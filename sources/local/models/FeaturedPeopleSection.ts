@@ -1,4 +1,4 @@
-import { Model } from '@stackbit/types';
+import { Model } from '@sanity/types';
 
 export const FeaturedPeopleSection: Model = {
     type: 'object',
@@ -80,17 +80,17 @@ export const FeaturedPeopleSection: Model = {
                 {
                     label: 'Three column grid',
                     value: 'three-col-grid',
-                    thumbnail: 'https://assets.stackbit.com/components/images/default/three-col-grid.png'
+                    thumbnail: 'https://assets.sanity.com/components/images/default/three-col-grid.png'
                 },
                 {
                     label: 'Four column grid',
                     value: 'four-col-grid',
-                    thumbnail: 'https://assets.stackbit.com/components/images/default/four-col-grid.png'
+                    thumbnail: 'https://assets.sanity.com/components/images/default/four-col-grid.png'
                 },
                 {
                     label: 'Mixed grid',
                     value: 'mixed-grid',
-                    thumbnail: 'https://assets.stackbit.com/components/images/default/mixed-grid.png'
+                    thumbnail: 'https://assets.sanity.com/components/images/default/mixed-grid.png'
                 }
             ],
             group: 'styles',
@@ -164,7 +164,7 @@ export const FeaturedPeopleSection: Model = {
             }
         }
     ],
-    thumbnail: 'https://assets.stackbit.com/components/models/thumbnails/default.png',
+    thumbnail: 'https://assets.sanity.com/components/models/thumbnails/default.png',
     fieldGroups: [
         {
             name: 'styles',

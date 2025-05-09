@@ -1,6 +1,6 @@
 {
     "model": "FeaturedItem",
-    "srcProjectId": "stackbit-projects/cool-olive-b21b7",
+    "srcProjectId": "sanity-projects/cool-olive-b21b7",
     "presets": [
         {
             "label": "Testimonial carousel item",

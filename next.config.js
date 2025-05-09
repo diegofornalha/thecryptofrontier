@@ -3,7 +3,10 @@
  */
 const nextConfig = {
     env: {
-        stackbitPreview: process.env.STACKBIT_PREVIEW || 'false'
+        sanityPreview: process.env.SANITY_PREVIEW || 'false',
+        NEXT_PUBLIC_SANITY_PROJECT_ID: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
+        NEXT_PUBLIC_SANITY_DATASET: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
+        NEXT_PUBLIC_SANITY_API_VERSION: process.env.NEXT_PUBLIC_SANITY_API_VERSION || '2023-05-03'
     },
     trailingSlash: true,
     reactStrictMode: true,
@@ -13,6 +16,10 @@ const nextConfig = {
     experimental: {
         // Permitir importações de ESM em CJS
         esmExternals: 'loose'
+    },
+    // Configuração de imagens para o Sanity
+    images: {
+        domains: ['cdn.sanity.io'],
     },
     // Configuração de redirecionamentos
     async redirects() {
@@ -69,6 +76,11 @@ const nextConfig = {
             {
                 source: '/mcpx/:path*',
                 destination: '/content/mcpx/:path*',
+            },
+            // Adicionar reescrita para API Webhook do Sanity
+            {
+                source: '/api/sanity-webhook',
+                destination: '/api/sanity-webhook',
             },
         ];
     },

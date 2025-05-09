@@ -80,7 +80,7 @@ const StaticPropsResolvers = {
     PostFeedLayout: (props, data) => {
         const numOfPostsPerPage = props.numOfPostsPerPage ?? 10;
         let allPosts = getAllNonFeaturedPostsSorted(data.objects);
-        if (!process.env.stackbitPreview) {
+        if (!process.env.sanityPreview) {
             allPosts = allPosts.filter(isPublished);
         }
         const paginationData = getPagedItemsForPage(props, allPosts, numOfPostsPerPage);
@@ -95,7 +95,7 @@ const StaticPropsResolvers = {
         const categoryId = props.__metadata?.id;
         const numOfPostsPerPage = props.numOfPostsPerPage ?? 10;
         let allCategoryPosts = getAllCategoryPostsSorted(data.objects, categoryId);
-        if (!process.env.stackbitPreview) {
+        if (!process.env.sanityPreview) {
             allCategoryPosts = allCategoryPosts.filter(isPublished);
         }
         const paginationData = getPagedItemsForPage(props, allCategoryPosts, numOfPostsPerPage);
@@ -108,7 +108,7 @@ const StaticPropsResolvers = {
     },
     RecentPostsSection: (props, data) => {
         let allPosts = getAllPostsSorted(data.objects);
-        if (!process.env.stackbitPreview) {
+        if (!process.env.sanityPreview) {
             allPosts = allPosts.filter(isPublished);
         }
         allPosts = allPosts.slice(0, props.recentCount || 6);

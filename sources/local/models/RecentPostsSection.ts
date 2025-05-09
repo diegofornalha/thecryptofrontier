@@ -1,4 +1,4 @@
-import { Model } from '@stackbit/types';
+import { Model } from '@sanity/types';
 
 export const RecentPostsSection: Model = {
     type: 'object',
@@ -114,22 +114,22 @@ export const RecentPostsSection: Model = {
                 {
                     label: 'Two column grid',
                     value: 'two-col-grid',
-                    thumbnail: 'https://assets.stackbit.com/components/images/default/two-col-grid.png'
+                    thumbnail: 'https://assets.sanity.com/components/images/default/two-col-grid.png'
                 },
                 {
                     label: 'Three column grid',
                     value: 'three-col-grid',
-                    thumbnail: 'https://assets.stackbit.com/components/images/default/three-col-grid.png'
+                    thumbnail: 'https://assets.sanity.com/components/images/default/three-col-grid.png'
                 },
                 {
                     label: 'Small list',
                     value: 'small-list',
-                    thumbnail: 'https://assets.stackbit.com/components/images/default/small-list.png'
+                    thumbnail: 'https://assets.sanity.com/components/images/default/small-list.png'
                 },
                 {
                     label: 'Big list',
                     value: 'big-list',
-                    thumbnail: 'https://assets.stackbit.com/components/images/default/big-list.png'
+                    thumbnail: 'https://assets.sanity.com/components/images/default/big-list.png'
                 }
             ],
             group: 'styles',
@@ -233,7 +233,7 @@ export const RecentPostsSection: Model = {
             }
         }
     ],
-    thumbnail: 'https://assets.stackbit.com/components/models/thumbnails/default.png',
+    thumbnail: 'https://assets.sanity.com/components/models/thumbnails/default.png',
     fieldGroups: [
         {
             name: 'styles',

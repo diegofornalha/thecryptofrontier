@@ -24,12 +24,12 @@ export default function AutoCompletePosts() {
     const [isPreview, setIsPreview] = React.useState(false);
     
     React.useEffect(() => {
-        // Detecta se estamos no ambiente de preview do Stackbit
-        const isStackbitPreview = typeof window !== 'undefined' && 
-            (window.location.hostname.includes('stackbit') || 
-             window.location.search.includes('stackbit-preview'));
+        // Detecta se estamos no ambiente de preview do Sanity
+        const isSanityPreview = typeof window !== 'undefined' && 
+            (window.location.hostname.includes('sanity') || 
+             window.location.search.includes('sanity-preview'));
         
-        setIsPreview(isStackbitPreview);
+        setIsPreview(isSanityPreview);
     }, []);
 
     // Se não houver credenciais do Algolia ou estamos no modo de preview, renderiza um placeholder

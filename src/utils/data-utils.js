@@ -126,7 +126,7 @@ export function findObjectById(objectId, objects, debugContext) {
     
     // Se estamos em modo de preview e o objeto não foi encontrado, 
     // apenas retornamos null sem exibir o aviso
-    if (!object && debugContext && !process.env.stackbitPreview) {
+    if (!object && debugContext && !process.env.sanityPreview) {
         const reverseStack = debugContext.stack.slice().reverse();
         const objectIndex = reverseStack.findIndex((object) => !!object.__metadata?.relProjectPath);
         if (objectIndex >= 0) {
@@ -143,7 +143,7 @@ export function findObjectById(objectId, objects, debugContext) {
     
     // Se estamos em modo de preview e não encontramos o objeto, 
     // criamos um objeto temporário para evitar erros
-    if (!object && process.env.stackbitPreview) {
+    if (!object && process.env.sanityPreview) {
         // Para o campo author, usar o autor padrão quando não encontrado
         if (debugContext?.keyPath?.includes('author')) {
             const defaultAuthor = objects.find((obj) => obj.__metadata?.id === 'content/data/diegofornalha.json');

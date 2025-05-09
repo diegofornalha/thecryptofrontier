@@ -1,4 +1,4 @@
-import { Model } from '@stackbit/types';
+import { Model } from '@sanity/types';
 
 export const ImageGallerySection: Model = {
     type: 'object',
@@ -149,7 +149,7 @@ export const ImageGallerySection: Model = {
             }
         }
     ],
-    thumbnail: 'https://assets.stackbit.com/components/models/thumbnails/default.png',
+    thumbnail: 'https://assets.sanity.com/components/models/thumbnails/default.png',
     fieldGroups: [
         {
             name: 'styles',

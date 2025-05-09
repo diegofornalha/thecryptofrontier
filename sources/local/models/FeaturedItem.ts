@@ -1,4 +1,4 @@
-import { Model } from '@stackbit/types';
+import { Model } from '@sanity/types';
 
 export const FeaturedItem: Model = {
     type: 'object',

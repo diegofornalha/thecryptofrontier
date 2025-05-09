@@ -1,4 +1,4 @@
-import { Model } from '@stackbit/types';
+import { Model } from '@sanity/types';
 
 export const DividerSection: Model = {
   type: 'object',
@@ -82,7 +82,7 @@ export const DividerSection: Model = {
       }
     }
   ],
-  thumbnail: 'https://assets.stackbit.com/components/models/thumbnails/default.png',
+  thumbnail: 'https://assets.sanity.com/components/models/thumbnails/default.png',
   fieldGroups: [
     {
       name: 'styles',

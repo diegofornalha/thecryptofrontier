@@ -1,4 +1,4 @@
-import { Model } from '@stackbit/types';
+import { Model } from '@sanity/types';
 
 export const Header: Model = {
     type: 'data',
@@ -75,31 +75,31 @@ export const Header: Model = {
                     label: 'Logo and primary links on the left',
                     value: 'logo-left-primary-nav-left',
                     thumbnail:
-                        'https://assets.stackbit.com/components/images/default/logo-left-primary-nav-left.png'
+                        'https://assets.sanity.com/components/images/default/logo-left-primary-nav-left.png'
                 },
                 {
                     label: 'Logo on the left, primary links centered',
                     value: 'logo-left-primary-nav-centered',
                     thumbnail:
-                        'https://assets.stackbit.com/components/images/default/logo-left-primary-nav-centered.png'
+                        'https://assets.sanity.com/components/images/default/logo-left-primary-nav-centered.png'
                 },
                 {
                     label: 'Logo on the left, primary links on the right',
                     value: 'logo-left-primary-nav-right',
                     thumbnail:
-                        'https://assets.stackbit.com/components/images/default/logo-left-primary-nav-right.png'
+                        'https://assets.sanity.com/components/images/default/logo-left-primary-nav-right.png'
                 },
                 {
                     label: 'Logo centered, primary links on the left',
                     value: 'logo-centered-primary-nav-left',
                     thumbnail:
-                        'https://assets.stackbit.com/components/images/default/logo-centered-primary-nav-left.png'
+                        'https://assets.sanity.com/components/images/default/logo-centered-primary-nav-left.png'
                 },
                 {
                     label: 'Logo and primary links centered',
                     value: 'logo-centered-primary-nav-centered',
                     thumbnail:
-                        'https://assets.stackbit.com/components/images/default/logo-centered-primary-nav-centered.png'
+                        'https://assets.sanity.com/components/images/default/logo-centered-primary-nav-centered.png'
                 }
             ],
             group: 'styles',

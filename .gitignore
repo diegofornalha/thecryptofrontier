@@ -48,12 +48,12 @@ logs/
 .netlify
 .netlify/
 
-# stackbit
-.stackbit
-.stackbit-*
-.stackbit-cache/
-.stackbit-editor/
-.stackbit-preview/
+# sanity
+.sanity
+.sanity-*
+.sanity-cache/
+.sanity-editor/
+.sanity-preview/
 
 # typescript
 *.tsbuildinfo

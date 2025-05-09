@@ -1,4 +1,4 @@
-import { Model } from '@stackbit/types';
+import { Model } from '@sanity/types';
 
 export const CarouselSection: Model = {
     type: 'object',
@@ -68,22 +68,22 @@ export const CarouselSection: Model = {
                 {
                     label: 'Next/prev navigation',
                     value: 'next-prev-nav',
-                    thumbnail: 'https://assets.stackbit.com/components/images/default/carousel-next-prev-nav.png'
+                    thumbnail: 'https://assets.sanity.com/components/images/default/carousel-next-prev-nav.png'
                 },
                 {
                     label: 'Dots navigation',
                     value: 'dots-nav',
-                    thumbnail: 'https://assets.stackbit.com/components/images/default/carousel-dots-nav.png'
+                    thumbnail: 'https://assets.sanity.com/components/images/default/carousel-dots-nav.png'
                 },
                 {
                     label: 'Tabs navigation',
                     value: 'tabs-nav',
-                    thumbnail: 'https://assets.stackbit.com/components/images/default/carousel-tabs-nav.png'
+                    thumbnail: 'https://assets.sanity.com/components/images/default/carousel-tabs-nav.png'
                 },
                 {
                     label: 'Carousel',
                     value: 'next-prev-nav-multiple',
-                    thumbnail: 'https://assets.stackbit.com/components/images/default/carousel-next-prev-nav-multiple.png'
+                    thumbnail: 'https://assets.sanity.com/components/images/default/carousel-next-prev-nav-multiple.png'
                 }
             ],
             group: 'styles',
@@ -157,7 +157,7 @@ export const CarouselSection: Model = {
             }
         }
     ],
-    thumbnail: 'https://assets.stackbit.com/components/models/thumbnails/default.png',
+    thumbnail: 'https://assets.sanity.com/components/models/thumbnails/default.png',
     fieldGroups: [
         {
             name: 'styles',

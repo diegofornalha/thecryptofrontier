@@ -1,12 +1,12 @@
-export const ALGOLIA_APP_ID = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || '';
-export const ALGOLIA_INDEX_NAME_SUFFIX = process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME || 'mcpx_content';
-export const ALGOLIA_SEARCH_API_KEY = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY || '';
+const ALGOLIA_APP_ID = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || '';
+const ALGOLIA_INDEX_NAME_SUFFIX = process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME || 'mcpx_content';
+const ALGOLIA_SEARCH_API_KEY = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY || '';
 
-export const ALGOLIA_ADMIN_API_KEY = process.env.ALGOLIA_ADMIN_API_KEY || '';
+const ALGOLIA_ADMIN_API_KEY = process.env.ALGOLIA_ADMIN_API_KEY || '';
 // Definir o nome do ambiente para indexação
-export const ENV_NAME = process.env.NODE_ENV || 'development';
+const ENV_NAME = process.env.NODE_ENV || 'development';
 
-export function buildIndexName() {
+function buildIndexName() {
     // Conforme especificado na documentação, sempre usar o nome fixo "development_mcpx_content"
     return 'development_mcpx_content';
     
@@ -25,3 +25,12 @@ export function buildIndexName() {
     return indexName;
     */
 }
+
+module.exports = {
+    ALGOLIA_APP_ID,
+    ALGOLIA_INDEX_NAME_SUFFIX,
+    ALGOLIA_SEARCH_API_KEY,
+    ALGOLIA_ADMIN_API_KEY,
+    ENV_NAME,
+    buildIndexName
+};
