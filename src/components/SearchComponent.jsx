@@ -159,15 +159,96 @@ const SearchComponent = () => {
         .searchbox form {
           display: flex;
           align-items: center;
+          position: relative;
         }
         
         .searchbox input {
           width: 100%;
           padding: 12px 16px;
+          padding-right: 48px;
           font-size: 1rem;
           border: 1px solid #e2e8f0;
-          border-radius: 4px;
+          border-radius: 8px;
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+          transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        .searchbox input:focus {
+          border-color: #4f46e5;
+          box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+          outline: none;
+        }
+        
+        /* Estilização do botão de busca (lupa) */
+        .searchbox button[type="submit"],
+        .searchbox .ais-SearchBox-submit {
+          position: absolute;
+          right: 8px;
+          top: 50%;
+          transform: translateY(-50%);
+          background: #4f46e5;
+          border: none;
+          border-radius: 6px;
+          width: 36px;
+          height: 36px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: background-color 0.2s;
+          z-index: 5;
+        }
+        
+        .searchbox button[type="submit"]:hover,
+        .searchbox .ais-SearchBox-submit:hover {
+          background: #4338ca;
+        }
+        
+        /* Estilização do SVG da lupa */
+        .searchbox button[type="submit"] svg,
+        .searchbox .ais-SearchBox-submitIcon {
+          width: 20px;
+          height: 20px;
+          fill: white;
+        }
+        
+        /* Ocultar todos os botões de reset padrão */
+        .searchbox button[type="reset"],
+        .searchbox .ais-SearchBox-reset {
+          display: none !important;
+        }
+        
+        /* Estilizar apenas o botão de reset que queremos mostrar */
+        .searchbox .ais-SearchBox-reset {
+          position: absolute;
+          right: 52px;
+          top: 50%;
+          transform: translateY(-50%);
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          padding: 4px;
+          display: flex !important;
+          align-items: center;
+          justify-content: center;
+          opacity: 0.6;
+          z-index: 5;
+        }
+        
+        /* Esconde o X quando não tiver conteúdo */
+        .searchbox form.ais-SearchBox-form--noRefinement .ais-SearchBox-reset {
+          display: none !important;
+        }
+        
+        /* Melhora o design do X */
+        .searchbox .ais-SearchBox-resetIcon {
+          width: 16px;
+          height: 16px;
+          fill: #4f46e5;
+        }
+        
+        .searchbox .ais-SearchBox-reset:hover {
+          opacity: 1;
         }
         
         .search-stats {
