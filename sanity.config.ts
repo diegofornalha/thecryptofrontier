@@ -28,4 +28,6 @@ export default defineConfig({
     // Plugin para blocos de código
     codeInput(),
   ],
+  // Define o título do Studio para o Dashboard
+  title: 'The Crypto Frontier',
 })

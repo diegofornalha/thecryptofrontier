@@ -7,13 +7,16 @@
         "start": "next start",
         "index-content": "node scripts/indexar-conteudo.js",
         "migrate-to-sanity": "node scripts/migrate-to-sanity.js",
-        "sanity-alt": "node sanity-workaround.js"
+        "sanity-alt": "node sanity-workaround.js",
+        "sanity-deploy": "npx sanity deploy",
+        "sanity-to-algolia": "node scripts/indexar-sanity-para-algolia.js"
     },
     "dependencies": {
         "@algolia/autocomplete-js": "^1.18.1",
         "@algolia/autocomplete-theme-classic": "^1.18.1",
         "@sanity/client": "^6.8.0",
         "@sanity/code-input": "^5.1.2",
+        "@sanity/dashboard": "^4.1.3",
         "@sanity/icons": "^3.7.0",
         "@sanity/image-url": "^1.1.0",
         "@sanity/vision": "^3.88.2",
