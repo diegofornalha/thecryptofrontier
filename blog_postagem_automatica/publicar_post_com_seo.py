@@ -100,6 +100,15 @@ def criar_post_com_seo():
         # Limitar tamanho
         slug = slug[:80]
         
+        # Verificar se as categorias estão no formato correto (array de strings)
+        if not CATEGORIAS or not isinstance(CATEGORIAS, list):
+            print("AVISO: Categorias não definidas ou em formato incorreto. Definindo padrão.")
+            categorias_post = ["Blockchain", "Criptomoedas", "Tecnologia"]
+        else:
+            categorias_post = CATEGORIAS
+            
+        print(f"Usando categorias: {categorias_post}")
+        
         # Montar o documento completo
         post_document = {
             "_type": "post",
@@ -115,7 +124,7 @@ def criar_post_com_seo():
             },
             "excerpt": CONTEUDO.strip().split("\n\n")[0],
             "publishedAt": datetime.now().isoformat(),
-            "categories": CATEGORIAS,  # Categorias como array de strings
+            "categories": categorias_post,  # Categorias como array de strings
             "tags": TAGS,  # Tags para busca
             "content": blocks,
             "isFeatured": True,
@@ -127,8 +136,10 @@ def criar_post_com_seo():
             }
         }
         
-        # Usar o autor como imagem (a imagem será definida no Studio manualmente)
-        print("Usando a imagem do autor para o post")
+        # Debugar o documento para verificar a estrutura
+        print("Verificando estrutura do documento:")
+        print(f"Tipo de categorias: {type(post_document['categories'])}")
+        print(f"Conteúdo de categorias: {post_document['categories']}")
         
         # Enviar para a API do Sanity
         create_url = f"{BASE_URL}/data/mutate/{config.SANITY_DATASET}"
@@ -145,10 +156,10 @@ def criar_post_com_seo():
         if create_response.status_code in (200, 201):
             print(f"Post criado com sucesso no Sanity! ID: {doc_id}")
             print(f"Slug: {slug}")
-            print(f"Categorias adicionadas: {', '.join(CATEGORIAS)}")
+            print(f"Categorias adicionadas: {', '.join(categorias_post)}")
             print(f"Meta título: {META_TITULO}")
             print(f"Meta descrição: {META_DESCRICAO}")
-            print("Nota: A imagem do autor será usada como imagem do post. Você pode alterar isso manualmente no Studio se necessário.")
+            print("Nota: Agora o post deve ser indexado corretamente no Algolia com as categorias.")
             return True
         else:
             print(f"Erro ao criar post: {create_response.status_code} - {create_response.text}")

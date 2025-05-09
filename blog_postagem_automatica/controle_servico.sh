@@ -6,8 +6,8 @@
 # Diretório base do script
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Caminho para o Python do ambiente virtual
-PYTHON="$DIR/venv/bin/python"
+# Caminho para o Python
+PYTHON="/usr/bin/python3"
 
 # Caminho para o script principal (relativo ao diretório base)
 SCRIPT="$DIR/main.py"

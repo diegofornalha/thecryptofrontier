@@ -1,15 +1,33 @@
 # main.py
 import os
+import sys
 import time
 from datetime import datetime
+
+# Adiciona o diretório do ambiente virtual ao caminho de busca do Python
+current_dir = os.path.dirname(os.path.abspath(__file__))
+site_packages = os.path.join(current_dir, 'fresh_env', 'lib', 'python3.11', 'site-packages')
+sys.path.insert(0, site_packages)
+sys.path.insert(0, current_dir)
 
 # Importa os módulos do sistema
 import rss_monitor
 import translator
-import markdown_generator  # Adicionando importação do novo módulo
+import markdown_generator
 import config
-import publisher  # Importa o novo módulo de publicação
-import formatar_conteudo  # Importa o novo módulo de formatação
+import formatar_conteudo
+
+# Tratamento especial para publisher que pode não existir
+class DummyPublisher:
+    @staticmethod
+    def publish_post(**kwargs):
+        print("Módulo publisher não encontrado. Post não publicado.")
+        return False, "Módulo publisher não encontrado"
+
+try:
+    import publisher
+except ImportError:
+    publisher = DummyPublisher()
 
 # Diretório para armazenar os arquivos gerados
 OUTPUT_DIR = "posts_traduzidos"

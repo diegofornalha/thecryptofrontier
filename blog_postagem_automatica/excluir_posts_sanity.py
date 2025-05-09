@@ -120,54 +120,18 @@ def confirmar_exclusao(ids_posts):
     for i, post_id in enumerate(ids_posts, 1):
         print(f"{i}. {post_id}")
     
-    confirmacao = input("\nDigite 'SIM' para confirmar a exclusão destes posts: ")
-    
-    if confirmacao.upper() == 'SIM':
-        return True
-    else:
-        print("Operação cancelada pelo usuário.")
-        return False
+    # Confirmação automática para uso no script
+    return True
 
 if __name__ == "__main__":
     print("=== Exclusão de Posts no Sanity ===\n")
     
-    # IDs dos posts com estrutura incorreta de categorias - estes são os que causam o erro de React
-    posts_com_erro = [
-        "drafts.post-b3-20250509222720",
-        "post-b3-20250509222720",
-        "drafts.post-b3-20250509221643",
-        "post-b3-20250509221643"
-    ]
+    # Buscar posts com "B3" e "Ethereum" no título
+    posts_para_excluir = buscar_posts_para_excluir("B3 do Brasil Lançará Futuros de Ethereum")
     
-    # IDs específicos dos posts a serem excluídos (a partir da busca anterior)
-    posts_01_06 = [
-        "drafts.post-b3-20250509223030",
-        "post-b3-20250509223030",
-        "post-b3-20250509222957",
-        "drafts.post-b3-20250509222940",
-        "post-b3-20250509222940",
-        "drafts.post-b3-20250509222720",
-        "post-b3-20250509222720",
-        "drafts.post-b3-20250509221643",
-        "post-b3-20250509221643",
-        "drafts.post-20250509221252-76411069",
-        "post-20250509221252-76411069",
-        "drafts.post-20250509221014-3e90401b",
-        "post-20250509221014-3e90401b"
-    ]
-    
-    # Excluir os posts com erro de categoria (objetos vs strings)
-    print("Excluindo posts com erro de estrutura de categorias...")
-    excluir_posts(posts_com_erro)
-    
-    # Primeira opção: excluir posts específicos da lista
-    # if confirmar_exclusao(posts_01_06):
-    #     excluir_posts(posts_01_06)
-    
-    # Segunda opção: buscar e excluir posts com "excluir" no título
-    # posts_para_excluir = buscar_posts_para_excluir("excluir")
-    # if confirmar_exclusao(posts_para_excluir):
-    #     excluir_posts(posts_para_excluir)
-    
-    # Terceira opção: excluir um post específico
-    # excluir_post_especifico("post-20250509221014-3e90401b") 
+    # Excluir sem confirmação manual
+    if posts_para_excluir:
+        excluir_posts(posts_para_excluir)
+        print("Exclusão de posts concluída com sucesso.")
+    else:
+        print("Nenhum post encontrado com o critério especificado.") 
