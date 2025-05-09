@@ -1,0 +1,24 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Roteamento e Páginas
+
+O sistema de roteamento deste projeto é baseado em Next.js com uma estrutura dinâmica para mapear arquivos Markdown para URLs.
+
+## Sistema de Roteamento
+- [pages/[[...slug]].jsx](mdc:pages/[[...slug]].jsx) - Rota dinâmica principal que renderiza todas as páginas
+- [pages/_app.js](mdc:pages/_app.js) - Componente raiz da aplicação Next.js
+
+## Geração de Páginas
+A geração de páginas funciona da seguinte forma:
+1. Os arquivos Markdown são armazenados em `content/pages/`
+2. A função `getStaticPaths` em `[[...slug]].jsx` mapeia esses arquivos para URLs
+3. A função `getStaticProps` carrega os dados do arquivo Markdown correspondente
+4. Os componentes são renderizados com base no tipo de seção definido no frontmatter
+
+## Utilitários de Conteúdo
+- [utils/content.js](mdc:utils/content.js) - Funções para carregar e processar arquivos Markdown
+
+O conteúdo é escrito em Markdown com frontmatter YAML que define as seções e suas propriedades, que são então renderizadas como componentes React.

@@ -1,0 +1,47 @@
+{
+    "logo": {
+        "url": "/images/logo-dark.svg",
+        "altText": "Logo dark",
+        "styles": {
+            "self": {
+                "margin": [
+                    "mr-3"
+                ]
+            }
+        },
+        "type": "ImageBlock"
+    },
+    "primaryLinks": [
+        {
+            "label": "mcpx",
+            "altText": "mcpx",
+            "url": "/mcpx",
+            "icon": "arrowRight",
+            "iconPosition": "right",
+            "style": "secondary",
+            "type": "Link"
+        }
+    ],
+    "secondaryLinks": [
+        {
+            "label": "Sign up",
+            "altText": "Sign up",
+            "url": "https://app.netlify.com/signup",
+            "icon": "arrowRight",
+            "iconPosition": "right",
+            "style": "secondary",
+            "type": "Button"
+        },
+        {
+            "label": "Log in",
+            "url": "https://jerry-nuxt-dojo.netlify.app/",
+            "icon": "arrowRight",
+            "iconPosition": "right",
+            "style": "primary",
+            "type": "Button"
+        }
+    ],
+    "variant": "logo-left-primary-nav-centered",
+    "colors": "bg-light-fg-dark",
+    "type": "Header"
+}

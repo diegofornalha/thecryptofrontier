@@ -1,0 +1,65 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Configuração e Uso do Algolia
+
+Este projeto utiliza Algolia para fornecer a funcionalidade de busca de conteúdo.
+
+## Variáveis de Ambiente
+As seguintes variáveis de ambiente precisam ser configuradas em um arquivo `.env` ou `.env.local` na raiz do projeto:
+- `NEXT_PUBLIC_ALGOLIA_APP_ID`: O ID da sua aplicação Algolia.
+- `NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY`: A chave de API *somente para busca* (Search-Only API Key). Usada no frontend pelo `SearchComponent`.
+- `ALGOLIA_ADMIN_API_KEY`: A chave de API de *administração* (Admin API Key). Usada pelo script de indexação para adicionar/atualizar dados no índice. **Não exponha esta chave no frontend.**
+- `NEXT_PUBLIC_ALGOLIA_INDEX_NAME`: O nome do índice a ser usado (padrão: `development_mcpx_content`).
+
+## Índice Padrão
+- Nome do índice: Definido por `NEXT_PUBLIC_ALGOLIA_INDEX_NAME` (padrão: `development_mcpx_content`).
+- Este é o único índice utilizado para todos os artigos.
+- Não criar novos índices, sempre usar este.
+
+## Script de Indexação
+- Comando: `npm run index-content`
+- Arquivo: [scripts/indexar-conteudo.js](mdc:scripts/indexar-conteudo.js)
+- O script faz o seguinte:
+  1. Carrega as variáveis de ambiente do arquivo `.env` usando `dotenv`.
+  2. Inicializa o cliente Algolia com `APP_ID` e `ADMIN_API_KEY`.
+  3. Define as configurações do índice (atributos pesquisáveis, faceting, ordenação).
+  4. Lê todos os arquivos `.md` dentro dos subdiretórios de `content/pages/` (ex: `content/pages/mcpx/*.md`), ignorando arquivos `index.md`.
+  5. Para cada arquivo, extrai dados do frontmatter e o corpo do Markdown.
+  6. Cria um objeto JSON para cada arquivo com os seguintes campos:
+     - `objectID`: Identificador único (formato: `{diretorio}_{slug}`)
+     - `title`: Título do post (do frontmatter)
+     - `content`: Corpo do Markdown
+     - `excerpt`: Resumo (do frontmatter ou primeiros 160 caracteres do corpo)
+     - `date`: Data de publicação em timestamp (do frontmatter)
+     - `categories`: Array de categorias (do frontmatter)
+     - `type`: Tipo de conteúdo (nome do diretório pai, ex: `mcpx`)
+     - `permalink`: URL da página (gerado a partir do tipo e slug)
+     - `featuredImage`: URL da imagem destacada (do frontmatter)
+     - `author`: Referência ao autor (do frontmatter)
+     - `timeToRead`: Tempo estimado de leitura (calculado a partir do corpo)
+  7. Envia os objetos para o índice Algolia usando `saveObjects` (cria ou atualiza).
+
+## Configuração do Índice (Definida no Script)
+- **Atributos Pesquisáveis (`searchableAttributes`):**
+  - `title`
+  - `content`
+  - `excerpt`
+  - `categories`
+- **Atributos para Faceting (`attributesForFaceting`):**
+  - `categories`
+  - `type`
+- **Ordenação Personalizada (`customRanking`):**
+  - `desc(date)` (mais recentes primeiro)
+
+## Uso no Frontend
+- O componente [src/components/SearchComponent.jsx](mdc:src/components/SearchComponent.jsx) utiliza as chaves públicas (`NEXT_PUBLIC_ALGOLIA_APP_ID`, `NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY`) e o nome do índice (`NEXT_PUBLIC_ALGOLIA_INDEX_NAME`) para se conectar ao Algolia e realizar buscas.
+- Ele é usado em páginas como [src/pages/index.js](mdc:src/pages/index.js) e [src/pages/busca.js](mdc:src/pages/busca.js).
+
+## Observações Importantes
+- **Execute `npm run index-content` sempre que:**
+  - Adicionar ou modificar arquivos de conteúdo `.md`.
+  - Configurar as variáveis de ambiente do Algolia pela primeira vez.
+- Verifique se as variáveis de ambiente estão corretamente configuradas no Netlify para que a busca funcione em produção.

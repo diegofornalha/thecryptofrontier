@@ -1,0 +1,35 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Integração com Netlify e Stackbit
+
+Este projeto é configurado para ser utilizado com create.netlify.com/studio/ e se integra com o Stackbit para edição visual e Netlify para deploy.
+
+## Configuração do Netlify
+- [netlify.toml](mdc:netlify.toml) - Arquivo de configuração para o Netlify.
+  - Usa o plugin `@netlify/plugin-nextjs` para otimização de builds Next.js no Netlify.
+  - Configura o diretório de publicação para `.next`.
+  - Define o comando de build como `npm run build`.
+- **Variáveis de Ambiente:** As chaves do Algolia (`NEXT_PUBLIC_ALGOLIA_APP_ID`, `NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY`, `ALGOLIA_ADMIN_API_KEY`) devem ser configuradas nas variáveis de ambiente do site no Netlify para que a indexação e a busca funcionem no ambiente de produção/preview.
+
+## Configuração do Stackbit
+- [stackbit.config.ts](mdc:stackbit.config.ts) - Arquivo de configuração para o Stackbit.
+  - Define os modelos de conteúdo (`PageLayout`, `PostLayout`, etc.) que o Stackbit pode editar (ver `sources/local/models`).
+  - Configura o Git como fonte de conteúdo (`GitContentSource`), especificando os diretórios de conteúdo (`content`) e de assets (`public/images`).
+  - Define o mapeamento de URL para os tipos de página (`page`, `post`).
+
+## Fluxo de Trabalho
+1. O conteúdo é editado visualmente no Stackbit Studio (local ou na nuvem).
+2. As alterações são salvas como commits no repositório Git.
+3. O Netlify detecta os novos commits (push) e aciona um novo deploy.
+4. Durante o build no Netlify, o Next.js gera páginas estáticas (`getStaticProps`, `getStaticPaths`) baseadas nos arquivos Markdown.
+5. O script `npm run index-content` **não** é executado automaticamente no build do Netlify por padrão. A indexação precisa ser gerenciada separadamente (ex: via webhook, manualmente ou integrando ao build se necessário).
+6. O site é publicado no Netlify com o conteúdo atualizado.
+
+## Desenvolvimento Local
+Para desenvolvimento local, você pode executar:
+- `npm run dev` - Iniciar o servidor de desenvolvimento Next.js (requer [variáveis de ambiente do Algolia](mdc:.cursor/rules/06-algolia.mdc) configuradas em `.env` ou `.env.local` para a busca funcionar).
+- `npm run index-content` - Executar manualmente o script para indexar o conteúdo local no Algolia (necessário após adicionar/modificar conteúdo ou configurar as chaves).
+- `stackbit dev` - Iniciar o Stackbit Studio local para edição visual (conecta-se ao servidor `npm run dev`).

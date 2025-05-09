@@ -1,0 +1,29 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Componentes React
+
+O projeto utiliza uma arquitetura baseada em componentes React para construir a interface do usuário.
+
+## Estrutura de Componentes
+- [src/components/](mdc:src/components) aiz para todos os componentes React.
+  - [src/components/atoms/](mdc:src/components/atoms) - Componentes atômicos básicos (botões, links, etc.).
+  - [src/components/blocks/](mdc:src/components/blocks) - Componentes maiores que represenúdo (Hero, Formulário, etc.).
+  - [src/components/layouts/](mdc:src/components/layouts) - Componentes de layout de página.
+  - [src/components/sections/](mdc:src/components/sections) - Componentes que representam seções inteiras de uma página.
+
+## Renderização Dinâmica
+- Os componentes são renderizados dinamicamente com base no array `sections` definido no frontmatter dos arquivos Markdown.
+- O mapeamento do `type` da seção para o componente React correspondente geralmente ocorre no arquivo de rota dinâmica principal: [src/pages/content/[[...slug]].js](mdc:src/pages/content/[[...slug]].js).
+- É essencial que exista um mapeamento para cada `type` de seção definido no conteúdo.
+
+## Dados e Props
+- Os componentes recebem dados do frontmatter do Markdown como `props`.
+- Cada componente é responsável por renderizar os dados recebidos.
+
+## Atributos Stackbit (Netlify Visual Editor)
+- Para habilitar a edição visual no Stackbit/Netlify Visual Editor, os componentes devem incluir atributos `data-sb-*`.
+- O atributo mais comum é `data-sb-field-path`, que mapeia um elemento HTML para um campo específico no objeto de dados do Stackbit.
+- Exemplo: Veja como [src/components/blocks/TitleBlock/index.tsx](mdc:src/components/blocks/TitleBlock/index.tsx) utiliza `data-sb-field-path`.

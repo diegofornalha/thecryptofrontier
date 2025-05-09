@@ -1,0 +1,19 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+## Arquivos Principais
+- [stackbit.config.ts](mdc:stackbit.config.ts) - Configuração do Stackbit
+- [netlify.toml](mdc:netlify.toml) - Configuração do Netlify
+- [package.json](mdc:package.json) - Dependências e scripts
+- [next.config.js](mdc:next.config.js) - Configuração do Next.js
+
+## Estrutura do Projeto
+- `/pages` - Rotas e páginas Next.js
+- `/components` - Componentes React reutilizáveis
+- `/content` - Conteúdo em formato Markdown
+- `/utils` - Funções utilitárias
+- `/public` - Arquivos estáticos
+- `/styles` - Estilos CSS/Tailwind
+Este site usa um sistema baseado em Markdown para conteúdo, que é convertido em páginas renderizadas pelo Next.js. O Stackbit é utilizado como CMS para edição visual.

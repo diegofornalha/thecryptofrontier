@@ -1,0 +1,66 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Criação de Novos Artigos (Tipo MCPX)
+
+Para criar um novo artigo na seção MCPX, siga estas diretrizes para garantir a consistência e a correta renderização e indexação.
+
+## Localização
+- Crie um novo arquivo `.md` dentro do diretório: `content/pages/mcpx/`
+- O nome do arquivo deve refletir o `slug` (ex: `meu-novo-artigo.md`).
+
+## Estrutura do Arquivo
+- O arquivo deve começar com um bloco de frontmatter YAML (`---`), seguido pelo conteúdo em Markdown.
+
+## Campos Obrigatórios do Frontmatter
+- **`type`**: Deve ser `PostLayout` para usar o layout de artigo padrão.
+- **`title`**: O título principal do artigo (ex: "Como Usar a Nova Ferramenta").
+- **`slug`**: O identificador único usado na URL (ex: `como-usar-nova-ferramenta`). Deve corresponder ao nome do arquivo (sem a extensão `.md`). A URL final será `/mcpx/{slug}`.
+- **`date`**: A data de publicação no formato `'YYYY-MM-DD'` (ex: `'2024-08-02'`). Usado para ordenação.
+- **`excerpt`**: Um resumo curto (1-2 frases) do conteúdo do artigo. Usado na listagem e na busca.
+
+## Campos Opcionais do Frontmatter
+- **`featuredImage`**: Bloco de imagem para a imagem destacada.
+  ```yaml
+  featuredImage:
+    url: /images/nome-da-imagem.svg # Caminho relativo à pasta public/
+    altText: Descrição da Imagem
+    type: ImageBlock
+    styles:
+      self:
+        borderRadius: medium
+  ```
+- **`author`**: Referência ao arquivo JSON do autor em `content/data/`.
+  ```yaml
+  author: content/data/nome-autor.json
+  ```
+- **`categories`**: Uma lista de tags ou categorias (usadas para busca e filtros futuros).
+  ```yaml
+  categories:
+    - tag1
+    - javascript
+  ```
+- **`isFeatured`**: `true` ou `false`. Se `true`, pode ser destacado em seções específicas.
+- **`isDraft`**: `true` ou `false`. Se `true`, o artigo não será publicado nem indexado.
+- **`seo`**: Configurações para otimização de busca.
+  ```yaml
+  seo:
+    metaTitle: Título Otimizado para SEO (até 60 caracteres)
+    metaDescription: Descrição Otimizada para SEO (até 160 caracteres)
+    socialImage: /images/imagem-para-redes-sociais.png
+    type: Seo
+  ```
+- **`bottomSections`**: Lista de seções adicionais a serem renderizadas abaixo do conteúdo principal (raramente usado para posts).
+
+## Conteúdo Markdown
+- Escreva o corpo do artigo usando a sintaxe Markdown padrão.
+- **Não** inclua um título principal (`# Título`) no corpo do Markdown, pois o título já é definido no frontmatter (`title`) e renderizado pelo layout. Use subtítulos (`##`, `###`) conforme necessário.
+- Use blocos de código cercados por três crases (```) para exemplos.
+
+## Exemplo de Referência
+- Veja [content/pages/mcpx/dev-web.md](mdc:content/pages/mcpx/dev-web.md) para um exemplo completo.
+
+## Próximo Passo
+- Após criar o arquivo, você precisa indexar o conteúdo para que ele apareça na busca. Consulte a regra [08-indexacao-algolia.mdc](mdc:.cursor/rules/08-indexacao-algolia.mdc).

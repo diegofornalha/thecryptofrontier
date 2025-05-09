@@ -1,0 +1,33 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Indexação de Conteúdo no Algolia
+
+Para que os artigos novos ou modificados apareçam nos resultados de busca do site, é necessário executar o script de indexação do Algolia.
+
+## Quando Executar
+Execute o script de indexação **sempre que**:
+- Um novo arquivo `.md` for criado na pasta `content/pages/mcpx/`.
+- O conteúdo (frontmatter ou corpo) de um arquivo `.md` existente em `content/pages/mcpx/` for modificado.
+- As credenciais do Algolia no arquivo `.env` forem alteradas.
+
+## Como Executar
+1. Abra o terminal na raiz do projeto.
+2. Execute o seguinte comando:
+   ```bash
+   npm run index-content
+   ```
+
+## O que o Script Faz
+- O script referenciado é [scripts/indexar-conteudo.js](mdc:scripts/indexar-conteudo.js).
+- Ele lê todos os arquivos `.md` dentro de `content/pages/mcpx/` (ignorando `index.md`).
+- Extrai os campos relevantes do frontmatter (`title`, `slug`, `date`, `excerpt`, `categories`, `featuredImage`, `author`) e o corpo (`content`).
+- Cria objetos JSON formatados para o Algolia.
+- Envia esses objetos para o índice `development_mcpx_content` no Algolia, criando novos registros ou atualizando os existentes.
+- Define as configurações do índice (atributos pesquisáveis, faceting, ordenação) conforme especificado na regra [06-algolia.mdc](mdc:.cursor/rules/06-algolia.mdc).
+
+## Verificação
+- Após a execução, o script exibirá uma mensagem indicando quantos documentos foram indexados.
+- Você pode verificar os resultados diretamente na interface do Algolia ou testando a busca no site.
