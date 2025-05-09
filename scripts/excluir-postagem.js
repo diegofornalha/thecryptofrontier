@@ -11,35 +11,42 @@ const client = createClient({
   token: process.env.SANITY_DEV_TOKEN // Necessário token com permissão de escrita
 });
 
-// Título da postagem a ser excluída (ou slug)
-const TITULO_POSTAGEM = 'Nova Postagem';
+// Lista de IDs de posts a excluir
+const POST_IDS = [
+  'post-20250509224548122', // excluir1
+  'post-20250509224658975', // excluir0
+  'post-b3-20250509222940', // excluir
+  'post-b3-20250509223030', // excluir2
+  'post-b3-20250509223341'  // excluir3
+];
 
-async function excluirPostagem() {
+async function excluirPostsPorIds() {
   try {
-    console.log(`Buscando postagem com título "${TITULO_POSTAGEM}"...`);
+    console.log(`Iniciando exclusão de ${POST_IDS.length} posts...`);
     
-    // Primeiro, encontrar o ID da postagem pelo título
-    const query = `*[_type == "post" && title == $titulo][0]._id`;
-    const postId = await client.fetch(query, { titulo: TITULO_POSTAGEM });
-    
-    if (!postId) {
-      console.log(`❌ Nenhuma postagem encontrada com o título "${TITULO_POSTAGEM}"`);
-      return;
+    // Excluir cada post pelo ID
+    let excluidos = 0;
+    for (const postId of POST_IDS) {
+      console.log(`Excluindo post ID: ${postId}...`);
+      
+      try {
+        // Excluir a postagem usando o ID
+        await client.delete(postId);
+        excluidos++;
+        
+        console.log(`✅ Post ${postId} excluído com sucesso!`);
+      } catch (err) {
+        console.error(`❌ Erro ao excluir post ${postId}:`, err.message);
+      }
     }
     
-    console.log(`Encontrada postagem com ID: ${postId}`);
-    console.log(`Excluindo postagem...`);
-    
-    // Excluir a postagem usando o ID
-    await client.delete(postId);
-    
-    console.log(`✅ Postagem "${TITULO_POSTAGEM}" excluída com sucesso!`);
-    console.log(`👉 Esta operação também acionará o webhook que removerá a postagem do Algolia automaticamente.`);
+    console.log(`\n✅ Processo concluído: ${excluidos} de ${POST_IDS.length} posts foram excluídos.`);
+    console.log(`👉 Esta operação também acionará o webhook que removerá os posts do Algolia automaticamente.`);
   } catch (error) {
-    console.error('❌ Erro ao excluir postagem:', error);
+    console.error('❌ Erro geral no processo de exclusão:', error);
     console.error('Detalhes do erro:', error.message);
   }
 }
 
 // Executar a função
-excluirPostagem(); 
+excluirPostsPorIds(); 
