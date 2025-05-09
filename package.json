@@ -5,6 +5,7 @@
         "dev": "next dev",
         "build": "next build && npm run index-content",
         "start": "next start",
+        "start:alt": "next start -p 3100",
         "index-content": "node scripts/indexar-conteudo.js",
         "migrate-to-sanity": "node scripts/migrate-to-sanity.js",
         "sanity-alt": "node sanity-workaround.js",

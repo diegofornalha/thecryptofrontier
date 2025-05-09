@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { serverClient as client } from './client';
+import { deployClient as client } from './client';
 
 /**
  * Utilitário para migrar dados do sistema de arquivos para o Sanity
