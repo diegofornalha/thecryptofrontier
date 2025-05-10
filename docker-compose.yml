@@ -6,7 +6,7 @@ services:
     image: lucaslorentz/caddy-docker-proxy:ci-alpine
     ports:
       - 9080:80
-      - 9443:443
+      - 9444:443
     environment:
       - CADDY_INGRESS_NETWORKS=caddy
     volumes:
