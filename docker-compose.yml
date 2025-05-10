@@ -36,17 +36,6 @@ services:
       - frontier_api_key
       - db_password
 
-  # Serviço de exemplo para o Tenant 2
-  tenant2-service:
-    image: traefik/whoami:latest
-    networks:
-      - caddy
-    labels:
-      caddy: tenant2.localhost
-      caddy.reverse_proxy: "{{upstreams 80}}"
-    secrets:
-      - tenant2_api_key
-
 networks:
   caddy:
     external: true
@@ -61,6 +50,4 @@ secrets:
   frontier_api_key:
     file: ./secrets/frontier_api_key.txt
   db_password:
-    file: ./secrets/db_password.txt
-  tenant2_api_key:
-    file: ./secrets/tenant2_api_key.txt 
+    file: ./secrets/db_password.txt 
