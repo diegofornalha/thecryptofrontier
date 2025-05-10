@@ -1,20 +1,48 @@
-version: '3'
+version: '3.7'
 
 services:
-  thecryptofrontier:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: always
+  # Serviço Proxy Caddy com descoberta automática
+  caddy-proxy:
+    image: lucaslorentz/caddy-docker-proxy:ci-alpine
     ports:
-      - "3200:3000"
+      - 9080:80
+      - 9443:443
     environment:
-      - PORT=3000
+      - CADDY_INGRESS_NETWORKS=caddy
     volumes:
-      - ./public:/app/public
-      - ./.env:/app/.env
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3" 
+      - /var/run/docker.sock:/var/run/docker.sock
+      - caddy_data:/data
+    networks:
+      - caddy
+    restart: unless-stopped
+
+  # Serviço The Crypto Frontier (tenant1)
+  tenant1-frontier:
+    image: node:16-alpine
+    working_dir: /app
+    volumes:
+      - /home/sanity/thecryptofrontier:/app
+    command: npm run dev -- -p 3200
+    networks:
+      - caddy
+    ports:
+      - "3200:3200"
+    labels:
+      caddy: "tenant1.localhost thecryptofrontier.agentesintegrados.com"
+      caddy.reverse_proxy: "{{upstreams 3200}}"
+
+  # Serviço de exemplo para o Tenant 2
+  tenant2-service:
+    image: traefik/whoami:latest
+    networks:
+      - caddy
+    labels:
+      caddy: tenant2.localhost
+      caddy.reverse_proxy: "{{upstreams 80}}"
+
+networks:
+  caddy:
+    external: true
+
+volumes:
+  caddy_data: 
