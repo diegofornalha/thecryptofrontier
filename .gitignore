@@ -118,3 +118,27 @@ __pycache__/
 firebase.json
 /functions
 .DS_Store
+
+# Ambientes virtuais Python específicos do blog_postagem_automatica
+blog_postagem_automatica/venv/
+blog_postagem_automatica/.venv/
+blog_postagem_automatica/fresh_env/
+blog_postagem_automatica/novo_env/
+
+# Arquivos temporários específicos do blog_postagem_automatica
+blog_postagem_automatica/**/__pycache__/
+blog_postagem_automatica/**/*.pyc
+*.sqlite
+log_monitor.txt
+monitor_pid.txt
+
+# Binários e dependências geradas
+blog_postagem_automatica/fresh_env/bin/
+blog_postagem_automatica/fresh_env/lib/
+blog_postagem_automatica/fresh_env/include/
+blog_postagem_automatica/fresh_env/share/
+blog_postagem_automatica/fresh_env/etc/
+blog_postagem_automatica/fresh_env/lib64/
+
+# Arquivos de backup específicos
+*.bak
