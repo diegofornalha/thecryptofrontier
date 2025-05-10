@@ -1,15 +1,16 @@
-import { Model } from '@sanity/types';
+import { defineType } from "sanity";
 
-export const BackgroundImage: Model = {
+export const BackgroundImage = defineType({
   type: 'object',
   name: 'BackgroundImage',
+  title: 'BackgroundImage',
   label: 'BackgroundImage',
   labelField: 'altText',
   fields: [
     {
       type: 'image',
       name: 'url',
-      label: 'Image',
+      title: 'Image',
       description: 'The URL of the image',
       required: false,
       hidden: false,
@@ -18,7 +19,7 @@ export const BackgroundImage: Model = {
     {
       type: 'string',
       name: 'altText',
-      label: 'Alt text',
+      title: 'Alt text',
       description: 'The alt text of the image',
       required: false,
       default: 'altText of the image',
@@ -28,7 +29,7 @@ export const BackgroundImage: Model = {
     {
       type: 'enum',
       name: 'backgroundSize',
-      label: 'Background size',
+      title: 'Background size',
       required: false,
       default: 'auto',
       hidden: false,
@@ -53,7 +54,7 @@ export const BackgroundImage: Model = {
     {
       type: 'enum',
       name: 'backgroundPosition',
-      label: 'Background position',
+      title: 'Background position',
       required: false,
       default: 'center',
       hidden: false,
@@ -101,7 +102,7 @@ export const BackgroundImage: Model = {
     {
       type: 'enum',
       name: 'backgroundRepeat',
-      label: 'Background repeat',
+      title: 'Background repeat',
       required: false,
       default: 'no-repeat',
       hidden: false,
@@ -130,7 +131,7 @@ export const BackgroundImage: Model = {
     {
       type: 'number',
       name: 'opacity',
-      label: 'Opacity',
+      title: 'Opacity',
       required: false,
       default: 100,
       hidden: false,
@@ -147,8 +148,8 @@ export const BackgroundImage: Model = {
   fieldGroups: [
     {
       name: 'styles',
-      label: 'Styles',
+      title: 'Styles',
       icon: 'palette'
     }
   ]
-};
+});

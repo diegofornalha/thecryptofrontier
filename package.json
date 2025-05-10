@@ -3,6 +3,7 @@
     "version": "0.1.0",
     "scripts": {
         "dev": "next dev",
+        "dev:3200": "next dev -p 3200",
         "build": "next build && npm run index-content",
         "start": "next start",
         "start:alt": "next start -p 3100",

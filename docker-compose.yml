@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  thecryptofrontier:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3200:3000"
+    environment:
+      - PORT=3000
+    volumes:
+      - ./public:/app/public
+      - ./.env:/app/.env
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3" 
