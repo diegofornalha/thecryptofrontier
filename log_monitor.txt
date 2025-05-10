@@ -1,0 +1,403 @@
+Diretório de saída já existe: posts_traduzidos
+Iniciando monitor RSS. Verificando a cada 60 minutos.
+Modo de saída: Publicação Direta - Formato: MARKDOWN
+Plataforma de publicação: sanity
+
+[2025-05-09 23:08:51] Iniciando processamento de novos itens...
+Buscando feed RSS de: https://thecryptobasic.com/feed/
+Banco de dados inicializado em: posts_database.sqlite
+Banco de dados inicializado em: posts_database.sqlite
+10 itens encontrados no feed.
+Processando primeiro item para teste: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+Encontrados 1 novos itens para processar.
+
+Processando item: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+Tentando traduzir para pt-br: 'Brazil’s B3 to Launch Ethereum and Solana Futures,...' via Gemini.
+Texto traduzido pelo Gemini: 'A B3 do Brasil Lançará Futuros de Ethereum e Solan...'
+Título traduzido: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Tipo de título traduzido: <class 'str'>
+Tentando traduzir para pt-br: '<strong>The Brazilian Securities and Exchange Comm...' via Gemini.
+Texto traduzido pelo Gemini: '<strong>A Comissão de Valores Mobiliários do Brasi...'
+Conteúdo traduzido (primeiras 50 chars): <strong>A Comissão de Valores Mobiliários do Brasi...
+Tipo de conteúdo traduzido: <class 'str'>
+Tags geradas pelo Gemini: criptomoedas, ethereum, solana
+Tags a serem usadas: criptomoedas, ethereum, solana
+Gerando Markdown para o post: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Markdown gerado (primeiros 100 chars): ---
+title: "A B3 do Brasil Lançará Futuros de Ethereum e Solana, Reduz Tamanho do Contrato de Bitcoi...
+Conteúdo gerado no formato markdown
+Formatando conteúdo para publicação...
+Usando tags do conteúdo formatado: bitcoin, ethereum, investimentos
+Conteúdo formatado com sucesso. Título: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Tentando publicar no sanity...
+Módulo publisher não encontrado. Post não publicado.
+Falha ao publicar post: Módulo publisher não encontrado
+Salvando como markdown como fallback...
+MARKDOWN de fallback gerado e salvo em: posts_traduzidos/https___thecryptobasic_com__p_124465.md
+Post já existe no banco de dados: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+
+Processamento concluído. 0 itens processados com sucesso.
+
+Aguardando 60 minutos até a próxima verificação...
+
+[2025-05-10 00:08:56] Iniciando processamento de novos itens...
+Buscando feed RSS de: https://thecryptobasic.com/feed/
+Banco de dados inicializado em: posts_database.sqlite
+Banco de dados inicializado em: posts_database.sqlite
+10 itens encontrados no feed.
+Processando primeiro item para teste: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+Encontrados 1 novos itens para processar.
+
+Processando item: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+Tentando traduzir para pt-br: 'Brazil’s B3 to Launch Ethereum and Solana Futures,...' via Gemini.
+Texto traduzido pelo Gemini: 'A B3 do Brasil Lançará Futuros de Ethereum e Solan...'
+Título traduzido: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Tipo de título traduzido: <class 'str'>
+Tentando traduzir para pt-br: '<strong>The Brazilian Securities and Exchange Comm...' via Gemini.
+Texto traduzido pelo Gemini: '<strong>A Comissão de Valores Mobiliários do Brasi...'
+Conteúdo traduzido (primeiras 50 chars): <strong>A Comissão de Valores Mobiliários do Brasi...
+Tipo de conteúdo traduzido: <class 'str'>
+Tags geradas pelo Gemini: futuros cripto, ethereum, solana
+Tags a serem usadas: futuros cripto, ethereum, solana
+Gerando Markdown para o post: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Markdown gerado (primeiros 100 chars): ---
+title: "A B3 do Brasil Lançará Futuros de Ethereum e Solana, Reduz Tamanho do Contrato de Bitcoi...
+Conteúdo gerado no formato markdown
+Formatando conteúdo para publicação...
+Usando tags do conteúdo formatado: bitcoin, ethereum, investimentos
+Conteúdo formatado com sucesso. Título: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Tentando publicar no sanity...
+Módulo publisher não encontrado. Post não publicado.
+Falha ao publicar post: Módulo publisher não encontrado
+Salvando como markdown como fallback...
+MARKDOWN de fallback gerado e salvo em: posts_traduzidos/https___thecryptobasic_com__p_124465.md
+Post já existe no banco de dados: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+
+Processamento concluído. 0 itens processados com sucesso.
+
+Aguardando 60 minutos até a próxima verificação...
+
+[2025-05-10 01:09:03] Iniciando processamento de novos itens...
+Buscando feed RSS de: https://thecryptobasic.com/feed/
+Banco de dados inicializado em: posts_database.sqlite
+Banco de dados inicializado em: posts_database.sqlite
+10 itens encontrados no feed.
+Processando primeiro item para teste: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+Encontrados 1 novos itens para processar.
+
+Processando item: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+Tentando traduzir para pt-br: 'Brazil’s B3 to Launch Ethereum and Solana Futures,...' via Gemini.
+Texto traduzido pelo Gemini: 'A B3 do Brasil Lançará Futuros de Ethereum e Solan...'
+Título traduzido: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Tipo de título traduzido: <class 'str'>
+Tentando traduzir para pt-br: '<strong>The Brazilian Securities and Exchange Comm...' via Gemini.
+Texto traduzido pelo Gemini: '<strong>A Comissão de Valores Mobiliários do Brasi...'
+Conteúdo traduzido (primeiras 50 chars): <strong>A Comissão de Valores Mobiliários do Brasi...
+Tipo de conteúdo traduzido: <class 'str'>
+Tags geradas pelo Gemini: futuros cripto, ethereum, solana
+Tags a serem usadas: futuros cripto, ethereum, solana
+Gerando Markdown para o post: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Markdown gerado (primeiros 100 chars): ---
+title: "A B3 do Brasil Lançará Futuros de Ethereum e Solana, Reduz Tamanho do Contrato de Bitcoi...
+Conteúdo gerado no formato markdown
+Formatando conteúdo para publicação...
+Usando tags do conteúdo formatado: bitcoin, ethereum, investimentos
+Conteúdo formatado com sucesso. Título: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Tentando publicar no sanity...
+Módulo publisher não encontrado. Post não publicado.
+Falha ao publicar post: Módulo publisher não encontrado
+Salvando como markdown como fallback...
+MARKDOWN de fallback gerado e salvo em: posts_traduzidos/https___thecryptobasic_com__p_124465.md
+Post já existe no banco de dados: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+
+Processamento concluído. 0 itens processados com sucesso.
+
+Aguardando 60 minutos até a próxima verificação...
+
+[2025-05-10 02:09:10] Iniciando processamento de novos itens...
+Buscando feed RSS de: https://thecryptobasic.com/feed/
+Banco de dados inicializado em: posts_database.sqlite
+Banco de dados inicializado em: posts_database.sqlite
+10 itens encontrados no feed.
+Processando primeiro item para teste: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+Encontrados 1 novos itens para processar.
+
+Processando item: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+Tentando traduzir para pt-br: 'Brazil’s B3 to Launch Ethereum and Solana Futures,...' via Gemini.
+Texto traduzido pelo Gemini: 'A B3 do Brasil Lançará Futuros de Ethereum e Solan...'
+Título traduzido: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Tipo de título traduzido: <class 'str'>
+Tentando traduzir para pt-br: '<strong>The Brazilian Securities and Exchange Comm...' via Gemini.
+Texto traduzido pelo Gemini: '<strong>A Comissão de Valores Mobiliários do Brasi...'
+Conteúdo traduzido (primeiras 50 chars): <strong>A Comissão de Valores Mobiliários do Brasi...
+Tipo de conteúdo traduzido: <class 'str'>
+Tags geradas pelo Gemini: criptomoedas, ethereum, solana
+Tags a serem usadas: criptomoedas, ethereum, solana
+Gerando Markdown para o post: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Markdown gerado (primeiros 100 chars): ---
+title: "A B3 do Brasil Lançará Futuros de Ethereum e Solana, Reduz Tamanho do Contrato de Bitcoi...
+Conteúdo gerado no formato markdown
+Formatando conteúdo para publicação...
+Usando tags do conteúdo formatado: bitcoin, ethereum, investimentos
+Conteúdo formatado com sucesso. Título: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Tentando publicar no sanity...
+Módulo publisher não encontrado. Post não publicado.
+Falha ao publicar post: Módulo publisher não encontrado
+Salvando como markdown como fallback...
+MARKDOWN de fallback gerado e salvo em: posts_traduzidos/https___thecryptobasic_com__p_124465.md
+Post já existe no banco de dados: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+
+Processamento concluído. 0 itens processados com sucesso.
+
+Aguardando 60 minutos até a próxima verificação...
+
+[2025-05-10 03:09:17] Iniciando processamento de novos itens...
+Buscando feed RSS de: https://thecryptobasic.com/feed/
+Banco de dados inicializado em: posts_database.sqlite
+Banco de dados inicializado em: posts_database.sqlite
+10 itens encontrados no feed.
+Processando primeiro item para teste: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+Encontrados 1 novos itens para processar.
+
+Processando item: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+Tentando traduzir para pt-br: 'Brazil’s B3 to Launch Ethereum and Solana Futures,...' via Gemini.
+Texto traduzido pelo Gemini: 'A B3 do Brasil Lançará Futuros de Ethereum e Solan...'
+Título traduzido: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Tipo de título traduzido: <class 'str'>
+Tentando traduzir para pt-br: '<strong>The Brazilian Securities and Exchange Comm...' via Gemini.
+Texto traduzido pelo Gemini: '<strong>A Comissão de Valores Mobiliários do Brasi...'
+Conteúdo traduzido (primeiras 50 chars): <strong>A Comissão de Valores Mobiliários do Brasi...
+Tipo de conteúdo traduzido: <class 'str'>
+Tags geradas pelo Gemini: futuros cripto, ethereum, solana
+Tags a serem usadas: futuros cripto, ethereum, solana
+Gerando Markdown para o post: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Markdown gerado (primeiros 100 chars): ---
+title: "A B3 do Brasil Lançará Futuros de Ethereum e Solana, Reduz Tamanho do Contrato de Bitcoi...
+Conteúdo gerado no formato markdown
+Formatando conteúdo para publicação...
+Usando tags do conteúdo formatado: bitcoin, ethereum, investimentos
+Conteúdo formatado com sucesso. Título: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Tentando publicar no sanity...
+Módulo publisher não encontrado. Post não publicado.
+Falha ao publicar post: Módulo publisher não encontrado
+Salvando como markdown como fallback...
+MARKDOWN de fallback gerado e salvo em: posts_traduzidos/https___thecryptobasic_com__p_124465.md
+Post já existe no banco de dados: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+
+Processamento concluído. 0 itens processados com sucesso.
+
+Aguardando 60 minutos até a próxima verificação...
+
+[2025-05-10 04:09:24] Iniciando processamento de novos itens...
+Buscando feed RSS de: https://thecryptobasic.com/feed/
+Banco de dados inicializado em: posts_database.sqlite
+Banco de dados inicializado em: posts_database.sqlite
+10 itens encontrados no feed.
+Processando primeiro item para teste: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+Encontrados 1 novos itens para processar.
+
+Processando item: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+Tentando traduzir para pt-br: 'Brazil’s B3 to Launch Ethereum and Solana Futures,...' via Gemini.
+Texto traduzido pelo Gemini: 'A B3 do Brasil Lançará Futuros de Ethereum e Solan...'
+Título traduzido: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Tipo de título traduzido: <class 'str'>
+Tentando traduzir para pt-br: '<strong>The Brazilian Securities and Exchange Comm...' via Gemini.
+Texto traduzido pelo Gemini: '<strong>A Comissão de Valores Mobiliários do Brasi...'
+Conteúdo traduzido (primeiras 50 chars): <strong>A Comissão de Valores Mobiliários do Brasi...
+Tipo de conteúdo traduzido: <class 'str'>
+Tags geradas pelo Gemini: futuros cripto, ethereum, solana
+Tags a serem usadas: futuros cripto, ethereum, solana
+Gerando Markdown para o post: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Markdown gerado (primeiros 100 chars): ---
+title: "A B3 do Brasil Lançará Futuros de Ethereum e Solana, Reduz Tamanho do Contrato de Bitcoi...
+Conteúdo gerado no formato markdown
+Formatando conteúdo para publicação...
+Usando tags do conteúdo formatado: bitcoin, ethereum, investimentos
+Conteúdo formatado com sucesso. Título: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Tentando publicar no sanity...
+Módulo publisher não encontrado. Post não publicado.
+Falha ao publicar post: Módulo publisher não encontrado
+Salvando como markdown como fallback...
+MARKDOWN de fallback gerado e salvo em: posts_traduzidos/https___thecryptobasic_com__p_124465.md
+Post já existe no banco de dados: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+
+Processamento concluído. 0 itens processados com sucesso.
+
+Aguardando 60 minutos até a próxima verificação...
+
+[2025-05-10 05:09:31] Iniciando processamento de novos itens...
+Buscando feed RSS de: https://thecryptobasic.com/feed/
+Banco de dados inicializado em: posts_database.sqlite
+Banco de dados inicializado em: posts_database.sqlite
+10 itens encontrados no feed.
+Processando primeiro item para teste: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+Encontrados 1 novos itens para processar.
+
+Processando item: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+Tentando traduzir para pt-br: 'Brazil’s B3 to Launch Ethereum and Solana Futures,...' via Gemini.
+Texto traduzido pelo Gemini: 'A B3 do Brasil Lançará Futuros de Ethereum e Solan...'
+Título traduzido: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Tipo de título traduzido: <class 'str'>
+Tentando traduzir para pt-br: '<strong>The Brazilian Securities and Exchange Comm...' via Gemini.
+Texto traduzido pelo Gemini: '<strong>A Comissão de Valores Mobiliários do Brasi...'
+Conteúdo traduzido (primeiras 50 chars): <strong>A Comissão de Valores Mobiliários do Brasi...
+Tipo de conteúdo traduzido: <class 'str'>
+Tags geradas pelo Gemini: criptomoedas, futuros, blockchain
+Tags a serem usadas: criptomoedas, futuros, blockchain
+Gerando Markdown para o post: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Markdown gerado (primeiros 100 chars): ---
+title: "A B3 do Brasil Lançará Futuros de Ethereum e Solana, Reduz Tamanho do Contrato de Bitcoi...
+Conteúdo gerado no formato markdown
+Formatando conteúdo para publicação...
+Usando tags do conteúdo formatado: bitcoin, ethereum, investimentos
+Conteúdo formatado com sucesso. Título: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Tentando publicar no sanity...
+Módulo publisher não encontrado. Post não publicado.
+Falha ao publicar post: Módulo publisher não encontrado
+Salvando como markdown como fallback...
+MARKDOWN de fallback gerado e salvo em: posts_traduzidos/https___thecryptobasic_com__p_124465.md
+Post já existe no banco de dados: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+
+Processamento concluído. 0 itens processados com sucesso.
+
+Aguardando 60 minutos até a próxima verificação...
+
+[2025-05-10 06:09:39] Iniciando processamento de novos itens...
+Buscando feed RSS de: https://thecryptobasic.com/feed/
+Banco de dados inicializado em: posts_database.sqlite
+Banco de dados inicializado em: posts_database.sqlite
+10 itens encontrados no feed.
+Processando primeiro item para teste: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+Encontrados 1 novos itens para processar.
+
+Processando item: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+Tentando traduzir para pt-br: 'Brazil’s B3 to Launch Ethereum and Solana Futures,...' via Gemini.
+Texto traduzido pelo Gemini: 'A B3 do Brasil Lançará Futuros de Ethereum e Solan...'
+Título traduzido: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Tipo de título traduzido: <class 'str'>
+Tentando traduzir para pt-br: '<strong>The Brazilian Securities and Exchange Comm...' via Gemini.
+Texto traduzido pelo Gemini: '<strong>A Comissão de Valores Mobiliários do Brasi...'
+Conteúdo traduzido (primeiras 50 chars): <strong>A Comissão de Valores Mobiliários do Brasi...
+Tipo de conteúdo traduzido: <class 'str'>
+Tags geradas pelo Gemini: futuros cripto, ethereum, solana
+Tags a serem usadas: futuros cripto, ethereum, solana
+Gerando Markdown para o post: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Markdown gerado (primeiros 100 chars): ---
+title: "A B3 do Brasil Lançará Futuros de Ethereum e Solana, Reduz Tamanho do Contrato de Bitcoi...
+Conteúdo gerado no formato markdown
+Formatando conteúdo para publicação...
+Usando tags do conteúdo formatado: bitcoin, ethereum, investimentos
+Conteúdo formatado com sucesso. Título: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Tentando publicar no sanity...
+Módulo publisher não encontrado. Post não publicado.
+Falha ao publicar post: Módulo publisher não encontrado
+Salvando como markdown como fallback...
+MARKDOWN de fallback gerado e salvo em: posts_traduzidos/https___thecryptobasic_com__p_124465.md
+Post já existe no banco de dados: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+
+Processamento concluído. 0 itens processados com sucesso.
+
+Aguardando 60 minutos até a próxima verificação...
+
+[2025-05-10 07:09:46] Iniciando processamento de novos itens...
+Buscando feed RSS de: https://thecryptobasic.com/feed/
+Banco de dados inicializado em: posts_database.sqlite
+Banco de dados inicializado em: posts_database.sqlite
+10 itens encontrados no feed.
+Processando primeiro item para teste: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+Encontrados 1 novos itens para processar.
+
+Processando item: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+Tentando traduzir para pt-br: 'Brazil’s B3 to Launch Ethereum and Solana Futures,...' via Gemini.
+Texto traduzido pelo Gemini: 'A B3 do Brasil Lançará Futuros de Ethereum e Solan...'
+Título traduzido: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Tipo de título traduzido: <class 'str'>
+Tentando traduzir para pt-br: '<strong>The Brazilian Securities and Exchange Comm...' via Gemini.
+Texto traduzido pelo Gemini: '<strong>A Comissão de Valores Mobiliários do Brasi...'
+Conteúdo traduzido (primeiras 50 chars): <strong>A Comissão de Valores Mobiliários do Brasi...
+Tipo de conteúdo traduzido: <class 'str'>
+Tags geradas pelo Gemini: futuros ethereum, futuros solana, b3
+Tags a serem usadas: futuros ethereum, futuros solana, b3
+Gerando Markdown para o post: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Markdown gerado (primeiros 100 chars): ---
+title: "A B3 do Brasil Lançará Futuros de Ethereum e Solana, Reduz Tamanho do Contrato de Bitcoi...
+Conteúdo gerado no formato markdown
+Formatando conteúdo para publicação...
+Usando tags do conteúdo formatado: bitcoin, ethereum, investimentos
+Conteúdo formatado com sucesso. Título: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Tentando publicar no sanity...
+Módulo publisher não encontrado. Post não publicado.
+Falha ao publicar post: Módulo publisher não encontrado
+Salvando como markdown como fallback...
+MARKDOWN de fallback gerado e salvo em: posts_traduzidos/https___thecryptobasic_com__p_124465.md
+Post já existe no banco de dados: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+
+Processamento concluído. 0 itens processados com sucesso.
+
+Aguardando 60 minutos até a próxima verificação...
+
+[2025-05-10 08:09:53] Iniciando processamento de novos itens...
+Buscando feed RSS de: https://thecryptobasic.com/feed/
+Banco de dados inicializado em: posts_database.sqlite
+Banco de dados inicializado em: posts_database.sqlite
+10 itens encontrados no feed.
+Processando primeiro item para teste: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+Encontrados 1 novos itens para processar.
+
+Processando item: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+Tentando traduzir para pt-br: 'Brazil’s B3 to Launch Ethereum and Solana Futures,...' via Gemini.
+Texto traduzido pelo Gemini: 'A B3 do Brasil Lançará Futuros de Ethereum e Solan...'
+Título traduzido: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Tipo de título traduzido: <class 'str'>
+Tentando traduzir para pt-br: '<strong>The Brazilian Securities and Exchange Comm...' via Gemini.
+Texto traduzido pelo Gemini: '<strong>A Comissão de Valores Mobiliários do Brasi...'
+Conteúdo traduzido (primeiras 50 chars): <strong>A Comissão de Valores Mobiliários do Brasi...
+Tipo de conteúdo traduzido: <class 'str'>
+Tags geradas pelo Gemini: criptomoedas, ethereum, solana
+Tags a serem usadas: criptomoedas, ethereum, solana
+Gerando Markdown para o post: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Markdown gerado (primeiros 100 chars): ---
+title: "A B3 do Brasil Lançará Futuros de Ethereum e Solana, Reduz Tamanho do Contrato de Bitcoi...
+Conteúdo gerado no formato markdown
+Formatando conteúdo para publicação...
+Usando tags do conteúdo formatado: bitcoin, ethereum, investimentos
+Conteúdo formatado com sucesso. Título: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Tentando publicar no sanity...
+Módulo publisher não encontrado. Post não publicado.
+Falha ao publicar post: Módulo publisher não encontrado
+Salvando como markdown como fallback...
+MARKDOWN de fallback gerado e salvo em: posts_traduzidos/https___thecryptobasic_com__p_124465.md
+Post já existe no banco de dados: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+
+Processamento concluído. 0 itens processados com sucesso.
+
+Aguardando 60 minutos até a próxima verificação...
+
+[2025-05-10 09:10:00] Iniciando processamento de novos itens...
+Buscando feed RSS de: https://thecryptobasic.com/feed/
+Banco de dados inicializado em: posts_database.sqlite
+Banco de dados inicializado em: posts_database.sqlite
+10 itens encontrados no feed.
+Processando primeiro item para teste: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+Encontrados 1 novos itens para processar.
+
+Processando item: Brazil’s B3 to Launch Ethereum and Solana Futures, Cuts Bitcoin Contract Size
+Tentando traduzir para pt-br: 'Brazil’s B3 to Launch Ethereum and Solana Futures,...' via Gemini.
+Texto traduzido pelo Gemini: 'A B3 do Brasil Lançará Futuros de Ethereum e Solan...'
+Título traduzido: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Tipo de título traduzido: <class 'str'>
+Tentando traduzir para pt-br: '<strong>The Brazilian Securities and Exchange Comm...' via Gemini.
+Texto traduzido pelo Gemini: '<strong>A Comissão de Valores Mobiliários do Brasi...'
+Conteúdo traduzido (primeiras 50 chars): <strong>A Comissão de Valores Mobiliários do Brasi...
+Tipo de conteúdo traduzido: <class 'str'>
+Tags geradas pelo Gemini: futuros cripto, ethereum solana, b3 brasil
+Tags a serem usadas: futuros cripto, ethereum solana, b3 brasil
+Gerando Markdown para o post: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Markdown gerado (primeiros 100 chars): ---
+title: "A B3 do Brasil Lançará Futuros de Ethereum e Solana, Reduz Tamanho do Contrato de Bitcoi...
+Conteúdo gerado no formato markdown
+Formatando conteúdo para publicação...
+Usando tags do conteúdo formatado: bitcoin, ethereum, investimentos
+Conteúdo formatado com sucesso. Título: A B3 do Brasil Lançará Futuros de Ethereum e Solan...
+Tentando publicar no sanity...
+Módulo publisher não encontrado. Post não publicado.

@@ -6,6 +6,7 @@ import { getBaseLayoutComponent } from '../../../utils/base-layout';
 import { getComponent } from '../../components-registry';
 import Link from '../../atoms/Link';
 import RelatedPostsSection from '../../sections/RelatedPostsSection';
+import SocialShare from '../../atoms/SocialShare';
 
 export default function PostLayout(props) {
     const { page, site } = props;
@@ -14,6 +15,9 @@ export default function PostLayout(props) {
     const { title, date, author = null, markdown_content, bottomSections = [], categories = [], slug } = page;
     const dateTimeAttr = dayjs(date).format('YYYY-MM-DD HH:mm:ss');
     const formattedDate = dayjs(date).format('YYYY-MM-DD');
+    // URL completa do post para compartilhamento
+    const siteUrl = site.siteUrl || 'https://thecryptofrontier.agentesintegrados.com';
+    const postUrl = `${siteUrl}/post/${slug}`;
 
     return (
         <BaseLayout page={page} site={site}>
@@ -75,6 +79,19 @@ export default function PostLayout(props) {
                         })}
                     </div>
                 )}
+                
+                {/* Seção de compartilhamento social no final da postagem */}
+                <div className="mx-auto max-w-screen-2xl px-4 pb-16">
+                    <div className="max-w-3xl mx-auto mt-12 border-t border-b py-6 bg-gray-50 rounded-lg shadow-sm">
+                        <h3 className="text-center mb-4 font-medium">Gostou deste artigo? Compartilhe!</h3>
+                        <SocialShare 
+                            title={title} 
+                            url={postUrl} 
+                            enableAnnotations={enableAnnotations} 
+                            className="justify-center"
+                        />
+                    </div>
+                </div>
             </main>
         </BaseLayout>
     );
