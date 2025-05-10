@@ -210,7 +210,6 @@ labels:
 2. **Monitoramento**: Implementar monitoramento e alertas para toda a infraestrutura
 3. **CI/CD**: Integrar a solução com pipelines de integração e entrega contínua
 4. **Backup**: Implementar estratégia de backup para volumes de dados
-5. **Secrets**: Utilizar Docker Secrets para gerenciamento de credenciais
 
 ## Conclusão
 

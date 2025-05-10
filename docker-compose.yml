@@ -15,6 +15,8 @@ services:
     networks:
       - caddy
     restart: unless-stopped
+    secrets:
+      - caddy_api_token
 
   # Serviço The Crypto Frontier (tenant1)
   tenant1-frontier:
@@ -30,6 +32,9 @@ services:
     labels:
       caddy: "tenant1.localhost thecryptofrontier.agentesintegrados.com"
       caddy.reverse_proxy: "{{upstreams 3200}}"
+    secrets:
+      - frontier_api_key
+      - db_password
 
   # Serviço de exemplo para o Tenant 2
   tenant2-service:
@@ -39,10 +44,23 @@ services:
     labels:
       caddy: tenant2.localhost
       caddy.reverse_proxy: "{{upstreams 80}}"
+    secrets:
+      - tenant2_api_key
 
 networks:
   caddy:
     external: true
 
 volumes:
-  caddy_data: 
+  caddy_data:
+
+# Definição dos secrets
+secrets:
+  caddy_api_token:
+    file: ./secrets/caddy_api_token.txt  # Caminho para o arquivo que contém o segredo
+  frontier_api_key:
+    file: ./secrets/frontier_api_key.txt
+  db_password:
+    file: ./secrets/db_password.txt
+  tenant2_api_key:
+    file: ./secrets/tenant2_api_key.txt 
