@@ -17,6 +17,7 @@
     "test:coverage": "jest --coverage",
     "test:a11y": "jest --testPathPattern=a11y",
     "storybook": "storybook dev -p 6006",
+    "storybook:restart": "./scripts/storybook-restart.sh",
     "build-storybook": "storybook build",
     "chromatic": "npx chromatic --project-token=chpt_10e25f8014659d3 --storybook-build-dir storybook-static",
     "chromatic:script": "./scripts/chromatic.sh",

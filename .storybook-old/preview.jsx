@@ -1,8 +1,9 @@
 import React from 'react';
+import '../src/css/main.css';
 
 // Tenta importar o CSS, mas não falha se o arquivo não existir
 try {
-  require('../src/css/main.css');
+  // require('../src/css/main.css'); // Comentado para evitar importação duplicada
 } catch (e) {
   console.warn('CSS não encontrado, continuando sem ele...');
 }

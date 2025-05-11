@@ -4,7 +4,7 @@
 Aceito
 
 ## Data
-2024-07-10
+2025-04-10
 
 ## Contexto
 Durante a migração para o design system baseado em shadcn/ui, precisamos estabelecer um padrão consistente para componentes complexos que permita flexibilidade, composição e extensibilidade. Os componentes complexos são aqueles que possuem múltiplas partes interagindo entre si, como Tabs, Dialog, Select, etc.
