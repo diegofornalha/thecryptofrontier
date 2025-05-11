@@ -18,7 +18,6 @@ const nextConfig = {
         esmExternals: 'loose'
     },
     // Forçar o uso do Pages Router, desativando o App Router
-    appDir: false,
     useFileSystemPublicRoutes: true,
     // Configuração de imagens para o Sanity
     images: {

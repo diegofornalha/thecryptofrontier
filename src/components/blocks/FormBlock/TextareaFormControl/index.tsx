@@ -1,5 +1,7 @@
 import * as React from 'react';
-import classNames from 'classnames';
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 export default function TextareaFormControl(props) {
     const { name, label, hideLabel, isRequired, placeholder, width = 'full' } = props;
@@ -18,24 +20,24 @@ export default function TextareaFormControl(props) {
 
     return (
         <div
-            className={classNames('sb-form-control', 'w-full', {
+            className={cn('sb-form-control w-full', {
                 'sm:w-formField': width === '1/2'
             })}
             data-sb-field-path={fieldPath}
         >
             {label && (
-                <label
+                <Label
                     id={labelId}
-                    className={classNames('sb-label', 'inline-block', 'sm:mb-1.5', { 'sr-only': hideLabel })}
+                    className={cn('sb-label inline-block sm:mb-1.5', { 'sr-only': hideLabel })}
                     htmlFor={name}
                     {...(fieldPath && { 'data-sb-field-path': '.label .name#@for' })}
                 >
                     {label}
-                </label>
+                </Label>
             )}
-            <textarea
+            <Textarea
                 id={props.name}
-                className="sb-textarea text-inherit bg-transparent border border-current w-full p-2 focus:outline-none"
+                className="sb-textarea"
                 name={name}
                 rows={5}
                 {...attr}

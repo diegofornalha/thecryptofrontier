@@ -1,12 +1,12 @@
 import * as React from 'react';
-import classNames from 'classnames';
+import { cn } from "@/lib/utils";
 
 import { getComponent } from '../../components-registry';
 import { mapStylesToClassNames as mapStyles } from '../../../utils/map-styles-to-class-names';
 import SubmitButtonFormControl from './SubmitButtonFormControl';
 
 export default function FormBlock(props) {
-    const formRef = React.createRef<HTMLFormElement>();
+    const formRef = React.useRef<HTMLFormElement>(null);
     const { fields = [], elementId, submitButton, className, styles = {}, 'data-sb-field-path': fieldPath } = props;
 
     if (fields.length === 0) {
@@ -16,26 +16,26 @@ export default function FormBlock(props) {
     function handleSubmit(event) {
         event.preventDefault();
 
-        const data = new FormData(formRef.current);
-        const value = Object.fromEntries(data.entries());
-        alert(`Form data: ${JSON.stringify(value)}`);
+        if (formRef.current) {
+            const data = new FormData(formRef.current);
+            const value = Object.fromEntries(data.entries());
+            alert(`Form data: ${JSON.stringify(value)}`);
+        }
     }
 
     return (
         <form
-            className={classNames(
-                'sb-component',
-                'sb-component-block',
-                'sb-component-form-block',
+            className={cn(
+                'sb-component sb-component-block sb-component-form-block',
                 className,
                 styles?.self?.margin ? mapStyles({ margin: styles?.self?.margin }) : undefined,
                 styles?.self?.padding ? mapStyles({ padding: styles?.self?.padding }) : undefined,
                 styles?.self?.borderWidth && styles?.self?.borderWidth !== 0 && styles?.self?.borderStyle !== 'none'
                     ? mapStyles({
-                          borderWidth: styles?.self?.borderWidth,
-                          borderStyle: styles?.self?.borderStyle,
-                          borderColor: styles?.self?.borderColor ?? 'border-primary'
-                      })
+                        borderWidth: styles?.self?.borderWidth,
+                        borderStyle: styles?.self?.borderStyle,
+                        borderColor: styles?.self?.borderColor ?? 'border-primary'
+                    })
                     : undefined,
                 styles?.self?.borderRadius ? mapStyles({ borderRadius: styles?.self?.borderRadius }) : undefined
             )}
@@ -43,10 +43,10 @@ export default function FormBlock(props) {
             id={elementId}
             onSubmit={handleSubmit}
             ref={formRef}
-            data-sb-field-path= {fieldPath}
+            data-sb-field-path={fieldPath}
         >
             <div
-                className={classNames('w-full', 'flex', 'flex-wrap', 'gap-8', mapStyles({ justifyContent: styles?.self?.justifyContent ?? 'flex-start' }))}
+                className={cn('w-full flex flex-wrap gap-8', mapStyles({ justifyContent: styles?.self?.justifyContent ?? 'flex-start' }))}
                 {...(fieldPath && { 'data-sb-field-path': '.fields' })}
             >
                 <input type="hidden" name="form-name" value={elementId} />
@@ -63,7 +63,7 @@ export default function FormBlock(props) {
                 })}
             </div>
             {submitButton && (
-                <div className={classNames('mt-8', 'flex', mapStyles({ justifyContent: styles?.self?.justifyContent ?? 'flex-start' }))}>
+                <div className={cn('mt-8 flex', mapStyles({ justifyContent: styles?.self?.justifyContent ?? 'flex-start' }))}>
                     <SubmitButtonFormControl {...submitButton} {...(fieldPath && { 'data-sb-field-path': '.submitButton' })} />
                 </div>
             )}

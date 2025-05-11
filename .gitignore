@@ -142,3 +142,5 @@ blog_postagem_automatica/fresh_env/lib64/
 
 # Arquivos de backup específicos
 *.bak
+
+*storybook.log

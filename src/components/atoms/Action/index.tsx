@@ -1,7 +1,8 @@
 import * as React from 'react';
-import classNames from 'classnames';
 import { iconMap } from '../../svgs';
-import Link from '../Link';
+import { Button } from "@/components/ui/button";
+import NextLink from 'next/link';
+import { cn } from "@/lib/utils";
 
 export default function Action(props) {
     const { elementId, className, label, altText, url, showIcon, icon, iconPosition = 'right', style = 'primary' } = props;
@@ -12,36 +13,64 @@ export default function Action(props) {
         : {};
     const type = props.__metadata?.modelName;
 
+    // Mapear estilos antigos para variantes do shadcn/ui
+    const variantMap = {
+        primary: 'default',
+        secondary: 'secondary',
+    };
+    
+    const variant = variantMap[style] || 'default';
+    
+    // Renderizar ícone com posicionamento correto
+    const renderIcon = () => {
+        if (!showIcon || !IconComponent) return null;
+        
+        return (
+            <IconComponent
+                className={cn("shrink-0 size-[1.25em]", {
+                    'order-first': iconPosition === 'left',
+                })}
+                {...(fieldPath && { 'data-sb-field-path': '.icon' })}
+            />
+        );
+    };
+
+    // Conteúdo do botão
+    const buttonContent = (
+        <>
+            {label && <span {...(fieldPath && { 'data-sb-field-path': '.label' })}>{label}</span>}
+            {renderIcon()}
+        </>
+    );
+
+    // Se tiver URL, usar como link
+    if (url) {
+        return (
+            <Button
+                variant={variant}
+                className={className}
+                asChild
+                id={elementId}
+                aria-label={altText}
+                {...annotations}
+            >
+                <NextLink href={url}>
+                    {buttonContent}
+                </NextLink>
+            </Button>
+        );
+    }
+    
+    // Caso contrário, renderizar como botão normal
     return (
-        <Link
-            href={url}
-            aria-label={altText}
+        <Button
+            variant={variant}
+            className={className}
             id={elementId}
-            className={classNames(
-                'sb-component',
-                'sb-component-block',
-                type === 'Button' ? 'sb-component-button' : 'sb-component-link',
-                {
-                    'sb-component-button-primary': type === 'Button' && style === 'primary',
-                    'sb-component-button-secondary': type === 'Button' && style === 'secondary',
-                    'sb-component-link-primary': type === 'Link' && style === 'primary',
-                    'sb-component-link-secondary': type === 'Link' && style === 'secondary'
-                },
-                className
-            )}
+            aria-label={altText}
             {...annotations}
         >
-            {label && <span {...(fieldPath && { 'data-sb-field-path': '.label' })}>{label}</span>}
-            {showIcon && IconComponent && (
-                <IconComponent
-                    className={classNames('shrink-0', 'fill-current', 'w-[1.25em]', 'h-[1.25em]', {
-                        'order-first': iconPosition === 'left',
-                        'mr-[0.5em]': label && iconPosition === 'left',
-                        'ml-[0.5em]': label && iconPosition === 'right'
-                    })}
-                    {...(fieldPath && { 'data-sb-field-path': '.icon' })}
-                />
-            )}
-        </Link>
+            {buttonContent}
+        </Button>
     );
 }

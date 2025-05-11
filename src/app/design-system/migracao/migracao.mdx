@@ -1,0 +1,58 @@
+# Plano de Migração para shadcn/ui
+
+## Fase 0 - Concluída
+
+Na Fase 0, estabelecemos as bases do nosso design system:
+
+- Consolidamos e organizamos variáveis CSS
+- Configuramos tema claro/escuro
+- Definimos padrões de tipografia, cores e espaçamentos
+- Instalamos componentes base do shadcn/ui
+- Criamos uma página de documentação (design system)
+
+## Fase 1 - Próximos Passos
+
+### Componentes a serem migrados:
+
+#### Componentes de Layout
+- [ ] Header
+- [ ] Footer
+- [ ] Layout principal
+- [ ] Layout de post
+- [ ] Layout de categoria
+
+#### Componentes de Blocos
+- [ ] Bloco de imagem
+- [ ] Bloco de formulário
+- [ ] Bloco de pesquisa
+- [ ] Bloco de título
+
+#### Componentes de UI básicos
+- [ ] Botões (migrar de sb-component-button para Button do shadcn)
+- [ ] Links (migrar de sb-component-link para componente Link personalizado)
+- [ ] Inputs de formulário
+- [ ] Campos de seleção
+
+### Priorização
+
+1. Componentes de UI básicos - são a base para todos os outros
+2. Componentes de Layout - definem a estrutura do site
+3. Componentes de Blocos - conteúdo específico
+
+### Abordagem de Migração
+
+Para cada componente:
+
+1. Identificar o componente atual e suas variantes
+2. Mapear para equivalentes do shadcn/ui
+3. Criar versão com shadcn/ui mantendo a mesma API quando possível
+4. Testar o componente em isolamento
+5. Implementar em uma página de teste
+6. Substituir gradualmente no restante do site
+
+### Considerações
+
+- Manter retrocompatibilidade durante a transição
+- Documentar todos os componentes novos na página do design system
+- Criar testes para garantir que a funcionalidade seja mantida
+- Atualizar os estilos globais conforme necessário 

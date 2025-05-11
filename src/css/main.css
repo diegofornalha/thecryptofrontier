@@ -4,8 +4,10 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 1. Variáveis do Design System */
 @layer base {
     :root {
+        /* Cores principais */
         --background: 0 0% 100%;
         --foreground: 0 0% 3.9%;
         --card: 0 0% 100%;
@@ -30,7 +32,29 @@
         --light: 0 0% 98%;
         --neutral: 0 0% 90%;
         --neutralAlt: 210 40% 96.1%;
+        
+        /* Tipografia */
+        --font-sans: 'Inter', sans-serif;
+        --font-serif: 'Roboto Slab', serif;
+        
+        /* Espaçamentos */
+        --spacing-1: 0.25rem;
+        --spacing-2: 0.5rem;
+        --spacing-3: 0.75rem;
+        --spacing-4: 1rem;
+        --spacing-5: 1.25rem;
+        --spacing-6: 1.5rem;
+        --spacing-8: 2rem;
+        --spacing-10: 2.5rem;
+        --spacing-12: 3rem;
+        --spacing-16: 4rem;
+        --spacing-20: 5rem;
+        --spacing-24: 6rem;
+        --spacing-32: 8rem;
+        --spacing-40: 10rem;
+        --spacing-48: 12rem;
     }
+    
     .dark {
         --background: 0 0% 3.9%;
         --foreground: 0 0% 98%;
@@ -56,9 +80,13 @@
         --neutral: 217.2 32.6% 17.5%;
         --neutralAlt: 215 20.2% 65.1%;
     }
+    
+    /* Estilos base */
     body {
-        @apply text-base;
+        @apply bg-background text-foreground;
+        font-family: var(--font-sans);
     }
+    
     h1,
     .h1,
     h2,
@@ -71,9 +99,57 @@
     h6 {
         @apply break-words;
         line-height: 1.2;
+        font-family: var(--font-serif);
     }
 }
 
+/* 2. Componentes shadcn/ui */
+@layer components {
+    /* Espaço reservado para componentes shadcn/ui */
+}
+
+/* 3. Classes utilitárias personalizadas */
+@layer utilities {
+    .underline-line-through {
+        text-decoration: underline line-through;
+    }
+    
+    .sb-animate-slide-left {
+        @apply animate-[slideLeft_0.4s_ease-in-out_forwards];
+        opacity: 0;
+        transform: translateX(40px);
+    }
+    
+    @keyframes slideLeft {
+        0% {
+            opacity: 0;
+            transform: translateX(40px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    .sb-animate-slide-right {
+        @apply animate-[slideRight_0.4s_ease-in-out_forwards];
+        opacity: 0;
+        transform: translateX(-40px);
+    }
+    
+    @keyframes slideRight {
+        0% {
+            opacity: 0;
+            transform: translateX(-40px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+}
+
+/* 4. Componentes herdados (a serem migrados gradualmente) */
 @layer components {
     .sb-markdown {
         @apply leading-relaxed;
@@ -248,17 +324,17 @@
         }
         .sb-divider,
         .sb-footer-bottom {
-            @apply border-neutral;
+            @apply border-dark/10;
         }
         .sb-carousel-prev,
         .sb-carousel-next {
-            @apply bg-dark text-light;
+            @apply text-dark/50 hover:text-dark;
         }
         .sb-carousel-dot {
-            @apply bg-dark/20;
+            @apply border-dark opacity-30;
         }
         .sb-carousel-dot-active {
-            @apply bg-dark;
+            @apply bg-dark opacity-100;
         }
     }
     .bg-neutral-fg-dark,
@@ -283,17 +359,17 @@
         }
         .sb-divider,
         .sb-footer-bottom {
-            @apply border-neutralAlt;
+            @apply border-dark/10;
         }
         .sb-carousel-prev,
         .sb-carousel-next {
-            @apply bg-dark text-light;
+            @apply text-dark/50 hover:text-dark;
         }
         .sb-carousel-dot {
-            @apply bg-dark/20;
+            @apply border-dark opacity-30;
         }
         .sb-carousel-dot-active {
-            @apply bg-dark;
+            @apply bg-dark opacity-100;
         }
     }
     .bg-dark-fg-light,
@@ -318,20 +394,20 @@
         }
         .sb-divider,
         .sb-footer-bottom {
-            @apply border-light/20;
+            @apply border-light/10;
         }
         .sb-carousel-prev,
         .sb-carousel-next {
-            @apply bg-light text-dark;
+            @apply text-light/60 hover:text-light;
         }
         .sb-carousel-dot {
-            @apply bg-light/20;
+            @apply border-light opacity-50;
         }
         .sb-carousel-dot-active {
-            @apply bg-light;
+            @apply bg-light opacity-100;
         }
     }
-    /* Only for cards */
+
     .bg-neutralAlt-fg-dark {
         @apply text-dark bg-neutralAlt;
         .sb-component-button-primary {
@@ -340,49 +416,5 @@
         .sb-component-button-secondary {
             @apply border-dark text-dark;
         }
-    }
-}
-
-@layer utilities {
-    .underline-line-through {
-        text-decoration-line: underline line-through
-    }
-    .sb-animate-slide-left {
-        animation-name: slideLeft;
-        animation-duration: var(--sb-slide-speed, 80s);
-        animation-timing-function: linear;
-        animation-iteration-count: infinite;
-    }
-    @keyframes slideLeft {
-        from {
-            transform: translate3d(0,0,0)
-        }
-        to {
-            transform: translate3d(-50%,0,0)
-        }
-    }
-    .sb-animate-slide-right {
-        animation-name: slideRight;
-        animation-duration: var(--sb-slide-speed, 80s);
-        animation-timing-function: linear;
-        animation-iteration-count: infinite;
-    }
-    @keyframes slideRight {
-        from {
-            transform: translate3d(-50%,0,0)
-        }
-        to {
-            transform: translate3d(0,0,0)
-        }
-    }
-}
-
-@layer base {
-    * {
-        @apply border-border;
-    }
-    body {
-        @apply bg-background text-foreground;
-        font-feature-settings: "rlig" 1, "calt" 1;
     }
 }
