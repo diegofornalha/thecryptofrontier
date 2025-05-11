@@ -7,10 +7,4 @@ export const dataset =
 export const projectId = 
   process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'brby2yrg'
 
-function assertValue<T>(v: T | undefined, errorMessage: string): T {
-  if (v === undefined) {
-    throw new Error(errorMessage)
-  }
-
-  return v
-}
+export const useCdn = process.env.NODE_ENV === 'production' 

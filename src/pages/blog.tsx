@@ -1,129 +1,156 @@
-import { GetStaticProps } from 'next'
-import Head from 'next/head'
-import Link from 'next/link'
-import React from 'react'
-import { client } from '../sanity/lib/client'
+import React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { client } from '../sanity/lib/client';
+import { urlForImage } from '../sanity/lib/image';
+import Head from 'next/head';
 
-type Post = {
-  _id: string
-  title: string
-  slug: { current: string }
-  excerpt?: string
-  publishedAt: string
-  categories?: string[]
-  author?: {
-    name: string
-    role?: string
-  }
-  featuredImageUrl?: string
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+
+// Consulta GROQ para buscar os posts do blog
+const POSTS_QUERY = `*[_type == "post"] | order(publishedAt desc) {
+  _id,
+  title,
+  slug,
+  mainImage,
+  publishedAt,
+  "authorName": author->name,
+  "categories": categories[]->title,
+  "estimatedReadingTime": round(length(pt::text(body)) / 5 / 180)
+}`;
+
+// Interface para os posts
+interface Post {
+  _id: string;
+  title: string;
+  slug: { current: string };
+  mainImage?: any;
+  publishedAt: string;
+  authorName?: string;
+  categories?: string[];
+  estimatedReadingTime?: number;
 }
 
-type BlogProps = {
-  posts: Post[]
+// Propriedades da página
+interface BlogProps {
+  posts: Post[];
 }
 
+// Função para formatar a data
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  });
+};
+
+// Componente de página do blog
 export default function Blog({ posts }: BlogProps) {
   return (
-    <>
+    <div className="min-h-screen bg-background">
       <Head>
-        <title>Blog | The Crypto Frontier</title>
-        <meta name="description" content="Artigos e tutoriais sobre criptomoedas e blockchain" />
+        <title>Blog - The Crypto Frontier</title>
+        <meta name="description" content="Artigos sobre criptomoedas, blockchain e tecnologia" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
-
-      <div className="container mx-auto px-5 py-24">
-        <div className="max-w-5xl mx-auto">
-          <h1 className="text-4xl font-bold mb-10 text-center">Blog</h1>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {posts.map((post) => (
-              <div key={post._id} className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-                {post.featuredImageUrl && (
-                  <div className="h-48 bg-gray-200 relative">
-                    <img 
-                      src={post.featuredImageUrl} 
-                      alt={post.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
-                
-                <div className="p-6">
-                  <h2 className="text-2xl font-bold mb-2">
-                    <Link href={`/post/${post.slug.current}`} className="hover:text-blue-600 transition-colors">
-                      {post.title}
-                    </Link>
-                  </h2>
-                  
-                  {post.categories && post.categories.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {post.categories.map((category) => (
-                        <span 
-                          key={category} 
-                          className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full"
-                        >
-                          {category}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  
-                  <div className="text-sm text-gray-500 mb-3">
-                    {post.publishedAt && (
-                      <time dateTime={post.publishedAt}>
-                        {new Date(post.publishedAt).toLocaleDateString('pt-BR', {
-                          day: '2-digit',
-                          month: 'long',
-                          year: 'numeric'
-                        })}
-                      </time>
-                    )}
-                    {post.author && (
-                      <span> · {post.author.name}</span>
-                    )}
-                  </div>
-                  
-                  {post.excerpt && (
-                    <p className="text-gray-600 mb-4">{post.excerpt}</p>
-                  )}
-                  
-                  <Link 
-                    href={`/post/${post.slug.current}`} 
-                    className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-md transition-colors"
-                  >
-                    Ler mais
-                  </Link>
-                </div>
-              </div>
-            ))}
+      
+      <header className="bg-gradient-to-r from-indigo-600 to-blue-500 text-white py-16">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h1 className="text-4xl font-extrabold mb-4">Blog</h1>
+            <p className="text-xl text-indigo-100 max-w-2xl mx-auto">
+              Artigos, tutoriais e notícias sobre o mundo das criptomoedas e blockchain
+            </p>
           </div>
         </div>
-      </div>
-    </>
-  )
+      </header>
+      
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {posts.map((post) => (
+            <Card key={post._id} className="overflow-hidden flex flex-col h-full">
+              {post.mainImage && (
+                <div className="relative h-48">
+                  <Image
+                    src={urlForImage(post.mainImage).url()}
+                    alt={post.mainImage.alt || post.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover"
+                  />
+                </div>
+              )}
+              <CardHeader className="flex-grow">
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {post.categories && post.categories.map((category, index) => (
+                    <Badge key={index} variant="secondary">
+                      {category}
+                    </Badge>
+                  ))}
+                </div>
+                <h2 className="text-xl font-bold mb-3 text-foreground">
+                  <Link href={`/post/${post.slug.current}`} className="hover:text-primary">
+                    {post.title}
+                  </Link>
+                </h2>
+                <div className="text-sm text-muted-foreground">
+                  {post.authorName && <span>{post.authorName} • </span>}
+                  <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
+                  {post.estimatedReadingTime && (
+                    <span> • {post.estimatedReadingTime} min de leitura</span>
+                  )}
+                </div>
+              </CardHeader>
+              <CardFooter>
+                <Button asChild variant="link" className="p-0">
+                  <Link href={`/post/${post.slug.current}`}>
+                    Ler mais →
+                  </Link>
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+        
+        {posts.length === 0 && (
+          <div className="text-center py-12">
+            <h2 className="text-2xl font-bold text-foreground mb-4">Nenhum post encontrado</h2>
+            <p className="text-muted-foreground">Em breve teremos novos artigos.</p>
+          </div>
+        )}
+      </main>
+      
+      <footer className="bg-gray-800 text-white py-12">
+        <div className="container mx-auto px-4 text-center">
+          <p>© {new Date().getFullYear()} The Crypto Frontier. Todos os direitos reservados.</p>
+        </div>
+      </footer>
+    </div>
+  );
 }
 
-export const getStaticProps: GetStaticProps = async () => {
-  // Buscar todos os posts ordenados pela data de publicação
-  const posts = await client.fetch(`
-    *[_type == "post"] | order(publishedAt desc) {
-      _id,
-      title,
-      slug,
-      excerpt,
-      publishedAt,
-      categories,
-      "author": author->{
-        name,
-        role
+// Buscar dados no momento da compilação
+export async function getStaticProps() {
+  try {
+    const posts = await client.fetch(POSTS_QUERY);
+    
+    return {
+      props: {
+        posts,
       },
-      "featuredImageUrl": featuredImage.asset->url
-    }
-  `)
-  
-  return {
-    props: {
-      posts
-    },
-    revalidate: 60 // Atualizar a cada minuto
+      // Revalidar a cada 1 hora
+      revalidate: 3600,
+    };
+  } catch (error) {
+    console.error('Erro ao buscar posts:', error);
+    return {
+      props: {
+        posts: [],
+      },
+      revalidate: 60,
+    };
   }
 } 

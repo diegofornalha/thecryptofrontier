@@ -44,7 +44,8 @@ const HomePage = () => {
             The Crypto Frontier
             </h1>
             <p className="text-xl text-indigo-100 max-w-xl mx-auto">
-              Explore o que existe de melhor no mundo cripto!
+              Explore o que existe de melhor no 
+               cripto!
             </p>
           </div>
         </div>

@@ -17,6 +17,9 @@ const nextConfig = {
         // Permitir importações de ESM em CJS
         esmExternals: 'loose'
     },
+    // Forçar o uso do Pages Router, desativando o App Router
+    appDir: false,
+    useFileSystemPublicRoutes: true,
     // Configuração de imagens para o Sanity
     images: {
         domains: ['cdn.sanity.io'],
