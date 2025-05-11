@@ -35,6 +35,9 @@ const config: StorybookConfig = {
         'process.browser': true,
         'process.version': JSON.stringify(process.version),
       },
+      css: {
+        postcss: path.resolve(__dirname, './postcss.config.js'),
+      },
       build: {
         commonjsOptions: {
           transformMixedEsModules: true,

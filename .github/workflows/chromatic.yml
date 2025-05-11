@@ -1,0 +1,67 @@
+name: 'Chromatic - Testes Visuais'
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - '.storybook/**'
+      - 'package.json'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - '.storybook/**'
+      - 'package.json'
+  # Permite execução manual a partir da aba Actions no GitHub
+  workflow_dispatch:
+
+jobs:
+  chromatic-deployment:
+    name: 'Publicar Storybook no Chromatic'
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Checkout do código
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Chromatic precisa do histórico completo
+      
+      # Setup do Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      # Instalar dependências
+      - name: Instalar dependências
+        run: npm ci
+      
+      # Publicar no Chromatic
+      - name: Publicar no Chromatic
+        uses: chromaui/action@v1
+        with:
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          exitZeroOnChanges: true  # Não falha o CI se houver alterações visuais
+          exitOnceUploaded: true   # Termina após o upload, para agilizar o CI
+          onlyChanged: true        # Testa apenas histórias que tenham mudado
+          skip: ${{ github.event_name == 'pull_request' && github.actor == 'dependabot[bot]' }}
+          
+      # Adiciona um comentário em PRs com o link para o Storybook publicado
+      - name: Adicionar comentário em PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { issue: { number: issue_number }, repo: { owner, repo } } = context;
+            const buildUrl = `https://682112af9250108fa51bec2a-gspkzoejsm.chromatic.com`;
+            
+            github.rest.issues.createComment({
+              issue_number,
+              owner,
+              repo,
+              body: `📚 **Storybook publicado!**\n\nVocê pode verificar as mudanças visuais em:\n[Chromatic Build](${buildUrl})`
+            }); 
