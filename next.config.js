@@ -67,6 +67,26 @@ const nextConfig = {
                     },
                 ],
             },
+            // Regras para pasta docker
+            // Redirecionar de /content/docker/... para /docker/...
+            {
+                source: '/content/docker/:path*',
+                destination: '/docker/:path*',
+                permanent: true,
+            },
+            // Redirecionar de /docker/... para /content/docker/... (para fins de compatibilidade interna)
+            {
+                source: '/docker/:path*',
+                destination: '/content/docker/:path*',
+                permanent: false,
+                has: [
+                    {
+                        type: 'header',
+                        key: 'x-nextjs-data',
+                        value: '1',
+                    },
+                ],
+            },
         ];
     },
     // Configuração de reescrita de URLs (alternativa ao redirecionamento)
@@ -76,6 +96,11 @@ const nextConfig = {
             {
                 source: '/mcpx/:path*',
                 destination: '/content/mcpx/:path*',
+            },
+            // Reescrever /docker/... para /content/docker/... (sem redirecionamento visível)
+            {
+                source: '/docker/:path*',
+                destination: '/content/docker/:path*',
             },
             // Adicionar reescrita para API Webhook do Sanity
             {

@@ -45,8 +45,24 @@ export function getStaticPaths() {
     
     console.log('Paths brutos:', JSON.stringify(paths, null, 2));
     
+    // Adicionando manualmente path para a página docker/docker-secrets-implementacao
+    paths.push('/docker/docker-secrets-implementacao');
+    paths.push('/content/docker/docker-secrets-implementacao');
+    
+    console.log('🔄 Paths após adicionar docker:', JSON.stringify(paths, null, 2));
+    
     // Mapeando os paths e tratando casos onde params pode ser undefined
     const adjustedPaths = paths.map(path => {
+        // Verificação de segurança - se path for null ou undefined, usar valor padrão
+        if (!path) {
+            console.log('⚠️ Path nulo ou indefinido encontrado');
+            return {
+                params: {
+                    slug: ['content']
+                }
+            };
+        }
+        
         // Se o path for uma string, converter para o formato correto
         if (typeof path === 'string') {
             // Remover o prefixo / se existir
@@ -93,7 +109,12 @@ export function getStaticPaths() {
     });
 
     console.log('Paths finais:', JSON.stringify(adjustedPaths, null, 2));
-    return { paths: adjustedPaths, fallback: false };
+    
+    // Usar fallback: true para permitir geração de páginas sob demanda
+    return { 
+        paths: adjustedPaths, 
+        fallback: 'blocking' 
+    };
 }
 
 export async function getStaticProps({ params }) {
@@ -113,6 +134,42 @@ export async function getStaticProps({ params }) {
             urlPath: p.__metadata?.urlPath
         }))
     });
+    
+    // HACK para Docker: Se a URL contém docker, verificar arquivo específico
+    if (urlPath.includes('/docker/')) {
+        console.log('🔧 URL contém /docker/, verificando página específica');
+        
+        // Verificar se temos um arquivo para este caminho
+        const pageFound = data.pages.find(page => {
+            // Tentativas de correspondência para diferentes padrões de URL
+            const slugToCheck = page.slug;
+            return (
+                (slugToCheck === urlPath) || 
+                (slugToCheck === urlPath.replace('/docker/', '/')) ||
+                (slugToCheck === 'docker/' + urlPath.split('/docker/')[1]) ||
+                (page.__metadata?.urlPath === urlPath) ||
+                (page.__metadata?.urlPath === '/content' + urlPath)
+            );
+        });
+        
+        if (pageFound) {
+            console.log('✅ Página Docker encontrada:', {
+                slug: pageFound.slug,
+                urlPath: pageFound.__metadata?.urlPath,
+                title: pageFound.title
+            });
+            
+            return {
+                props: {
+                    page: pageFound,
+                    site: data.props.site || {}
+                }
+            };
+        } else {
+            console.log('⚠️ Tentativa de busca direta para Docker falhou. URLs disponíveis:',
+                data.pages.map(p => p.__metadata?.urlPath || p.slug).filter(Boolean));
+        }
+    }
     
     // Se o path não começa com /content/, adicionar o prefixo
     if (!urlPath.startsWith('/content/')) {
