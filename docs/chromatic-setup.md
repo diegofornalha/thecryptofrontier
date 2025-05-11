@@ -1,98 +1,121 @@
 # Configuração do Chromatic para Testes Visuais
 
-Este documento descreve como o Chromatic foi configurado para testes visuais automatizados no projeto thecryptofrontier.
+Este documento descreve como configurar o Chromatic para testes visuais em nosso design system, conforme recomendado na Fase 5 do plano de migração para shadcn/ui.
 
 ## O que é o Chromatic?
 
-[Chromatic](https://www.chromatic.com/) é uma ferramenta para testes visuais e revisão de componentes de UI que se integra ao Storybook. Ele permite:
+O Chromatic é uma ferramenta para testes visuais automatizados integrada ao Storybook. Ele permite:
 
 - Capturar snapshots visuais de cada componente
-- Detectar alterações visuais de maneira automatizada
-- Revisar e aprovar alterações de UI
-- Documentar componentes publicamente
+- Detectar automaticamente alterações visuais
+- Revisar e aprovar mudanças através de uma interface web
+- Documentar e versionar componentes
 
-## Configuração Realizada
+## Requisitos
 
-Realizamos as seguintes configurações:
+- Conta no [Chromatic](https://www.chromatic.com/)
+- Projeto configurado com Storybook
+- Token de acesso ao projeto Chromatic
 
-1. **Instalação do pacote Chromatic**:
-   ```bash
-   npm install --save-dev chromatic
-   ```
+## Obtendo um Token do Projeto
 
-2. **Configuração do PostCSS para o Storybook**:
-   Criamos um arquivo `.storybook/postcss.config.js` específico para o Storybook, para evitar problemas com o PurgeCSS.
+1. Acesse [https://www.chromatic.com/start](https://www.chromatic.com/start)
+2. Faça login ou crie uma conta
+3. Crie um projeto (ou selecione um existente)
+4. Na página "Manage", encontre o token do projeto
+5. Copie o token para uso nos passos seguintes
 
-3. **Script Bash Personalizado**:
-   Criamos um script em `scripts/chromatic.sh` que facilita a publicação com diferentes opções.
+## Configuração Local
 
-4. **Configuração de CI/CD**:
-   Configuramos um workflow GitHub Actions em `.github/workflows/chromatic.yml` para publicação automática.
+### Método 1: Variável de Ambiente
 
-## Como Usar o Chromatic
-
-### Localmente
-
-Temos os seguintes comandos disponíveis no `package.json`:
+Execute o Chromatic fornecendo o token como variável de ambiente:
 
 ```bash
-# Publicação básica
-npm run chromatic
-
-# Usando o script personalizado
-npm run chromatic:script
-
-# Construir e publicar
-npm run chromatic:build
-
-# Publicar aceitando alterações automaticamente
-npm run chromatic:accept
-
-# Modo CI (sai com 0 e finaliza após upload)
-npm run chromatic:ci
+CHROMATIC_PROJECT_TOKEN=seu_token_aqui npx chromatic
 ```
 
-Para mais opções, execute:
+### Método 2: Script de Execução
+
+1. Edite o arquivo `scripts/run-chromatic.sh` e substitua o token pelo seu:
+
 ```bash
-./scripts/chromatic.sh --help
+#!/bin/bash
+CHROMATIC_PROJECT_TOKEN=seu_token_aqui npx chromatic --project-token=$CHROMATIC_PROJECT_TOKEN
 ```
 
-### Automação via GitHub Actions
+2. Execute o script:
 
-O workflow do GitHub Actions foi configurado para:
+```bash
+./scripts/run-chromatic.sh
+```
 
-1. Executar automaticamente quando:
-   - Há um push para a branch `main`
-   - Um pull request é aberto para a branch `main`
-   - Manualmente através da aba Actions no GitHub
+## Configuração no GitHub Actions
 
-2. Publicar no Chromatic com as seguintes configurações:
-   - Não falha o build em caso de alterações visuais (`exitZeroOnChanges`)
-   - Finaliza após o upload para agilizar o CI (`exitOnceUploaded`)
-   - Testa apenas histórias que foram alteradas (`onlyChanged`)
-   - Adiciona um comentário em PRs com o link para o Storybook publicado
+Para integrar o Chromatic ao seu CI/CD:
 
-## Segurança
+1. Adicione o token como segredo no GitHub:
+   - Vá para seu repositório > Settings > Secrets
+   - Adicione um novo segredo chamado `CHROMATIC_PROJECT_TOKEN`
+   - Cole o valor do token
 
-O token do projeto está configurado como um segredo no GitHub Actions (`CHROMATIC_PROJECT_TOKEN`).
+2. Use o script de configuração (opcional):
 
-## Processo de Revisão
+```bash
+./scripts/setup-chromatic.sh seu_token_aqui
+```
 
-Para revisar alterações visuais:
+3. Verifique se o workflow `.github/workflows/chromatic.yml` está configurado corretamente:
 
-1. Acesse o link do build no Chromatic fornecido nos comentários do PR ou nos logs do CI
-2. Compare as versões antes/depois de cada componente
-3. Aceite ou rejeite as alterações
-4. Adicione comentários específicos se necessário
+```yaml
+# Trecho relevante do arquivo
+- name: Publicar no Chromatic
+  uses: chromaui/action@v1
+  with:
+    projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+    exitZeroOnChanges: true
+    exitOnceUploaded: true
+    onlyChanged: true
+```
 
-## URL do Storybook Publicado
+## Verificação da Configuração
 
-Nosso Storybook está disponível publicamente em:
-https://682112af9250108fa51bec2a-gspkzoejsm.chromatic.com/
+Para verificar se a configuração está correta:
 
-## Melhores Práticas
+```bash
+npx chromatic --project-token=seu_token_aqui --dry-run
+```
 
-1. **Sempre revise as alterações visuais** - Não deixe alterações pendentes por muito tempo
-2. **Documente mudanças intencionais** - Use descrições claras em commits e PRs
-3. **Mantenha histórias atualizadas** - Crie ou atualize histórias para novos componentes e variantes
-4. **Use em conjunto com PR Reviews** - Refira-se aos builds do Chromatic durante as revisões de código 
+## Solução de Problemas
+
+### Erro: "Missing project token"
+
+Este erro ocorre quando o token do projeto não está configurado corretamente.
+
+**Solução:**
+- Verifique se o token está correto
+- Certifique-se de que a variável de ambiente está sendo lida corretamente
+- Tente fornecer o token diretamente via linha de comando
+
+### Erro: "No app with code found"
+
+Este erro indica que o token fornecido é inválido.
+
+**Solução:**
+- Verifique se o token foi copiado corretamente
+- Gere um novo token no site do Chromatic
+
+## Integração com a Fase 5 do Plano de Migração
+
+Os testes visuais são parte fundamental da estratégia de evolução e manutenção do design system, conforme detalhado na Fase 5. Eles garantem:
+
+1. **Consistência visual** ao longo do tempo
+2. **Detecção precoce** de regressões visuais
+3. **Documentação viva** dos componentes
+4. **Facilitação da revisão** de mudanças por equipes multidisciplinares
+
+## Recursos Adicionais
+
+- [Documentação oficial do Chromatic](https://www.chromatic.com/docs/)
+- [Integrando Chromatic e Storybook](https://storybook.js.org/docs/writing-tests/visual-testing)
+- [Melhores práticas para testes visuais](https://www.chromatic.com/docs/best-practices) 
