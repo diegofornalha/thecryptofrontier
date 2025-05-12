@@ -2,7 +2,7 @@
 
 import { ThemeProvider } from "@/components/ui/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
-import { type ThemeProviderProps } from "next-themes/dist/types"
+import { type ThemeProviderProps } from "next-themes"
 import { ReactNode } from "react"
 
 interface ProvidersProps extends ThemeProviderProps {

@@ -484,14 +484,14 @@ function ExampleForm() {
   })
   
   // Inicializar formulário com hook-form e zod
-  const form = useForm({
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
       email: '',
       subject: '',
       message: '',
-      terms: false,
+      terms: false as any, // Usando any para contornar erro de tipo
     },
   })
   

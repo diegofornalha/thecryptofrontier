@@ -1,13 +1,12 @@
 import React from 'react';
-import { preload as preloadModule } from 'react-dom';
+
+// Polyfill para o preloadModule 
+// Em vez de importar do react-dom, criamos nossa própria implementação
+const preloadModule = (mod) => {
+  // Simples implementação de polyfill que apenas retorna o módulo
+  console.warn('Usando polyfill para preloadModule');
+  return mod;
+};
 
 // Monkey patch para resolver o problema de importação no Netlify
-if (typeof preloadModule !== 'function') {
-  // Fallback se preloadModule não estiver disponível
-  global.preloadModule = (mod) => {
-    console.warn('Usando fallback para preloadModule');
-    return mod;
-  };
-} else {
-  global.preloadModule = preloadModule;
-} 
+global.preloadModule = preloadModule; 

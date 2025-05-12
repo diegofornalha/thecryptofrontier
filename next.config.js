@@ -10,13 +10,7 @@ const nextConfig = {
     },
     trailingSlash: true,
     reactStrictMode: true,
-    // Desativando o SWC para resolver possíveis problemas de compilação
-    swcMinify: false,
-    // Configuração adicional para lidar com erros de módulos
-    experimental: {
-        // Permitir importações de ESM em CJS
-        esmExternals: 'loose'
-    },
+
     // Adicionando webpack config para incluir o patch de preload
     webpack: (config, { isServer }) => {
         if (!isServer) {

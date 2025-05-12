@@ -1,9 +1,12 @@
 [build]
-  command = "npm run build && npm run index-content"
+  command = "npm run build"
   publish = ".next"
 
 [[plugins]]
-  package = "./netlify-plugin-preload-patch.js"
+  package = "@netlify/plugin-nextjs"
+
+[[plugins]]
+  package = "./netlify-plugins/preload-patch"
 
 [build.environment]
   # Variável de ambiente para indicar ao Next.js que estamos no ambiente Netlify

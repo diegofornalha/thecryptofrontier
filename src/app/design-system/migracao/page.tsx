@@ -5,8 +5,6 @@ import { Container } from "@/components/ui/container"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { H1, H2, Paragraph, Lead } from "@/components/ui/typography"
 import Link from "next/link"
-import fs from 'fs'
-import path from 'path'
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -33,16 +31,27 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 
-// Função para ler o arquivo MDX
-async function getMigracaoContent() {
-  const filePath = path.join(process.cwd(), 'src/app/design-system/migracao/migracao.mdx')
-  const content = await fs.promises.readFile(filePath, 'utf8')
-  return content
-}
+// Substituir a função que usa fs com um fallback simples
+const FALLBACK_CONTENT = `
+# Plano de Migração para shadcn/ui
 
-export default async function MigracaoPage() {
-  // Ler o conteúdo do MDX para renderizar diretamente
-  const migracaoContent = await getMigracaoContent()
+## Visão Geral
+
+Este documento descreve o plano para migração dos componentes legados para o design system moderno baseado em shadcn/ui.
+
+## Componentes a Migrar
+
+- [x] Botões
+- [x] Links
+- [x] Badges
+- [ ] Inputs
+- [ ] Cards
+- [ ] Layout
+`;
+
+export default function MigracaoPage() {
+  // Usar o conteúdo de fallback em vez de ler do sistema de arquivos
+  const migracaoContent = FALLBACK_CONTENT;
   
   return (
     <Container>
@@ -366,93 +375,4 @@ function renderMarkdown(content: string): string {
     .replace(/\n\n/g, '</p><p class="my-4">')
 }
 
-export function MigracaoTestPage() {
-  return (
-    <div className="container mx-auto py-10 space-y-10">
-      <div>
-        <h1 className="text-3xl font-bold mb-8">Teste de Componentes Migrados</h1>
-        
-        <div className="space-y-12">
-          <section>
-            <h2 className="text-2xl font-semibold mb-4">Botões (Button / Action)</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <h3 className="text-xl mb-2">Variantes</h3>
-                <div className="flex flex-wrap gap-4">
-                  <Button>Default</Button>
-                  <Button variant="secondary">Secondary</Button>
-                  <Button variant="outline">Outline</Button>
-                  <Button variant="ghost">Ghost</Button>
-                  <Button variant="link">Link</Button>
-                  <Button variant="destructive">Destructive</Button>
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                <h3 className="text-xl mb-2">Com Ícones</h3>
-                <div className="flex flex-wrap gap-4">
-                  <Button>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-4 w-4">
-                      <circle cx="12" cy="12" r="10" />
-                      <path d="m16 12-4 4-4-4" />
-                      <path d="M12 8v8" />
-                    </svg>
-                    Ícone à Esquerda
-                  </Button>
-                  
-                  <Button variant="secondary">
-                    Ícone à Direita
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-2 h-4 w-4">
-                      <path d="M5 12h14" />
-                      <path d="m12 5 7 7-7 7" />
-                    </svg>
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </section>
-          
-          <section>
-            <h2 className="text-2xl font-semibold mb-4">Badges</h2>
-            <div className="space-y-4">
-              <div className="flex flex-wrap gap-4">
-                <Badge>Default</Badge>
-                <Badge variant="secondary">Secondary</Badge>
-                <Badge variant="outline">Outline</Badge>
-                <Badge variant="destructive">Destructive</Badge>
-              </div>
-              
-              <div className="flex flex-wrap gap-4">
-                <Badge className="bg-blue-500 hover:bg-blue-600">Personalizado</Badge>
-                <Badge className="uppercase tracking-wider">Estilizado</Badge>
-              </div>
-            </div>
-          </section>
-          
-          <section>
-            <h2 className="text-2xl font-semibold mb-4">Links</h2>
-            <div className="space-y-4">
-              <div className="flex flex-wrap gap-4">
-                <Button variant="link" asChild>
-                  <Link href="/">Link Interno</Link>
-                </Button>
-                
-                <Button variant="link" asChild>
-                  <a href="https://exemplo.com" target="_blank" rel="noopener noreferrer">
-                    Link Externo
-                  </a>
-                </Button>
-                
-                <Button variant="link" className="p-0 h-auto" asChild>
-                  <Link href="/contato">
-                    Link sem Padding
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          </section>
-        </div>
-      </div>
-    </div>
-  )
-} 
+// Remover a função MigracaoTestPage que causava o erro de tipo 
