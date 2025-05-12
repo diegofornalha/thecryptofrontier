@@ -33,11 +33,6 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 
-export const metadata: Metadata = {
-  title: "Plano de Migração - Design System",
-  description: "Plano de migração para o shadcn/ui no The Crypto Frontier",
-}
-
 // Função para ler o arquivo MDX
 async function getMigracaoContent() {
   const filePath = path.join(process.cwd(), 'src/app/design-system/migracao/migracao.mdx')

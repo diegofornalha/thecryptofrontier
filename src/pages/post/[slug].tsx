@@ -255,9 +255,9 @@ export default function Post({ post, footerConfig, headerConfig }: PostProps) {
       </main>
       
       <ModernFooter 
-        title="The Crypto Frontier"
-        description="Seu portal de conteúdo sobre criptomoedas e blockchain"
-        socialLinks={[
+        title={footerConfig?.title || "The Crypto Frontier"}
+        description={footerConfig?.description || "Seu portal de conteúdo sobre criptomoedas e blockchain"}
+        socialLinks={footerConfig?.socialLinks || [
           { label: 'Twitter', icon: 'twitter', url: 'https://twitter.com/' },
           { label: 'Facebook', icon: 'facebook', url: 'https://facebook.com/' },
           { label: 'Instagram', icon: 'instagram', url: 'https://instagram.com/' }
@@ -268,12 +268,12 @@ export default function Post({ post, footerConfig, headerConfig }: PostProps) {
         }}
         secondaryLinks={{
           title: "Recursos",
-          links: [
+          links: footerConfig?.secondaryLinks || [
             { label: "Artigos", url: "/blog" },
             { label: "Tutoriais", url: "/blog" }
           ]
         }}
-        legalLinks={[
+        legalLinks={footerConfig?.legalLinks || [
           { label: "Termos de Uso", url: "#" },
           { label: "Política de Privacidade", url: "#" }
         ]}

@@ -1,4 +1,8 @@
-import { Button, Card, Input, Badge, Avatar } from '@/components/ui';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 export default function DesignAudit() {
   return (
@@ -98,11 +102,11 @@ export default function DesignAudit() {
             <h3 className="text-lg font-medium mb-2">Tema Claro</h3>
             <div className="p-4 bg-white rounded-lg flex gap-2">
               <Avatar>
-                <Avatar.Image src="https://github.com/shadcn.png" alt="@shadcn" />
-                <Avatar.Fallback>CN</Avatar.Fallback>
+                <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+                <AvatarFallback>CN</AvatarFallback>
               </Avatar>
               <Avatar>
-                <Avatar.Fallback>JD</Avatar.Fallback>
+                <AvatarFallback>JD</AvatarFallback>
               </Avatar>
             </div>
           </div>
@@ -110,11 +114,11 @@ export default function DesignAudit() {
             <h3 className="text-lg font-medium mb-2">Tema Escuro</h3>
             <div className="p-4 bg-gray-900 rounded-lg flex gap-2">
               <Avatar>
-                <Avatar.Image src="https://github.com/shadcn.png" alt="@shadcn" />
-                <Avatar.Fallback>CN</Avatar.Fallback>
+                <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+                <AvatarFallback>CN</AvatarFallback>
               </Avatar>
               <Avatar>
-                <Avatar.Fallback>JD</Avatar.Fallback>
+                <AvatarFallback>JD</AvatarFallback>
               </Avatar>
             </div>
           </div>

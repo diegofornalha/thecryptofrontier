@@ -99,13 +99,97 @@ const footer: SchemaTypeDefinition = {
   type: 'document',
   fields: [
     {
+      name: 'title',
+      title: 'Título',
+      type: 'string',
+      description: 'Título que aparece no topo do rodapé'
+    },
+    {
+      name: 'description',
+      title: 'Descrição',
+      type: 'string',
+      description: 'Breve descrição do site'
+    },
+    {
       name: 'copyrightText',
       title: 'Texto de Copyright',
       type: 'string',
     },
     {
       name: 'navLinks',
-      title: 'Links de Navegação',
+      title: 'Links de Navegação Primários',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            {
+              name: 'label',
+              title: 'Label',
+              type: 'string',
+            },
+            {
+              name: 'url',
+              title: 'URL',
+              type: 'string',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'socialLinks',
+      title: 'Links de Redes Sociais',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            {
+              name: 'label',
+              title: 'Label',
+              type: 'string',
+            },
+            {
+              name: 'icon',
+              title: 'Ícone',
+              type: 'string',
+              description: 'Nome do ícone (twitter, facebook, instagram, etc.)',
+            },
+            {
+              name: 'url',
+              title: 'URL',
+              type: 'string',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'secondaryLinks',
+      title: 'Links Secundários (Recursos)',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            {
+              name: 'label',
+              title: 'Label',
+              type: 'string',
+            },
+            {
+              name: 'url',
+              title: 'URL',
+              type: 'string',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'legalLinks',
+      title: 'Links Legais',
       type: 'array',
       of: [
         {
