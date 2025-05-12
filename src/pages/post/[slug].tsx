@@ -20,32 +20,97 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 // GROQ para pegar todos os slugs para geração estática
 const SLUGS_QUERY = `*[_type == "post" && defined(slug.current)][].slug.current`;
 
-// GROQ para pegar um post específico pelo slug
+// GROQ atualizado para o novo schema
 const POST_QUERY = `*[_type == "post" && slug.current == $slug][0]{
   _id,
   title,
   slug,
-  mainImage,
-  body,
+  mainImage {
+    ...,
+    alt,
+    caption,
+    attribution
+  },
+  content,
   publishedAt,
-  "author": author->{name, image, bio},
-  categories
+  excerpt,
+  "author": author->{
+    _id,
+    name,
+    image,
+    role,
+    slug,
+    bio
+  },
+  "categories": categories[]->{ 
+    _id,
+    title,
+    slug,
+    description
+  },
+  "tags": tags[]->{ 
+    _id,
+    title,
+    slug
+  },
+  seo,
+  cryptoMeta,
+  originalSource
 }`;
 
-// Interfaces
+// Interfaces atualizadas
 interface Post {
   _id: string;
   title: string;
   slug: { current: string };
-  mainImage?: any;
-  body: any;
+  mainImage?: any; // Usar any para evitar problemas com o tipo de imagem do Sanity
+  content: any[];
   publishedAt: string;
+  excerpt?: string;
   author?: { 
+    _id: string;
     name?: string;
     image?: any;
-    bio?: string;
+    role?: string;
+    slug?: { current: string };
+    bio?: any[];
   };
-  categories?: string[];
+  categories?: Array<{
+    _id: string;
+    title: string;
+    slug: { current: string };
+    description?: string;
+  }>;
+  tags?: Array<{
+    _id: string;
+    title: string;
+    slug: { current: string };
+  }>;
+  seo?: {
+    metaTitle?: string;
+    metaDescription?: string;
+    openGraphImage?: any;
+    keywords?: string[];
+    canonicalUrl?: string;
+  };
+  cryptoMeta?: {
+    coinName?: string;
+    coinSymbol?: string;
+    coinLogo?: any;
+    currentPrice?: number;
+    priceChange24h?: number;
+    marketCap?: number;
+    coingeckoId?: string;
+    links?: Array<{
+      title: string;
+      url: string;
+    }>;
+  };
+  originalSource?: {
+    url?: string;
+    title?: string;
+    site?: string;
+  };
 }
 
 interface PostProps {
@@ -74,7 +139,17 @@ const components = {
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-contain"
           />
+          {value.caption && (
+            <p className="text-sm text-center text-muted-foreground mt-2">{value.caption}</p>
+          )}
         </div>
+      );
+    },
+    code: ({ value }: any) => {
+      return (
+        <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm my-4">
+          <code>{value.code}</code>
+        </pre>
       );
     },
   },
@@ -82,6 +157,7 @@ const components = {
     h1: ({ children }: any) => <h1 className="text-3xl font-bold mt-12 mb-4">{children}</h1>,
     h2: ({ children }: any) => <h2 className="text-2xl font-bold mt-10 mb-4">{children}</h2>,
     h3: ({ children }: any) => <h3 className="text-xl font-bold mt-8 mb-4">{children}</h3>,
+    h4: ({ children }: any) => <h4 className="text-lg font-bold mt-6 mb-4">{children}</h4>,
     normal: ({ children }: any) => <p className="text-foreground mb-4 leading-relaxed">{children}</p>,
     blockquote: ({ children }: any) => (
       <blockquote className="border-l-4 border-primary pl-4 italic my-6">{children}</blockquote>
@@ -106,6 +182,8 @@ const components = {
     code: ({ children }: any) => (
       <code className="bg-muted px-2 py-1 rounded font-mono text-sm">{children}</code>
     ),
+    underline: ({ children }: any) => <span className="underline">{children}</span>,
+    'strike-through': ({ children }: any) => <span className="line-through">{children}</span>,
   },
   list: {
     bullet: ({ children }: any) => <ul className="list-disc ml-6 my-4 space-y-1">{children}</ul>,
@@ -124,6 +202,15 @@ const formatDate = (dateString: string) => {
     month: 'long',
     year: 'numeric'
   });
+};
+
+// Função para formatar preço em BRL
+const formatPrice = (price?: number) => {
+  if (!price) return '';
+  return new Intl.NumberFormat('pt-BR', { 
+    style: 'currency', 
+    currency: 'BRL' 
+  }).format(price);
 };
 
 // Componente de página do blog
@@ -150,29 +237,32 @@ export default function Post({ post, footerConfig, headerConfig }: PostProps) {
     );
   }
 
-  const getInitials = (name: string) => {
-    return name
-      ? name
-          .split(' ')
-          .map((part) => part[0])
-          .join('')
-          .toUpperCase()
-          .substring(0, 2)
-      : 'CF';
-  };
-
   // Verifica se o corpo do post está vazio e providencia um conteúdo padrão
-  const hasContent = post.body && post.body.length > 0;
+  const hasContent = post.content && post.content.length > 0;
+
+  // Usar dados de SEO
+  const metaTitle = post.seo?.metaTitle || post.title;
+  const metaDescription = post.seo?.metaDescription || post.excerpt || post.title;
+  const ogImage = post.seo?.openGraphImage 
+    ? urlForImage(post.seo.openGraphImage).url() 
+    : (post.mainImage ? urlForImage(post.mainImage).url() : undefined);
 
   return (
     <div className="min-h-screen bg-background">
       <Head>
-        <title>{`${post.title} - The Crypto Frontier`}</title>
-        <meta name="description" content={post.title} />
-        <meta property="og:title" content={post.title} />
+        <title>{`${metaTitle} - The Crypto Frontier`}</title>
+        <meta name="description" content={metaDescription} />
+        <meta property="og:title" content={metaTitle} />
+        <meta property="og:description" content={metaDescription} />
         <meta property="og:type" content="article" />
-        {post.mainImage && (
-          <meta property="og:image" content={urlForImage(post.mainImage).url()} />
+        {ogImage && (
+          <meta property="og:image" content={ogImage} />
+        )}
+        {post.seo?.keywords && post.seo.keywords.length > 0 && (
+          <meta name="keywords" content={post.seo.keywords.join(', ')} />
+        )}
+        {post.seo?.canonicalUrl && (
+          <link rel="canonical" href={post.seo.canonicalUrl} />
         )}
       </Head>
       
@@ -192,17 +282,21 @@ export default function Post({ post, footerConfig, headerConfig }: PostProps) {
           <article>
             <header className="mb-8">
               <div className="flex flex-wrap gap-2 mb-4">
-                {post.categories && post.categories.map((category, index) => (
+                {post.categories && post.categories.map((category) => (
                   <Badge 
-                    key={index} 
+                    key={category._id} 
                     variant="secondary"
                   >
-                    {category}
+                    {category.title}
                   </Badge>
                 ))}
               </div>
               
               <h1 className="text-4xl font-bold text-foreground mb-4">{post.title}</h1>
+              
+              {post.excerpt && (
+                <p className="text-lg text-muted-foreground mb-4">{post.excerpt}</p>
+              )}
               
               <div className="flex items-center mb-6">
                 {post.author && (
@@ -213,36 +307,81 @@ export default function Post({ post, footerConfig, headerConfig }: PostProps) {
                         alt={post.author.name || 'Autor'} 
                       />
                     ) : null}
-                    <AvatarFallback>{getInitials(post.author.name || 'Crypto Frontier')}</AvatarFallback>
+                    <AvatarFallback>{post.author.name ? post.author.name.substring(0, 2).toUpperCase() : 'CF'}</AvatarFallback>
                   </Avatar>
                 )}
                 
                 <div>
                   <div className="font-medium">{post.author?.name || 'Autor'}</div>
                   <div className="text-sm text-muted-foreground">
+                    {post.author?.role && (
+                      <span className="mr-2">{post.author.role}</span>
+                    )}
                     <time dateTime={post.publishedAt}>
                       {formatDate(post.publishedAt)}
                     </time>
                   </div>
                 </div>
               </div>
+              
+              {post.cryptoMeta && post.cryptoMeta.coinName && (
+                <div className="bg-muted p-4 rounded-lg mb-6">
+                  <h2 className="text-lg font-medium mb-2">Informações de {post.cryptoMeta.coinName}</h2>
+                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Símbolo</p>
+                      <p className="font-medium">{post.cryptoMeta.coinSymbol}</p>
+                    </div>
+                    {post.cryptoMeta.currentPrice !== undefined && (
+                      <div>
+                        <p className="text-sm text-muted-foreground">Preço</p>
+                        <p className="font-medium">{formatPrice(post.cryptoMeta.currentPrice)}</p>
+                      </div>
+                    )}
+                    {post.cryptoMeta.priceChange24h !== undefined && (
+                      <div>
+                        <p className="text-sm text-muted-foreground">Variação 24h</p>
+                        <p className={`font-medium ${post.cryptoMeta.priceChange24h > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                          {post.cryptoMeta.priceChange24h > 0 ? '+' : ''}{post.cryptoMeta.priceChange24h.toFixed(2)}%
+                        </p>
+                      </div>
+                    )}
+                    {post.cryptoMeta.marketCap && (
+                      <div>
+                        <p className="text-sm text-muted-foreground">Market Cap</p>
+                        <p className="font-medium">{formatPrice(post.cryptoMeta.marketCap)}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </header>
             
             {post.mainImage && (
               <div className="relative h-96 mb-8 rounded-lg overflow-hidden">
                 <Image
                   src={urlForImage(post.mainImage).url()}
-                  alt={post.mainImage.alt || post.title}
+                  alt={(post.mainImage.alt as string) || post.title}
                   fill
                   sizes="(max-width: 768px) 100vw, 800px"
                   className="object-cover"
                 />
+                {post.mainImage.caption && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white p-2 text-sm">
+                    {post.mainImage.caption}
+                    {post.mainImage.attribution && (
+                      <span className="ml-1 text-gray-300">
+                        (Crédito: {post.mainImage.attribution})
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             )}
             
             <div className="prose prose-lg max-w-none dark:prose-invert">
               {hasContent ? (
-                <PortableText value={post.body} components={components} />
+                <PortableText value={post.content} components={components} />
               ) : (
                 <div className="text-center py-8">
                   <p className="text-muted-foreground mb-4">O conteúdo deste post ainda está sendo elaborado.</p>
@@ -250,6 +389,32 @@ export default function Post({ post, footerConfig, headerConfig }: PostProps) {
                 </div>
               )}
             </div>
+            
+            {post.originalSource && post.originalSource.url && (
+              <div className="mt-8 pt-4 border-t border-border">
+                <p className="text-sm text-muted-foreground">
+                  Fonte original: {' '}
+                  <a 
+                    href={post.originalSource.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    {post.originalSource.title || post.originalSource.site || post.originalSource.url}
+                  </a>
+                </p>
+              </div>
+            )}
+            
+            {post.tags && post.tags.length > 0 && (
+              <div className="mt-8 flex flex-wrap gap-2">
+                {post.tags.map(tag => (
+                  <Badge key={tag._id} variant="outline">
+                    #{tag.title}
+                  </Badge>
+                ))}
+              </div>
+            )}
           </article>
         </Card>
       </main>
@@ -264,7 +429,11 @@ export default function Post({ post, footerConfig, headerConfig }: PostProps) {
         ]}
         primaryLinks={{
           title: "Navegação",
-          links: navLinks
+          links: headerConfig?.navLinks || [
+            { label: "Home", url: "/" },
+            { label: "Blog", url: "/blog" },
+            { label: "Studio", url: "/studio-redirect" }
+          ]
         }}
         secondaryLinks={{
           title: "Recursos",

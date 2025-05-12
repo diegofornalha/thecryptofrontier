@@ -1,0 +1,21 @@
+{
+  "name": "blog-automacao",
+  "version": "1.0.0",
+  "description": "Automação de posts de blog sobre criptomoedas",
+  "main": "main.py",
+  "scripts": {
+    "start": "python main.py",
+    "monitor": "python main.py --loop 60",
+    "padronizar": "node criar_post_padronizado.js",
+    "publicar": "node publicar_posts_markdown.js",
+    "indexar": "node scripts/indexar-sanity-para-algolia.js",
+    "fluxo-completo": "./executar_fluxo_completo.sh"
+  },
+  "dependencies": {
+    "@sanity/client": "^6.15.1",
+    "dotenv": "^16.4.5",
+    "gray-matter": "^4.0.3",
+    "jsdom": "^24.0.0",
+    "marked": "^12.0.0"
+  }
+} 

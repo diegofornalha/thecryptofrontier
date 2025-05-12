@@ -1,289 +1,388 @@
-// Importar configuração do Sanity
-const sanityConfig = require('./sanity.config');
+// Importar bibliotecas necessárias
 const fs = require('fs');
 const path = require('path');
 const matter = require('gray-matter');
-const { v4: uuidv4 } = require('uuid');
+const { marked } = require('marked');
 const { createClient } = require('@sanity/client');
+const colors = require('./utils/colors');
+const slugify = require('./utils/slugify');
 
 // Diretórios de trabalho
-const POSTS_TRADUZIDOS_DIR = path.join(__dirname, 'posts_traduzidos');
-const POSTS_PUBLICADOS_DIR = path.join(__dirname, 'posts_publicados');
+const DIR_POSTS_TRADUZIDOS = './posts_traduzidos';
+const DIR_POSTS_PUBLICADOS = './posts_publicados';
 
-// Cores para terminal
-const colors = {
-  reset: '\x1b[0m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  red: '\x1b[31m',
-  blue: '\x1b[34m',
-  magenta: '\x1b[35m',
-  cyan: '\x1b[36m',
-  bold: '\x1b[1m'
+// Categorias padrão para criptomoedas
+const CATEGORIAS_CRIPTO = {
+  bitcoin: 'Bitcoin',
+  ethereum: 'Ethereum', 
+  altcoins: 'Altcoins',
+  defi: 'DeFi',
+  nft: 'NFTs',
+  metaverso: 'Metaverso',
+  regulacao: 'Regulação',
+  blockchain: 'Blockchain',
+  mercado: 'Mercado',
+  tecnologia: 'Tecnologia'
 };
 
-// Imprimir cabeçalho
-console.log(`${colors.magenta}${colors.bold}===========================================${colors.reset}`);
+// Inicialização
 console.log(`${colors.magenta}${colors.bold}    PUBLICAÇÃO DE POSTS NO SANITY CMS     ${colors.reset}`);
-console.log(`${colors.magenta}${colors.bold}===========================================${colors.reset}\n`);
+console.log(`${colors.blue}---------------------------------------------${colors.reset}`);
 
-// Verificar e criar diretórios necessários
-if (!fs.existsSync(POSTS_PUBLICADOS_DIR)) {
-  fs.mkdirSync(POSTS_PUBLICADOS_DIR, { recursive: true });
-  console.log(`${colors.green}✓ Diretório de posts publicados criado${colors.reset}`);
+// Verificar diretórios
+if (!fs.existsSync(DIR_POSTS_PUBLICADOS)) {
+  fs.mkdirSync(DIR_POSTS_PUBLICADOS, { recursive: true });
+  console.log(`${colors.yellow}[AVISO] Diretório '${DIR_POSTS_PUBLICADOS}' não existia e foi criado.${colors.reset}`);
 }
 
-// Mostrar informações da configuração
+// Configuração direta do cliente Sanity
+const config = {
+  projectId: 'brby2yrg',
+  dataset: 'production',
+  apiVersion: '2023-05-03',
+  token: 'sk0MzzutKkZoELcQnRSwhz7hqSMXlwMuQCwna9Mp90nqUU1OLb0WdouiGhXa1xWdWcNPFlLoCkrxCuq8xNVeDzJPKQOtlh22xjLsNduo7WIR138cCAiZe40cwque00dbHAx0ylF0ntLM5GinO8GKX69aF5JZw7Q5Bpq1GPGRihGhbM0cNGAm',
+  useCdn: false
+};
+
 console.log(`${colors.blue}[INFO] Configuração do Sanity:${colors.reset}`);
-console.log(`${colors.blue}  - Project ID: ${sanityConfig.projectId}${colors.reset}`);
-console.log(`${colors.blue}  - Dataset: ${sanityConfig.dataset}${colors.reset}`);
-console.log(`${colors.blue}  - API Version: ${sanityConfig.apiVersion}${colors.reset}`);
+console.log(`${colors.blue}  - Project ID: ${config.projectId}${colors.reset}`);
+console.log(`${colors.blue}  - Dataset: ${config.dataset}${colors.reset}`);
+console.log(`${colors.blue}  - API Version: ${config.apiVersion}${colors.reset}`);
 
 // Configuração do cliente Sanity
-const sanityClient = createClient({
-  projectId: sanityConfig.projectId,
-  dataset: sanityConfig.dataset,
-  apiVersion: sanityConfig.apiVersion,
-  useCdn: false,
-  token: sanityConfig.token
-});
+const sanityClient = createClient(config);
 
-// Função para criar um slug a partir do título
-function criarSlug(titulo) {
-  return titulo
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // Remove acentos
-    .replace(/[^\w\s-]/g, '') // Remove caracteres especiais
-    .replace(/\s+/g, '-') // Substitui espaços por hífens
-    .replace(/--+/g, '-') // Remove hífens duplicados
-    .substring(0, 80); // Limita o tamanho
+// Converte HTML para Portable Text do Sanity
+function htmlToPortableText(html) {
+  return [
+    {
+      _type: 'block',
+      children: [
+        {
+          _type: 'span',
+          text: html
+        }
+      ]
+    }
+  ];
 }
 
-// Processa conteúdo HTML para formato Portable Text do Sanity
-function processarConteudoHtml(htmlContent) {
-  // Esta é uma versão simplificada que trata o HTML como um único bloco
-  // Em um ambiente de produção, você deveria usar um parser HTML adequado
-  const blocks = [];
+// Extrai tags relevantes do conteúdo do post
+function extrairTags(conteudo, titulo) {
+  const tagsComuns = [
+    'bitcoin', 'ethereum', 'criptomoedas', 'blockchain', 'defi', 
+    'nft', 'altcoins', 'investimentos', 'regulação', 'mercado'
+  ];
   
-  // Criar um bloco de texto para o conteúdo HTML
-  blocks.push({
-    _type: 'block',
-    _key: uuidv4().replace(/-/g, ''),
-    style: 'normal',
-    children: [
-      {
-        _type: 'span',
-        _key: uuidv4().replace(/-/g, ''),
-        text: htmlContent,
-        marks: []
-      }
-    ],
-    markDefs: []
+  const palavrasChave = new Set();
+  
+  // Adiciona palavras do título
+  titulo.toLowerCase().split(/\s+/).forEach(palavra => {
+    if (palavra.length > 3 && tagsComuns.includes(palavra)) {
+      palavrasChave.add(palavra);
+    }
   });
   
-  return blocks;
+  // Procura tags no conteúdo
+  tagsComuns.forEach(tag => {
+    if (conteudo.toLowerCase().includes(tag)) {
+      palavrasChave.add(tag);
+    }
+  });
+  
+  return Array.from(palavrasChave);
+}
+
+// Determina a categoria principal com base no conteúdo
+async function determinarCategoria(conteudo, titulo) {
+  const conteudoCompleto = (titulo + ' ' + conteudo).toLowerCase();
+  let categoriaPrincipal = 'mercado'; // Padrão
+  
+  const PALAVRAS_CHAVE = {
+    bitcoin: ['bitcoin', 'btc', 'satoshi'],
+    ethereum: ['ethereum', 'eth', 'vitalik', 'buterin', 'ether'],
+    defi: ['defi', 'finanças descentralizadas', 'yield farming', 'staking', 'empréstimo crypto'],
+    nft: ['nft', 'token não fungível', 'colecionáveis digitais', 'arte digital'],
+    regulacao: ['regulação', 'regulamentação', 'sec', 'cvm', 'banco central', 'legislação'],
+    blockchain: ['blockchain', 'consenso', 'descentralização', 'smart contract'],
+    altcoins: ['altcoin', 'cardano', 'solana', 'polkadot', 'dogecoin', 'shiba'],
+    metaverso: ['metaverso', 'realidade virtual', 'sandbox', 'descentraland', 'mundos virtuais'],
+    tecnologia: ['tecnologia', 'desenvolvimento', 'atualização', 'fork', 'protocolo']
+  };
+  
+  // Pontuação para cada categoria
+  const pontuacao = {};
+  Object.keys(PALAVRAS_CHAVE).forEach(categoria => {
+    pontuacao[categoria] = 0;
+    PALAVRAS_CHAVE[categoria].forEach(palavraChave => {
+      const regex = new RegExp(palavraChave, 'gi');
+      const ocorrencias = (conteudoCompleto.match(regex) || []).length;
+      pontuacao[categoria] += ocorrencias;
+    });
+  });
+  
+  // Encontra a categoria com maior pontuação
+  let maiorPontuacao = 0;
+  Object.keys(pontuacao).forEach(categoria => {
+    if (pontuacao[categoria] > maiorPontuacao) {
+      maiorPontuacao = pontuacao[categoria];
+      categoriaPrincipal = categoria;
+    }
+  });
+  
+  // Busca o ID da categoria no Sanity
+  try {
+    const nomeCategoria = CATEGORIAS_CRIPTO[categoriaPrincipal];
+    let categoria = await sanityClient.fetch(
+      `*[_type == "category" && title == $title][0]`,
+      { title: nomeCategoria }
+    );
+    
+    // Se a categoria não existir, cria-a
+    if (!categoria) {
+      categoria = await sanityClient.create({
+        _type: 'category',
+        title: nomeCategoria,
+        slug: {
+          _type: 'slug',
+          current: slugify(nomeCategoria)
+        }
+      });
+      console.log(`${colors.green}✓ Categoria '${nomeCategoria}' criada no Sanity${colors.reset}`);
+    }
+    
+    return categoria._id;
+  } catch (erro) {
+    console.error(`${colors.red}✗ Erro ao buscar/criar categoria: ${erro.message}${colors.reset}`);
+    return null;
+  }
+}
+
+// Criar ou obter IDs para tags
+async function processarTags(tags) {
+  const tagsIds = [];
+  
+  for (const tagNome of tags) {
+    try {
+      let tag = await sanityClient.fetch(
+        `*[_type == "tag" && title == $title][0]`,
+        { title: tagNome }
+      );
+      
+      if (!tag) {
+        tag = await sanityClient.create({
+          _type: 'tag',
+          title: tagNome,
+          slug: {
+            _type: 'slug',
+            current: slugify(tagNome)
+          }
+        });
+        console.log(`${colors.green}✓ Tag '${tagNome}' criada no Sanity${colors.reset}`);
+      }
+      
+      tagsIds.push({
+        _type: 'reference',
+        _ref: tag._id
+      });
+    } catch (erro) {
+      console.error(`${colors.red}✗ Erro ao processar tag '${tagNome}': ${erro.message}${colors.reset}`);
+    }
+  }
+  
+  return tagsIds;
+}
+
+// Obter ou criar um autor padrão
+async function obterAutorPadrao() {
+  try {
+    let autor = await sanityClient.fetch(
+      `*[_type == "author" && name == $name][0]`,
+      { name: "The Crypto Frontier" }
+    );
+    
+    if (!autor) {
+      autor = await sanityClient.create({
+        _type: 'author',
+        name: "The Crypto Frontier",
+        slug: {
+          _type: 'slug',
+          current: "the-crypto-frontier"
+        },
+        bio: [{
+          _type: 'block',
+          children: [{
+            _type: 'span',
+            text: "Portal de notícias sobre criptomoedas e blockchain."
+          }]
+        }]
+      });
+      console.log(`${colors.green}✓ Autor padrão criado no Sanity${colors.reset}`);
+    }
+    
+    return autor._id;
+  } catch (erro) {
+    console.error(`${colors.red}✗ Erro ao obter/criar autor padrão: ${erro.message}${colors.reset}`);
+    return null;
+  }
 }
 
 // Função para publicar um post no Sanity
-async function publicarPost(arquivoMarkdown) {
-  console.log(`\n${colors.blue}[INFO] Processando: ${arquivoMarkdown}${colors.reset}`);
-  
+async function publicarPost(arquivo) {
   try {
-    const caminhoArquivo = path.join(POSTS_TRADUZIDOS_DIR, arquivoMarkdown);
-    
-    // Ler conteúdo do arquivo
+    const caminhoArquivo = path.join(DIR_POSTS_TRADUZIDOS, arquivo);
     const conteudoArquivo = fs.readFileSync(caminhoArquivo, 'utf8');
     
-    // Analisar o front matter
+    // Parsear o frontmatter do arquivo markdown
     const { data, content } = matter(conteudoArquivo);
     
-    // Verificar título
+    // Converter o conteúdo de markdown para HTML
+    const htmlContent = marked(content);
+    
+    // Verificar dados mínimos necessários
     if (!data.title) {
-      console.error(`${colors.red}✗ Erro: Arquivo sem título no front matter${colors.reset}`);
-      return false;
+      throw new Error("Título não encontrado no frontmatter");
     }
     
-    // Criar slug para o post
-    const slug = criarSlug(data.title);
+    // Tratar os dados
+    const slug = data.slug || slugify(data.title);
+    const dataPublicacao = data.date ? new Date(data.date) : new Date();
+    const imagemPrincipal = data.image || data.featuredImage || data.thumbnail;
     
-    // Extrair categorias (anteriormente tags)
-    const categorias = Array.isArray(data.tags) ? data.tags : (
-      typeof data.tags === 'string' ? data.tags.split(',').map(tag => tag.trim()) : []
-    );
+    // Obter autor padrão
+    const autorId = await obterAutorPadrao();
     
-    // Criar um resumo a partir do conteúdo
-    let resumo = '';
-    try {
-      // Tenta extrair o primeiro parágrafo sem tags HTML
-      const textoSemHTML = content.replace(/<\/?[^>]+(>|$)/g, " ");
-      resumo = textoSemHTML.substring(0, 200).trim() + '...';
-    } catch (e) {
-      resumo = `${data.title} - Artigo sobre criptomoedas`;
-    }
-    
-    // Gerar ID único
-    const docId = `post-${uuidv4().replace(/-/g, '')}`;
-    
-    // Converter o conteúdo HTML para blocos Portable Text
-    const blocosConteudo = processarConteudoHtml(content);
-    
-    // Informação do autor (usando ID existente no Sanity)
-    const autorRef = {
-      _type: 'reference',
-      _ref: 'ca38a3d5-cba1-47a0-aa29-4af17a15e17c' // Alexandre Bianchi
-    };
+    // Extrair tags e determinar categoria
+    const tags = extrairTags(content, data.title);
+    const categoriaId = await determinarCategoria(content, data.title);
+    const tagsIds = await processarTags(tags);
     
     // Preparar documento para Sanity de acordo com o schema
     const documento = {
       _type: 'post',
-      _id: docId,
       title: data.title,
       slug: {
         _type: 'slug',
         current: slug
       },
-      author: autorRef,
-      publishedAt: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
-      excerpt: resumo,
-      content: blocosConteudo  // Agora usando o array de blocos
+      publishedAt: dataPublicacao.toISOString(),
+      excerpt: data.excerpt || content.substring(0, 300).replace(/[#*]/g, '') + '...',
+      body: htmlToPortableText(htmlContent),
+      author: autorId ? {
+        _type: 'reference',
+        _ref: autorId
+      } : undefined,
+      categories: categoriaId ? [{
+        _type: 'reference',
+        _ref: categoriaId
+      }] : [],
+      tags: tagsIds,
+      seo: {
+        metaTitle: data.title,
+        metaDescription: data.excerpt || content.substring(0, 160).replace(/[#*]/g, '') + '...',
+        keywords: tags
+      },
+      originalSource: {
+        url: data.original_link || "",
+        name: data.source || "",
+        publishedAt: data.date || new Date().toISOString()
+      }
     };
     
-    // Adicionar tags como array de strings simples
-    if (categorias && categorias.length > 0) {
-      documento.tags = categorias;
-    }
-    
-    // Tentar adicionar referência para imagem principal se disponível
-    if (data.image) {
+    // Se tiver imagem, adicionar
+    if (imagemPrincipal) {
       documento.mainImage = {
-        _type: 'image',
+        _type: 'mainImage',
+        alt: data.title,
         asset: {
           _type: 'reference',
-          _ref: data.image
+          _ref: imagemPrincipal.startsWith('image-') ? imagemPrincipal : undefined
         }
       };
     }
     
-    // Criar o post no Sanity
-    console.log(`${colors.blue}[INFO] Enviando para o Sanity: "${data.title}"${colors.reset}`);
+    // Publicar no Sanity
+    console.log(`${colors.blue}[INFO] Publicando post: ${data.title}${colors.reset}`);
     
-    try {
-      // Verificar se já existe um post com este slug
-      const postsExistentes = await sanityClient.fetch(
-        `*[_type == "post" && slug.current == $slug][0]`,
-        { slug }
-      );
-      
-      let resultado;
-      
-      if (postsExistentes) {
-        console.log(`${colors.yellow}⚠ Post com slug "${slug}" já existe. Atualizando...${colors.reset}`);
-        resultado = await sanityClient.patch(postsExistentes._id)
-          .set(documento)
-          .commit();
-      } else {
-        resultado = await sanityClient.create(documento);
-      }
-      
-      console.log(`${colors.green}✓ Post publicado com sucesso no Sanity!${colors.reset}`);
-      console.log(`${colors.green}  ID: ${resultado._id}${colors.reset}`);
-      console.log(`${colors.green}  Slug: ${slug}${colors.reset}`);
-      
-      // Mover o arquivo para pasta de publicados
-      const arquivoDestino = path.join(POSTS_PUBLICADOS_DIR, 
-        arquivoMarkdown.replace('traduzido_', 'publicado_'));
-      
-      fs.renameSync(caminhoArquivo, arquivoDestino);
-      console.log(`${colors.green}✓ Arquivo movido para: ${path.basename(arquivoDestino)}${colors.reset}`);
-      
-      return {
-        id: resultado._id,
-        title: data.title,
-        slug: slug
-      };
-    } catch (erroSanity) {
-      console.error(`${colors.red}✗ Erro de comunicação com Sanity: ${erroSanity.message}${colors.reset}`);
-      return false;
-    }
+    const resultado = await sanityClient.create(documento);
+    
+    console.log(`${colors.green}✓ Post publicado com sucesso! ID: ${resultado._id}${colors.reset}`);
+    
+    // Mover arquivo para a pasta de publicados
+    const arquivoPublicado = path.join(DIR_POSTS_PUBLICADOS, arquivo.replace("traduzido_", "publicado_"));
+    
+    // Atualizar o frontmatter
+    data.status = "publicado";
+    data.published_date = new Date().toISOString();
+    data.sanity_id = resultado._id;
+    
+    // Gravar o arquivo atualizado
+    fs.writeFileSync(
+      arquivoPublicado,
+      matter.stringify(content, data),
+      'utf8'
+    );
+    
+    // Remover o arquivo da pasta de traduzidos
+    fs.unlinkSync(caminhoArquivo);
+    
+    console.log(`${colors.green}✓ Arquivo movido para: ${arquivoPublicado}${colors.reset}`);
+    
+    return resultado._id;
   } catch (erro) {
-    console.error(`${colors.red}✗ Erro ao processar arquivo: ${erro.message}${colors.reset}`);
-    return false;
+    console.error(`${colors.red}✗ Erro ao publicar post '${arquivo}': ${erro.message}${colors.reset}`);
+    console.error(erro.stack);
+    return null;
   }
 }
 
-// Função principal para processar todos os arquivos
-async function processarTodosArquivos() {
-  try {
-    // Verificar se diretório existe
-    if (!fs.existsSync(POSTS_TRADUZIDOS_DIR)) {
-      console.log(`${colors.yellow}⚠ Diretório de posts traduzidos não encontrado: ${POSTS_TRADUZIDOS_DIR}${colors.reset}`);
-      return [];
-    }
-    
-    // Listar arquivos markdown na pasta de traduzidos
-    const arquivos = fs.readdirSync(POSTS_TRADUZIDOS_DIR)
-      .filter(arquivo => arquivo.endsWith('.md'))
-      .sort((a, b) => a.localeCompare(b));
-    
-    if (arquivos.length === 0) {
-      console.log(`${colors.yellow}⚠ Nenhum arquivo encontrado para publicar em: ${POSTS_TRADUZIDOS_DIR}${colors.reset}`);
-      return [];
-    }
-    
-    console.log(`${colors.blue}[INFO] Encontrados ${arquivos.length} arquivos para processar${colors.reset}`);
-    
-    const sucessos = [];
-    const falhas = [];
-    
-    // Processar cada arquivo
-    for (const arquivo of arquivos) {
-      const resultado = await publicarPost(arquivo);
-      if (resultado) {
-        sucessos.push(resultado);
-      } else {
-        falhas.push(arquivo);
-      }
-    }
-    
-    // Resumo
-    console.log(`\n${colors.magenta}${colors.bold}=== RESUMO ===${colors.reset}`);
-    console.log(`${colors.blue}Total de arquivos: ${arquivos.length}${colors.reset}`);
-    console.log(`${colors.green}Posts publicados: ${sucessos.length}${colors.reset}`);
-    
-    if (falhas.length > 0) {
-      console.log(`${colors.red}Falhas: ${falhas.length}${colors.reset}`);
-      console.log(`${colors.red}Arquivos com erro:${colors.reset}`);
-      falhas.forEach(arquivo => {
-        console.log(`${colors.red}  - ${arquivo}${colors.reset}`);
-      });
-    } else {
-      console.log(`${colors.green}Nenhuma falha! Todos os arquivos foram processados.${colors.reset}`);
-    }
-    
-    return sucessos;
-  } catch (erro) {
-    console.error(`${colors.red}✗ Erro geral: ${erro.message}${colors.reset}`);
-    return [];
-  }
-}
-
-// Executar
-(async () => {
+// Função principal
+async function executar() {
   console.log(`${colors.blue}[INFO] Iniciando publicação de posts no Sanity...${colors.reset}`);
   
+  // Verificar arquivos markdown na pasta
+  let arquivos;
   try {
-    const resultados = await processarTodosArquivos();
-    
-    if (resultados.length > 0) {
-      console.log(`\n${colors.green}${colors.bold}Posts publicados com sucesso:${colors.reset}`);
-      resultados.forEach((post, index) => {
-        console.log(`${colors.green}${index + 1}. "${post.title}" (ID: ${post.id})${colors.reset}`);
-      });
-    }
-    console.log(`\n${colors.magenta}${colors.bold}Processo concluído!${colors.reset}`);
+    arquivos = fs.readdirSync(DIR_POSTS_TRADUZIDOS);
+    arquivos = arquivos.filter(arquivo => arquivo.endsWith('.md'));
   } catch (erro) {
-    console.error(`${colors.red}✗ Erro fatal: ${erro.message}${colors.reset}`);
-    process.exit(1);
+    console.error(`${colors.red}✗ Erro ao ler diretório: ${erro.message}${colors.reset}`);
+    arquivos = [];
   }
-})(); 
+  
+  if (arquivos.length === 0) {
+    console.log(`${colors.yellow}[AVISO] Nenhum arquivo markdown encontrado em '${DIR_POSTS_TRADUZIDOS}'${colors.reset}`);
+    return;
+  }
+  
+  console.log(`${colors.blue}[INFO] Encontrados ${arquivos.length} arquivos para publicar:${colors.reset}`);
+  arquivos.forEach((arquivo, i) => {
+    console.log(`${colors.blue}  ${i+1}. ${arquivo}${colors.reset}`);
+  });
+  
+  // Publicar cada arquivo
+  let sucesso = 0;
+  let falha = 0;
+  
+  for (const arquivo of arquivos) {
+    const resultado = await publicarPost(arquivo);
+    
+    if (resultado) {
+      sucesso++;
+    } else {
+      falha++;
+    }
+  }
+  
+  // Resumo
+  console.log(`${colors.blue}---------------------------------------------${colors.reset}`);
+  console.log(`${colors.blue}[RESUMO] Processo de publicação finalizado:${colors.reset}`);
+  console.log(`${colors.green}  ✓ ${sucesso} posts publicados com sucesso${colors.reset}`);
+  
+  if (falha > 0) {
+    console.log(`${colors.red}  ✗ ${falha} posts com erro na publicação${colors.reset}`);
+  }
+}
+
+// Executar função principal
+executar(); 
