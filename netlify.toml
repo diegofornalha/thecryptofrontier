@@ -1,3 +1,12 @@
 [build]
   command = "npm run build && npm run index-content"
   publish = ".next"
+
+[[plugins]]
+  package = "./netlify-plugin-preload-patch.js"
+
+[build.environment]
+  # Variável de ambiente para indicar ao Next.js que estamos no ambiente Netlify
+  NETLIFY_BUILD = "true"
+  # Use Node 18
+  NODE_VERSION = "18"

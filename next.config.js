@@ -17,6 +17,22 @@ const nextConfig = {
         // Permitir importações de ESM em CJS
         esmExternals: 'loose'
     },
+    // Adicionando webpack config para incluir o patch de preload
+    webpack: (config, { isServer }) => {
+        if (!isServer) {
+            // Adicionando nosso patch como entry point
+            const originalEntry = config.entry;
+            config.entry = async () => {
+                const entries = await originalEntry();
+                // Adicionando nosso patch antes de qualquer outro script
+                if (entries['main.js']) {
+                    entries['main.js'].unshift('./preload-patch.js');
+                }
+                return entries;
+            };
+        }
+        return config;
+    },
     // Forçar o uso do Pages Router, desativando o App Router
     useFileSystemPublicRoutes: true,
     // Configuração de imagens para o Sanity
