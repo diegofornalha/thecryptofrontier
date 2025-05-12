@@ -3,7 +3,9 @@ import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import Link from 'next/link';
 import ModernFooter from '../components/sections/ModernFooter';
+import ModernHeader from '../components/sections/ModernHeader';
 import { getFooterConfig } from '../lib/getFooterConfig';
+import { getHeaderConfig } from '../lib/getHeaderConfig';
 
 // Importação dinâmica do SearchComponent para evitar erros de SSR
 const SearchComponent = dynamic(
@@ -11,7 +13,7 @@ const SearchComponent = dynamic(
   { ssr: false }
 );
 
-const HomePage = ({ footerConfig }) => {
+const HomePage = ({ footerConfig, headerConfig }) => {
   // Obter os links de navegação do Sanity ou usar fallback
   const navLinks = footerConfig?.navLinks?.length > 0 
     ? footerConfig.navLinks 
@@ -29,28 +31,14 @@ const HomePage = ({ footerConfig }) => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
       
-      <header className="bg-gradient-to-r from-indigo-600 to-blue-500 text-white py-20">
+      <ModernHeader 
+        title={headerConfig?.title || "The Crypto Frontier"} 
+        navLinks={headerConfig?.navLinks || navLinks} 
+      />
+      
+      <div className="bg-gradient-to-r from-indigo-600 to-blue-500 text-white py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <nav className="mb-6">
-              <ul className="flex justify-center space-x-6">
-                <li>
-                  <Link href="/" className="text-white hover:text-indigo-200 font-medium">
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/blog" className="text-white hover:text-indigo-200 font-medium">
-                    Blog
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/studio-redirect" className="text-white hover:text-indigo-200 font-medium">
-                    Studio
-                  </Link>
-                </li>
-              </ul>
-            </nav>
             <h1 className="text-5xl font-extrabold mb-4">
             The Crypto Frontier
             </h1>
@@ -60,7 +48,7 @@ const HomePage = ({ footerConfig }) => {
             </p>
           </div>
         </div>
-      </header>
+      </div>
       
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-white shadow-lg rounded-lg -mt-16 p-6 mb-12">
@@ -101,12 +89,16 @@ const HomePage = ({ footerConfig }) => {
 };
 
 export async function getStaticProps() {
-  // Buscar as configurações do rodapé
-  const footerConfig = await getFooterConfig();
+  // Buscar as configurações do rodapé e cabeçalho
+  const [footerConfig, headerConfig] = await Promise.all([
+    getFooterConfig(),
+    getHeaderConfig(),
+  ]);
   
   return {
     props: {
       footerConfig,
+      headerConfig,
     },
     // Revalidar a cada 1 hora
     revalidate: 3600,

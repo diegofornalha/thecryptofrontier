@@ -5,7 +5,9 @@ import { client } from '../sanity/lib/client';
 import { urlForImage } from '../sanity/lib/image';
 import Head from 'next/head';
 import ModernFooter from '../components/sections/ModernFooter';
+import ModernHeader from '../components/sections/ModernHeader';
 import { getFooterConfig } from '../lib/getFooterConfig';
+import { getHeaderConfig } from '../lib/getHeaderConfig';
 
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -39,6 +41,7 @@ interface Post {
 interface BlogProps {
   posts: Post[];
   footerConfig: any;
+  headerConfig: any;
 }
 
 // Função para formatar a data
@@ -51,7 +54,7 @@ const formatDate = (dateString: string) => {
 };
 
 // Componente de página do blog
-export default function Blog({ posts, footerConfig }: BlogProps) {
+export default function Blog({ posts, footerConfig, headerConfig }: BlogProps) {
   // Obter os links de navegação do Sanity ou usar fallback
   const navLinks = footerConfig?.navLinks?.length > 0 
     ? footerConfig.navLinks 
@@ -69,7 +72,12 @@ export default function Blog({ posts, footerConfig }: BlogProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
       
-      <header className="bg-gradient-to-r from-indigo-600 to-blue-500 text-white py-16">
+      <ModernHeader 
+        title={headerConfig?.title || "The Crypto Frontier"} 
+        navLinks={headerConfig?.navLinks || navLinks} 
+      />
+      
+      <div className="bg-gradient-to-r from-indigo-600 to-blue-500 text-white py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl font-extrabold mb-4">Blog</h1>
@@ -78,7 +86,7 @@ export default function Blog({ posts, footerConfig }: BlogProps) {
             </p>
           </div>
         </div>
-      </header>
+      </div>
       
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -168,12 +176,16 @@ export default function Blog({ posts, footerConfig }: BlogProps) {
 export async function getStaticProps() {
   try {
     const posts = await client.fetch(POSTS_QUERY);
-    const footerConfig = await getFooterConfig();
+    const [footerConfig, headerConfig] = await Promise.all([
+      getFooterConfig(),
+      getHeaderConfig(),
+    ]);
     
     return {
       props: {
         posts,
         footerConfig,
+        headerConfig,
       },
       // Revalidar a cada 1 hora
       revalidate: 3600,
@@ -184,6 +196,7 @@ export async function getStaticProps() {
       props: {
         posts: [],
         footerConfig: {},
+        headerConfig: {},
       },
       revalidate: 60,
     };

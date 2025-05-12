@@ -8,7 +8,9 @@ import { urlForImage } from '../../sanity/lib/image';
 import { PortableText } from '@portabletext/react';
 import { ParsedUrlQuery } from 'querystring';
 import ModernFooter from '../../components/sections/ModernFooter';
+import ModernHeader from '../../components/sections/ModernHeader';
 import { getFooterConfig } from '../../lib/getFooterConfig';
+import { getHeaderConfig } from '../../lib/getHeaderConfig';
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -49,6 +51,7 @@ interface Post {
 interface PostProps {
   post: Post;
   footerConfig: any;
+  headerConfig: any;
 }
 
 interface IParams extends ParsedUrlQuery {
@@ -124,14 +127,14 @@ const formatDate = (dateString: string) => {
 };
 
 // Componente de página do blog
-export default function Post({ post, footerConfig }: PostProps) {
+export default function Post({ post, footerConfig, headerConfig }: PostProps) {
   // Obter os links de navegação do Sanity ou usar fallback
   const navLinks = footerConfig?.navLinks?.length > 0 
     ? footerConfig.navLinks 
     : [
         { label: "Home", url: "/" },
         { label: "Blog", url: "/blog" },
-        { label: "Studio", url: "/studio" }
+        { label: "Studio", url: "/studio-redirect" }
       ];
 
   if (!post) {
@@ -173,6 +176,11 @@ export default function Post({ post, footerConfig }: PostProps) {
         )}
       </Head>
       
+      <ModernHeader 
+        title={headerConfig?.title || "The Crypto Frontier"} 
+        navLinks={headerConfig?.navLinks || navLinks} 
+      />
+
       <main className="container mx-auto px-4 py-12 max-w-4xl">
         <Button asChild variant="ghost" className="mb-6">
           <Link href="/blog">
@@ -291,38 +299,31 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
+  if (!params) return { notFound: true };
   const { slug } = params as IParams;
-  
+
   try {
-    // Tenta buscar o post com o slug original
-    let post = await client.fetch(POST_QUERY, { slug });
-    
-    // Se não encontrar e o slug terminar com "bitcoin", tenta com o slug truncado
-    if (!post && slug === 'a-b3-do-brasil-lancara-futuros-de-ethereum-e-solana-reduz-tamanho-do-contrato-de-bitcoin') {
-      const truncatedSlug = 'a-b3-do-brasil-lancara-futuros-de-ethereum-e-solana-reduz-tamanho-do-contrato-de';
-      post = await client.fetch(POST_QUERY, { slug: truncatedSlug });
-    }
-    
-    // Buscar as configurações do rodapé
-    const footerConfig = await getFooterConfig();
+    const post = await client.fetch(POST_QUERY, { slug });
     
     if (!post) {
-      return {
-        notFound: true,
-      };
+      return { notFound: true };
     }
-    
+
+    const [footerConfig, headerConfig] = await Promise.all([
+      getFooterConfig(),
+      getHeaderConfig(),
+    ]);
+
     return {
       props: {
         post,
         footerConfig,
+        headerConfig,
       },
-      revalidate: 3600, // Revalidar a cada hora
+      revalidate: 3600, // Revalidar a cada 1 hora
     };
   } catch (error) {
     console.error('Erro ao buscar dados:', error);
-    return {
-      notFound: true,
-    };
+    return { notFound: true };
   }
 }; 

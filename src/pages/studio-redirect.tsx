@@ -2,13 +2,16 @@ import React, { useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import ModernFooter from '../components/sections/ModernFooter';
+import ModernHeader from '../components/sections/ModernHeader';
 import { getFooterConfig } from '../lib/getFooterConfig';
+import { getHeaderConfig } from '../lib/getHeaderConfig';
 
 interface StudioRedirectProps {
   footerConfig: any;
+  headerConfig: any;
 }
 
-export default function StudioRedirect({ footerConfig }: StudioRedirectProps) {
+export default function StudioRedirect({ footerConfig, headerConfig }: StudioRedirectProps) {
   const router = useRouter();
 
   // Obter os links de navegação do Sanity ou usar fallback
@@ -32,6 +35,11 @@ export default function StudioRedirect({ footerConfig }: StudioRedirectProps) {
         <meta name="description" content="Redirecionando para o Studio Sanity" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
+      
+      <ModernHeader 
+        title={headerConfig?.title || "The Crypto Frontier"} 
+        navLinks={headerConfig?.navLinks || navLinks} 
+      />
       
       <div className="container mx-auto px-4 py-20 text-center">
         <h1 className="text-3xl font-bold mb-4">Redirecionando para o Studio...</h1>
@@ -69,12 +77,16 @@ export default function StudioRedirect({ footerConfig }: StudioRedirectProps) {
 }
 
 export async function getStaticProps() {
-  // Buscar as configurações do rodapé
-  const footerConfig = await getFooterConfig();
+  // Buscar as configurações do rodapé e cabeçalho
+  const [footerConfig, headerConfig] = await Promise.all([
+    getFooterConfig(),
+    getHeaderConfig(),
+  ]);
   
   return {
     props: {
       footerConfig,
+      headerConfig,
     },
     // Revalidar a cada 1 hora
     revalidate: 3600,
