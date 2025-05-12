@@ -8,6 +8,7 @@ import { urlForImage } from '../../sanity/lib/image';
 import { PortableText } from '@portabletext/react';
 import { ParsedUrlQuery } from 'querystring';
 import ModernFooter from '../../components/sections/ModernFooter';
+import { getFooterConfig } from '../../lib/getFooterConfig';
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -47,6 +48,7 @@ interface Post {
 
 interface PostProps {
   post: Post;
+  footerConfig: any;
 }
 
 interface IParams extends ParsedUrlQuery {
@@ -122,7 +124,16 @@ const formatDate = (dateString: string) => {
 };
 
 // Componente de página do blog
-export default function Post({ post }: PostProps) {
+export default function Post({ post, footerConfig }: PostProps) {
+  // Obter os links de navegação do Sanity ou usar fallback
+  const navLinks = footerConfig?.navLinks?.length > 0 
+    ? footerConfig.navLinks 
+    : [
+        { label: "Home", url: "/" },
+        { label: "Blog", url: "/blog" },
+        { label: "Studio", url: "/studio" }
+      ];
+
   if (!post) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -245,11 +256,7 @@ export default function Post({ post }: PostProps) {
         ]}
         primaryLinks={{
           title: "Navegação",
-          links: [
-            { label: "Home", url: "/" },
-            { label: "Blog", url: "/blog" },
-            { label: "Studio", url: "/studio" }
-          ]
+          links: navLinks
         }}
         secondaryLinks={{
           title: "Recursos",
@@ -262,6 +269,7 @@ export default function Post({ post }: PostProps) {
           { label: "Termos de Uso", url: "#" },
           { label: "Política de Privacidade", url: "#" }
         ]}
+        copyrightText={footerConfig?.copyrightText || `© ${new Date().getFullYear()} The Crypto Frontier. Todos os direitos reservados.`}
       />
     </div>
   );
@@ -295,6 +303,9 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       post = await client.fetch(POST_QUERY, { slug: truncatedSlug });
     }
     
+    // Buscar as configurações do rodapé
+    const footerConfig = await getFooterConfig();
+    
     if (!post) {
       return {
         notFound: true,
@@ -304,11 +315,12 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     return {
       props: {
         post,
+        footerConfig,
       },
       revalidate: 3600, // Revalidar a cada hora
     };
   } catch (error) {
-    console.error('Erro ao buscar post:', error);
+    console.error('Erro ao buscar dados:', error);
     return {
       notFound: true,
     };

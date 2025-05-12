@@ -5,6 +5,7 @@ import { client } from '../sanity/lib/client';
 import { urlForImage } from '../sanity/lib/image';
 import Head from 'next/head';
 import ModernFooter from '../components/sections/ModernFooter';
+import { getFooterConfig } from '../lib/getFooterConfig';
 
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ interface Post {
 // Propriedades da página
 interface BlogProps {
   posts: Post[];
+  footerConfig: any;
 }
 
 // Função para formatar a data
@@ -49,7 +51,16 @@ const formatDate = (dateString: string) => {
 };
 
 // Componente de página do blog
-export default function Blog({ posts }: BlogProps) {
+export default function Blog({ posts, footerConfig }: BlogProps) {
+  // Obter os links de navegação do Sanity ou usar fallback
+  const navLinks = footerConfig?.navLinks?.length > 0 
+    ? footerConfig.navLinks 
+    : [
+        { label: "Home", url: "/" },
+        { label: "Blog", url: "/blog" },
+        { label: "Studio", url: "/studio-redirect" }
+      ];
+
   return (
     <div className="min-h-screen bg-background">
       <Head>
@@ -134,11 +145,7 @@ export default function Blog({ posts }: BlogProps) {
         ]}
         primaryLinks={{
           title: "Navegação",
-          links: [
-            { label: "Home", url: "/" },
-            { label: "Blog", url: "/blog" },
-            { label: "Studio", url: "/studio" }
-          ]
+          links: navLinks
         }}
         secondaryLinks={{
           title: "Recursos",
@@ -151,6 +158,7 @@ export default function Blog({ posts }: BlogProps) {
           { label: "Termos de Uso", url: "#" },
           { label: "Política de Privacidade", url: "#" }
         ]}
+        copyrightText={footerConfig?.copyrightText || `© ${new Date().getFullYear()} The Crypto Frontier. Todos os direitos reservados.`}
       />
     </div>
   );
@@ -160,19 +168,22 @@ export default function Blog({ posts }: BlogProps) {
 export async function getStaticProps() {
   try {
     const posts = await client.fetch(POSTS_QUERY);
+    const footerConfig = await getFooterConfig();
     
     return {
       props: {
         posts,
+        footerConfig,
       },
       // Revalidar a cada 1 hora
       revalidate: 3600,
     };
   } catch (error) {
-    console.error('Erro ao buscar posts:', error);
+    console.error('Erro ao buscar dados:', error);
     return {
       props: {
         posts: [],
+        footerConfig: {},
       },
       revalidate: 60,
     };

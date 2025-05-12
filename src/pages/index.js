@@ -3,6 +3,7 @@ import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import Link from 'next/link';
 import ModernFooter from '../components/sections/ModernFooter';
+import { getFooterConfig } from '../lib/getFooterConfig';
 
 // Importação dinâmica do SearchComponent para evitar erros de SSR
 const SearchComponent = dynamic(
@@ -10,7 +11,16 @@ const SearchComponent = dynamic(
   { ssr: false }
 );
 
-const HomePage = () => {
+const HomePage = ({ footerConfig }) => {
+  // Obter os links de navegação do Sanity ou usar fallback
+  const navLinks = footerConfig?.navLinks?.length > 0 
+    ? footerConfig.navLinks 
+    : [
+        { label: "Home", url: "/" },
+        { label: "Blog", url: "/blog" },
+        { label: "Studio", url: "/studio-redirect" }
+      ];
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Head>
@@ -35,7 +45,7 @@ const HomePage = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/studio" className="text-white hover:text-indigo-200 font-medium">
+                  <Link href="/studio-redirect" className="text-white hover:text-indigo-200 font-medium">
                     Studio
                   </Link>
                 </li>
@@ -71,11 +81,7 @@ const HomePage = () => {
         ]}
         primaryLinks={{
           title: "Navegação",
-          links: [
-            { label: "Home", url: "/" },
-            { label: "Blog", url: "/blog" },
-            { label: "Studio", url: "/studio" }
-          ]
+          links: navLinks
         }}
         secondaryLinks={{
           title: "Recursos",
@@ -88,9 +94,23 @@ const HomePage = () => {
           { label: "Termos de Uso", url: "#" },
           { label: "Política de Privacidade", url: "#" }
         ]}
+        copyrightText={footerConfig?.copyrightText || `© ${new Date().getFullYear()} The Crypto Frontier. Todos os direitos reservados.`}
       />
     </div>
   );
 };
+
+export async function getStaticProps() {
+  // Buscar as configurações do rodapé
+  const footerConfig = await getFooterConfig();
+  
+  return {
+    props: {
+      footerConfig,
+    },
+    // Revalidar a cada 1 hora
+    revalidate: 3600,
+  };
+}
 
 export default HomePage; 
