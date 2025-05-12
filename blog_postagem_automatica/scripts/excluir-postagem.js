@@ -13,11 +13,8 @@ const client = createClient({
 
 // Lista de IDs de posts a excluir
 const POST_IDS = [
-  'post-20250509224548122', // excluir1
-  'post-20250509224658975', // excluir0
-  'post-b3-20250509222940', // excluir
-  'post-b3-20250509223030', // excluir2
-  'post-b3-20250509223341'  // excluir3
+  'post-20250510182539',  // Excluir03 (versão publicada)
+  'post-20250510183456'   // Excluir02 (versão publicada)
 ];
 
 async function excluirPostsPorIds() {

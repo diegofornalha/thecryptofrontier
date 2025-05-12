@@ -13,7 +13,7 @@ sys.path.insert(0, current_dir)
 # Importa os módulos do sistema
 import rss_monitor
 import translator
-import markdown_generator
+import blog_postagem_automatica.crewai.markdown_generator as markdown_generator
 import config
 import formatar_conteudo
 

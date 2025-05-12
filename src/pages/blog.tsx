@@ -17,7 +17,7 @@ const POSTS_QUERY = `*[_type == "post"] | order(publishedAt desc) {
   mainImage,
   publishedAt,
   "authorName": author->name,
-  "categories": categories[]->title,
+  categories,
   "estimatedReadingTime": round(length(pt::text(body)) / 5 / 180)
 }`;
 

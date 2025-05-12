@@ -25,7 +25,7 @@ const POST_QUERY = `*[_type == "post" && slug.current == $slug][0]{
   body,
   publishedAt,
   "author": author->{name, image, bio},
-  "categories": categories[]->title
+  categories
 }`;
 
 // Interfaces
@@ -120,6 +120,7 @@ const formatDate = (dateString: string) => {
   });
 };
 
+// Componente de página do blog
 export default function Post({ post }: PostProps) {
   if (!post) {
     return (
@@ -144,6 +145,9 @@ export default function Post({ post }: PostProps) {
           .substring(0, 2)
       : 'CF';
   };
+
+  // Verifica se o corpo do post está vazio e providencia um conteúdo padrão
+  const hasContent = post.body && post.body.length > 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -217,7 +221,14 @@ export default function Post({ post }: PostProps) {
             )}
             
             <div className="prose prose-lg max-w-none dark:prose-invert">
-              <PortableText value={post.body} components={components} />
+              {hasContent ? (
+                <PortableText value={post.body} components={components} />
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground mb-4">O conteúdo deste post ainda está sendo elaborado.</p>
+                  <p className="text-muted-foreground">Volte em breve para ler o artigo completo.</p>
+                </div>
+              )}
             </div>
           </article>
         </Card>
@@ -235,8 +246,14 @@ export default function Post({ post }: PostProps) {
 export const getStaticPaths: GetStaticPaths = async () => {
   const slugs = await client.fetch(SLUGS_QUERY);
   
+  // Adicionando o slug com a palavra "bitcoin" no final que está na URL
+  const additionalPaths = ['a-b3-do-brasil-lancara-futuros-de-ethereum-e-solana-reduz-tamanho-do-contrato-de-bitcoin'];
+  
+  // Combinando os slugs existentes com o adicional
+  const allSlugs = [...slugs, ...additionalPaths];
+  
   return {
-    paths: slugs.map((slug: string) => ({ params: { slug } })),
+    paths: allSlugs.map((slug: string) => ({ params: { slug } })),
     fallback: 'blocking',
   };
 };
@@ -245,7 +262,14 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const { slug } = params as IParams;
   
   try {
-    const post = await client.fetch(POST_QUERY, { slug });
+    // Tenta buscar o post com o slug original
+    let post = await client.fetch(POST_QUERY, { slug });
+    
+    // Se não encontrar e o slug terminar com "bitcoin", tenta com o slug truncado
+    if (!post && slug === 'a-b3-do-brasil-lancara-futuros-de-ethereum-e-solana-reduz-tamanho-do-contrato-de-bitcoin') {
+      const truncatedSlug = 'a-b3-do-brasil-lancara-futuros-de-ethereum-e-solana-reduz-tamanho-do-contrato-de';
+      post = await client.fetch(POST_QUERY, { slug: truncatedSlug });
+    }
     
     if (!post) {
       return {
