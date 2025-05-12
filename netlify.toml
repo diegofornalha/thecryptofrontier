@@ -11,5 +11,5 @@
 [build.environment]
   # Variável de ambiente para indicar ao Next.js que estamos no ambiente Netlify
   NETLIFY_BUILD = "true"
-  # Use Node 18
-  NODE_VERSION = "18"
+  # Atualizar para Node 20
+  NODE_VERSION = "20"

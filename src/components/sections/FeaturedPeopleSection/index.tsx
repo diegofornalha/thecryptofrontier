@@ -9,11 +9,31 @@ import TitleBlock from '../../blocks/TitleBlock';
 import ImageBlock from '../../blocks/ImageBlock';
 import { Action, Badge } from '../../atoms';
 
+import { getComponent } from '../../components-registry';
+
 export default function FeaturedPeopleSection(props) {
-    const { elementId, colors, backgroundImage, badge, title, subtitle, actions = [], people = [], variant, styles = {}, enableAnnotations } = props;
+    const {
+        type,
+        elementId,
+        colors,
+        backgroundImage,
+        badge,
+        title,
+        subtitle,
+        actions = [],
+        people = [],
+        variant,
+        columns = 4,
+        enableAnimation,
+        styles = {},
+        enableAnnotations
+    } = props;
+    const hasSectionTitle = !!(badge?.label || title?.text || subtitle);
+    const hasSectionActions = actions && actions.length > 0;
 
     return (
         <Section
+            type={type}
             elementId={elementId}
             className="sb-component-featured-people-section"
             colors={colors}
@@ -50,9 +70,12 @@ export default function FeaturedPeopleSection(props) {
                 <FeaturedPeopleVariants
                     variant={variant}
                     people={people}
+                    columns={columns}
                     hasTopMargin={!!(badge?.label || title?.text || subtitle)}
-                    hasSectionTitle={!!title?.text}
+                    hasSectionTitle={hasSectionTitle}
+                    hasSectionActions={hasSectionActions}
                     hasAnnotations={enableAnnotations}
+                    animationData={variant !== 'project-grid' ? enableAnimation : null}
                 />
                 {actions.length > 0 && (
                     <div
@@ -77,121 +100,60 @@ export default function FeaturedPeopleSection(props) {
 }
 
 function FeaturedPeopleVariants(props) {
-    const { variant = 'three-col-grid', ...rest } = props;
+    const { variant = 'variant-a', ...rest } = props;
     switch (variant) {
-        case 'four-col-grid':
-            return <FeaturedPeopleFourCol {...rest} />;
-        case 'mixed-grid':
-            return <FeaturedPeopleMixedCol {...rest} />;
+        case 'project-grid':
+            return <FeaturedPeopleProjectGrid {...rest} />;
         default:
-            return <FeaturedPeopleThreeCol {...rest} />;
+            return <FeaturedPeopleDefaultGrid {...rest} />;
     }
 }
 
-function FeaturedPeopleThreeCol({ people = [], hasTopMargin, hasSectionTitle, hasAnnotations }) {
+function FeaturedPeopleDefaultGrid({ people = [], columns, hasTopMargin, hasSectionTitle, hasSectionActions, hasAnnotations, animationData }) {
     if (people.length === 0) {
         return null;
     }
+    const FeaturedPerson = getComponent('FeaturedPerson');
     return (
         <div
-            className={classNames('grid', 'gap-10', 'sm:grid-cols-2', 'lg:grid-cols-3', { 'mt-12': hasTopMargin })}
+            className={classNames('w-full', 'gap-y-16', 'sm:gap-y-20', {
+                'mt-12': hasTopMargin,
+                'grid md:grid-cols-2 lg:grid-cols-3': columns === 3,
+                'grid md:grid-cols-2 lg:grid-cols-4': columns === 4,
+                'grid md:grid-cols-3': columns === 2
+            })}
             {...(hasAnnotations && { 'data-sb-field-path': '.people' })}
         >
             {people.map((person, index) => (
-                <FeaturedPerson key={index} {...person} hasSectionTitle={hasSectionTitle} {...(hasAnnotations && { 'data-sb-field-path': `.${index}` })} />
-            ))}
-        </div>
-    );
-}
-function FeaturedPeopleFourCol({ people = [], hasTopMargin, hasSectionTitle, hasAnnotations }) {
-    if (people.length === 0) {
-        return null;
-    }
-    return (
-        <div
-            className={classNames('grid', 'gap-10', 'sm:grid-cols-2', 'lg:grid-cols-4', { 'mt-12': hasTopMargin })}
-            {...(hasAnnotations && { 'data-sb-field-path': '.people' })}
-        >
-            {people.map((person, index) => (
-                <FeaturedPerson key={index} {...person} hasSectionTitle={hasSectionTitle} {...(hasAnnotations && { 'data-sb-field-path': `.${index}` })} />
+                <FeaturedPerson 
+                    key={index} 
+                    {...person as any} 
+                    hasSectionTitle={hasSectionTitle} 
+                    {...(hasAnnotations ? { 'data-sb-field-path': `.${index}` } as any : {})} 
+                />
             ))}
         </div>
     );
 }
 
-function FeaturedPeopleMixedCol({ people = [], hasTopMargin, hasSectionTitle, hasAnnotations }) {
+function FeaturedPeopleProjectGrid({ people = [], hasTopMargin, hasSectionTitle, hasAnnotations }) {
     if (people.length === 0) {
         return null;
     }
+    const FeaturedPerson = getComponent('FeaturedPerson');
     return (
         <div
-            className={classNames('grid', 'gap-10', 'sm:grid-cols-2', 'lg:grid-cols-16', { 'mt-12': hasTopMargin })}
+            className={classNames('grid', 'gap-x-8', 'gap-y-10', 'sm:grid-cols-2', 'lg:grid-cols-3', { 'mt-12': hasTopMargin })}
             {...(hasAnnotations && { 'data-sb-field-path': '.people' })}
         >
             {people.map((person, index) => (
                 <FeaturedPerson
                     key={index}
-                    {...person}
+                    {...person as any}
                     hasSectionTitle={hasSectionTitle}
-                    {...(hasAnnotations && { 'data-sb-field-path': `.${index}` })}
-                    className={classNames('lg:col-span-4', {
-                        'lg:col-start-3 lg:col-end-span4': (index + 3) % 7 === 0,
-                        'lg:col-start-span4 lg:col-end-neg3': (index + 1) % 7 === 0
-                    })}
+                    {...(hasAnnotations ? { 'data-sb-field-path': `.${index}` } as any : {})}
                 />
             ))}
-        </div>
-    );
-}
-
-function FeaturedPerson(props) {
-    const { elementId, name, image, role, bio, colors = 'bg-light-fg-dark', styles = {}, className, hasSectionTitle } = props;
-    const fieldPath = props['data-sb-field-path'];
-    const TitleTag = hasSectionTitle ? 'h3' : 'h2';
-    return (
-        <div
-            id={elementId}
-            className={classNames(
-                'sb-card',
-                colors,
-                className,
-                'overflow-hidden',
-                styles?.self?.margin ? mapStyles({ margin: styles?.self?.margin }) : undefined,
-                styles?.self?.padding ? mapStyles({ padding: styles?.self?.padding }) : undefined,
-                styles?.self?.borderWidth && styles?.self?.borderWidth !== 0 && styles?.self?.borderStyle !== 'none'
-                    ? mapStyles({
-                          borderWidth: styles?.self?.borderWidth,
-                          borderStyle: styles?.self?.borderStyle,
-                          borderColor: styles?.self?.borderColor ?? 'border-primary'
-                      })
-                    : undefined,
-                styles?.self?.borderRadius ? mapStyles({ borderRadius: styles?.self?.borderRadius }) : undefined,
-                styles?.self?.textAlign ? mapStyles({ textAlign: styles?.self?.textAlign }) : undefined
-            )}
-            data-sb-field-path={fieldPath}
-        >
-            {image && (
-                <ImageBlock
-                    {...image}
-                    className={classNames('flex', mapStyles({ justifyContent: styles?.self?.justifyContent ?? 'flex-start' }))}
-                    {...(fieldPath && { 'data-sb-field-path': '.image' })}
-                />
-            )}
-            {name && (
-                <TitleTag className="h3" {...(fieldPath && { 'data-sb-field-path': '.name' })}>
-                    {name}
-                </TitleTag>
-            )}
-            {role && (
-                <p className="mt-2" {...(fieldPath && { 'data-sb-field-path': '.role' })}>
-                    {role}
-                </p>
-            )}
-            {bio && (
-                <Markdown options={{ forceBlock: true, forceWrapper: true }} className="mt-4 sb-markdown" {...(fieldPath && { 'data-sb-field-path': '.bio' })}>
-                    {bio}
-                </Markdown>
-            )}
         </div>
     );
 }

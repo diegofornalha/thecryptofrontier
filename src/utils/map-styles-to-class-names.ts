@@ -153,20 +153,49 @@ const TAILWIND_MAP = {
     }
 };
 
-export function mapStylesToClassNames(styles: Record<string, any>) {
-    return Object.entries(styles)
-        .map(([prop, value]) => {
-            if (prop in TAILWIND_MAP) {
-                if (typeof TAILWIND_MAP[prop] === 'function') {
-                    return TAILWIND_MAP[prop](value);
-                } else if (value in TAILWIND_MAP[prop]) {
-                    return TAILWIND_MAP[prop][value];
+export function mapStylesToClassNames(styles) {
+    const classNames: string[] = [];
+
+    if (!styles) {
+        return '';
+    }
+
+    Object.entries(styles).forEach(([styleProp, styleValue]) => {
+        if (!styleValue) {
+            return;
+        }
+
+        if (styleProp === 'padding') {
+            if (typeof styleValue === 'object') {
+                if (styleValue.top && styleValue.top !== '0') {
+                    classNames.push(paddingHeightClassName(styleValue.top));
+                }
+                if (styleValue.right && styleValue.right !== '0') {
+                    classNames.push(paddingWidthClassName(styleValue.right));
+                }
+                if (styleValue.bottom && styleValue.bottom !== '0') {
+                    classNames.push(paddingHeightClassName(styleValue.bottom));
+                }
+                if (styleValue.left && styleValue.left !== '0') {
+                    classNames.push(paddingWidthClassName(styleValue.left));
                 }
             } else {
-                // if prop or value don't exist in the map, use the value as is,
-                // useful for direct color values.
-                return value;
+                classNames.push(paddingClassName(styleValue));
             }
-        })
-        .join(' ');
+        }
+
+        if (styleProp in TAILWIND_MAP) {
+            if (typeof TAILWIND_MAP[styleProp] === 'function') {
+                classNames.push(TAILWIND_MAP[styleProp](styleValue));
+            } else if (styleValue in TAILWIND_MAP[styleProp]) {
+                classNames.push(TAILWIND_MAP[styleProp][styleValue]);
+            }
+        } else {
+            // if prop or value don't exist in the map, use the value as is,
+            // useful for direct color values.
+            classNames.push(styleValue);
+        }
+    });
+
+    return classNames.join(' ');
 }

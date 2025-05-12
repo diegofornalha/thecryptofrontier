@@ -9,50 +9,44 @@ import ImageBlock from '../../blocks/ImageBlock';
 import ChevronDownIcon from '../../svgs/chevron-down';
 import CloseIcon from '../../svgs/close';
 import MenuIcon from '../../svgs/menu';
+import { getDataAttrs } from '../../../utils/get-data-attrs';
+import { getComponent } from '../../components-registry';
+
 
 export default function Header(props) {
-    const { colors = 'bg-light-fg-dark', styles = {}, enableAnnotations } = props;
+    const { primaryColors, secondaryColors, styles = {}, annotationPrefix, enableAnnotations } = props;
     return (
-        <header
-            className={classNames(
-                'sb-component',
-                'sb-component-header',
-                colors,
-                'relative',
-                'shadow-header',
-                styles?.self?.margin ? mapStyles({ padding: styles?.self?.margin }) : undefined,
-                styles?.self?.padding ? mapStyles({ padding: styles?.self?.padding }) : 'p-4',
-                'z-50'
+        <div {...getDataAttrs(props)} data-sb-field-path={enableAnnotations ? annotationPrefix : ''}>
+            {primaryColors === 'colors-c' || primaryColors === 'colors-f' ? (
+                <HeaderVariant
+                    {...props}
+                    enableAnnotations={enableAnnotations}
+                    styles={{ self: { margin: 'mx-auto', padding: 'py-5 lg:py-7', width: 'w-full', justifyContent: 'flex-start' } }}
+                />
+            ) : (
+                <HeaderVariant {...props} enableAnnotations={enableAnnotations} />
             )}
-            {...(enableAnnotations && { 'data-sb-object-id': props?.__metadata?.id })}
-        >
-            <div className="mx-auto max-w-7xl">
-                <Link href="#main" className="sr-only">
-                    Skip to main content
-                </Link>
-                <HeaderVariants {...props} />
-            </div>
-        </header>
+        </div>
     );
 }
 
-function HeaderVariants(props) {
-    const { variant = 'logo-left-primary-nav-left', ...rest } = props;
-    switch (variant) {
-        case 'logo-left-primary-nav-centered':
-            return <HeaderLogoLeftPrimaryCentered {...rest} />;
-        case 'logo-left-primary-nav-right':
-            return <HeaderLogoLeftPrimaryRight {...rest} />;
-        case 'logo-centered-primary-nav-left':
-            return <HeaderLogoCenteredPrimaryLeft {...rest} />;
-        case 'logo-centered-primary-nav-centered':
-            return <HeaderLogoCenteredPrimaryCentered {...rest} />;
+function HeaderVariant(props) {
+    const { headerVariant = 'variant-a', ...rest } = props;
+    switch (headerVariant) {
+        case 'variant-b':
+            return <HeaderVariantB {...rest} />;
+        case 'variant-c':
+            return <HeaderVariantC {...rest} />;
+        case 'variant-d':
+            return <HeaderVariantD {...rest} />;
+        case 'variant-e':
+            return <HeaderVariantE {...rest} />;
         default:
-            return <HeaderLogoLeftPrimaryLeft {...rest} />;
+            return <HeaderVariantA {...rest} />;
     }
 }
 
-function HeaderLogoLeftPrimaryLeft(props) {
+function HeaderVariantA(props) {
     const { title, logo, primaryLinks = [], secondaryLinks = [], colors = 'bg-light-fg-dark', enableAnnotations } = props;
     return (
         <div className="relative flex items-center">
@@ -76,7 +70,7 @@ function HeaderLogoLeftPrimaryLeft(props) {
     );
 }
 
-function HeaderLogoLeftPrimaryCentered(props) {
+function HeaderVariantB(props) {
     const { title, logo, primaryLinks = [], secondaryLinks = [], colors = 'bg-light-fg-dark', enableAnnotations } = props;
     return (
         <div className="relative flex items-center">
@@ -103,7 +97,7 @@ function HeaderLogoLeftPrimaryCentered(props) {
     );
 }
 
-function HeaderLogoLeftPrimaryRight(props) {
+function HeaderVariantC(props) {
     const { title, logo, primaryLinks = [], secondaryLinks = [], colors = 'bg-light-fg-dark', enableAnnotations } = props;
     return (
         <div className="relative flex items-center">
@@ -130,7 +124,7 @@ function HeaderLogoLeftPrimaryRight(props) {
     );
 }
 
-function HeaderLogoCenteredPrimaryLeft(props) {
+function HeaderVariantD(props) {
     const { title, logo, primaryLinks = [], secondaryLinks = [], colors = 'bg-light-fg-dark', enableAnnotations } = props;
     return (
         <div className="relative flex items-center">
@@ -154,7 +148,7 @@ function HeaderLogoCenteredPrimaryLeft(props) {
     );
 }
 
-function HeaderLogoCenteredPrimaryCentered(props) {
+function HeaderVariantE(props) {
     const { title, logo, primaryLinks = [], secondaryLinks = [], colors = 'bg-light-fg-dark', enableAnnotations } = props;
     return (
         <>
@@ -278,7 +272,7 @@ function ListOfLinks(props) {
                             })}
                         >
                             <Action
-                                {...link}
+                                {...link as any}
                                 className={classNames('whitespace-nowrap', inMobileMenu ? 'w-full' : 'text-sm', {
                                     'justify-start py-3': inMobileMenu && link.__metadata.modelName === 'Link'
                                 })}
@@ -373,9 +367,9 @@ function ListOfSubNavLinks({ links = [], hasAnnotations, inMobileMenu = false })
             {links.map((link, index) => (
                 <li key={index}>
                     <Action
-                        {...link}
+                        {...link as any}
                         className={classNames(inMobileMenu ? 'w-full justify-start' : 'text-sm')}
-                        {...(hasAnnotations && { 'data-sb-field-path': `.${index}` })}
+                        {...(hasAnnotations ? { 'data-sb-field-path': `.${index}` } as any : {})}
                     />
                 </li>
             ))}

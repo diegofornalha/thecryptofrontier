@@ -41,8 +41,8 @@ export default function RelatedPostsSection(props) {
         className
     } = props;
 
-    const [relatedPosts, setRelatedPosts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [relatedPosts, setRelatedPosts] = useState<any[]>([]);
 
     useEffect(() => {
         const fetchRelatedPosts = async () => {
