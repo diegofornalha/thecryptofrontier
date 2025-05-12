@@ -12,7 +12,7 @@ export function FooterMigration() {
   return (
     <div className="space-y-8">
       <div className="space-y-4">
-        <h3 className="text-lg font-medium">Componente Atual (Footer legado)</h3>
+        <h3 className="text-lg font-medium">Componente Atual (Footer)</h3>
         <div className="border rounded-md p-4 bg-background">
           {/* Versão simplificada do Footer atual */}
           <footer className="bg-gray-50 px-4 py-16">
@@ -96,7 +96,7 @@ export function FooterMigration() {
           </footer>
         </div>
         <pre className="p-4 bg-muted rounded-md overflow-x-auto">
-          <code>{`// Footer Legado
+          <code>{`// Footer
 <footer className="bg-gray-50 px-4 py-16">
   <div className="mx-auto max-w-7xl">
     <div className="grid sm:grid-cols-3 lg:grid-cols-4 gap-8">

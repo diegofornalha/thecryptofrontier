@@ -7,6 +7,7 @@ import { client } from '../../sanity/lib/client';
 import { urlForImage } from '../../sanity/lib/image';
 import { PortableText } from '@portabletext/react';
 import { ParsedUrlQuery } from 'querystring';
+import ModernFooter from '../../components/sections/ModernFooter';
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -234,11 +235,34 @@ export default function Post({ post }: PostProps) {
         </Card>
       </main>
       
-      <footer className="bg-gray-800 text-white py-12 mt-16">
-        <div className="container mx-auto px-4 text-center">
-          <p>© {new Date().getFullYear()} The Crypto Frontier. Todos os direitos reservados.</p>
-        </div>
-      </footer>
+      <ModernFooter 
+        title="The Crypto Frontier"
+        description="Seu portal de conteúdo sobre criptomoedas e blockchain"
+        socialLinks={[
+          { label: 'Twitter', icon: 'twitter', url: 'https://twitter.com/' },
+          { label: 'Facebook', icon: 'facebook', url: 'https://facebook.com/' },
+          { label: 'Instagram', icon: 'instagram', url: 'https://instagram.com/' }
+        ]}
+        primaryLinks={{
+          title: "Navegação",
+          links: [
+            { label: "Home", url: "/" },
+            { label: "Blog", url: "/blog" },
+            { label: "Studio", url: "/studio" }
+          ]
+        }}
+        secondaryLinks={{
+          title: "Recursos",
+          links: [
+            { label: "Artigos", url: "/blog" },
+            { label: "Tutoriais", url: "/blog" }
+          ]
+        }}
+        legalLinks={[
+          { label: "Termos de Uso", url: "#" },
+          { label: "Política de Privacidade", url: "#" }
+        ]}
+      />
     </div>
   );
 }
