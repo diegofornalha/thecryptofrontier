@@ -123,8 +123,7 @@ if 'sanity_posts' not in st.session_state:
     st.session_state.sanity_posts = []
 if 'last_posts_fetch' not in st.session_state:
     st.session_state.last_posts_fetch = None
-if 'post_to_delete' not in st.session_state:
-    st.session_state.post_to_delete = None
+# Removida variável post_to_delete, não necessária mais
 if 'post_to_index' not in st.session_state:
     st.session_state.post_to_index = None
 if 'post_to_edit' not in st.session_state:
@@ -259,7 +258,7 @@ def excluir_post_do_sanity(post_id, post_title):
         usar_script = True
         
         if usar_script:
-            script_path = "agentes_crewai/scripts/editar-postagem/excluir-postagem.js"
+            script_path = "scripts/excluir-postagem.js"
             
             # Verificar se o script existe
             if not os.path.exists(script_path):
@@ -345,12 +344,15 @@ def modificar_script_exclusao(script_path, post_id):
 # Função para indexar post no Algolia
 def indexar_post_no_algolia(post_id, post_title):
     try:
-        script_path = "agentes_crewai/scripts/editar-postagem/indexar-conteudo.js"
+        script_path = "scripts/indexar-conteudo.js"
         
         # Verificar se o script existe
         if not os.path.exists(script_path):
-            add_log(f"Erro: Script não encontrado em {script_path}")
-            return False
+            # Tentar alternativa verificar_posts.js que também pode indexar
+            script_path = "verificar_posts.js"
+            if not os.path.exists(script_path):
+                add_log(f"Erro: Script de indexação não encontrado")
+                return False
         
         # Executar o script Node.js
         add_log(f"Indexando post '{post_title}' no Algolia...")
@@ -377,12 +379,15 @@ def indexar_post_no_algolia(post_id, post_title):
 # Função para indexar todos os posts no Algolia
 def indexar_todos_posts_no_algolia():
     try:
-        script_path = "agentes_crewai/scripts/editar-postagem/indexar-sanity-para-algolia.js"
+        script_path = "scripts/indexar-sanity-para-algolia.js"
         
         # Verificar se o script existe
         if not os.path.exists(script_path):
-            add_log(f"Erro: Script não encontrado em {script_path}")
-            return False
+            # Tentar alternativa verificar_posts.js que também pode indexar
+            script_path = "verificar_posts.js"
+            if not os.path.exists(script_path):
+                add_log(f"Erro: Script de indexação não encontrado")
+                return False
         
         # Executar o script Node.js
         add_log("Indexando todos os posts no Algolia...")

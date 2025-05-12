@@ -125,6 +125,15 @@ async function publicarPost(arquivoMarkdown) {
     // Gerar ID único
     const docId = `post-${uuidv4().replace(/-/g, '')}`;
     
+    // Converter o conteúdo HTML para blocos Portable Text
+    const blocosConteudo = processarConteudoHtml(content);
+    
+    // Informação do autor (usando ID existente no Sanity)
+    const autorRef = {
+      _type: 'reference',
+      _ref: 'ca38a3d5-cba1-47a0-aa29-4af17a15e17c' // Alexandre Bianchi
+    };
+    
     // Preparar documento para Sanity de acordo com o schema
     const documento = {
       _type: 'post',
@@ -134,9 +143,10 @@ async function publicarPost(arquivoMarkdown) {
         _type: 'slug',
         current: slug
       },
+      author: autorRef,
       publishedAt: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
       excerpt: resumo,
-      content: content  // Campo correto para o conteúdo
+      content: blocosConteudo  // Agora usando o array de blocos
     };
     
     // Adicionar tags como array de strings simples

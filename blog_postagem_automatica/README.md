@@ -1,6 +1,15 @@
-# Blog Postagem Automática
+# Blog Automação - The Crypto Frontier
 
-Sistema de automação para monitoramento de feeds RSS, tradução e publicação de conteúdo sobre criptomoedas utilizando Google Gemini.
+Sistema de automação para monitoramento, tradução e publicação de artigos sobre criptomoedas para o blog The Crypto Frontier.
+
+## Visão Geral
+
+Este sistema automatiza todo o fluxo de trabalho para criação de conteúdo para um blog sobre criptomoedas, dividido em quatro etapas principais:
+
+1. **Monitoramento**: Monitorar feeds RSS de sites especializados em criptomoedas
+2. **Tradução**: Traduzir artigos relevantes de inglês para português usando Google Gemini
+3. **Publicação**: Publicar os artigos traduzidos no Sanity CMS
+4. **Indexação**: Indexar os artigos publicados no Algolia para permitir buscas
 
 ## Estrutura do Projeto
 
@@ -30,172 +39,118 @@ blog_postagem_automatica/
 
 ## Requisitos
 
-- Python 3.10+
-- CrewAI 0.28.0+
-- API Key do Google Gemini (opcional para monitoramento direto)
-- Conta no Sanity CMS (para publicação)
-- Conta no Algolia (para indexação e pesquisa)
+- Python 3.8+
+- Node.js 18+
+- Dependências Python: `pip install -r requirements.txt`
+- Dependências Node.js: `npm install`
+- Arquivo `.env` com credenciais do Sanity CMS e Algolia
 
 ## Configuração
 
-1. Clone este repositório:
-```bash
-git clone https://github.com/seu-usuario/blog_postagem_automatica.git
-cd blog_postagem_automatica
-```
-
-2. Crie e ative um ambiente virtual:
-```bash
-python -m venv venv
-source venv/bin/activate  # No Windows: venv\Scripts\activate
-```
-
-3. Instale as dependências:
-```bash
-pip install -e .
-```
-
-4. Crie um arquivo `.env` com suas credenciais:
-```
-# API Google Gemini (necessária para funcionamento)
-GEMINI_API_KEY=sua_chave_api_gemini
-
-# Chave OpenAI fictícia para garantir compatibilidade com LiteLLM
-OPENAI_API_KEY=sk-123
-
-# Credenciais do Sanity CMS
-SANITY_PROJECT_ID=seu_project_id
-SANITY_DATASET=production
-SANITY_API_VERSION=2023-05-03
-SANITY_API_TOKEN=seu_token
-
-# Configurações Algolia (opcional)
-ALGOLIA_APP_ID=seu_app_id
-ALGOLIA_API_KEY=sua_api_key
-ALGOLIA_INDEX_NAME=blog_posts
-```
-
-5. Configure os feeds RSS no arquivo `feeds.json`:
-```json
-[
-  "https://cointelegraph.com/rss",
-  "https://www.coindesk.com/arc/outboundfeeds/rss/",
-  "https://decrypt.co/feed",
-  "https://blog.chain.link/rss/",
-  "https://bitcoin.org/en/rss/blog.xml",
-  "https://bitcoinmagazine.com/feed"
-]
-```
-
-> **Nota**: O sistema também pode usar automaticamente os feeds configurados em `agentes_backup_legado/config.py` se o arquivo existir.
-
-## Uso do Google Gemini
-
-Este projeto usa o Google Gemini como modelo de IA para alimentar os agentes CrewAI. Ele oferece:
-
-1. **Tradução de alta qualidade**: O Gemini 2.0 oferece excelentes traduções de inglês para português
-2. **Baixa latência**: Respostas rápidas para processamento eficiente
-3. **Custo menor**: Alternativa mais econômica em comparação com outros modelos
-
-A integração é feita através do LangChain, que permite a comunicação entre o CrewAI e a API do Gemini.
+1. Clone o repositório
+2. Instale as dependências
+3. Configure o arquivo `.env` com suas credenciais (ver `.env.example`)
+4. Configure os feeds RSS em `feeds.json`
 
 ## Uso
 
-### Monitoramento de Feeds
+### Método 1: Script de Fluxo Completo
 
-Para monitorar feeds RSS e gerar artigos para tradução:
-
-```bash
-python -m src.blog_automacao.main --monitoramento
-```
-
-Para executar em loop a cada X minutos:
+Para simplificar a execução, use o script `executar_fluxo_completo.sh`:
 
 ```bash
-python -m src.blog_automacao.main --monitoramento --loop 60  # Executa a cada 60 minutos
+# Executar o fluxo completo (uma vez)
+./executar_fluxo_completo.sh
+
+# Ou apenas o monitoramento
+./executar_fluxo_completo.sh --monitor
+
+# Monitoramento contínuo a cada 60 minutos
+./executar_fluxo_completo.sh --monitor --loop 60
+
+# Apenas tradução dos artigos pendentes
+./executar_fluxo_completo.sh --translate
+
+# Apenas publicação dos artigos traduzidos
+./executar_fluxo_completo.sh --publish
+
+# Apenas indexação no Algolia
+./executar_fluxo_completo.sh --index
+
+# Exibir ajuda
+./executar_fluxo_completo.sh --help
 ```
 
-### Monitoramento Direto (Sem CrewAI/Gemini)
+### Método 2: Execução Manual
 
-Se você estiver enfrentando problemas com a integração do Gemini ou simplesmente quiser executar o monitoramento de feeds sem usar a IA, use o modo direto:
+Alternativamente, você pode executar cada etapa manualmente:
 
 ```bash
-python -m src.blog_automacao.main --direto
+# Monitoramento (um ciclo)
+python main.py
+
+# Monitoramento contínuo (a cada 60 minutos)
+python main.py --loop 60
+
+# Tradução de artigos
+python main.py --traducao
+
+# Publicação no Sanity
+node publicar_posts_markdown.js
+
+# Indexação no Algolia
+node scripts/indexar-sanity-para-algolia.js
 ```
 
-Para executar em loop a cada X minutos:
+### Interface Web (Streamlit)
+
+Também está disponível uma interface web para controle do sistema:
 
 ```bash
-python -m src.blog_automacao.main --direto --loop 60  # Executa a cada 60 minutos
+streamlit run app.py
 ```
 
-Este modo:
-1. Monitora os feeds RSS configurados
-2. Salva os artigos encontrados em `posts_traduzidos/` com prefixo `para_traduzir_`
-3. Não usa API do Gemini ou CrewAI, funcionando mesmo sem configurações de IA
-4. Segue o mesmo fluxo de dados do sistema completo
+## Estrutura de Diretórios
 
-### Tradução de Artigos
+- `posts_para_traduzir/`: Artigos baixados que aguardam tradução
+- `posts_traduzidos/`: Artigos traduzidos que aguardam publicação
+- `posts_publicados/`: Artigos que já foram publicados no Sanity
+- `scripts/`: Scripts auxiliares para publicação e indexação
+- `src/`: Código-fonte principal do sistema
+- `app.py`: Interface web Streamlit
 
-Para traduzir artigos encontrados no monitoramento:
+## Correções e Melhorias Recentes
 
-```bash
-python -m src.blog_automacao.main --traducao
-```
+1. **Correção do formato Portable Text**: Os artigos agora são convertidos para o formato Portable Text correto para o Sanity, evitando o erro "Invalid property value" no Sanity Studio.
 
-### Publicação no Sanity CMS
+2. **Correção da referência de autor**: Agora é usada a referência correta para o autor Alexandre Bianchi.
 
-Para publicar os artigos traduzidos no Sanity CMS:
+3. **Melhoria na tradução de títulos**: O título é traduzido separadamente para garantir qualidade na tradução.
 
-```bash
-python -m src.blog_automacao.main --publicacao
-```
+4. **Script de automação completa**: Novo script `executar_fluxo_completo.sh` para facilitar a execução de todo o fluxo.
 
-### Fluxo Completo
+5. **Tratamento de erros robusto**: Melhor tratamento de erros em todas as etapas do processo.
 
-Para executar o fluxo completo (monitoramento, tradução e publicação):
+## Observações Importantes
 
-```bash
-python -m src.blog_automacao.main --completo
-```
+1. NUNCA defina `PUBLISH_DIRECTLY = True` em `main.py`, pois quebraria o fluxo de trabalho separado.
+2. Sempre verifique se os diretórios necessários existem.
+3. Mantenha as credenciais no arquivo `.env` atualizadas.
+4. Para republicar um artigo, mova-o de volta para a pasta `posts_traduzidos/`.
 
-## Banco de Dados
+## Arquivos de Configuração Importantes
 
-O sistema utiliza um banco de dados SQLite (`posts_database.sqlite`) para controlar os artigos já processados, evitando duplicações. Principais funcionalidades:
+- `.env`: Credenciais do Sanity e Algolia
+- `feeds.json`: Lista de feeds RSS para monitoramento
+- `src/blog_automacao/config/settings.py`: Configurações gerais do sistema
 
-- Identificação de artigos por GUID e hash de conteúdo
-- Rastreamento de status de processamento
-- Armazenamento de metadados como origem, data de publicação e título
+## Solução de Problemas
 
-## Fluxo de Trabalho
+Se você encontrar o erro "Invalid property value" no Sanity Studio:
+- Verifique se o conteúdo está sendo convertido para o formato correto (array de blocos)
+- Execute novamente o script de publicação para aplicar a correção
 
-1. **Monitoramento**: O sistema monitora feeds RSS de sites de criptomoedas e seleciona artigos relevantes
-2. **Tradução**: Os artigos selecionados são traduzidos do inglês para português brasileiro usando o Google Gemini
-3. **Adaptação**: O conteúdo é adaptado para o contexto brasileiro
-4. **Publicação**: Os artigos são publicados no Sanity CMS
-
-## Troubleshooting
-
-### Erro de API Key do Gemini
-
-Se você encontrar erros relacionados à API key do Gemini:
-
-1. Verifique se a chave está configurada no arquivo `.env`
-2. Alternativamente, coloque a chave no arquivo `agentes_backup_legado/config.py` 
-3. Certifique-se de que a chave está ativa e tem permissões corretas
-4. **Alternativa**: Use o modo direto (`--direto`) que não depende do Gemini
-
-O sistema procura a chave na seguinte ordem:
-1. Variável de ambiente `GEMINI_API_KEY`
-2. Arquivo `.env`
-3. Arquivo `agentes_backup_legado/config.py`
-
-### Erro no LiteLLM ou CrewAI
-
-Se estiver encontrando erros persistentes com o LiteLLM ou CrewAI:
-
-1. Use o modo direto para monitoramento: `python -m src.blog_automacao.main --direto`
-2. Este modo não depende do Gemini, LiteLLM ou CrewAI e funciona com a mesma eficácia para monitoramento de feeds
+Para outros problemas, consulte os logs na interface web ou execute os comandos com a flag `--verbose`.
 
 ## Licença
 

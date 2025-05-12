@@ -259,11 +259,40 @@ def traduzir_artigo(caminho_arquivo):
     yaml_frontmatter = match.group(1)
     conteudo_html = match.group(2)
     
+    # Extrair front matter como dicionário
+    front_matter = json.loads(yaml_frontmatter)
+    
+    # Obter título para tradução separada
+    titulo_original = front_matter.get("title", "")
+    
     # Configurar Gemini
     genai.configure(api_key=GEMINI_CONFIG["api_key"])
     model = genai.GenerativeModel(GEMINI_CONFIG["model"])
     
+    # Primeiro traduzir o título separadamente
+    print_step("3.2", "Traduzindo título...")
+    
+    try:
+        prompt_titulo = f"""
+        Traduza o seguinte título de inglês para português brasileiro:
+        
+        {titulo_original}
+        
+        Retorne apenas o título traduzido, sem aspas ou comentários adicionais.
+        """
+        
+        resposta_titulo = model.generate_content(prompt_titulo)
+        titulo_traduzido = resposta_titulo.text.strip()
+        
+        print_success(f"Título traduzido: {titulo_traduzido}")
+    except Exception as e:
+        print_warning(f"Erro ao traduzir título: {str(e)}")
+        titulo_traduzido = titulo_original
+        print_warning("Usando título original como fallback")
+    
     # Instruções para o Gemini
+    print_step("3.3", "Traduzindo conteúdo...")
+    
     prompt = f"""
     Traduza o seguinte artigo de inglês para português brasileiro. 
     Mantenha todas as tags HTML e formatação original.
@@ -276,19 +305,15 @@ def traduzir_artigo(caminho_arquivo):
     ARTIGO TRADUZIDO:
     """
     
-    print_step("3.2", "Enviando para o Gemini API...")
-    
     try:
         # Chamar a API Gemini
         resposta = model.generate_content(prompt)
         traducao = resposta.text
         
-        # Extrair front matter como dicionário
-        front_matter = json.loads(yaml_frontmatter)
-        
         # Atualizar front matter
         front_matter["status"] = "traduzido"
         front_matter["translated_date"] = datetime.now().isoformat()
+        front_matter["title"] = titulo_traduzido  # Usar o título traduzido
         
         # Salvar na pasta de traduzidos
         os.makedirs("posts_traduzidos", exist_ok=True)
