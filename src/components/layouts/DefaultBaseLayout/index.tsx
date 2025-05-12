@@ -1,7 +1,7 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import Header from '../../sections/Header';
-import Footer from '../../sections/Footer';
+import ModernFooter from '../../sections/ModernFooter';
 
 export default function DefaultBaseLayout(props) {
     const { page, site } = props;
@@ -13,7 +13,17 @@ export default function DefaultBaseLayout(props) {
             <div className="sb-base sb-default-base-layout">
                 {site.header && <Header {...site.header} enableAnnotations={enableAnnotations} />}
                 {props.children}
-                {site.footer && <Footer {...site.footer} enableAnnotations={enableAnnotations} />}
+                {site.footer && (
+                    <ModernFooter 
+                        title={site.footer.title}
+                        description={site.footer.text}
+                        primaryLinks={site.footer.primaryLinks}
+                        secondaryLinks={site.footer.secondaryLinks}
+                        socialLinks={site.footer.socialLinks}
+                        legalLinks={site.footer.legalLinks}
+                        copyrightText={site.footer.copyrightText}
+                    />
+                )}
             </div>
         </div>
     );
