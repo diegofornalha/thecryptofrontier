@@ -1,0 +1,55 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Processo de Publicação e Indexação
+
+Após os artigos serem traduzidos e salvos na pasta [posts_traduzidos/](mdc:posts_traduzidos), eles devem ser publicados no Sanity CMS e indexados no Algolia.
+
+## Publicação no Sanity CMS
+
+Os arquivos da pasta [scripts/](mdc:scripts) contêm ferramentas para publicação no Sanity:
+
+- [publicar-e-indexar.js](mdc:scripts/publicar-e-indexar.js): Script principal para publicação no Sanity
+- [listar-postagens.js](mdc:scripts/listar-postagens.js): Lista as postagens já publicadas
+- [verificar-postagem.js](mdc:scripts/verificar-postagem.js): Verifica o status de uma postagem específica
+
+### Passos para Publicação
+
+1. Verifique se há novos arquivos em [posts_traduzidos/](mdc:posts_traduzidos)
+2. Execute o script de publicação para cada arquivo não processado
+3. Verifique se a publicação foi bem-sucedida
+
+## Indexação no Algolia
+
+Após a publicação no Sanity, os conteúdos devem ser indexados no Algolia:
+
+- [indexar-sanity-para-algolia.js](mdc:scripts/indexar-sanity-para-algolia.js): Sincroniza conteúdo do Sanity para o Algolia
+- [indexar-conteudo.js](mdc:scripts/indexar-conteudo.js): Ferramentas adicionais para indexação
+
+### Passos para Indexação
+
+1. Após a publicação no Sanity, execute o script de indexação
+2. Verifique se o conteúdo está corretamente indexado no Algolia
+3. Teste a funcionalidade de busca no site
+
+## Credenciais Necessárias
+
+Para que esses processos funcionem, as seguintes credenciais devem estar configuradas no arquivo `.env`:
+
+```
+# Algolia
+NEXT_PUBLIC_ALGOLIA_APP_ID=...
+NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY=...
+ALGOLIA_ADMIN_API_KEY=...
+NEXT_PUBLIC_ALGOLIA_INDEX_NAME=...
+ALGOLIA_WRITE_API_KEY=...
+
+# Sanity
+NEXT_PUBLIC_SANITY_PROJECT_ID=...
+NEXT_PUBLIC_SANITY_DATASET=...
+NEXT_PUBLIC_SANITY_API_VERSION=...
+SANITY_DEV_TOKEN=...
+SANITY_DEPLOY_TOKEN=...
+SANITY_WEBHOOK_SECRET=...

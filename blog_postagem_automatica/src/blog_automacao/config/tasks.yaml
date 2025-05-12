@@ -1,0 +1,146 @@
+# Configuração das tarefas para automação de blog de criptomoedas
+# ------------------------------------------------------
+
+# Tarefas de monitoramento
+monitoring_task:
+  description: >
+    Analise o seguinte artigo de criptomoedas:
+    
+    Título: {title}
+    URL: {url}
+    Data: {date}
+    
+    Conteúdo: {content}
+    
+    Forneça:
+    1. Um resumo conciso do artigo (max 3 frases)
+    2. Os principais tópicos abordados (max 5 tópicos)
+    3. Razão pela qual pode ser relevante para investidores brasileiros
+    
+    Formato de resposta:
+    {"resumo": "Resumo aqui", 
+     "topicos": ["tópico 1", "tópico 2", ...], 
+     "relevancia": "Explicação da relevância"}
+  expected_output: Análise do artigo em formato JSON
+  agent: monitor
+
+selection_task:
+  description: >
+    Avalie se o seguinte artigo de criptomoedas é relevante para o público brasileiro:
+    
+    Título: {title}
+    URL: {url}
+    
+    Análise do artigo:
+    Resumo: {resumo}
+    Tópicos: {topicos}
+    Relevância: {relevancia}
+    
+    Critérios de avaliação:
+    1. Relevância para investidores brasileiros
+    2. Novidade da informação
+    3. Potencial de interesse
+    4. Impacto no mercado brasileiro
+    
+    Retorne apenas "SIM" se o artigo for relevante ou "NÃO" caso contrário, seguido de uma breve justificativa.
+  expected_output: Decisão de relevância do artigo com justificativa
+  agent: selector
+
+# Tarefas de tradução
+translation_task:
+  description: >
+    Traduza o seguinte artigo sobre criptomoedas do inglês para português brasileiro:
+
+    Título original: {titulo}
+    URL original: {url}
+    
+    Conteúdo original:
+    {conteudo}
+    
+    Siga estas diretrizes:
+    1. Traduza para português brasileiro formal
+    2. Mantenha termos técnicos de cripto quando não houver equivalente em português
+    3. Preserve qualquer formatação importante do texto original
+    4. Se o artigo for muito longo, foque nos pontos principais
+    5. Inclua o título traduzido no início
+    
+    Retorne apenas o texto traduzido, sem comentários adicionais.
+  expected_output: Artigo traduzido para português brasileiro
+  agent: translator
+
+localization_task:
+  description: >
+    Adapte o seguinte artigo traduzido sobre criptomoedas para o público brasileiro:
+    
+    {conteudo_traduzido}
+    
+    Siga estas diretrizes:
+    1. Adicione contextualizações relevantes para o mercado brasileiro quando necessário
+    2. Adapte exemplos para o contexto brasileiro se apropriado
+    3. Explique conceitos que podem ser menos conhecidos no Brasil
+    4. Mantenha o tom e estilo do artigo original
+    5. Formate o resultado como um post de blog em Markdown
+    6. Adicione 5-8 tags relevantes para o conteúdo
+    7. Classifique o artigo em uma categoria principal (ex: Bitcoin, Ethereum, DeFi, NFTs, etc.)
+    
+    Retorne o artigo em formato Markdown com cabeçalho YAML contendo:
+    - título traduzido
+    - data original
+    - tags
+    - categoria
+    - url original como referência
+  expected_output: Artigo adaptado em formato Markdown com cabeçalho YAML
+  agent: localizer
+  output_file: posts_traduzidos/{output_filename}.md
+
+# Tarefas de publicação
+editing_task:
+  description: >
+    Revise e melhore o seguinte artigo traduzido sobre criptomoedas:
+    
+    {conteudo_formatado}
+    
+    Siga estas diretrizes:
+    1. Corrija erros gramaticais e ortográficos
+    2. Melhore a coerência e fluidez do texto
+    3. Verifique a precisão das informações técnicas
+    4. Garanta que o tom seja adequado ao público-alvo
+    5. Mantenha o formato Markdown
+    
+    Retorne o artigo revisado mantendo o cabeçalho YAML original.
+  expected_output: Artigo revisado em formato Markdown
+  agent: editor
+
+seo_optimization_task:
+  description: >
+    Otimize o seguinte artigo para SEO:
+    
+    {conteudo_editado}
+    
+    Siga estas diretrizes:
+    1. Identifique e sugira palavras-chave principais
+    2. Otimize o título para SEO (mantendo significado)
+    3. Verifique a densidade de palavras-chave
+    4. Sugira melhorias na estrutura de cabeçalhos (h1, h2, h3)
+    5. Crie meta descrição de até 160 caracteres
+    
+    Retorne o artigo otimizado com as sugestões implementadas, incluindo
+    uma seção SEO no cabeçalho YAML com meta título e meta descrição.
+  expected_output: Artigo otimizado para SEO em formato Markdown
+  agent: seo_analyst
+
+publish_task:
+  description: >
+    Prepare e publique o seguinte artigo no Sanity CMS:
+    
+    {conteudo_otimizado}
+    
+    Siga estas diretrizes:
+    1. Extraia o título, slug, excerpt e conteúdo do artigo
+    2. Formate o conteúdo em blocos Portable Text para o Sanity
+    3. Envie o documento para o Sanity CMS
+    4. Verifique e confirme a publicação bem-sucedida
+    
+    Retorne a confirmação da publicação com o ID e slug do documento.
+  expected_output: Confirmação da publicação no Sanity CMS
+  agent: publisher 

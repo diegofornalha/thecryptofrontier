@@ -1,0 +1,17 @@
+Metadata-Version: 2.4
+Name: blog_automacao
+Version: 1.0.0
+Summary: Automação de blog de criptomoedas usando CrewAI
+Author-email: The Crypto Frontier <contato@thecryptofrontier.com>
+License: MIT
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: crewai>=0.28.0
+Requires-Dist: feedparser>=6.0.11
+Requires-Dist: requests>=2.32.3
+Requires-Dist: python-frontmatter>=1.0.0
+Requires-Dist: tqdm>=4.67.1
+Requires-Dist: google-generativeai>=0.8.5
+Provides-Extra: dev
+Requires-Dist: black; extra == "dev"
+Requires-Dist: pytest; extra == "dev"

@@ -1,0 +1,124 @@
+{
+  "snippets": [
+    {
+      "name": "crewai-agent",
+      "description": "Cria um agente CrewAI",
+      "prefix": "crew-agent",
+      "body": [
+        "@agent",
+        "def ${1:nome_do_agente}(self) -> Agent:",
+        "    \"\"\"${2:Descrição do agente.}\"\"\"",
+        "    return Agent(",
+        "        config=self.agents_config[\"${1:nome_do_agente}\"],",
+        "        verbose=True${3:,}",
+        "        ${4:tools=[${5:Ferramentas}]}",
+        "    )"
+      ]
+    },
+    {
+      "name": "crewai-task",
+      "description": "Cria uma tarefa CrewAI",
+      "prefix": "crew-task",
+      "body": [
+        "@task",
+        "def ${1:nome_da_tarefa}(self) -> Task:",
+        "    \"\"\"${2:Descrição da tarefa.}\"\"\"",
+        "    return Task(",
+        "        config=self.tasks_config[\"${1:nome_da_tarefa}\"]${3:,}",
+        "        ${4:output_file=\"${5:caminho_do_arquivo}\"}",
+        "    )"
+      ]
+    },
+    {
+      "name": "crewai-crew",
+      "description": "Cria uma crew CrewAI",
+      "prefix": "crew-crew",
+      "body": [
+        "@crew",
+        "def ${1:nome_da_crew}(self) -> Crew:",
+        "    \"\"\"${2:Descrição da crew.}\"\"\"",
+        "    return Crew(",
+        "        agents=[${3:self.agente1(), self.agente2()}],",
+        "        tasks=[${4:self.tarefa1(), self.tarefa2()}],",
+        "        verbose=2,",
+        "        process=Process.${5|sequential,parallel|}",
+        "    )"
+      ]
+    },
+    {
+      "name": "crewai-tool",
+      "description": "Cria uma ferramenta CrewAI",
+      "prefix": "crew-tool",
+      "body": [
+        "class ${1:Nome}Tool(Tool):",
+        "    \"\"\"${2:Descrição da ferramenta.}\"\"\"",
+        "    ",
+        "    def __init__(self):",
+        "        \"\"\"Inicializa a ferramenta.\"\"\"",
+        "        super().__init__(",
+        "            name=\"${1:Nome}Tool\",",
+        "            description=\"${3:Descrição detalhada da ferramenta.}\",",
+        "            return_direct=${4|False,True|}",
+        "        )",
+        "    ",
+        "    def _run(self, ${5:parametros}):",
+        "        \"\"\"${6:Implementação da ferramenta.}",
+        "        ",
+        "        Args:",
+        "            ${7:parametro}: ${8:Descrição do parâmetro}",
+        "            ",
+        "        Returns:",
+        "            ${9:Descrição do retorno}",
+        "        \"\"\"",
+        "        ${10:# Implementação aqui}",
+        "        ",
+        "        return ${11:resultado}"
+      ]
+    },
+    {
+      "name": "crewai-class",
+      "description": "Cria uma classe CrewAI completa",
+      "prefix": "crew-class",
+      "body": [
+        "@CrewBase",
+        "class ${1:Nome}Crew:",
+        "    \"\"\"${2:Descrição da crew.}\"\"\"",
+        "    ",
+        "    def __init__(self):",
+        "        \"\"\"Inicializa a crew.\"\"\"",
+        "        ${3:# Inicialização aqui}",
+        "    ",
+        "    # Agentes",
+        "    ",
+        "    @agent",
+        "    def ${4:agente1}(self) -> Agent:",
+        "        \"\"\"${5:Descrição do agente.}\"\"\"",
+        "        return Agent(",
+        "            config=self.agents_config[\"${4:agente1}\"],",
+        "            verbose=True",
+        "        )",
+        "    ",
+        "    # Tarefas",
+        "    ",
+        "    @task",
+        "    def ${6:tarefa1}(self) -> Task:",
+        "        \"\"\"${7:Descrição da tarefa.}\"\"\"",
+        "        return Task(",
+        "            config=self.tasks_config[\"${6:tarefa1}\"]",
+        "        )",
+        "    ",
+        "    # Crew",
+        "    ",
+        "    @crew",
+        "    def ${8:crew_principal}(self) -> Crew:",
+        "        \"\"\"${9:Descrição da crew principal.}\"\"\"",
+        "        return Crew(",
+        "            agents=[self.${4:agente1}()],",
+        "            tasks=[self.${6:tarefa1}()],",
+        "            verbose=2,",
+        "            process=Process.sequential",
+        "        )"
+      ]
+    }
+  ]
+} 

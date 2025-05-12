@@ -1,0 +1,19 @@
+---
+{
+  "title": "Strengthening U.S. Federal Agencies With Blockchain Technology: 10+ Real-World Use Cases",
+  "original_link": "https://blog.chain.link/blockchain-federal-agencies/",
+  "date": "2025-04-29T11:47:51",
+  "source": "blog.chain.link",
+  "tags": [
+    "Government and Policy",
+    "blockchain",
+    "Capital Markets",
+    "Compliance",
+    "Government",
+    "Vision"
+  ],
+  "status": "para_traduzir"
+}
+---
+
+<p>The post <a href="https://blog.chain.link/blockchain-federal-agencies/">Strengthening U.S. Federal Agencies With Blockchain Technology: 10+ Real-World Use Cases</a> appeared first on <a href="https://blog.chain.link">Chainlink Blog</a>.</p>

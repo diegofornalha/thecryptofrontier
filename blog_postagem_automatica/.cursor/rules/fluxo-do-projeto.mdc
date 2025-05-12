@@ -1,0 +1,36 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Fluxo de Trabalho do Blog de Postagem Automática
+
+Este projeto segue um fluxo de trabalho em 3 etapas principais para automatizar a tradução e publicação de notícias sobre criptomoedas:
+
+## 1. Monitoramento 
+- O sistema monitora feeds RSS de sites de criptomoedas em inglês
+- @main.py é o ponto de entrada principal que controla o processo
+- Quando novos artigos são encontrados por @rss_monitor.py
+
+## 2. Tradução
+- [translator.py](mdc:crewai/translator.py) traduz o conteúdo para português usando a API do Google Gemini
+- [markdown_generator.py](mdc:crewai/markdown_generator.py) converte o conteúdo HTML para Markdown
+- Os artigos traduzidos são salvos como arquivos .md na pasta [posts_traduzidos/](mdc:posts_traduzidos)
+
+## 3. Publicação no Sanity CMS
+- Um processo separado pega os arquivos de [posts_traduzidos/](mdc:posts_traduzidos)
+- Usa a API do Sanity para publicar os artigos no CMS
+- Usa as credenciais definidas no arquivo .env
+- Scripts como [publicar-e-indexar.js](mdc:scripts/publicar-e-indexar.js) auxiliam neste processo
+
+## 4. Indexar no Algolia
+- Após publicação no Sanity, o conteúdo é indexado no Algolia
+- A indexação permite buscas eficientes no site
+- Scripts como [indexar-sanity-para-algolia.js](mdc:scripts/indexar-sanity-para-algolia.js) executam esse processo
+- Usa as credenciais do Algolia definidas no arquivo .env
+
+## Importante
+- Não publicar diretamente do processo de monitoramento
+- Sempre salvar os artigos traduzidos em [posts_traduzidos/](mdc:posts_traduzidos) primeiro
+- Executar a publicação e indexação como processos separados
+- Revisar os artigos traduzidos antes da publicação quando necessário
