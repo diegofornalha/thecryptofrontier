@@ -148,7 +148,7 @@ export default function Post({ post }: PostProps) {
   return (
     <div className="min-h-screen bg-background">
       <Head>
-        <title>{post.title} - The Crypto Frontier</title>
+        <title>{`${post.title} - The Crypto Frontier`}</title>
         <meta name="description" content={post.title} />
         <meta property="og:title" content={post.title} />
         <meta property="og:type" content="article" />

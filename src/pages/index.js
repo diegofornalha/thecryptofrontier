@@ -13,7 +13,7 @@ const HomePage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Head>
-        <title>The Crypto Frontier - Artigos e Tutoriais</title>
+        <title>{"The Crypto Frontier - Artigos e Tutoriais"}</title>
         <meta name="description" content="Explore nossa coleção de artigos e tutoriais sobre desenvolvimento e tecnologia" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>

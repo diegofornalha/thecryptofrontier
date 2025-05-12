@@ -52,7 +52,7 @@ export default function Blog({ posts }: BlogProps) {
   return (
     <div className="min-h-screen bg-background">
       <Head>
-        <title>Blog - The Crypto Frontier</title>
+        <title>{"Blog - The Crypto Frontier"}</title>
         <meta name="description" content="Artigos sobre criptomoedas, blockchain e tecnologia" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>

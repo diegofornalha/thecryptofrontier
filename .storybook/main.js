@@ -25,6 +25,11 @@ const config = {
           '@': path.resolve(__dirname, '../src'),
           'next/image': path.resolve(__dirname, './mocks/NextImage.jsx'),
           'next/router': path.resolve(__dirname, './mocks/NextRouter.jsx'),
+          'react': path.resolve(__dirname, '../node_modules/react'),
+          'react-dom': path.resolve(__dirname, '../node_modules/react-dom'),
+          '@radix-ui/react-avatar': path.resolve(__dirname, './mocks/RadixAvatar.jsx'),
+          '@/components/ui/avatar': path.resolve(__dirname, './mocks/UIAvatar.jsx'),
+
         },
       },
       define: {
