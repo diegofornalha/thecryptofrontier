@@ -155,3 +155,133 @@ Para outros problemas, consulte os logs na interface web ou execute os comandos 
 ## Licença
 
 MIT 
+
+## Configuração do Sistema
+
+O sistema agora permite configurações ajustáveis de duas formas:
+
+### 1. Configuração Editável no Sanity Studio (Recomendado)
+
+A partir da versão mais recente, as configurações principais podem ser editadas diretamente no Sanity Studio:
+
+1. Acesse o Sanity Studio em [https://thecryptofrontier.sanity.studio](https://thecryptofrontier.sanity.studio)
+2. Navegue até "Configurações do Blog" no menu lateral
+3. Edite a configuração existente ou crie uma nova
+4. Defina o autor padrão, frequência de monitoramento e outras opções
+
+Para verificar se as configurações estão corretas, execute:
+```bash
+node utils/configuracao-sanity.js
+# Ou para criar uma configuração padrão se não existir:
+node utils/configuracao-sanity.js --criar
+
+# Para verificar se o sistema está reconhecendo as configurações:
+node publicar_posts_markdown.js --verify
+```
+
+### 2. Configuração Local (Fallback)
+
+Caso o Sanity não esteja acessível, o sistema usa a configuração local em `utils/config.js`:
+
+```bash
+cd blog_postagem_automatica
+node utils/mostrar-config.js
+```
+
+### Configuração do Autor Padrão
+
+A partir da versão atual, o sistema permite configurar qual autor será usado por padrão para todas as publicações. Esta configuração pode ser feita de duas formas:
+
+#### Opção 1: No Sanity Studio (Recomendado)
+
+1. Acesse o Sanity Studio em [https://thecryptofrontier.sanity.studio](https://thecryptofrontier.sanity.studio)
+2. Navegue até "Configurações do Blog" no menu lateral
+3. Clique no campo "Autor Padrão" e selecione o autor desejado
+4. Salve a configuração
+
+#### Opção 2: No arquivo local de configuração
+
+Como método alternativo, você pode editar o arquivo `utils/config.js`:
+
+```javascript
+// Configuração do autor padrão
+autor: {
+  id: 'ca38a3d5-cba1-47a0-aa29-4af17a15e17c', // ID do Alexandre Bianchi
+  nome: 'Alexandre Bianchi'
+}
+```
+
+### Autores disponíveis no sistema
+
+- **Alexandre Bianchi** (ID: ca38a3d5-cba1-47a0-aa29-4af17a15e17c)
+- **The Crypto Frontier** (ID: 8pYdfL3aL47Vbm89ptixRC)
+
+Se desejar adicionar novos autores, use o Studio do Sanity ou o script apropriado.
+
+### Alterando o Autor Padrão
+
+Existem duas formas de alterar o autor padrão:
+
+#### 1. Usando o script automatizado (recomendado)
+
+```bash
+cd blog_postagem_automatica
+node utils/alterar-autor.js <ID_DO_AUTOR> "<NOME_DO_AUTOR>"
+
+# Exemplos:
+node utils/alterar-autor.js ca38a3d5-cba1-47a0-aa29-4af17a15e17c "Alexandre Bianchi"
+node utils/alterar-autor.js 8pYdfL3aL47Vbm89ptixRC "The Crypto Frontier"
+```
+
+#### 2. Editando manualmente o arquivo de configuração
+
+Edite o arquivo `utils/config.js` modificando:
+- `id`: O ID do autor no Sanity CMS
+- `nome`: O nome do autor (usado para exibição e como fallback caso o ID não seja encontrado)
+
+```javascript
+// Configuração do autor padrão
+autor: {
+  id: 'ca38a3d5-cba1-47a0-aa29-4af17a15e17c', // ID do Alexandre Bianchi
+  nome: 'Alexandre Bianchi'
+}
+``` 
+
+## Deploy das Configurações
+
+Para aplicar as configurações no ambiente de produção, existem duas opções:
+
+### Opção 1: Deploy Completo (inclui Sanity Studio)
+
+Este script faz o deploy do Sanity Studio e configura o autor padrão:
+
+```bash
+# No diretório raiz do projeto
+./deploy-configuracao.sh
+```
+
+Este script realiza as seguintes operações:
+
+1. **Deploy do Sanity Studio**: Garante que o novo schema esteja disponível no Studio online
+2. **Verificação da configuração**: Verifica se existe uma configuração no Sanity e cria se necessário
+3. **Verificação do autor padrão**: Confirma se o sistema está usando o autor configurado no Sanity
+
+### Opção 2: Aplicação Rápida de Configurações (sem deploy do Studio)
+
+Se apenas quiser aplicar as configurações sem fazer deploy do Sanity Studio:
+
+```bash
+./aplicar-configuracao.sh
+```
+
+Este script simplificado apenas:
+1. Verifica se existe uma configuração no Sanity
+2. Cria a configuração se necessário
+3. Confirma se o sistema está usando o autor configurado
+
+Depois de executar qualquer um dos scripts, você pode editar as configurações diretamente no Sanity Studio:
+- Acesse o Studio em https://thecryptofrontier.sanity.studio
+- Navegue até "Configurações do Blog" no menu lateral
+- Faça suas alterações e salve
+
+As alterações nas configurações são refletidas imediatamente no sistema de publicação. 

@@ -6,28 +6,24 @@ const { marked } = require('marked');
 const { createClient } = require('@sanity/client');
 const colors = require('./utils/colors');
 const slugify = require('./utils/slugify');
+const config = require('./utils/config');
 
 // Diretórios de trabalho
-const DIR_POSTS_TRADUZIDOS = './posts_traduzidos';
-const DIR_POSTS_PUBLICADOS = './posts_publicados';
+const DIR_POSTS_TRADUZIDOS = config.diretorios.postsTraduzidos;
+const DIR_POSTS_PUBLICADOS = config.diretorios.postsPublicados;
 
 // Categorias padrão para criptomoedas
-const CATEGORIAS_CRIPTO = {
-  bitcoin: 'Bitcoin',
-  ethereum: 'Ethereum', 
-  altcoins: 'Altcoins',
-  defi: 'DeFi',
-  nft: 'NFTs',
-  metaverso: 'Metaverso',
-  regulacao: 'Regulação',
-  blockchain: 'Blockchain',
-  mercado: 'Mercado',
-  tecnologia: 'Tecnologia'
-};
+const CATEGORIAS_CRIPTO = config.categorias;
 
 // Inicialização
 console.log(`${colors.magenta}${colors.bold}    PUBLICAÇÃO DE POSTS NO SANITY CMS     ${colors.reset}`);
 console.log(`${colors.blue}---------------------------------------------${colors.reset}`);
+
+// Informações do autor configurado (apenas para exibição inicial, será atualizado após consulta ao Sanity)
+const autorNome = config.autor && config.autor.nome ? config.autor.nome : "The Crypto Frontier";
+const autorId = config.autor && config.autor.id ? config.autor.id : "(ID não configurado)";
+console.log(`${colors.blue}[INFO] Autor padrão local: ${colors.cyan}${autorNome}${colors.reset} (${autorId})`);
+console.log(`${colors.blue}[INFO] Verificando configuração no Sanity...${colors.reset}`);
 
 // Verificar diretórios
 if (!fs.existsSync(DIR_POSTS_PUBLICADOS)) {
@@ -36,7 +32,7 @@ if (!fs.existsSync(DIR_POSTS_PUBLICADOS)) {
 }
 
 // Configuração direta do cliente Sanity
-const config = {
+const configSanity = {
   projectId: 'brby2yrg',
   dataset: 'production',
   apiVersion: '2023-05-03',
@@ -45,12 +41,15 @@ const config = {
 };
 
 console.log(`${colors.blue}[INFO] Configuração do Sanity:${colors.reset}`);
-console.log(`${colors.blue}  - Project ID: ${config.projectId}${colors.reset}`);
-console.log(`${colors.blue}  - Dataset: ${config.dataset}${colors.reset}`);
-console.log(`${colors.blue}  - API Version: ${config.apiVersion}${colors.reset}`);
+console.log(`${colors.blue}  - Project ID: ${configSanity.projectId}${colors.reset}`);
+console.log(`${colors.blue}  - Dataset: ${configSanity.dataset}${colors.reset}`);
+console.log(`${colors.blue}  - API Version: ${configSanity.apiVersion}${colors.reset}`);
 
 // Configuração do cliente Sanity
-const sanityClient = createClient(config);
+const sanityClient = createClient(configSanity);
+
+// Variável global para armazenar a configuração do blog
+let blogConfigData = null;
 
 // Converte HTML para Portable Text do Sanity
 function htmlToPortableText(html) {
@@ -193,21 +192,59 @@ async function processarTags(tags) {
   return tagsIds;
 }
 
-// Obter ou criar um autor padrão
+// Obter o autor configurado ou criar/usar um autor padrão
 async function obterAutorPadrao() {
   try {
+    // 1. Primeiro, tentar obter a configuração do blog do Sanity
+    if (!blogConfigData) {
+      blogConfigData = await sanityClient.fetch(
+        `*[_type == "blogConfig"][0]{
+          title,
+          "defaultAuthorId": defaultAuthor._ref,
+          "defaultAuthorName": defaultAuthor->name
+        }`
+      );
+
+      if (blogConfigData && blogConfigData.defaultAuthorId) {
+        console.log(`${colors.green}✓ Configuração encontrada no Sanity: ${blogConfigData.title}${colors.reset}`);
+        console.log(`${colors.green}✓ Usando autor do Sanity: ${blogConfigData.defaultAuthorName} (${blogConfigData.defaultAuthorId})${colors.reset}`);
+        return blogConfigData.defaultAuthorId;
+      } else {
+        console.log(`${colors.yellow}[AVISO] Configuração do blog não encontrada no Sanity ou autor padrão não definido${colors.reset}`);
+      }
+    } else if (blogConfigData.defaultAuthorId) {
+      return blogConfigData.defaultAuthorId;
+    }
+    
+    // 2. Se não houver configuração no Sanity, usar o config.js como fallback
+    if (config.autor && config.autor.id) {
+      // Verificar se o autor existe no Sanity
+      let autor = await sanityClient.fetch(
+        `*[_type == "author" && _id == $id][0]`,
+        { id: config.autor.id }
+      );
+      
+      if (autor) {
+        console.log(`${colors.yellow}[AVISO] Usando autor do arquivo de configuração local: ${config.autor.nome} (${config.autor.id})${colors.reset}`);
+        return autor._id;
+      }
+    }
+    
+    // 3. Fallback final para autor pelo nome
+    const nomeAutor = config.autor && config.autor.nome ? config.autor.nome : "The Crypto Frontier";
+    
     let autor = await sanityClient.fetch(
       `*[_type == "author" && name == $name][0]`,
-      { name: "The Crypto Frontier" }
+      { name: nomeAutor }
     );
     
     if (!autor) {
       autor = await sanityClient.create({
         _type: 'author',
-        name: "The Crypto Frontier",
+        name: nomeAutor,
         slug: {
           _type: 'slug',
-          current: "the-crypto-frontier"
+          current: slugify(nomeAutor)
         },
         bio: [{
           _type: 'block',
@@ -217,7 +254,7 @@ async function obterAutorPadrao() {
           }]
         }]
       });
-      console.log(`${colors.green}✓ Autor padrão criado no Sanity${colors.reset}`);
+      console.log(`${colors.green}✓ Autor padrão criado no Sanity: ${nomeAutor}${colors.reset}`);
     }
     
     return autor._id;
@@ -338,6 +375,18 @@ async function publicarPost(arquivo) {
 
 // Função principal
 async function executar() {
+  // Verificar se é apenas para verificar a configuração
+  if (process.argv.includes('--verify')) {
+    console.log(`${colors.blue}[INFO] Modo de verificação - apenas exibindo configuração...${colors.reset}`);
+    const autorId = await obterAutorPadrao();
+    console.log(`${colors.blue}---------------------------------------------${colors.reset}`);
+    console.log(`${colors.green}Para editar a configuração no Sanity Studio:${colors.reset}`);
+    console.log(`1. Acesse ${colors.yellow}https://thecryptofrontier.sanity.studio${colors.reset}`);
+    console.log(`2. Navegue até ${colors.yellow}"Configurações do Blog"${colors.reset} no menu lateral`);
+    console.log(`3. Edite o autor padrão e outras configurações`);
+    return;
+  }
+
   console.log(`${colors.blue}[INFO] Iniciando publicação de posts no Sanity...${colors.reset}`);
   
   // Verificar arquivos markdown na pasta

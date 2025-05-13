@@ -12,6 +12,7 @@ import cryptoMeta from './objects/cryptoMeta.js'
 
 // Settings schemas
 import siteConfig from './settings/siteConfig.js'
+import blogConfig from './settings/blogConfig.js'
 
 export const schemaTypes = [
   // Documents
@@ -28,4 +29,5 @@ export const schemaTypes = [
   
   // Settings
   siteConfig,
+  blogConfig,
 ] 
