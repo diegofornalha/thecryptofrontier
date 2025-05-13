@@ -31,34 +31,34 @@ except ImportError:
     from crew import BlogAutomacaoCrew
     from tools.rss_tools import RssFeedTool
 
-def executar_monitoramento_direto(loop_minutes=None):
+def executar_monitoramento_direto(base_dir, loop_minutes=None):
     """Executa o monitoramento diretamente usando a ferramenta RSS, sem passar pelos agentes CrewAI.
     
     Este é um método alternativo quando o Gemini não está disponível ou configurado.
     
     Args:
+        base_dir: Diretório base para os subdiretórios de posts.
         loop_minutes: Se definido, executa em loop a cada N minutos
     """
-    print(f"=== INICIANDO MONITORAMENTO RSS DIRETO ===")
+    print(f"=== INICIANDO MONITORAMENTO RSS DIRETO (Base Dir: {base_dir}) ===")
     
     # Criar diretório para artigos a serem traduzidos se não existir
-    dir_para_traduzir = Path("posts_para_traduzir")
-    dir_para_traduzir.mkdir(exist_ok=True)
+    dir_para_traduzir = base_dir / "posts_para_traduzir"
+    dir_para_traduzir.mkdir(parents=True, exist_ok=True)
     # dir_traduzidos = Path("posts_traduzidos") # Não necessário aqui
-    # dir_traduzidos.mkdir(exist_ok=True)
     
     while True:
         print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Verificando feeds RSS...")
         
         # Criar ferramenta RSS
-        rss_tool = RssFeedTool()
+        rss_tool = RssFeedTool() # Passar base_dir para a ferramenta se ela precisar
         
         # Executar ferramenta
         artigos = rss_tool._run(max_entries=5)
         
         # Verificar se encontramos artigos novos
         if not artigos:
-            print("Nenhum artigo novo encontrado.")
+            print(f"Nenhum artigo novo encontrado no modo direto.") # Adicionado log para clareza
         else:
             print(f"Encontrados {len(artigos)} artigos novos.")
             
@@ -91,9 +91,11 @@ def executar_monitoramento_direto(loop_minutes=None):
                 try:
                     with open(caminho_arquivo, "w", encoding="utf-8") as f:
                         json.dump(dados_salvar, f, ensure_ascii=False, indent=2)
-                    print(f"Artigo salvo para tradução: {caminho_arquivo}")
+                    print(f"SUCESSO AO SALVAR: {caminho_arquivo}") # Mensagem explícita
                 except Exception as e_save:
-                    print(f"Erro ao salvar arquivo {caminho_arquivo}: {e_save}")
+                    print(f"!!!!!! ERRO REAL AO SALVAR ARQUIVO {caminho_arquivo}: {e_save} !!!!!!") # Erro mais visível
+                    # Considerar levantar o erro aqui para que o main.py retorne um código de erro
+                    # raise e_save 
         
         # Se não for para executar em loop, sair
         if not loop_minutes:
@@ -103,14 +105,15 @@ def executar_monitoramento_direto(loop_minutes=None):
         print(f"Aguardando {loop_minutes} minutos até a próxima verificação...")
         time.sleep(loop_minutes * 60)
 
-def executar_monitoramento(crew, loop_minutes=None):
+def executar_monitoramento(crew, base_dir, loop_minutes=None):
     """Executa apenas o monitoramento e seleção de conteúdo usando CrewAI.
     
     Args:
         crew: Instância do BlogAutomacaoCrew
+        base_dir: Diretório base para os subdiretórios de posts.
         loop_minutes: Se definido, executa em loop a cada N minutos
     """
-    print(f"=== INICIANDO MONITORAMENTO RSS (CrewAI) ===")
+    print(f"=== INICIANDO MONITORAMENTO RSS (CrewAI - Base Dir: {base_dir}) ===")
     
     while True:
         print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Verificando feeds RSS com CrewAI...")
@@ -118,7 +121,7 @@ def executar_monitoramento(crew, loop_minutes=None):
         try:
             # Executar crew de monitoramento
             # A crew (monitor + selector) deve retornar a lista de arquivos salvos
-            inputs = {} # A crew/tool deve encontrar os feeds
+            inputs = {"base_dir": str(base_dir)} # Passar base_dir para a crew/tasks
             print("Executando monitoramento_crew().kickoff()...")
             result = crew.monitoramento_crew().kickoff(inputs=inputs)
             
@@ -131,7 +134,7 @@ def executar_monitoramento(crew, loop_minutes=None):
             print("\nTentando executar monitoramento direto como fallback...")
             try:
                 # Tentar fallback direto
-                executar_monitoramento_direto(None)  # Executar uma vez
+                executar_monitoramento_direto(base_dir, None)  # Executar uma vez, passar base_dir
                 print("Monitoramento direto executado com sucesso como fallback.")
             except Exception as e3:
                 print(f"Erro no modo direto de fallback: {str(e3)}")
@@ -147,16 +150,17 @@ def executar_monitoramento(crew, loop_minutes=None):
         print(f"Aguardando {loop_minutes} minutos até a próxima verificação...")
         time.sleep(loop_minutes * 60)
 
-def executar_traducao(crew):
+def executar_traducao(crew, base_dir):
     """Executa apenas a tradução e adaptação de conteúdo.
     
     Args:
         crew: Instância do BlogAutomacaoCrew
+        base_dir: Diretório base para os subdiretórios de posts.
     """
-    print(f"=== INICIANDO TRADUÇÃO DE ARTIGOS (CrewAI) ===")
-    dir_para_traduzir = Path("posts_para_traduzir")
-    dir_traduzidos = Path("posts_traduzidos")
-    dir_traduzidos.mkdir(exist_ok=True)
+    print(f"=== INICIANDO TRADUÇÃO DE ARTIGOS (CrewAI - Base Dir: {base_dir}) ===")
+    dir_para_traduzir = base_dir / "posts_para_traduzir"
+    dir_traduzidos = base_dir / "posts_traduzidos"
+    dir_traduzidos.mkdir(parents=True, exist_ok=True)
     
     arquivos = list(dir_para_traduzir.glob("para_traduzir_*.json"))
     
@@ -169,7 +173,8 @@ def executar_traducao(crew):
     for arquivo_origem in arquivos:
         print(f"\nProcessando tradução de: {arquivo_origem.name}")
         inputs = {
-            "arquivo_markdown": str(arquivo_origem) # Passa o caminho do arquivo original
+            "arquivo_markdown": str(arquivo_origem), # Passa o caminho do arquivo original
+            "base_dir": str(base_dir) # Passa base_dir para a crew/tasks
         }
         
         try:
@@ -196,16 +201,17 @@ def executar_traducao(crew):
         except Exception as e_trad:
             print(f"Erro ao executar traducao_crew para {arquivo_origem.name}: {e_trad}")
 
-def executar_publicacao(crew):
+def executar_publicacao(crew, base_dir):
     """Executa apenas a revisão e publicação de conteúdo.
     
     Args:
         crew: Instância do BlogAutomacaoCrew
+        base_dir: Diretório base para os subdiretórios de posts.
     """
-    print(f"=== INICIANDO PUBLICAÇÃO NO SANITY (CrewAI) ===")
-    dir_traduzidos = Path("posts_traduzidos")
-    dir_publicados = Path("posts_publicados")
-    dir_publicados.mkdir(exist_ok=True)
+    print(f"=== INICIANDO PUBLICAÇÃO DE ARTIGOS (CrewAI - Base Dir: {base_dir}) ===")
+    dir_traduzidos = base_dir / "posts_traduzidos"
+    dir_publicados = base_dir / "posts_publicados"
+    dir_publicados.mkdir(parents=True, exist_ok=True)
     
     # Busca arquivos .json que começam com 'traduzido_'
     arquivos = list(dir_traduzidos.glob("traduzido_*.json"))
@@ -219,7 +225,8 @@ def executar_publicacao(crew):
     for arquivo_origem in arquivos:
         print(f"\nProcessando publicação de: {arquivo_origem.name}")
         inputs = {
-            "arquivo_markdown": str(arquivo_origem) # Passa o caminho do arquivo traduzido
+            "arquivo_markdown": str(arquivo_origem), # Passa o caminho do arquivo original
+            "base_dir": str(base_dir) # Passa base_dir para a crew/tasks
         }
         
         try:
@@ -256,35 +263,21 @@ def executar_publicacao(crew):
         except Exception as e_pub:
             print(f"Erro ao executar publicacao_crew para {arquivo_origem.name}: {e_pub}")
 
-def executar_fluxo_completo(crew, loop_minutes=None):
-    """Executa o fluxo completo de monitoramento, tradução e publicação.
+def executar_fluxo_completo(crew, base_dir, loop_minutes=None):
+    """Executa o fluxo completo: Monitoramento -> Tradução -> Publicação.
     
     Args:
         crew: Instância do BlogAutomacaoCrew
+        base_dir: Diretório base para os subdiretórios de posts.
         loop_minutes: Se definido, executa em loop a cada N minutos
     """
-    print(f"=== EXECUTANDO FLUXO COMPLETO (CrewAI) ===")
-    
+    print(f"=== INICIANDO FLUXO COMPLETO (Base Dir: {base_dir}) ===")
     while True:
-        start_time = time.time()
-        print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Iniciando ciclo completo...")
+        print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Iniciando novo ciclo completo...")
+        executar_monitoramento(crew, base_dir, None)  # Executar uma vez dentro do loop completo
+        executar_traducao(crew, base_dir)
+        executar_publicacao(crew, base_dir)
         
-        # Passo 1: Monitoramento
-        print(f"\n----- Passo 1: Monitoramento e seleção ----- ")
-        executar_monitoramento(crew, loop_minutes=None) # Executa uma vez
-        
-        # Passo 2: Tradução
-        print(f"\n----- Passo 2: Tradução e Adaptação ----- ")
-        executar_traducao(crew) # Processa todos os arquivos pendentes
-        
-        # Passo 3: Publicação
-        print(f"\n----- Passo 3: Revisão e Publicação ----- ")
-        executar_publicacao(crew) # Processa todos os arquivos pendentes
-        
-        end_time = time.time()
-        print(f"\nCiclo completo finalizado em {end_time - start_time:.2f} segundos.")
-        
-        # Se não for para executar em loop, sair
         if not loop_minutes:
             break
             
@@ -292,82 +285,233 @@ def executar_fluxo_completo(crew, loop_minutes=None):
         print(f"Aguardando {loop_minutes} minutos até o próximo ciclo...")
         time.sleep(loop_minutes * 60)
 
-def load_feed_urls_from_config():
-    """Carrega URLs de feed de um arquivo feeds.json ou retorna uma lista padrão."""
-    feeds_file = Path(__file__).parent.parent.parent / "feeds.json" # Sobe três níveis para framework_crewai/feeds.json
-    default_feeds = [
-        {"name": "CoinDesk", "url": "https://www.coindesk.com/arc/outboundfeeds/rss/"},
-        # Adicione mais feeds padrão aqui se desejar
-    ]
-    if feeds_file.exists():
-        try:
-            with open(feeds_file, 'r') as f:
-                data = json.load(f)
-                if isinstance(data, list) and all("url" in item for item in data):
-                    print(f"Carregado {len(data)} feeds de {feeds_file}")
-                    return data
-                elif isinstance(data, dict) and "feeds" in data and isinstance(data["feeds"], list):
-                     print(f"Carregado {len(data['feeds'])} feeds de {feeds_file} (formato aninhado)")
-                     return data["feeds"]
-                else:
-                    print(f"Formato inesperado em {feeds_file}. Usando feeds padrão.")
-                    return default_feeds
-        except json.JSONDecodeError:
-            print(f"Erro ao decodificar {feeds_file}. Usando feeds padrão.")
-            return default_feeds
-    else:
-        print("Arquivo feeds.json não encontrado na raiz. Usando feeds padrão.")
-        return default_feeds
+    # Necessário para que a RssFeedTool possa encontrar o feeds.json no diretório correto
+    # O ideal seria a ferramenta ter seu próprio mecanismo de encontrar o config ou recebê-lo
+    # Esta é uma solução temporária para compatibilidade com a estrutura atual.
+    # print(f"CWD antes de mudar: {os.getcwd()}")
+    # os.chdir(Path(__file__).parent) # Mudar CWD para o diretório do script main.py (src/blog_automacao)
+    # print(f"CWD depois de mudar: {os.getcwd()}")
 
-def main():
-    """Função principal que interpreta argumentos e chama a execução apropriada."""
-    parser = argparse.ArgumentParser(description="Automação de blog usando CrewAI")
-    parser.add_argument("--monitoramento", action="store_true", help="Executa apenas o monitoramento")
-    parser.add_argument("--traducao", action="store_true", help="Executa apenas a tradução")
-    parser.add_argument("--publicacao", action="store_true", help="Executa apenas a publicação")
-    parser.add_argument("--completo", action="store_true", help="Executa o fluxo completo (padrão se nenhuma flag for passada)")
-    parser.add_argument("--loop", type=int, help="Executa em loop a cada N minutos (aplicável a --monitoramento ou --completo)")
-    parser.add_argument("--direto", action="store_true", help="Executa monitoramento direto (sem CrewAI/LLM)")
+    # Não é mais necessário mudar o CWD globalmente se base_dir for usado consistentemente
+    
+    # Tentar carregar URLs de feed do feeds.json na raiz do projeto (framework_crewai)
+    project_root = Path(__file__).parent.parent.parent # framework_crewai
+    feeds_json_path = project_root / "feeds.json"
+    feed_urls = load_feed_urls_from_config(feeds_json_path)
+    
+    # Se não encontrar no local esperado, tenta no diretório src/blog_automacao (local antigo)
+    if not feed_urls:
+        current_dir_feeds_json = Path(__file__).parent / "feeds.json"
+        feed_urls = load_feed_urls_from_config(current_dir_feeds_json)
+        if feed_urls:
+            print(f"Aviso: Usando feeds.json de {current_dir_feeds_json}. Considere movê-lo para {feeds_json_path}")
+
+    if not feed_urls:
+        print("ERRO: Não foi possível carregar URLs de feed do feeds.json. Verifique os caminhos.")
+        # Poderia usar um fallback para uma lista hardcoded aqui se necessário
+        # feed_urls = ["http://default-feed.com/rss"]
+
+    parser = argparse.ArgumentParser(
+        description="Executa a automação de blog usando CrewAI.",
+        formatter_class=argparse.RawTextHelpFormatter
+    )
+    parser.add_argument(
+        "--monitoramento", action="store_true", 
+        help="Executa apenas o monitoramento e seleção de conteúdo"
+    )
+    parser.add_argument(
+        "--traducao", action="store_true", 
+        help="Executa apenas a tradução e adaptação de conteúdo"
+    )
+    parser.add_argument(
+        "--publicacao", action="store_true", 
+        help="Executa apenas a revisão e publicação de conteúdo"
+    )
+    parser.add_argument(
+        "--completo", action="store_true", 
+        help="Executa o fluxo completo (padrão se nenhuma outra ação for especificada)"
+    )
+    parser.add_argument(
+        "--loop", type=int, metavar="N", 
+        help="Executa em loop a cada N minutos (aplicável a --monitoramento ou --completo)"
+    )
+    parser.add_argument(
+        "--base_dir", type=str, default=".",
+        help="Diretório base para os subdiretórios de posts (posts_para_traduzir, etc.). Padrão: diretório atual."
+    )
     
     args = parser.parse_args()
     
-    # Determinar a ação padrão se nenhuma flag for passada
-    run_completo = not (args.monitoramento or args.traducao or args.publicacao or args.direto)
+    base_dir = Path(args.base_dir).resolve() # Resolve para caminho absoluto
+    print(f"Usando diretório base: {base_dir}")
+    
+    # Garantir que os diretórios base existam
+    (base_dir / "posts_para_traduzir").mkdir(parents=True, exist_ok=True)
+    (base_dir / "posts_traduzidos").mkdir(parents=True, exist_ok=True)
+    (base_dir / "posts_publicados").mkdir(parents=True, exist_ok=True)
+
+    # Inicializar a CrewAI (isso pode carregar configs, LLM, etc.)
+    try:
+        blog_crew = BlogAutomacaoCrew()
+        print("BlogAutomacaoCrew inicializada com sucesso.")
+    except Exception as e_crew:
+        print(f"ERRO CRÍTICO ao inicializar BlogAutomacaoCrew: {e_crew}")
+        print("Verifique as configurações de API (ex: GEMINI_API_KEY) e dependências.")
+        # Se a crew não puder ser inicializada, apenas o modo de monitoramento direto pode funcionar
+        if args.monitoramento and not (args.traducao or args.publicacao or args.completo):
+            print("Tentando executar monitoramento direto devido à falha na inicialização da Crew...")
+            executar_monitoramento_direto(base_dir, args.loop)
+        else:
+            print("Não é possível continuar sem a inicialização bem-sucedida da Crew para esta operação.")
+            sys.exit(1)
+        return # Sair da main se a crew falhou e o fallback foi executado ou não era aplicável
+
+    # Lógica de execução baseada nos argumentos
+    if args.monitoramento:
+        executar_monitoramento(blog_crew, base_dir, args.loop)
+    elif args.traducao:
+        if args.loop:
+            print("Aviso: --loop não é aplicável a --traducao. Executando uma vez.")
+        executar_traducao(blog_crew, base_dir)
+    elif args.publicacao:
+        if args.loop:
+            print("Aviso: --loop não é aplicável a --publicacao. Executando uma vez.")
+        executar_publicacao(blog_crew, base_dir)
+    elif args.completo:
+        executar_fluxo_completo(blog_crew, base_dir, args.loop)
+    else:
+        # Comportamento padrão: executar fluxo completo uma vez
+        print("Nenhuma flag específica fornecida, executando o fluxo completo por padrão.")
+        executar_fluxo_completo(blog_crew, base_dir, args.loop)
+
+def load_feed_urls_from_config(filepath):
+    """Carrega URLs de feed de um arquivo JSON que contém uma lista de objetos com 'name' e 'url'."""
+    if not filepath.exists():
+        print(f"Aviso: Arquivo de configuração de feeds não encontrado em {filepath}")
+        return [] # Retorna lista vazia se o arquivo não existe
 
     try:
-        # Executar monitoramento direto se solicitado
-        if args.direto:
-            print("Executando em modo de monitoramento direto...")
-            executar_monitoramento_direto(args.loop)
-            return # Sair após modo direto
+        with open(filepath, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            if isinstance(data, list) and all(isinstance(item, dict) and 'url' in item for item in data):
+                print(f"Carregados {len(data)} feeds de {filepath}")
+                return data # Retorna a lista de dicionários
+            else:
+                print(f"Erro: Formato inesperado em {filepath}. Esperado: lista de objetos com chave 'url'.")
+                return []
+    except json.JSONDecodeError:
+        print(f"Erro: Falha ao decodificar JSON em {filepath}.")
+        return []
+    except Exception as e:
+        print(f"Erro ao ler arquivo de feeds {filepath}: {e}")
+        return []
 
-        # Inicializar a crew (apenas se não for modo direto)
-        print("Inicializando BlogAutomacaoCrew...")
-        crew = BlogAutomacaoCrew()
-        print("BlogAutomacaoCrew inicializada.")
+def main():
+    # << INDENTAR TODO O CÓDIGO ABAIXO PARA DENTRO DE main() >>
+    # Tentar carregar URLs de feed do feeds.json na raiz do projeto (framework_crewai)
+    project_root = Path(__file__).parent.parent.parent # framework_crewai
+    feeds_json_path = project_root / "feeds.json"
+    feed_urls = load_feed_urls_from_config(feeds_json_path)
+    
+    # Se não encontrar no local esperado, tenta no diretório src/blog_automacao (local antigo)
+    if not feed_urls:
+        current_dir_feeds_json = Path(__file__).parent / "feeds.json"
+        feed_urls = load_feed_urls_from_config(current_dir_feeds_json)
+        if feed_urls:
+            print(f"Aviso: Usando feeds.json de {current_dir_feeds_json}. Considere movê-lo para {feeds_json_path}")
 
-        # Verificar qual comando executar
-        if args.monitoramento:
-            executar_monitoramento(crew, args.loop)
-        elif args.traducao:
-            if args.loop:
-                print("Aviso: --loop não é aplicável a --traducao. Executando uma vez.")
-            executar_traducao(crew)
-        elif args.publicacao:
-            if args.loop:
-                print("Aviso: --loop não é aplicável a --publicacao. Executando uma vez.")
-            executar_publicacao(crew)
-        else: # args.completo ou padrão
-            executar_fluxo_completo(crew, args.loop)
-            
-    except KeyboardInterrupt:
-        print("\nProcessamento interrompido pelo usuário.")
-        sys.exit(0)
-    except Exception as e_main:
-        print(f"\nERRO FATAL na execução principal: {e_main}")
-        import traceback
-        traceback.print_exc()
-        sys.exit(1)
+    if not feed_urls:
+        print("ERRO: Não foi possível carregar URLs de feed do feeds.json. Verifique os caminhos.")
+        # Poderia usar um fallback para uma lista hardcoded aqui se necessário
+        # feed_urls = ["http://default-feed.com/rss"]
+
+    parser = argparse.ArgumentParser(
+        description="Executa a automação de blog usando CrewAI.",
+        formatter_class=argparse.RawTextHelpFormatter
+    )
+    parser.add_argument(
+        "--monitoramento", action="store_true", 
+        help="Executa apenas o monitoramento e seleção de conteúdo"
+    )
+    parser.add_argument(
+        "--traducao", action="store_true", 
+        help="Executa apenas a tradução e adaptação de conteúdo"
+    )
+    parser.add_argument(
+        "--publicacao", action="store_true", 
+        help="Executa apenas a revisão e publicação de conteúdo"
+    )
+    parser.add_argument(
+        "--completo", action="store_true", 
+        help="Executa o fluxo completo (padrão se nenhuma outra ação for especificada)"
+    )
+    parser.add_argument(
+        "--loop", type=int, metavar="N", 
+        help="Executa em loop a cada N minutos (aplicável a --monitoramento ou --completo)"
+    )
+    parser.add_argument(
+        "--base_dir", type=str, default=".",
+        help="Diretório base para os subdiretórios de posts (posts_para_traduzir, etc.). Padrão: diretório atual."
+    )
+    
+    args = parser.parse_args()
+    
+    base_dir = Path(args.base_dir).resolve() # Resolve para caminho absoluto
+    print(f"Usando diretório base: {base_dir}")
+    
+    # Garantir que os diretórios base existam
+    (base_dir / "posts_para_traduzir").mkdir(parents=True, exist_ok=True)
+    (base_dir / "posts_traduzidos").mkdir(parents=True, exist_ok=True)
+    (base_dir / "posts_publicados").mkdir(parents=True, exist_ok=True)
+
+    # Inicializar a CrewAI (isso pode carregar configs, LLM, etc.)
+    try:
+        blog_crew = BlogAutomacaoCrew()
+        print("BlogAutomacaoCrew inicializada com sucesso.")
+    except Exception as e_crew:
+        print(f"ERRO CRÍTICO ao inicializar BlogAutomacaoCrew: {e_crew}")
+        print("Verifique as configurações de API (ex: GEMINI_API_KEY) e dependências.")
+        # Se a crew não puder ser inicializada, apenas o modo de monitoramento direto pode funcionar
+        if args.monitoramento and not (args.traducao or args.publicacao or args.completo):
+            print("Tentando executar monitoramento direto devido à falha na inicialização da Crew...")
+            executar_monitoramento_direto(base_dir, args.loop)
+        else:
+            print("Não é possível continuar sem a inicialização bem-sucedida da Crew para esta operação.")
+            sys.exit(1)
+        return # Sair da main se a crew falhou e o fallback foi executado ou não era aplicável
+
+    # Lógica de execução baseada nos argumentos
+    if args.monitoramento:
+        executar_monitoramento(blog_crew, base_dir, args.loop)
+    elif args.traducao:
+        if args.loop:
+            print("Aviso: --loop não é aplicável a --traducao. Executando uma vez.")
+        executar_traducao(blog_crew, base_dir)
+    elif args.publicacao:
+        if args.loop:
+            print("Aviso: --loop não é aplicável a --publicacao. Executando uma vez.")
+        executar_publicacao(blog_crew, base_dir)
+    elif args.completo:
+        executar_fluxo_completo(blog_crew, base_dir, args.loop)
+    else:
+        # Comportamento padrão: executar fluxo completo uma vez
+        print("Nenhuma flag específica fornecida, executando o fluxo completo por padrão.")
+        executar_fluxo_completo(blog_crew, base_dir, args.loop)
+    # << FIM DO BLOCO INDENTADO >>
 
 if __name__ == "__main__":
+    # Configuração para garantir que os imports relativos funcionem mesmo se 
+    # o script for chamado de um diretório diferente ou como parte de um pacote maior.
+    # Isso é importante se você executar, por exemplo, `python src/blog_automacao/main.py`
+    # em vez de `python -m src.blog_automacao.main`
+    current_script_path = Path(__file__).resolve()
+    # src_dir vai ser .../framework_crewai/src
+    src_dir = current_script_path.parent.parent 
+    # project_root_dir vai ser .../framework_crewai
+    project_root_dir = src_dir.parent 
+
+    if str(project_root_dir) not in sys.path:
+        sys.path.insert(0, str(project_root_dir))
+        print(f"Adicionado {project_root_dir} ao sys.path para imports de módulo")
+    
     main() 

@@ -14,8 +14,12 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent
 SRC_ROOT = PROJECT_ROOT / "src"
 MAIN_MODULE = "src.blog_automacao.main"
 
+# Definir o executável Python a ser usado (do venv)
+PROJECT_ROOT_FOR_TEST_PY = Path(__file__).resolve().parent.parent.parent # framework_crewai
+PYTHON_EXEC = PROJECT_ROOT_FOR_TEST_PY / "venv/bin/python3" # Caminho absoluto
+
 # Diretórios de teste
-TEST_DIR = PROJECT_ROOT / "temp_test_dir_single_post" # Nome diferente para evitar conflito
+TEST_DIR = PROJECT_ROOT_FOR_TEST_PY / "temp_test_dir_single_post"
 POSTS_PARA_TRADUZIR = TEST_DIR / "posts_para_traduzir"
 POSTS_TRADUZIDOS = TEST_DIR / "posts_traduzidos"
 POSTS_PUBLICADOS = TEST_DIR / "posts_publicados"
@@ -41,6 +45,9 @@ class TestSinglePostE2E(unittest.TestCase):
         POSTS_PARA_TRADUZIR.mkdir()
         POSTS_TRADUZIDOS.mkdir()
         POSTS_PUBLICADOS.mkdir()
+
+        print("Adicionado /home/sanity/thecryptofrontier/framework_crewai ao sys.path")
+        # sys.path.insert(0, "/home/sanity/thecryptofrontier/framework_crewai")
 
     @classmethod
     def tearDownClass(cls):
@@ -95,10 +102,17 @@ class TestSinglePostE2E(unittest.TestCase):
         # cmd = [PYTHON_EXEC, "-m", "src.blog_automacao.main", "--monitoramento", "--base_dir", str(TEST_DIR.relative_to(Path.cwd() / \"framework_crewai\"))]
         cmd = [PYTHON_EXEC, "-m", "src.blog_automacao.main", "--monitoramento", "--base_dir", str(TEST_DIR)]
 
-        result_mon = subprocess.run(cmd, capture_output=True, text=True, cwd=str(Path("framework_crewai")) )
+        result_mon = subprocess.run(cmd, capture_output=True, text=True)
+        # if result_mon.returncode != 0: # Imprimir sempre para depuração
+        print("--- Monitoramento STDOUT ---")
+        print(result_mon.stdout)
+        print("--- Monitoramento STDERR ---")
+        print(result_mon.stderr)
         self.assertEqual(result_mon.returncode, 0, f"Monitoramento falhou com código de saída {result_mon.returncode}")
         # Verificar se pelo menos um arquivo foi criado
+        print(f"Verificando arquivos em: {POSTS_PARA_TRADUZIR}") # DEBUG
         files_para_traduzir = list(POSTS_PARA_TRADUZIR.glob("*.json"))
+        print(f"Arquivos encontrados: {files_para_traduzir}") # DEBUG
         self.assertGreater(len(files_para_traduzir), initial_para_traduzir_count, "Nenhum arquivo foi encontrado em posts_para_traduzir após o monitoramento.")
         # Pegar o primeiro arquivo encontrado para as próximas etapas
         file_para_traduzir = files_para_traduzir[0]
@@ -107,7 +121,10 @@ class TestSinglePostE2E(unittest.TestCase):
         # 2. Executar Tradução
         print("\n--- Etapa 2: Executando Tradução (--traducao) ---")
         cmd_trad = [PYTHON_EXEC, "-m", "src.blog_automacao.main", "--traducao", "--base_dir", str(TEST_DIR)]
-        result_trad = subprocess.run(cmd_trad, capture_output=True, text=True, cwd=str(Path("framework_crewai")))
+        result_trad = subprocess.run(cmd_trad, capture_output=True, text=True)
+        if result_trad.returncode != 0:
+            print("--- Tradução STDOUT ---")
+            print(result_trad.stdout)
         self.assertEqual(result_trad.returncode, 0, f"Tradução falhou com código de saída {result_trad.returncode}")
         # Verificar se o script de tradução reportou ter encontrado artigos
         self.assertRegex(result_trad.stdout, r"Encontrados \d+ artigos para traduzir.") # Usar regex para número variável
@@ -126,7 +143,10 @@ class TestSinglePostE2E(unittest.TestCase):
         # 4. Executar Publicação
         print("\n--- Etapa 4: Executando Publicação (--publicacao) ---")
         cmd_pub = [PYTHON_EXEC, "-m", "src.blog_automacao.main", "--publicacao", "--base_dir", str(TEST_DIR)]
-        result_pub = subprocess.run(cmd_pub, capture_output=True, text=True, cwd=str(Path("framework_crewai")))
+        result_pub = subprocess.run(cmd_pub, capture_output=True, text=True)
+        if result_pub.returncode != 0:
+            print("--- Publicação STDOUT ---")
+            print(result_pub.stdout)
         self.assertEqual(result_pub.returncode, 0, f"Publicação falhou com código de saída {result_pub.returncode}")
         # Verificar se o script de publicação reportou ter encontrado artigos
         self.assertRegex(result_pub.stdout, r"Encontrados \d+ artigos para publicar.") # Usar regex

@@ -191,9 +191,20 @@ class RssFeedTool(Tool):
         feeds = self.obter_feeds_rss()
         artigos = []
         
-        for feed_url in feeds:
+        for feed_item in feeds:
             try:
-                print(f"Processando feed: {feed_url}")
+                # Extrair URL - pode ser string direta ou de um dict
+                if isinstance(feed_item, dict) and 'url' in feed_item:
+                    feed_url = feed_item['url']
+                    feed_name = feed_item.get('name', feed_url) # Usar nome ou URL como fallback
+                elif isinstance(feed_item, str):
+                    feed_url = feed_item
+                    feed_name = feed_item
+                else:
+                    print(f"Aviso: Item de feed inválido ignorado: {feed_item}")
+                    continue # Pular item inválido
+
+                print(f"Processando feed: {feed_name} ({feed_url})")
                 feed = feedparser.parse(feed_url)
                 
                 if not feed or not hasattr(feed, 'entries') or not feed.entries:
@@ -252,7 +263,7 @@ class RssFeedTool(Tool):
                     artigos.append(artigo)
                     
             except Exception as e:
-                print(f"Erro ao processar feed {feed_url}: {str(e)}")
+                print(f"Erro ao processar feed {feed_name}: {str(e)}")
         
         # Filtrar artigos com base na consulta, se fornecida
         if query and isinstance(query, str) and query.strip():

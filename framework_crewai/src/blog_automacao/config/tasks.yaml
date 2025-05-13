@@ -38,7 +38,7 @@ selection_task:
 
     Se o artigo for relevante (SIM):
     - Pegue os dados do campo "original_article".
-    - Crie um nome de arquivo único (ex: para_traduzir_{timestamp}_{slug}.json).
+    - Crie um nome de arquivo único (ex: para_traduzir_artigo.json).
     - Salve um arquivo JSON/Markdown em \'posts_para_traduzir/\' contendo os dados originais 
       (título, url, data, conteúdo, fonte) com um frontmatter apropriado.
     - Retorne o caminho completo do arquivo salvo.
@@ -96,7 +96,7 @@ localization_task:
     no diretório \'posts_traduzidos/\' usando o nome de arquivo gerado.
   expected_output: >
     O caminho completo do arquivo final salvo em \'posts_traduzidos/\'. 
-    Ex: \'posts_traduzidos/traduzido_{timestamp}_{slug}.json\'
+    Ex: \'posts_traduzidos/traduzido_artigo.json\'
   agent: localizer
   context: # Depende explicitamente do output da translation_task (o conteúdo traduzido)
     - translation_task 
