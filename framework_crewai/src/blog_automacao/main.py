@@ -242,6 +242,7 @@ def executar_traducao(crew, base_dir, arquivo_especifico_para_teste=None):
             resultado_crew = crew.traducao_crew().kickoff(inputs=inputs)
             
             # O resultado esperado da localization_task é o caminho do arquivo salvo
+            caminho_arquivo_traduzido_str = str(resultado_crew).strip()
             caminho_arquivo_traduzido_str = resultado_crew
             print(f"Resultado da traducao_crew: {caminho_arquivo_traduzido_str}")
 
