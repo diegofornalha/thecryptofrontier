@@ -73,20 +73,20 @@ async function indexarConteudo() {
     const files = fs.readdirSync(mcpxDirPath);
 
     files.forEach(file => {
-      // Ignorar arquivos index.md
-      if (file === 'index.md') {
+      // Ignorar arquivos index.json
+      if (file === 'index.json') {
         return;
       }
 
       const filePath = path.join(mcpxDirPath, file);
       const stat = fs.statSync(filePath);
 
-      if (!stat.isDirectory() && file.endsWith('.md')) {
+      if (!stat.isDirectory() && file.endsWith('.json')) {
         const content = fs.readFileSync(filePath, 'utf-8');
         const { attributes, body } = matter(content);
         
         // Gerar slug e permalink
-        const slug = attributes.slug || path.basename(file, '.md');
+        const slug = attributes.slug || path.basename(file, '.json');
         
         // Usar o caminho sem o prefixo /content/ para mcpx
         const permalink = `/${MCPX_DIR}/${slug}`;
@@ -117,15 +117,15 @@ async function indexarConteudo() {
         console.log(`📁 Processando subdiretório: ${subdir}`);
         
         subdirFiles.forEach(subdirFile => {
-          if (subdirFile === 'index.md') return;
+          if (subdirFile === 'index.json') return;
           
           const subdirFilePath = path.join(subdirPath, subdirFile);
-          if (fs.statSync(subdirFilePath).isFile() && subdirFile.endsWith('.md')) {
+          if (fs.statSync(subdirFilePath).isFile() && subdirFile.endsWith('.json')) {
             const content = fs.readFileSync(subdirFilePath, 'utf-8');
             const { attributes, body } = matter(content);
             
             // Gerar slug e permalink para arquivos em subdiretórios
-            const slug = attributes.slug || path.basename(subdirFile, '.md');
+            const slug = attributes.slug || path.basename(subdirFile, '.json');
             
             // Usar o caminho sem o prefixo /content/ para mcpx
             const permalink = `/${MCPX_DIR}/${subdir}/${slug}`;

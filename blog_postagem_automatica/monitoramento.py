@@ -34,7 +34,7 @@ def main():
         title="Post de teste para verificar funcionamento",
         content="Este é um conteúdo de teste para o post.",
         link="https://example.com/test",
-        output_file="test.md"
+        output_file="test.json"
     )
     
     # Verificar novamente

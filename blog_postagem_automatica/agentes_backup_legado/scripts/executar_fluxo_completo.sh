@@ -93,7 +93,7 @@ executar_fluxo_completo() {
   fi
   
   # Verificar se há artigos para traduzir
-  if [ "$(ls -A posts_traduzidos/para_traduzir_*.md 2>/dev/null)" ]; then
+  if [ "$(ls -A posts_traduzidos/para_traduzir_*.json 2>/dev/null)" ]; then
     # Passo 2: Traduzir artigos selecionados
     echo_color $YELLOW "Passo 2: Traduzindo artigos selecionados..."
     if [ "$USE_CREW" = true ]; then
@@ -106,7 +106,7 @@ executar_fluxo_completo() {
   fi
   
   # Verificar se há artigos traduzidos para publicar (sem o prefixo para_traduzir_)
-  if [ "$(ls -A posts_traduzidos/*.md 2>/dev/null | grep -v "para_traduzir_")" ]; then
+  if [ "$(ls -A posts_traduzidos/*.json 2>/dev/null | grep -v "para_traduzir_")" ]; then
     # Passo 3: Publicar artigos no Sanity
     echo_color $YELLOW "Passo 3: Publicando artigos no Sanity..."
     if [ "$USE_CREW" = true ]; then

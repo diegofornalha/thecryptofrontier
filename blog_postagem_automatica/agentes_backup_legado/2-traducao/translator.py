@@ -58,7 +58,7 @@ def obter_artigos_para_traduzir():
     artigos = []
     
     # Buscar arquivos marcados para tradução
-    arquivos = list(POSTS_DIR.glob("para_traduzir_*.md"))
+    arquivos = list(POSTS_DIR.glob("para_traduzir_*.json"))
     
     for arquivo in arquivos:
         try:

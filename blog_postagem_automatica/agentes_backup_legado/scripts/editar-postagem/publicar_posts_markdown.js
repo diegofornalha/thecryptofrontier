@@ -194,9 +194,9 @@ async function publicarPost(arquivoMarkdown) {
 // Função principal para processar todos os arquivos
 async function processarTodosArquivos() {
   try {
-    // Listar todos os arquivos .md na pasta
+    // Listar todos os arquivos .json na pasta
     const arquivos = fs.readdirSync(POSTS_DIR)
-      .filter(arquivo => arquivo.endsWith('.md'))
+      .filter(arquivo => arquivo.endsWith('.json'))
       .sort(); // Ordenar por nome (geralmente relacionado à data de criação)
     
     if (arquivos.length === 0) {

@@ -197,7 +197,7 @@ def publicar_posts():
     print("Iniciando processamento de artigos com CrewAI e publicação no Sanity...")
     
     # Listar arquivos markdown na pasta de posts traduzidos
-    arquivos = list(POSTS_DIR.glob("*.md"))
+    arquivos = list(POSTS_DIR.glob("*.json"))
     
     if not arquivos:
         print("Nenhum artigo encontrado para processar.")

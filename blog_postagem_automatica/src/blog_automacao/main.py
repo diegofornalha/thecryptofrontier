@@ -60,7 +60,7 @@ def executar_monitoramento_direto(loop_minutes=None):
                 titulo_slug = "".join(c if c.isalnum() else "_" for c in titulo_slug)
                 titulo_slug = titulo_slug[:50]  # Limitar tamanho
                 
-                arquivo_nome = f"para_traduzir_{int(time.time())}_{i}_{titulo_slug}.md"
+                arquivo_nome = f"para_traduzir_{int(time.time())}_{i}_{titulo_slug}.json"
                 caminho_arquivo = Path("posts_para_traduzir") / arquivo_nome
                 
                 # Criar cabeçalho YAML Front Matter
@@ -153,7 +153,7 @@ def executar_traducao(crew):
     
     # Verificar se há artigos para traduzir
     dir_posts = Path("posts_para_traduzir")
-    arquivos = list(dir_posts.glob("para_traduzir_*.md"))
+    arquivos = list(dir_posts.glob("para_traduzir_*.json"))
     
     if not arquivos:
         print("Nenhum artigo encontrado para traduzir.")
@@ -181,7 +181,7 @@ def executar_publicacao(crew):
     
     # Verificar se há artigos traduzidos para publicar
     dir_posts = Path("posts_traduzidos")
-    arquivos = list(dir_posts.glob("*.md"))
+    arquivos = list(dir_posts.glob("*.json"))
     arquivos = [a for a in arquivos if not a.name.startswith("para_traduzir_")]
     
     if not arquivos:
@@ -223,7 +223,7 @@ def executar_fluxo_completo(crew, loop_minutes=None):
         
         # Passo 2: Tradução (se houver artigos para traduzir)
         dir_posts = Path("posts_para_traduzir")
-        arquivos_traduzir = list(dir_posts.glob("para_traduzir_*.md"))
+        arquivos_traduzir = list(dir_posts.glob("para_traduzir_*.json"))
         
         if arquivos_traduzir:
             print(f"Passo 2: Tradução de {len(arquivos_traduzir)} artigos...")
@@ -240,7 +240,7 @@ def executar_fluxo_completo(crew, loop_minutes=None):
             print("Passo 2: Nenhum artigo para traduzir.")
         
         # Passo 3: Publicação (se houver artigos traduzidos)
-        arquivos_publicar = [a for a in Path("posts_traduzidos").glob("*.md")]
+        arquivos_publicar = [a for a in Path("posts_traduzidos").glob("*.json")]
         
         if arquivos_publicar:
             print(f"Passo 3: Publicação de {len(arquivos_publicar)} artigos...")

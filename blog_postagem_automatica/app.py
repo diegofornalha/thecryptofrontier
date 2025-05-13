@@ -172,7 +172,7 @@ def traduzir_artigos():
         if not dir_posts.exists():
             dir_posts = Path("posts_traduzidos")  # Fallback para compatibilidade
             
-        arquivos = list(dir_posts.glob("para_traduzir_*.md"))
+        arquivos = list(dir_posts.glob("para_traduzir_*.json"))
         
         if not arquivos:
             add_log("Nenhum artigo encontrado para traduzir.")
@@ -422,7 +422,7 @@ def publicar_artigos():
     with st.spinner("Publicando artigos..."):
         # Verificar se há artigos traduzidos para publicar
         dir_posts = Path("posts_traduzidos")
-        arquivos = [a for a in dir_posts.glob("*.md") if not a.name.startswith("para_traduzir_")]
+        arquivos = [a for a in dir_posts.glob("*.json") if not a.name.startswith("para_traduzir_")]
         
         if not arquivos:
             add_log("Nenhum artigo traduzido encontrado para publicar.")
@@ -507,7 +507,7 @@ def executar_fluxo_completo():
         if not dir_para_traduzir.exists():
             dir_para_traduzir = Path("posts_traduzidos")
         
-        arquivos_para_traduzir = list(dir_para_traduzir.glob("para_traduzir_*.md"))
+        arquivos_para_traduzir = list(dir_para_traduzir.glob("para_traduzir_*.json"))
         if arquivos_para_traduzir:
             add_log(f"Encontrados {len(arquivos_para_traduzir)} artigos para traduzir. Traduzindo o primeiro...")
             traduzir_artigos()
@@ -516,7 +516,7 @@ def executar_fluxo_completo():
         
         # Passo 3: Verificar se há arquivos traduzidos para publicar
         dir_traduzidos = Path("posts_traduzidos")
-        arquivos_traduzidos = [a for a in dir_traduzidos.glob("*.md") if not a.name.startswith("para_traduzir_")]
+        arquivos_traduzidos = [a for a in dir_traduzidos.glob("*.json") if not a.name.startswith("para_traduzir_")]
         
         if arquivos_traduzidos:
             add_log(f"Encontrados {len(arquivos_traduzidos)} artigos traduzidos. Publicando o primeiro...")
@@ -548,16 +548,16 @@ def obter_estatisticas():
         dir_publicados = Path(".")
     
     # Artigos para traduzir
-    stats["para_traduzir"] = len(list(dir_para_traduzir.glob("para_traduzir_*.md")))
+    stats["para_traduzir"] = len(list(dir_para_traduzir.glob("para_traduzir_*.json")))
     
     # Artigos traduzidos (não começam com "para_traduzir_")
-    stats["traduzidos"] = len([a for a in dir_traduzidos.glob("*.md") if not a.name.startswith("para_traduzir_")])
+    stats["traduzidos"] = len([a for a in dir_traduzidos.glob("*.json") if not a.name.startswith("para_traduzir_")])
     
     # Artigos publicados - usar a contagem do Sanity apenas ao visualizar a tab Sanity CMS
     if st.session_state.sanity_posts:
         stats["publicados"] = len(st.session_state.sanity_posts)
     else:
-        stats["publicados"] = len(list(dir_publicados.glob("*.md")))
+        stats["publicados"] = len(list(dir_publicados.glob("*.json")))
     
     return stats
 
@@ -896,7 +896,7 @@ with col_content:
             if not dir_posts.exists():
                 dir_posts = Path("posts_traduzidos")
                 
-            artigos = list(dir_posts.glob("para_traduzir_*.md"))
+            artigos = list(dir_posts.glob("para_traduzir_*.json"))
             
             if not artigos:
                 st.info("Nenhum artigo para traduzir.")
@@ -912,7 +912,7 @@ with col_content:
         
         with subtab2:
             dir_posts = Path("posts_traduzidos")
-            artigos = [a for a in dir_posts.glob("*.md") if not a.name.startswith("para_traduzir_")]
+            artigos = [a for a in dir_posts.glob("*.json") if not a.name.startswith("para_traduzir_")]
             
             if not artigos:
                 st.info("Nenhum artigo traduzido.")
@@ -931,7 +931,7 @@ with col_content:
             if not dir_publicados.exists():
                 st.info("Diretório de posts publicados não encontrado.")
             else:
-                artigos = list(dir_publicados.glob("*.md"))
+                artigos = list(dir_publicados.glob("*.json"))
                 
                 if not artigos:
                     st.info("Nenhum artigo publicado localmente.")

@@ -105,7 +105,7 @@ def process_new_items():
             try:
                 if OUTPUT_FORMAT.lower() == 'markdown':
                     output_content = markdown_generator.generate_post_markdown(title_translated, content_translated)
-                    file_extension = ".md"
+                    file_extension = ".json"
                 else:
                     output_content = html_generator.generate_post_html(title_translated, content_translated)
                     file_extension = ".html"

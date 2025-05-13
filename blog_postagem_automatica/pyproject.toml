@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "blog_automacao"
 version = "1.0.0"
 description = "Automação de blog de criptomoedas usando CrewAI"
-readme = "README.md"
+readme = "README.json"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [

@@ -15,8 +15,6 @@ Limpar o cache de compilação do Next.js resolvendo a incompatibilidade:
 ```bash
 # Remover o diretório .next que contém o cache do Next.js
 rm -rf .next
-
-# Reiniciar o servidor de desenvolvimento
 npm run dev
 ```
 

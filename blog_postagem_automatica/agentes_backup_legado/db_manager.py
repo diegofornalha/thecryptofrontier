@@ -66,7 +66,7 @@ def is_content_duplicated(content):
     if not content:
         return False
     
-    content_hash = hashlib.md5(content.encode('utf-8')).hexdigest()
+    content_hash = hashlib.json5(content.encode('utf-8')).hexdigest()
     
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -121,7 +121,7 @@ def save_processed_post(guid, title, content, link="", output_file=""):
             content = str(content)
     
     # Calcula o hash do conteúdo
-    content_hash = hashlib.md5(content.encode('utf-8')).hexdigest() if content else ""
+    content_hash = hashlib.json5(content.encode('utf-8')).hexdigest() if content else ""
     
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()

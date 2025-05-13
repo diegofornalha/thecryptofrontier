@@ -12,7 +12,7 @@ const fs = require('fs');
 const path = require('path');
 const matter = require('gray-matter');
 const { marked } = require('marked');
-const slugify = require('../utils/slugify');
+const slugify = require('../../utils/slugify');
 const { JSDOM } = require('jsdom');
 
 // Diretórios
@@ -543,7 +543,7 @@ function executar() {
   let arquivos;
   try {
     arquivos = fs.readdirSync(DIR_POSTS_TRADUZIDOS);
-    arquivos = arquivos.filter(arquivo => arquivo.endsWith('.md'));
+    arquivos = arquivos.filter(arquivo => arquivo.endsWith('.json'));
   } catch (erro) {
     console.error(`Erro ao ler diretório: ${erro.message}`);
     arquivos = [];

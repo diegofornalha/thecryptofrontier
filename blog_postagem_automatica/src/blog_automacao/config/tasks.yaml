@@ -91,7 +91,7 @@ localization_task:
     - url original como referência
   expected_output: Artigo adaptado em formato Markdown com cabeçalho YAML
   agent: localizer
-  output_file: posts_traduzidos/{output_filename}.md
+  output_file: posts_traduzidos/{output_filename}.json
 
 # Tarefas de publicação
 editing_task:

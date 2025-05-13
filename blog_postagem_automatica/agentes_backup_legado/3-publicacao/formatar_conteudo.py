@@ -98,4 +98,4 @@ if __name__ == "__main__":
         if resultado:
             print(json.dumps(resultado, indent=2, ensure_ascii=False))
     else:
-        print("Uso: python formatar_conteudo.py caminho_para_arquivo.md") 
+        print("Uso: python formatar_conteudo.py caminho_para_arquivo.json") 

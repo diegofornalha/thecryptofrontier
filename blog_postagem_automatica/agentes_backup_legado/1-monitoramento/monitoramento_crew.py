@@ -42,7 +42,7 @@ def criar_nome_arquivo(title, date):
     date_str = date.strftime("%Y-%m-%d")
     safe_title = "".join(c if c.isalnum() or c in " -" else "_" for c in title)
     safe_title = safe_title.replace(" ", "-").lower()[:80]  # Limita tamanho
-    return f"{date_str}-{safe_title}.md"
+    return f"{date_str}-{safe_title}.json"
 
 # Define o agente monitor de RSS
 def criar_agente_monitor():

@@ -106,7 +106,7 @@ class RssFeedTool(Tool):
             True se o post já foi processado, False caso contrário
         """
         # Gerar hash do conteúdo
-        content_hash = hashlib.md5(content.encode('utf-8')).hexdigest()
+        content_hash = hashlib.json5(content.encode('utf-8')).hexdigest()
         
         # Verificar no banco de dados
         conn = sqlite3.connect(self.db_path)
@@ -141,7 +141,7 @@ class RssFeedTool(Tool):
         pub_date = post.get("date", datetime.now().isoformat())
         
         # Gerar hash do conteúdo
-        content_hash = hashlib.md5(content.encode('utf-8')).hexdigest()
+        content_hash = hashlib.json5(content.encode('utf-8')).hexdigest()
         
         # Salvar no banco de dados
         conn = sqlite3.connect(self.db_path)

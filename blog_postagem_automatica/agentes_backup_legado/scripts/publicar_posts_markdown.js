@@ -4,9 +4,9 @@ const path = require('path');
 const matter = require('gray-matter');
 const { marked } = require('marked');
 const { createClient } = require('@sanity/client');
-const colors = require('../utils/colors');
-const slugify = require('../utils/slugify');
-const config = require('../utils/config');
+const colors = require('../../utils/colors');
+const slugify = require('../../utils/slugify');
+const config = require('../../utils/config');
 
 // Diretórios de trabalho
 const DIR_POSTS_TRADUZIDOS = config.diretorios.postsTraduzidos;
@@ -393,7 +393,7 @@ async function executar() {
   let arquivos;
   try {
     arquivos = fs.readdirSync(DIR_POSTS_TRADUZIDOS);
-    arquivos = arquivos.filter(arquivo => arquivo.endsWith('.md'));
+    arquivos = arquivos.filter(arquivo => arquivo.endsWith('.json'));
   } catch (erro) {
     console.error(`${colors.red}✗ Erro ao ler diretório: ${erro.message}${colors.reset}`);
     arquivos = [];
