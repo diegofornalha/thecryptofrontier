@@ -1037,14 +1037,31 @@ with col_content:
                     "https://thecryptobasic.com/feed",
                 ]
         
-        feeds_str = "\n".join(feeds)
+        # Verificar se feeds é uma lista de strings ou de dicionários
+        if feeds and isinstance(feeds[0], dict):
+            # Se for dicionário, extrair as URLs
+            feeds_str = "\n".join([feed.get("url", "") for feed in feeds])
+        else:
+            # Se for lista de strings
+            feeds_str = "\n".join(feeds)
+            
         new_feeds = st.text_area("Feeds RSS (um por linha)", feeds_str, height=200)
         
         if st.button("Salvar Feeds"):
             try:
                 new_feeds_list = [f for f in new_feeds.split("\n") if f.strip()]
+                # Converter para o formato de objeto com name e url
+                formatted_feeds = []
+                for feed_url in new_feeds_list:
+                    # Extrair um nome simples da URL
+                    feed_name = feed_url.split("//")[-1].split("/")[0].replace("www.", "")
+                    formatted_feeds.append({
+                        "name": feed_name,
+                        "url": feed_url
+                    })
+                
                 with open(feeds_file, "w", encoding="utf-8") as f:
-                    json.dump(new_feeds_list, f, indent=2)
+                    json.dump(formatted_feeds, f, indent=2)
                 add_log("Feeds RSS salvos com sucesso!")
                 st.success("Feeds RSS salvos com sucesso!")
             except Exception as e:
