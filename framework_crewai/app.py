@@ -33,6 +33,12 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Botão para limpar cache
+if st.sidebar.button("🧹 Limpar Cache"):
+    st.cache_data.clear()
+    st.cache_resource.clear()
+    st.experimental_rerun()
+
 # Estilos
 st.markdown("""
     <style>
@@ -1120,7 +1126,28 @@ with col_content:
                         post_url = f"https://thecryptofrontier.com/post/{post_slug}"
                         # Usar html para abrir em nova aba
                         st.markdown(f'<a href="{post_url}" target="_blank"><button style="background-color: #2196F3; color: white; border: none; border-radius: 0.25rem; padding: 0.25rem 0.5rem; font-size: 0.85rem; cursor: pointer;">Ver Detalhes</button></a>', unsafe_allow_html=True)
-    
+            
+            # Opção para exportar
+            if st.button("Exportar para CSV"):
+                import pandas as pd
+                df = pd.DataFrame([{
+                    "ID": p.get("id"),
+                    "Título": p.get("title", "Sem título"),
+                    "Fonte": p.get("source", "Desconhecida"),
+                    "Link": p.get("link", ""),
+                    "Data Publicação": p.get("published_date", ""),
+                    "Processado em": p.get("processed_date", ""),
+                    "Status": p.get("status", "processado")
+                } for p in filtered_posts])
+                
+                csv = df.to_csv(index=False)
+                st.download_button(
+                    label="Baixar CSV",
+                    data=csv,
+                    file_name="posts_processados.csv",
+                    mime="text/csv"
+                )
+
     with tab5:
         st.session_state.active_tab = "Configuração"
         st.markdown('<h2 class="sub-header">Configuração do Sistema</h2>', unsafe_allow_html=True)
@@ -1251,6 +1278,7 @@ with col_content:
                     
                     # Botões de ação
                     with col2:
+                        # Em vez de criar sub-colunas, colocar os botões um abaixo do outro
                         if st.button("Excluir", key=f"delete_db_{i}", type="primary"):
                             if excluir_post_do_banco(post.get('id')):
                                 st.success(f"Post {post.get('id')} excluído!")
@@ -1258,27 +1286,58 @@ with col_content:
                                 st.rerun()
                             else:
                                 st.error("Erro ao excluir post.")
-            
-            # Opção para exportar
-            if st.button("Exportar para CSV"):
-                import pandas as pd
-                df = pd.DataFrame([{
-                    "ID": p.get("id"),
-                    "Título": p.get("title", "Sem título"),
-                    "Fonte": p.get("source", "Desconhecida"),
-                    "Link": p.get("link", ""),
-                    "Data Publicação": p.get("published_date", ""),
-                    "Processado em": p.get("processed_date", ""),
-                    "Status": p.get("status", "processado")
-                } for p in filtered_posts])
-                
-                csv = df.to_csv(index=False)
-                st.download_button(
-                    label="Baixar CSV",
-                    data=csv,
-                    file_name="posts_processados.csv",
-                    mime="text/csv"
-                )
+                        
+                        if st.button("Traduzir", key=f"translate_db_{i}"):
+                            # Iniciar processo de tradução manual
+                            try:
+                                # Criar JSON com estrutura para tradução
+                                data_post = {
+                                    "frontmatter_original": {
+                                        "title": post.get('title', 'Sem Título Original'),
+                                        "original_link": post.get('link', ''),
+                                        "published_date": post.get('published_date', datetime.now().isoformat()),
+                                        "source_name": post.get('source', 'Desconhecido'),
+                                        "tags_originais": post.get('tags', []),
+                                        "slug_original": criar_slug(post.get('title', 'sem-titulo')),
+                                        "timestamp_captura": int(datetime.now().timestamp())
+                                    },
+                                    "content_text_original": post.get('content', ''),
+                                    "content_html_original": post.get('content_html', ''),
+                                    "resumo_original": post.get('summary', ''),
+                                    "content_text_traduzido": None,
+                                    "content_html_traduzido": None,
+                                    "frontmatter_traduzido": None
+                                }
+                                
+                                # Verificar se o diretório existe ou criar se necessário
+                                dir_posts = Path("posts_para_traduzir")
+                                dir_posts.mkdir(parents=True, exist_ok=True)
+                                
+                                # Gerar nome de arquivo único
+                                timestamp_atual = int(datetime.now().timestamp())
+                                arquivo_nome = f"para_traduzir_manual_{timestamp_atual}_{post.get('id')}.json"
+                                caminho_arquivo = dir_posts / arquivo_nome
+                                
+                                # Salvar arquivo para tradução
+                                with open(caminho_arquivo, "w", encoding="utf-8") as f:
+                                    json.dump(data_post, f, ensure_ascii=False, indent=4)
+                                
+                                # Iniciar tradução usando a crew
+                                add_log(f"Iniciando tradução manual do artigo ID: {post.get('id')}")
+                                
+                                crew = st.session_state.crew or inicializar_crew()
+                                inputs = {"arquivo_json": str(caminho_arquivo)}
+                                
+                                with st.spinner("Traduzindo artigo..."):
+                                    resultado_traducao = crew.traducao_crew().kickoff(inputs=inputs)
+                                    add_log(f"Resultado da tradução: {resultado_traducao}")
+                                    st.success(f"Artigo ID {post.get('id')} traduzido com sucesso!")
+                                    
+                            except Exception as e:
+                                import traceback
+                                add_log(f"Erro ao traduzir artigo: {str(e)}")
+                                add_log(f"Trace: {traceback.format_exc()}")
+                                st.error(f"Erro ao traduzir artigo: {str(e)}")
 
 # Footer
 st.markdown("---")

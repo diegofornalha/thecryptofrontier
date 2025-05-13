@@ -1,3 +1,32 @@
+#!/bin/bash
+
+echo "=== Reinicializando aplicação Streamlit ===="
+echo "1. Parando processos Streamlit existentes..."
+pkill -f streamlit
+
+echo "2. Limpando caches..."
+rm -rf ~/.streamlit/cache/* 2>/dev/null || true
+rm -rf .streamlit/cache/* 2>/dev/null || true
+rm -rf /tmp/streamlit/* 2>/dev/null || true
+
+echo "3. Verificando integridade do banco de dados..."
+sqlite3 posts_database.sqlite "VACUUM; PRAGMA integrity_check;" || echo "AVISO: Verificação de BD falhou!"
+
+echo "4. Otimizando banco de dados..."
+sqlite3 posts_database.sqlite "PRAGMA optimize;" || echo "AVISO: Otimização do BD falhou!"
+
+echo "5. Limpando arquivos temporários..."
+rm -f *.temp.js *.pid 2>/dev/null || true
+
+echo "6. Limpar e recriar diretório de scripts..."
+if [ -d "scripts" ]; then
+    rm -f scripts/excluir-postagem.js.temp 2>/dev/null || true
+else
+    mkdir -p scripts
+fi
+
+# Recria o script de exclusão com o dotenv
+cat << 'EOF' > scripts/excluir-postagem.js
 /**
  * Script para excluir posts do Sanity CMS
  * 
@@ -96,3 +125,10 @@ try {
   console.error(`Erro ao inicializar script: ${error.message}`);
   process.exit(1);
 }
+EOF
+
+echo "7. Instalando dependências necessárias..."
+npm install dotenv @sanity/client
+
+echo "8. Iniciando aplicação Streamlit..."
+streamlit run app.py --server.runOnSave=true --browser.serverAddress=0.0.0.0 --server.enableCORS=false 
