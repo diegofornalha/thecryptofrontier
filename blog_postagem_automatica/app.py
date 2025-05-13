@@ -29,6 +29,12 @@ import frontmatter
 sys.path.append(os.path.abspath('.'))
 from src.blog_automacao import BlogAutomacaoCrew
 
+# Função para adicionar log
+def add_log(message):
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    if 'log_messages' in st.session_state:
+        st.session_state.log_messages.append(f"[{timestamp}] {message}")
+
 # Configuração da página
 st.set_page_config(
     page_title="Blog Automação - The Crypto Frontier",
@@ -117,7 +123,8 @@ st.markdown("""
 
 # Inicialização de sessão
 if 'crew' not in st.session_state:
-    st.session_state.crew = None
+    st.session_state.crew = BlogAutomacaoCrew()
+    add_log(f"[{datetime.now().strftime('%H:%M:%S')}] Crew inicializada automaticamente!")
 if 'last_run' not in st.session_state:
     st.session_state.last_run = None
 if 'log_messages' not in st.session_state:
@@ -131,17 +138,14 @@ if 'post_to_index' not in st.session_state:
     st.session_state.post_to_index = None
 if 'post_to_edit' not in st.session_state:
     st.session_state.post_to_edit = None
+if 'active_tab' not in st.session_state:
+    st.session_state.active_tab = "Logs"
 
 # Função para inicializar a crew
 def inicializar_crew():
     st.session_state.crew = BlogAutomacaoCrew()
     st.session_state.log_messages.append(f"[{datetime.now().strftime('%H:%M:%S')}] Crew inicializada com sucesso!")
     return st.session_state.crew
-
-# Função para adicionar log
-def add_log(message):
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    st.session_state.log_messages.append(f"[{timestamp}] {message}")
 
 # Função para monitorar feeds RSS
 def monitorar_feeds():
@@ -805,9 +809,10 @@ st.markdown('<p>Sistema de automação para o blog The Crypto Frontier usando Cr
 with st.sidebar:
     st.markdown('<h2 class="sub-header">Controles</h2>', unsafe_allow_html=True)
     
-    # Inicialização
-    if st.button("Inicializar Crew", key="init_crew"):
-        inicializar_crew()
+    # Botão para ver logs
+    if st.button("Ver Logs", key="view_logs"):
+        st.session_state.active_tab = "Logs"
+        st.experimental_rerun()
     
     # Última execução
     if st.session_state.last_run:
@@ -818,9 +823,7 @@ with st.sidebar:
     # Ações
     st.markdown('<h3>Ações</h3>', unsafe_allow_html=True)
     
-    # Operações individuais
-    st.markdown('<h4>Operações Individuais</h4>', unsafe_allow_html=True)
-    
+    # Operações disponíveis
     col1, col2, col3 = st.columns(3)
     
     with col1:
@@ -834,34 +837,6 @@ with st.sidebar:
     with col3:
         if st.button("Indexar", key="btn_indexar"):
             indexar_artigo_individual()
-    
-    # Fluxo completo
-    st.markdown('<h4>Fluxo Completo</h4>', unsafe_allow_html=True)
-    
-    if st.button("Executar Fluxo Completo", key="btn_fluxo_completo"):
-        executar_fluxo_completo()
-    
-    # Operações do Algolia
-    st.markdown('<h4>Operações Algolia</h4>', unsafe_allow_html=True)
-    
-    if st.button("Indexar Todos Posts", key="btn_indexar_todos"):
-        indexar_todos_posts_no_algolia()
-    
-    # Modo contínuo
-    st.markdown('<h4>Modo Contínuo</h4>', unsafe_allow_html=True)
-    
-    interval = st.slider("Intervalo (minutos)", min_value=5, max_value=120, value=30, step=5)
-    
-    if 'running_continuous' not in st.session_state:
-        st.session_state.running_continuous = False
-    
-    if st.button("Iniciar Monitoramento Contínuo" if not st.session_state.running_continuous else "Parar Monitoramento", key="btn_continuous"):
-        st.session_state.running_continuous = not st.session_state.running_continuous
-        
-        if st.session_state.running_continuous:
-            add_log(f"Iniciando monitoramento contínuo a cada {interval} minutos")
-        else:
-            add_log("Monitoramento contínuo interrompido")
 
 # Removido diálogo de confirmação para exclusão direta
 
@@ -974,15 +949,10 @@ with col_content:
         st.session_state.active_tab = "Sanity CMS"
         st.markdown('<h2 class="sub-header">Posts no Sanity CMS</h2>', unsafe_allow_html=True)
         
-        # Botões para operações em lote
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("Atualizar Posts do Sanity", key="refresh_sanity"):
-                st.session_state.sanity_posts = []
-                st.session_state.last_posts_fetch = None
-        with col2:
-            if st.button("Indexar Todos no Algolia", key="index_all_algolia"):
-                indexar_todos_posts_no_algolia()
+        # Botão para atualizar posts
+        if st.button("Atualizar Posts do Sanity", key="refresh_sanity"):
+            st.session_state.sanity_posts = []
+            st.session_state.last_posts_fetch = None
         
         # Apenas nesta tab devemos buscar posts do Sanity
         posts = buscar_posts_do_sanity()
@@ -1094,21 +1064,7 @@ with col_content:
                 add_log(f"Erro ao salvar feeds: {str(e)}")
                 st.error(f"Erro ao salvar feeds: {str(e)}")
 
-# Modo contínuo (se estiver ativo)
-if st.session_state.running_continuous:
-    # Verificar quando foi a última execução
-    current_time = datetime.now()
-    
-    if st.session_state.last_run:
-        time_diff = (current_time - st.session_state.last_run).total_seconds() / 60
-        
-        # Se já passou o intervalo definido, executar novamente
-        if time_diff >= interval:
-            st.experimental_rerun()
-    else:
-        # Se nunca executou, executar agora
-        executar_fluxo_completo()
-        st.experimental_rerun()
+
 
 # Footer
 st.markdown("---")
