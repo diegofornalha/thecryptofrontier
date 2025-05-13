@@ -35,14 +35,17 @@ class RssFeedTool(Tool):
         # Inicializar banco de dados
         self._init_db()
         
-        # Carregar feeds da configuração legada se disponível
+        # Verificar se existe um arquivo de feeds personalizado
         try:
-            import sys
-            sys.path.append("agentes_backup_legado")
-            from config import RSS_FEEDS
-            self.default_feeds = RSS_FEEDS
-            print(f"Carregados {len(RSS_FEEDS)} feeds RSS da configuração legada.")
-        except ImportError:
+            feeds_file = Path("feeds.json")
+            if feeds_file.exists():
+                with open(feeds_file, "r", encoding="utf-8") as f:
+                    feeds = json.load(f)
+                    if isinstance(feeds, list) and feeds:
+                        self.default_feeds = feeds
+                        print(f"Feeds RSS carregados do arquivo feeds.json: {len(feeds)} feeds")
+        except Exception as e:
+            print(f"Erro ao carregar feeds.json: {e}")
             print("Usando feeds RSS padrão.")
     
     def _init_db(self):

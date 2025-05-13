@@ -50,15 +50,19 @@ class SanityPublishTool(Tool):
             return_direct=False
         )
         
-        # Carrega as configurações do ambiente
-        self.project_id = os.environ.get("SANITY_PROJECT_ID", self.project_id)
-        self.dataset = os.environ.get("SANITY_DATASET", self.dataset)
+        # Tentar usar variáveis de ambiente se disponíveis
+        self.project_id = os.environ.get("NEXT_PUBLIC_SANITY_PROJECT_ID", os.environ.get("SANITY_PROJECT_ID", self.project_id))
+        self.dataset = os.environ.get("NEXT_PUBLIC_SANITY_DATASET", "production")
+        self.api_version = os.environ.get("NEXT_PUBLIC_SANITY_API_VERSION", "2023-05-03")
         self.token = os.environ.get("SANITY_API_TOKEN", self.token)
-        self.api_version = os.environ.get("SANITY_API_VERSION", self.api_version)
+        # Verificar também SANITY_DEV_TOKEN e SANITY_DEPLOY_TOKEN
+        if not self.token:
+            self.token = os.environ.get("SANITY_DEV_TOKEN", self.token)
+        if not self.token:
+            self.token = os.environ.get("SANITY_DEPLOY_TOKEN", self.token)
         
-        # Verificar configurações
         if not self.project_id or not self.token:
-            print("⚠️ Aviso: Configurações do Sanity incompletas (SANITY_PROJECT_ID, SANITY_API_TOKEN). A publicação pode falhar.")
+            print("⚠️ Aviso: Configurações do Sanity incompletas (SANITY_PROJECT_ID, SANITY_API_TOKEN/SANITY_DEV_TOKEN/SANITY_DEPLOY_TOKEN). A publicação pode falhar.")
     
     def _get_field_name(self, schema, target_name):
         """Busca o nome real de um campo no schema pelo nome alvo."""

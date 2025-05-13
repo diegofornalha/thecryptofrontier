@@ -25,58 +25,12 @@ from .tools.sanity_tools import SanityPublishTool
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv()
 
-# Tentativa de carregar configurações do arquivo legado se as variáveis de ambiente não estiverem definidas
-def load_legacy_config():
-    config = {}
-    legacy_config_path = Path(__file__).parent.parent.parent / 'agentes_backup_legado' / 'config.py'
-    if legacy_config_path.exists():
-        try:
-            spec = importlib.util.spec_from_file_location("legacy_config", legacy_config_path)
-            legacy_module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(legacy_module)
-            
-            # Carregar variáveis relevantes
-            config['GEMINI_API_KEY'] = getattr(legacy_module, 'GEMINI_API_KEY', None)
-            config['GEMINI_MODEL'] = getattr(legacy_module, 'GEMINI_MODEL', 'gemini-1.5-flash') # Default para flash
-            config['SANITY_PROJECT_ID'] = getattr(legacy_module, 'SANITY_PROJECT_ID', None)
-            config['SANITY_DATASET'] = getattr(legacy_module, 'SANITY_DATASET', 'production')
-            config['SANITY_API_TOKEN'] = getattr(legacy_module, 'SANITY_API_TOKEN', None)
-            config['SANITY_API_VERSION'] = getattr(legacy_module, 'SANITY_API_VERSION', '2023-05-03')
-            
-        except Exception as e:
-            print(f"Aviso: Não foi possível carregar ou ler o arquivo de configuração legado {legacy_config_path}: {e}")
-    else:
-        print(f"Aviso: Arquivo de configuração legado não encontrado em {legacy_config_path}")
-    return config
-
-# Carregar configurações legadas (se necessário)
-legacy_cfg = load_legacy_config()
-
-# Definir variáveis de ambiente se não estiverem definidas
-# GEMINI
-if not os.getenv('GEMINI_API_KEY') and legacy_cfg.get('GEMINI_API_KEY'):
-    os.environ['GEMINI_API_KEY'] = legacy_cfg['GEMINI_API_KEY']
-    print("GEMINI_API_KEY carregada do config legado.")
 
 # Garantir que GOOGLE_API_KEY também seja definida se GEMINI_API_KEY estiver presente
 gemini_api_key_from_env = os.getenv("GEMINI_API_KEY")
 if gemini_api_key_from_env and not os.getenv("GOOGLE_API_KEY"):
     os.environ["GOOGLE_API_KEY"] = gemini_api_key_from_env
     print("GOOGLE_API_KEY definida a partir de GEMINI_API_KEY.")
-
-# SANITY
-if not os.getenv('SANITY_PROJECT_ID') and legacy_cfg.get('SANITY_PROJECT_ID'):
-    os.environ['SANITY_PROJECT_ID'] = legacy_cfg['SANITY_PROJECT_ID']
-    print("SANITY_PROJECT_ID carregado do config legado.")
-if not os.getenv('SANITY_DATASET') and legacy_cfg.get('SANITY_DATASET'):
-    os.environ['SANITY_DATASET'] = legacy_cfg['SANITY_DATASET']
-    print("SANITY_DATASET carregado do config legado.")
-if not os.getenv('SANITY_API_TOKEN') and legacy_cfg.get('SANITY_API_TOKEN'):
-    os.environ['SANITY_API_TOKEN'] = legacy_cfg['SANITY_API_TOKEN']
-    print("SANITY_API_TOKEN carregado do config legado.")
-if not os.getenv('SANITY_API_VERSION') and legacy_cfg.get('SANITY_API_VERSION'):
-    os.environ['SANITY_API_VERSION'] = legacy_cfg['SANITY_API_VERSION']
-    print("SANITY_API_VERSION carregado do config legado.")
 
 # Garante que a chave API Gemini está disponível
 gemini_api_key = os.getenv("GEMINI_API_KEY")
@@ -106,12 +60,10 @@ LITELLM_GEMINI_MODEL_NAME = "gemini/gemini-1.5-flash"
 # Classe base para inicializar LLM e ferramentas comuns
 class BaseCrewComponents:
     def __init__(self):
-        # <<< RE-INTRODUZIR INICIALIZAÇÃO DO LLM DAQUI
         self.llm = LLM(
             model="gemini/gemini-1.5-flash", 
             config={'api_key': gemini_api_key, 'temperature': 0.7}
         )
-        # pass # Apenas inicializa ferramentas REMOVIDO
         
         self.rss_feed_tool = RssFeedTool()
         self.sanity_publish_tool = SanityPublishTool()
@@ -121,24 +73,15 @@ class BaseCrewComponents:
 class BlogAutomacaoCrew(BaseCrewComponents):
     """Crew para automação completa de blog sobre criptomoedas."""
 
-    agents_config = 'config/agents.yaml' # Adicionado para carregar config
-    tasks_config = 'config/tasks.yaml'   # Adicionado para carregar config
+    agents_config = 'config/agents.yaml'
+    tasks_config = 'config/tasks.yaml'
 
     def __init__(self):
         """Inicializar a crew com configurações necessárias."""
-        super().__init__() # Inicializa LLM (agora LLM do CrewAI) e ferramentas da classe base
+        super().__init__() # Inicializa LLM e ferramentas da classe base
         
-        api_key = os.environ.get("GEMINI_API_KEY")
-        if not api_key:
-            # ... (código legado de carregamento de chave, pode permanecer para definir env var)
-            pass # A lógica principal de carregamento da chave API já está no topo do arquivo
-        
-        if api_key:
-            os.environ["LANGCHAIN_TRACING_V2"] = "false"  
-            os.environ["GOOGLE_API_KEY"] = api_key # Garantir que GOOGLE_API_KEY está definida
-            print("LLM foi configurado explicitamente em BaseCrewComponents.")
-        else:
-            print("ATENÇÃO: Nenhuma chave API GEMINI_API_KEY encontrada...")
+        os.environ["LANGCHAIN_TRACING_V2"] = "false"  
+        print("LLM foi configurado explicitamente em BaseCrewComponents.")
         
         # Criar diretórios necessários (movido para main.py onde faz mais sentido para o fluxo)
         # os.makedirs("posts_traduzidos", exist_ok=True)
@@ -341,46 +284,10 @@ class BlogAutomacaoCrew(BaseCrewComponents):
             llm=self.llm
         )
 
-# Este bloco é útil se você quiser executar este arquivo diretamente para teste
-# Ele não é o ponto de entrada padrão do `crewai run`
+# Execução para teste
 if __name__ == "__main__":
     print("## Bem-vindo à Crew de Automação de Blog! ##")
     print('-----------------------------------------------')
-
-    # Exemplo de como receber input (substitua pela sua lógica real)
-    # A string do input foi corrigida para ser uma linha única.
-    markdown_input = input("Cole o conteúdo markdown completo do post original (com frontmatter): ")
-
-    # Montar os inputs para a crew
-    inputs = {
-        'markdown_original': markdown_input
-        # Adicione outros inputs globais se necessário
-    }
-
-    # Criar e executar a crew
-    blog_crew = BlogAutomacaoCrew()
-
-    # Exemplo de como executar uma sub-crew (ex: traducao_crew)
-    # Esta parte precisa de um 'markdown_original' ou um 'arquivo_markdown'
-    # dependendo de como a primeira tarefa da traducao_crew (translation_task) espera o input.
-    # Conforme tasks.yaml, translation_task espera {arquivo_markdown}
-    # Este bloco if __name__ precisaria criar um arquivo temporário para testar.
-
-    # print("\nIniciando uma sub-crew de exemplo (traducao_crew)...")
-    # Supondo que você queira testar a traducao_crew aqui:
-    # temp_file_path = Path("temp_test_article_for_crew_py.md")
-    # with open(temp_file_path, 'w') as f:
-    #     f.write(markdown_input)
-    # test_inputs = {'arquivo_markdown': str(temp_file_path)}
-    # result = blog_crew.traducao_crew().kickoff(inputs=test_inputs)
-    # temp_file_path.unlink() # Limpar arquivo temporário
-
     print("\nO bloco if __name__ == '__main__' em crew.py é para testes diretos deste arquivo.")
     print("Para executar o fluxo principal, use o script main.py.")
-    # print("Resultado da sub-crew de exemplo:")
-    # print(result)
-
-    print("\n\n########################")
-    # print("## Resultado da Execução da Crew:")
-    # print(result)
     print("########################") 

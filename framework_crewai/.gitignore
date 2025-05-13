@@ -1,3 +1,4 @@
 .env
-/venv/
-/new_venv/
+env
+new_env
+new_venv
