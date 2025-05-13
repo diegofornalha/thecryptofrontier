@@ -239,35 +239,35 @@
   },
   "categories": [
     {
-      "_type": "category",
-      "title": "Ethereum"
+      "_type": "reference",
+      "_ref": "categoria-ethereum"
     }
   ],
   "tags": [
     {
-      "_type": "tag",
-      "title": "defi"
+      "_type": "reference",
+      "_ref": "tag-defi"
     },
     {
-      "_type": "tag",
-      "title": "bitcoin"
+      "_type": "reference",
+      "_ref": "tag-bitcoin"
     },
     {
-      "_type": "tag",
-      "title": "ethereum"
+      "_type": "reference",
+      "_ref": "tag-ethereum"
     },
     {
-      "_type": "tag",
-      "title": "criptomoedas"
+      "_type": "reference",
+      "_ref": "tag-criptomoedas"
     },
     {
-      "_type": "tag",
-      "title": "mercado"
+      "_type": "reference",
+      "_ref": "tag-mercado"
     }
   ],
   "author": {
-    "_type": "author",
-    "name": "The Crypto Frontier"
+    "_type": "reference",
+    "_ref": "author-crypto-frontier"
   },
   "cryptoMeta": {
     "coinName": "Bitcoin",
@@ -288,7 +288,7 @@
   },
   "originalSource": {
     "url": "https://cointelegraph.com/news/de-fi-lender-aave-breaks-all-time-high-tvl?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound",
-    "title": "Plataforma de empréstimo DeFi Aave atinge US$ 40 bilhões em valor bloqueado on-chain",
+    "title": "cointelegraph.com",
     "site": "cointelegraph.com"
   }
 }

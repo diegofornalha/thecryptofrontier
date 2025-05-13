@@ -321,16 +321,16 @@ function processarArquivo(arquivo) {
         }
       } : undefined,
       categories: [{
-        _type: 'category',
-        title: categoria
+        _type: 'reference',
+        _ref: 'categoria-' + slugify(categoria)
       }],
       tags: tags.map(tag => ({
-        _type: 'tag',
-        title: tag
+        _type: 'reference',
+        _ref: 'tag-' + slugify(tag)
       })),
       author: {
-        _type: 'author',
-        name: "The Crypto Frontier"
+        _type: 'reference',
+        _ref: 'author-crypto-frontier'
       },
       cryptoMeta: cryptoMeta.coinName ? cryptoMeta : undefined,
       seo: {
@@ -340,7 +340,7 @@ function processarArquivo(arquivo) {
       },
       originalSource: {
         url: data.original_link || "",
-        title: data.title,
+        title: data.source || "",
         site: data.source || ""
       }
     };

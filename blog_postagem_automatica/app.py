@@ -21,6 +21,7 @@ from pathlib import Path
 import requests
 import asyncio
 import subprocess
+import shutil
 
 # Adiciona o diretório src ao path para importar o módulo blog_automacao
 sys.path.append(os.path.abspath('.'))
@@ -161,22 +162,27 @@ def traduzir_artigos():
         crew = st.session_state.crew or inicializar_crew()
         
         # Verificar se há artigos para traduzir
-        dir_posts = Path("posts_traduzidos")
+        dir_posts = Path("posts_para_traduzir")
+        if not dir_posts.exists():
+            dir_posts = Path("posts_traduzidos")  # Fallback para compatibilidade
+            
         arquivos = list(dir_posts.glob("para_traduzir_*.md"))
         
         if not arquivos:
             add_log("Nenhum artigo encontrado para traduzir.")
             return False
         
-        add_log(f"Iniciando tradução de {len(arquivos)} artigos...")
+        # Ordenar por nome para pegar o mais antigo primeiro
+        arquivos.sort()
+        arquivo = arquivos[0]  # Pegar apenas o primeiro arquivo
         
-        for arquivo in arquivos:
-            add_log(f"Traduzindo: {arquivo.name}")
-            try:
-                result = crew.traducao_crew().kickoff(inputs={"arquivo_markdown": str(arquivo)})
-                add_log(f"Artigo traduzido: {arquivo.name}")
-            except Exception as e:
-                add_log(f"Erro ao traduzir {arquivo.name}: {str(e)}")
+        add_log(f"Iniciando tradução de 1 artigo: {arquivo.name}")
+        
+        try:
+            result = crew.traducao_crew().kickoff(inputs={"arquivo_markdown": str(arquivo)})
+            add_log(f"✅ Artigo traduzido com sucesso: {arquivo.name}")
+        except Exception as e:
+            add_log(f"❌ Erro ao traduzir {arquivo.name}: {str(e)}")
         
         st.session_state.last_run = datetime.now()
         return True
@@ -188,22 +194,49 @@ def publicar_artigos():
         
         # Verificar se há artigos traduzidos para publicar
         dir_posts = Path("posts_traduzidos")
-        arquivos = list(dir_posts.glob("*.md"))
-        arquivos = [a for a in arquivos if not a.name.startswith("para_traduzir_")]
+        arquivos = [a for a in dir_posts.glob("*.md") if not a.name.startswith("para_traduzir_")]
         
         if not arquivos:
             add_log("Nenhum artigo traduzido encontrado para publicar.")
             return False
         
-        add_log(f"Iniciando publicação de {len(arquivos)} artigos...")
+        # Ordenar por data de modificação para pegar o mais antigo primeiro
+        arquivos.sort(key=lambda x: x.stat().st_mtime)
+        arquivo = arquivos[0]  # Pegar apenas o primeiro arquivo
         
-        for arquivo in arquivos:
-            add_log(f"Publicando: {arquivo.name}")
+        add_log(f"Iniciando publicação de 1 artigo: {arquivo.name}")
+        
+        try:
+            # Ler o conteúdo do arquivo Markdown
+            with open(arquivo, "r", encoding="utf-8") as f:
+                conteudo_markdown = f.read()
+                
+            # Passar tanto o caminho do arquivo quanto o conteúdo formatado
+            result = crew.publicacao_crew().kickoff(inputs={
+                "arquivo_markdown": str(arquivo),
+                "conteudo_formatado": conteudo_markdown
+            })
+            
+            add_log(f"✅ Artigo publicado com sucesso: {arquivo.name}")
+            
+            # Mover o arquivo para a pasta posts_publicados após publicação bem-sucedida
+            dir_publicados = Path("posts_publicados")
+            if not dir_publicados.exists():
+                dir_publicados.mkdir(exist_ok=True)
+                
+            arquivo_destino = dir_publicados / arquivo.name
             try:
-                result = crew.publicacao_crew().kickoff(inputs={"arquivo_markdown": str(arquivo)})
-                add_log(f"Artigo publicado: {arquivo.name}")
+                # Usar shutil para garantir que funcione entre sistemas de arquivos
+                shutil.copy2(arquivo, arquivo_destino)
+                # Só excluir o original se a cópia foi bem-sucedida
+                if arquivo_destino.exists():
+                    arquivo.unlink()
+                add_log(f"✅ Arquivo movido para posts_publicados: {arquivo.name}")
             except Exception as e:
-                add_log(f"Erro ao publicar {arquivo.name}: {str(e)}")
+                add_log(f"⚠️ Aviso: Não foi possível mover o arquivo: {str(e)}")
+                
+        except Exception as e:
+            add_log(f"❌ Erro ao publicar {arquivo.name}: {str(e)}")
         
         st.session_state.last_run = datetime.now()
         # Limpar o cache de posts para forçar atualização
@@ -219,11 +252,27 @@ def executar_fluxo_completo():
         # Passo 1: Monitoramento
         monitorar_feeds()
         
-        # Passo 2: Tradução
-        traduzir_artigos()
+        # Passo 2: Verificar se há arquivos para traduzir
+        dir_para_traduzir = Path("posts_para_traduzir")
+        if not dir_para_traduzir.exists():
+            dir_para_traduzir = Path("posts_traduzidos")
         
-        # Passo 3: Publicação
-        publicar_artigos()
+        arquivos_para_traduzir = list(dir_para_traduzir.glob("para_traduzir_*.md"))
+        if arquivos_para_traduzir:
+            add_log(f"Encontrados {len(arquivos_para_traduzir)} artigos para traduzir. Traduzindo o primeiro...")
+            traduzir_artigos()
+        else:
+            add_log("Nenhum artigo encontrado para traduzir após monitoramento.")
+        
+        # Passo 3: Verificar se há arquivos traduzidos para publicar
+        dir_traduzidos = Path("posts_traduzidos")
+        arquivos_traduzidos = [a for a in dir_traduzidos.glob("*.md") if not a.name.startswith("para_traduzir_")]
+        
+        if arquivos_traduzidos:
+            add_log(f"Encontrados {len(arquivos_traduzidos)} artigos traduzidos. Publicando o primeiro...")
+            publicar_artigos()
+        else:
+            add_log("Nenhum artigo traduzido encontrado para publicar.")
         
         add_log("Fluxo completo finalizado!")
         st.session_state.last_run = datetime.now()
@@ -235,18 +284,29 @@ def executar_fluxo_completo():
 def obter_estatisticas():
     stats = {}
     
+    # Diretório para artigos não traduzidos
+    dir_para_traduzir = Path("posts_para_traduzir")
+    if not dir_para_traduzir.exists():
+        dir_para_traduzir = Path("posts_traduzidos")
+    
+    # Diretório para artigos traduzidos
+    dir_traduzidos = Path("posts_traduzidos")
+    
+    # Diretório para artigos publicados
+    dir_publicados = Path("posts_publicados")
+    if not dir_publicados.exists():
+        dir_publicados = Path(".")
+    
     # Artigos para traduzir
-    dir_posts = Path("posts_traduzidos")
-    stats["para_traduzir"] = len(list(dir_posts.glob("para_traduzir_*.md")))
+    stats["para_traduzir"] = len(list(dir_para_traduzir.glob("para_traduzir_*.md")))
     
-    # Artigos traduzidos
-    stats["traduzidos"] = len([a for a in dir_posts.glob("*.md") if not a.name.startswith("para_traduzir_")])
+    # Artigos traduzidos (não começam com "para_traduzir_")
+    stats["traduzidos"] = len([a for a in dir_traduzidos.glob("*.md") if not a.name.startswith("para_traduzir_")])
     
-    # Artigos publicados - usar a contagem do Sanity quando disponível
+    # Artigos publicados - usar a contagem do Sanity apenas ao visualizar a tab Sanity CMS
     if st.session_state.sanity_posts:
         stats["publicados"] = len(st.session_state.sanity_posts)
     else:
-        dir_publicados = Path("posts_publicados")
         stats["publicados"] = len(list(dir_publicados.glob("*.md")))
     
     return stats
@@ -465,6 +525,32 @@ def buscar_posts_do_sanity(refresh=False):
         add_log(f"Erro ao buscar posts: {str(e)}")
         return []
 
+# Função para indexar um único artigo no Algolia
+def indexar_artigo_individual():
+    with st.spinner("Indexando artigo..."):
+        # Verificar se há posts no Sanity para indexar
+        posts = buscar_posts_do_sanity()
+        
+        if not posts:
+            add_log("Nenhum post encontrado no Sanity CMS para indexar.")
+            return False
+        
+        # Ordenar por data de publicação (mais recente primeiro)
+        posts.sort(key=lambda p: p.get("publishedAt", ""), reverse=True)
+        
+        # Pegar o post mais recente para indexar
+        post = posts[0]
+        post_id = post.get("_id")
+        post_title = post.get("title", "Sem título")
+        
+        add_log(f"Indexando post mais recente: '{post_title}'")
+        
+        if indexar_post_no_algolia(post_id, post_title):
+            add_log(f"✅ Post '{post_title}' indexado com sucesso no Algolia!")
+            return True
+        else:
+            return False
+
 # Interface principal
 st.markdown('<h1 class="main-header">Blog Automação - The Crypto Frontier</h1>', unsafe_allow_html=True)
 st.markdown('<p>Sistema de automação para o blog The Crypto Frontier usando CrewAI</p>', unsafe_allow_html=True)
@@ -492,16 +578,16 @@ with st.sidebar:
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        if st.button("Monitorar", key="btn_monitorar"):
-            monitorar_feeds()
-    
-    with col2:
         if st.button("Traduzir", key="btn_traduzir"):
             traduzir_artigos()
     
-    with col3:
+    with col2:
         if st.button("Publicar", key="btn_publicar"):
             publicar_artigos()
+    
+    with col3:
+        if st.button("Indexar", key="btn_indexar"):
+            indexar_artigo_individual()
     
     # Fluxo completo
     st.markdown('<h4>Fluxo Completo</h4>', unsafe_allow_html=True)
@@ -539,8 +625,7 @@ col_stats, col_content = st.columns([1, 3])
 with col_stats:
     st.markdown('<h2 class="sub-header">Estatísticas</h2>', unsafe_allow_html=True)
     
-    # Garantir que temos dados atualizados do Sanity
-    buscar_posts_do_sanity()
+    # Obter estatísticas sem buscar do Sanity
     stats = obter_estatisticas()
     
     st.markdown('<div class="info-box">', unsafe_allow_html=True)
@@ -557,9 +642,16 @@ with col_stats:
 
 with col_content:
     # Tabs para diferentes visualizações
+    if 'active_tab' not in st.session_state:
+        st.session_state.active_tab = "Logs"
+        
     tab1, tab2, tab3, tab4 = st.tabs(["Logs", "Artigos", "Sanity CMS", "Configuração"])
     
+    # Detectar qual tab está ativa
+    # Como o Streamlit não permite detectar diretamente, usar a seleção para atualizar variáveis de sessão
+    
     with tab1:
+        st.session_state.active_tab = "Logs"
         st.markdown('<h2 class="sub-header">Logs</h2>', unsafe_allow_html=True)
         
         # Limpar logs
@@ -571,13 +663,18 @@ with col_content:
         st.code(log_text)
     
     with tab2:
+        st.session_state.active_tab = "Artigos"
         st.markdown('<h2 class="sub-header">Artigos</h2>', unsafe_allow_html=True)
         
         # Subtabs para diferentes estados
         subtab1, subtab2, subtab3 = st.tabs(["Para Traduzir", "Traduzidos", "Publicados"])
         
         with subtab1:
-            dir_posts = Path("posts_traduzidos")
+            # Verificar primeiro em posts_para_traduzir e se não existir, verificar em posts_traduzidos
+            dir_posts = Path("posts_para_traduzir")
+            if not dir_posts.exists():
+                dir_posts = Path("posts_traduzidos")
+                
             artigos = list(dir_posts.glob("para_traduzir_*.md"))
             
             if not artigos:
@@ -610,21 +707,25 @@ with col_content:
         
         with subtab3:
             dir_publicados = Path("posts_publicados")
-            artigos = list(dir_publicados.glob("*.md"))
-            
-            if not artigos:
-                st.info("Nenhum artigo publicado.")
+            if not dir_publicados.exists():
+                st.info("Diretório de posts publicados não encontrado.")
             else:
-                for arquivo in artigos:
-                    with st.expander(arquivo.name):
-                        try:
-                            with open(arquivo, "r", encoding="utf-8") as f:
-                                conteudo = f.read()
-                            st.code(conteudo[:500] + "...", language="markdown")
-                        except Exception as e:
-                            st.error(f"Erro ao ler arquivo: {str(e)}")
+                artigos = list(dir_publicados.glob("*.md"))
+                
+                if not artigos:
+                    st.info("Nenhum artigo publicado localmente.")
+                else:
+                    for arquivo in artigos:
+                        with st.expander(arquivo.name):
+                            try:
+                                with open(arquivo, "r", encoding="utf-8") as f:
+                                    conteudo = f.read()
+                                st.code(conteudo[:500] + "...", language="markdown")
+                            except Exception as e:
+                                st.error(f"Erro ao ler arquivo: {str(e)}")
     
     with tab3:
+        st.session_state.active_tab = "Sanity CMS"
         st.markdown('<h2 class="sub-header">Posts no Sanity CMS</h2>', unsafe_allow_html=True)
         
         # Botões para operações em lote
@@ -637,7 +738,7 @@ with col_content:
             if st.button("Indexar Todos no Algolia", key="index_all_algolia"):
                 indexar_todos_posts_no_algolia()
         
-        # Buscar e exibir posts
+        # Apenas nesta tab devemos buscar posts do Sanity
         posts = buscar_posts_do_sanity()
         
         if not posts:
@@ -699,9 +800,10 @@ with col_content:
                         if st.button("Indexar no Algolia", key=f"index_{i}"):
                             indexar_post_no_algolia(post.get("_id"), post.get("title", "Sem título"))
                     with col3:
-                        if st.button("Ver Detalhes", key=f"view_{i}"):
-                            st.session_state.post_to_edit = post
-                            # Exibir modal com detalhes completos futuramente
+                        post_slug = post.get('slug', {}).get('current', '')
+                        post_url = f"https://thecryptofrontier.com/post/{post_slug}"
+                        # Usar html para abrir em nova aba
+                        st.markdown(f'<a href="{post_url}" target="_blank"><button style="background-color: #2196F3; color: white; border: none; border-radius: 0.25rem; padding: 0.25rem 0.5rem; font-size: 0.85rem; cursor: pointer;">Ver Detalhes</button></a>', unsafe_allow_html=True)
     
     with tab4:
         st.markdown('<h2 class="sub-header">Configuração</h2>', unsafe_allow_html=True)
@@ -771,4 +873,5 @@ st.markdown(
     </div>
     """, 
     unsafe_allow_html=True
-) 
+)
+

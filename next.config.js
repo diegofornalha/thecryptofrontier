@@ -11,7 +11,7 @@ const nextConfig = {
     trailingSlash: true,
     reactStrictMode: true,
 
-    // Adicionando webpack config para incluir o patch de preload
+    // Adicionando webpack config para incluir o patch de preload e resolver problemas de compatibilidade
     webpack: (config, { isServer }) => {
         if (!isServer) {
             // Adicionando nosso patch como entry point
@@ -25,13 +25,21 @@ const nextConfig = {
                 return entries;
             };
         }
+
+        // Resolver problemas de compatibilidade com @sanity/visual-editing-csm
+        config.resolve.alias = {
+            ...config.resolve.alias,
+            '@sanity/visual-editing-csm': false,
+            '@sanity/visual-editing': false
+        };
+
         return config;
     },
     // Forçar o uso do Pages Router, desativando o App Router
     useFileSystemPublicRoutes: true,
     // Configuração de imagens para o Sanity
     images: {
-        domains: ['cdn.sanity.io'],
+        domains: ['cdn.sanity.io', 'images.cointelegraph.com', 's3.cointelegraph.com'],
     },
     // Configuração de redirecionamentos
     async redirects() {

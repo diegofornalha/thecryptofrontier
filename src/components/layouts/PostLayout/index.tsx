@@ -1,6 +1,7 @@
 import * as React from 'react';
 import dayjs from 'dayjs';
 import Markdown from 'markdown-to-jsx';
+import { useRouter } from 'next/router';
 
 import { getBaseLayoutComponent } from '../../../utils/base-layout';
 import { getComponent } from '../../components-registry';
@@ -10,13 +11,14 @@ import SocialShare from '../../atoms/SocialShare';
 
 export default function PostLayout(props) {
     const { page, site } = props;
+    const router = useRouter();
     const BaseLayout = getBaseLayoutComponent(page.baseLayout, site.baseLayout);
     const { enableAnnotations = true } = site;
     const { title, date, author = null, markdown_content, bottomSections = [], categories = [], slug } = page;
     const dateTimeAttr = dayjs(date).format('YYYY-MM-DD HH:mm:ss');
     const formattedDate = dayjs(date).format('YYYY-MM-DD');
     // URL completa do post para compartilhamento
-    const siteUrl = site.siteUrl || 'https://thecryptofrontier.agentesintegrados.com';
+    const siteUrl = site.siteUrl || 'https://thecryptofrontier.com';
     const postUrl = `${siteUrl}/post/${slug}`;
 
     return (
