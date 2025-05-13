@@ -22,6 +22,8 @@ import requests
 import asyncio
 import subprocess
 import shutil
+import uuid
+import frontmatter
 
 # Adiciona o diretório src ao path para importar o módulo blog_automacao
 sys.path.append(os.path.abspath('.'))
@@ -187,11 +189,136 @@ def traduzir_artigos():
         st.session_state.last_run = datetime.now()
         return True
 
+# Função para publicar diretamente no Sanity, baseada no código JS legado
+def publicar_post_direto(arquivo_markdown):
+    """
+    Publica um post diretamente no Sanity CMS sem usar o CrewAI.
+    Baseado no código legado publicar_posts_markdown.js
+    """
+    try:
+        # Ler arquivo markdown
+        with open(arquivo_markdown, "r", encoding="utf-8") as f:
+            conteudo = f.read()
+        
+        # Parsear o frontmatter (cabeçalho YAML)
+        post = frontmatter.loads(conteudo)
+        
+        # Verificar se temos título
+        if not post.get('title'):
+            return False, "Arquivo sem título no front matter"
+        
+        # Criar slug do título
+        slug = criar_slug(post.get('title'))
+        
+        # Preparar o documento para o Sanity (diretamente via API Sanity)
+        project_id = os.environ.get("NEXT_PUBLIC_SANITY_PROJECT_ID") or os.environ.get("SANITY_PROJECT_ID")
+        dataset = os.environ.get("NEXT_PUBLIC_SANITY_DATASET") or "production"
+        api_version = os.environ.get("NEXT_PUBLIC_SANITY_API_VERSION") or "2023-05-03"
+        token = os.environ.get("SANITY_DEV_TOKEN")
+        
+        if not project_id or not token:
+            # Tentar ler do .env
+            try:
+                with open(".env", "r") as f:
+                    for line in f:
+                        if "SANITY_PROJECT_ID" in line or "NEXT_PUBLIC_SANITY_PROJECT_ID" in line:
+                            parts = line.strip().split("=")
+                            if len(parts) > 1:
+                                project_id = parts[1].strip().strip('"').strip("'")
+                        elif "SANITY_DEV_TOKEN" in line:
+                            parts = line.strip().split("=")
+                            if len(parts) > 1:
+                                token = parts[1].strip().strip('"').strip("'")
+            except Exception as e:
+                return False, f"Erro ao ler arquivo .env: {e}"
+        
+        if not project_id or not token:
+            return False, "Credenciais do Sanity não encontradas"
+        
+        # Gerar ID único para o post
+        doc_id = f"post-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        
+        # Extrair o primeiro parágrafo como excerpt
+        excerpt = post.content.split('\n\n')[0] if post.content else ""
+        
+        # Formatamos o conteúdo de forma simplificada para iniciar
+        # Para um formato completo, seria necessário converter o markdown para blocos Sanity
+        documento = {
+            "_type": "post",
+            "_id": doc_id,
+            "title": post.get('title'),
+            "slug": {
+                "_type": "slug",
+                "current": slug
+            },
+            "excerpt": excerpt.strip()[:160],
+            "content": [
+                {
+                    "_type": "block",
+                    "_key": str(uuid.uuid4()).replace('-', ''),
+                    "style": "normal",
+                    "children": [
+                        {
+                            "_type": "span",
+                            "_key": str(uuid.uuid4()).replace('-', ''),
+                            "text": post.content,
+                            "marks": []
+                        }
+                    ],
+                    "markDefs": []
+                }
+            ],
+            "publishedAt": post.get('date') or datetime.now().isoformat()
+        }
+        
+        # Enviar para o Sanity
+        url = f"https://{project_id}.api.sanity.io/v{api_version}/data/mutate/{dataset}"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {token}"
+        }
+        payload = {
+            "mutations": [
+                {
+                    "create": documento
+                }
+            ]
+        }
+        
+        response = requests.post(url, headers=headers, json=payload)
+        
+        if response.status_code == 200:
+            resultado = response.json()
+            # Debugar a estrutura da resposta para entender o formato
+            print(f"Resposta do Sanity: {resultado}")
+            # Usar o ID do documento que foi enviado, já que sabemos isso
+            return True, f"Post publicado com sucesso! ID: {doc_id}"
+        else:
+            return False, f"Erro API Sanity: {response.status_code} - {response.text}"
+            
+    except Exception as e:
+        import traceback
+        return False, f"Erro ao publicar post: {str(e)}\n{traceback.format_exc()}"
+
+def criar_slug(titulo):
+    """Cria um slug a partir do título"""
+    import re
+    # Converter para minúsculas
+    slug = titulo.lower()
+    # Remover acentos
+    import unicodedata
+    slug = unicodedata.normalize('NFKD', slug).encode('ASCII', 'ignore').decode('utf-8')
+    # Substituir espaços e caracteres especiais por hífen
+    slug = re.sub(r'[^\w\s-]', '', slug)
+    slug = re.sub(r'\s+', '-', slug)
+    # Remover hífens duplicados
+    slug = re.sub(r'-+', '-', slug)
+    # Limitar tamanho
+    return slug[:80]
+
 # Função para publicar artigos
 def publicar_artigos():
     with st.spinner("Publicando artigos..."):
-        crew = st.session_state.crew or inicializar_crew()
-        
         # Verificar se há artigos traduzidos para publicar
         dir_posts = Path("posts_traduzidos")
         arquivos = [a for a in dir_posts.glob("*.md") if not a.name.startswith("para_traduzir_")]
@@ -204,20 +331,13 @@ def publicar_artigos():
         arquivos.sort(key=lambda x: x.stat().st_mtime)
         arquivo = arquivos[0]  # Pegar apenas o primeiro arquivo
         
-        add_log(f"Iniciando publicação de 1 artigo: {arquivo.name}")
+        add_log(f"Iniciando publicação direta de 1 artigo: {arquivo.name}")
         
-        try:
-            # Ler o conteúdo do arquivo Markdown
-            with open(arquivo, "r", encoding="utf-8") as f:
-                conteudo_markdown = f.read()
-                
-            # Passar tanto o caminho do arquivo quanto o conteúdo formatado
-            result = crew.publicacao_crew().kickoff(inputs={
-                "arquivo_markdown": str(arquivo),
-                "conteudo_formatado": conteudo_markdown
-            })
-            
-            add_log(f"✅ Artigo publicado com sucesso: {arquivo.name}")
+        # Tentar publicar diretamente sem passar pela CrewAI
+        sucesso, mensagem = publicar_post_direto(arquivo)
+        
+        if sucesso:
+            add_log(f"✅ {mensagem}")
             
             # Mover o arquivo para a pasta posts_publicados após publicação bem-sucedida
             dir_publicados = Path("posts_publicados")
@@ -234,9 +354,38 @@ def publicar_artigos():
                 add_log(f"✅ Arquivo movido para posts_publicados: {arquivo.name}")
             except Exception as e:
                 add_log(f"⚠️ Aviso: Não foi possível mover o arquivo: {str(e)}")
+        else:
+            add_log(f"❌ Erro ao publicar {arquivo.name}: {mensagem}")
+            
+            # Se falhar o método direto, tentar pelo CrewAI como fallback
+            add_log("Tentando publicar usando CrewAI como alternativa...")
+            try:
+                crew = st.session_state.crew or inicializar_crew()
                 
-        except Exception as e:
-            add_log(f"❌ Erro ao publicar {arquivo.name}: {str(e)}")
+                # Ler o conteúdo do arquivo Markdown
+                with open(arquivo, "r", encoding="utf-8") as f:
+                    conteudo_markdown = f.read()
+                    
+                # Passar todos os parâmetros necessários com o mesmo conteúdo
+                # O processo de publicação precisa dos 3 parâmetros mesmo que sejam idênticos
+                result = crew.publicacao_crew().kickoff(inputs={
+                    "arquivo_markdown": str(arquivo),
+                    "conteudo_formatado": conteudo_markdown,
+                    "conteudo_editado": conteudo_markdown,
+                    "conteudo_otimizado": conteudo_markdown
+                })
+                
+                add_log(f"✅ Artigo publicado com sucesso via CrewAI: {arquivo.name}")
+                
+                # Mover o arquivo para a pasta posts_publicados
+                if not arquivo_destino.exists():  # Se já não foi movido antes
+                    shutil.copy2(arquivo, arquivo_destino)
+                    if arquivo_destino.exists():
+                        arquivo.unlink()
+                    add_log(f"✅ Arquivo movido para posts_publicados: {arquivo.name}")
+            except Exception as e:
+                add_log(f"❌ Erro na publicação via CrewAI: {str(e)}")
+                return False
         
         st.session_state.last_run = datetime.now()
         # Limpar o cache de posts para forçar atualização
