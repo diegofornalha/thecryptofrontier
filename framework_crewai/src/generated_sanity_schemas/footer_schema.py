@@ -125,11 +125,11 @@ schema = {
         'rows': '3'
     }
     ],
-    'preview': '{
+    'preview': '''{
     prepare() {
       return {
         title: \'Rodapé do Site\',
       };
     },
-  }'
+  }'''
 }
