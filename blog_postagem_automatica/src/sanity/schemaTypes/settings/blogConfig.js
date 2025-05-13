@@ -22,6 +22,20 @@ export default {
       validation: Rule => Rule.required()
     },
     {
+      name: 'hideAuthorOnPosts',
+      title: 'Ocultar Autor nas Postagens',
+      description: 'Se ativado, o autor não será exibido nas páginas de postagens',
+      type: 'boolean',
+      initialValue: false
+    },
+    {
+      name: 'hideDateOnPosts',
+      title: 'Ocultar Data nas Postagens',
+      description: 'Se ativado, a data de publicação não será exibida nas páginas de postagens',
+      type: 'boolean',
+      initialValue: false
+    },
+    {
       name: 'monitoringFrequency',
       title: 'Frequência de Monitoramento (minutos)',
       description: 'Intervalo entre verificações de novos conteúdos',

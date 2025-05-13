@@ -129,14 +129,16 @@ if (process.argv.includes('--criar')) {
   obterConfiguracao();
 }
 
-// Instruções para uso do Sanity Studio
-console.log(`\n${colors.cyan}${colors.bold}=== Como editar no Sanity Studio ===${colors.reset}`);
-console.log(`1. Acesse o Sanity Studio: ${colors.yellow}https://thecryptofrontier.sanity.studio${colors.reset}`);
-console.log(`2. Navegue até ${colors.yellow}"Configurações do Blog"${colors.reset} no menu lateral`);
-console.log(`3. Edite a configuração existente ou crie uma nova`);
-console.log(`4. Para alterar o autor padrão, clique no campo ${colors.yellow}"Autor Padrão"${colors.reset} e selecione o autor desejado`);
-
 // Instruções para usar no código
 console.log(`\n${colors.cyan}${colors.bold}=== Verificando se as alterações foram aplicadas ===${colors.reset}`);
 console.log(`Para verificar se as alterações foram aplicadas, execute:`);
-console.log(`${colors.yellow}node publicar_posts_markdown.js --verify${colors.reset}`); 
+console.log(`${colors.yellow}node publicar_posts_markdown.js --verify${colors.reset}`);
+
+console.log(`\n${colors.cyan}${colors.bold}=== Como utilizar a configuração ===${colors.reset}`);
+console.log(`1. Acesse o Studio Sanity em ${colors.green}https://thecryptofrontier.sanity.studio/${colors.reset}`);
+console.log(`2. No menu à esquerda, clique em ${colors.yellow}"Configurações do Blog"${colors.reset}`);
+console.log(`3. Edite a configuração principal ou crie uma nova caso não exista`);
+console.log(`4. Para alterar o autor padrão, clique no campo ${colors.yellow}"Autor Padrão"${colors.reset} e selecione o autor desejado`);
+console.log(`5. Para ocultar o autor nas postagens, ative a opção ${colors.yellow}"Ocultar Autor nas Postagens"${colors.reset}`);
+console.log(`6. Para ocultar a data de publicação, ative a opção ${colors.yellow}"Ocultar Data nas Postagens"${colors.reset}`);
+console.log(`7. Salve a configuração clicando no botão ${colors.green}"Publicar"${colors.reset} no canto superior direito`); 

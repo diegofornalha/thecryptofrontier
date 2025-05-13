@@ -25,30 +25,42 @@ const POST_QUERY = `*[_type == "post" && slug.current == $slug][0]{
   _id,
   title,
   slug,
-  mainImage {
-    ...,
-    alt,
+  mainImage{
+    asset->{
+      _id,
+      url
+    },
     caption,
+    alt,
     attribution
+  },
+  body[]{
+    ...,
+    markDefs[]{
+      ...,
+      _type == "internalLink" => {
+        "slug": @.reference->slug.current
+      }
+    }
   },
   content,
   publishedAt,
   excerpt,
-  "author": author->{
+  author->{
     _id,
     name,
-    image,
+    image{asset->{_id, url}},
     role,
     slug,
-    bio
+    bio,
   },
-  "categories": categories[]->{ 
+  categories[]->{
     _id,
     title,
     slug,
     description
   },
-  "tags": tags[]->{ 
+  tags[]->{
     _id,
     title,
     slug
@@ -56,6 +68,12 @@ const POST_QUERY = `*[_type == "post" && slug.current == $slug][0]{
   seo,
   cryptoMeta,
   originalSource
+}`;
+
+// Consulta para buscar a configuração do blog
+const BLOG_CONFIG_QUERY = `*[_type == "blogConfig"][0]{
+  hideAuthorOnPosts,
+  hideDateOnPosts
 }`;
 
 // Interfaces atualizadas
@@ -214,7 +232,7 @@ const formatPrice = (price?: number) => {
 };
 
 // Componente de página do blog
-export default function Post({ post, footerConfig, headerConfig }: PostProps) {
+export default function Post({ post, footerConfig, headerConfig, blogConfig }: PostProps & { blogConfig?: { hideAuthorOnPosts?: boolean, hideDateOnPosts?: boolean } }) {
   // Obter os links de navegação do Sanity ou usar fallback
   const navLinks = footerConfig?.navLinks?.length > 0 
     ? footerConfig.navLinks 
@@ -247,23 +265,28 @@ export default function Post({ post, footerConfig, headerConfig }: PostProps) {
     ? urlForImage(post.seo.openGraphImage).url() 
     : (post.mainImage ? urlForImage(post.mainImage).url() : undefined);
 
+  // Controle de exibição de autor e data
+  const showAuthor = !blogConfig?.hideAuthorOnPosts && post.author !== undefined;
+  const showDate = !blogConfig?.hideDateOnPosts && post.publishedAt;
+
   return (
     <div className="min-h-screen bg-background">
       <Head>
-        <title>{`${metaTitle} - The Crypto Frontier`}</title>
-        <meta name="description" content={metaDescription} />
+        <title>{metaTitle}</title>
+        <meta name="description" content={metaDescription || ""} />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        
+        {/* Open Graph tags */}
         <meta property="og:title" content={metaTitle} />
-        <meta property="og:description" content={metaDescription} />
+        <meta property="og:description" content={metaDescription || ""} />
         <meta property="og:type" content="article" />
-        {ogImage && (
-          <meta property="og:image" content={ogImage} />
-        )}
-        {post.seo?.keywords && post.seo.keywords.length > 0 && (
-          <meta name="keywords" content={post.seo.keywords.join(', ')} />
-        )}
-        {post.seo?.canonicalUrl && (
-          <link rel="canonical" href={post.seo.canonicalUrl} />
-        )}
+        {ogImage && <meta property="og:image" content={ogImage} />}
+        
+        {/* Twitter Card tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={metaTitle} />
+        <meta name="twitter:description" content={metaDescription || ""} />
+        {ogImage && <meta name="twitter:image" content={ogImage} />}
       </Head>
       
       <ModernHeader 
@@ -299,7 +322,7 @@ export default function Post({ post, footerConfig, headerConfig }: PostProps) {
               )}
               
               <div className="flex items-center mb-6">
-                {post.author && (
+                {showAuthor && post.author && (
                   <Avatar className="mr-4 h-12 w-12">
                     {post.author.image ? (
                       <AvatarImage 
@@ -312,15 +335,21 @@ export default function Post({ post, footerConfig, headerConfig }: PostProps) {
                 )}
                 
                 <div>
-                  <div className="font-medium">{post.author?.name || 'Autor'}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {post.author?.role && (
-                      <span className="mr-2">{post.author.role}</span>
-                    )}
-                    <time dateTime={post.publishedAt}>
-                      {formatDate(post.publishedAt)}
-                    </time>
-                  </div>
+                  {showAuthor && post.author && (
+                    <div className="font-medium">{post.author.name || 'Autor'}</div>
+                  )}
+                  {((showAuthor && post.author?.role) || showDate) && (
+                    <div className="text-sm text-muted-foreground">
+                      {showAuthor && post.author?.role && (
+                        <span className="mr-2">{post.author.role}</span>
+                      )}
+                      {showDate && (
+                        <time dateTime={post.publishedAt}>
+                          {formatDate(post.publishedAt)}
+                        </time>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
               
@@ -472,20 +501,21 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const { slug } = params as IParams;
 
   try {
-    const post = await client.fetch(POST_QUERY, { slug });
+    const [post, blogConfig, footerConfig, headerConfig] = await Promise.all([
+      client.fetch(POST_QUERY, { slug }),
+      client.fetch(BLOG_CONFIG_QUERY),
+      getFooterConfig(),
+      getHeaderConfig(),
+    ]);
     
     if (!post) {
       return { notFound: true };
     }
 
-    const [footerConfig, headerConfig] = await Promise.all([
-      getFooterConfig(),
-      getHeaderConfig(),
-    ]);
-
     return {
       props: {
         post,
+        blogConfig,
         footerConfig,
         headerConfig,
       },

@@ -16,7 +16,7 @@ import time
 import glob
 import json
 import streamlit as st
-from datetime import datetime
+from datetime import datetime, date
 from pathlib import Path
 import requests
 import asyncio
@@ -181,10 +181,66 @@ def traduzir_artigos():
         add_log(f"Iniciando tradução de 1 artigo: {arquivo.name}")
         
         try:
-            result = crew.traducao_crew().kickoff(inputs={"arquivo_markdown": str(arquivo)})
-            add_log(f"✅ Artigo traduzido com sucesso: {arquivo.name}")
+            # Vamos ler o arquivo primeiro para verificar o formato e extrair dados essenciais
+            with open(arquivo, "r", encoding="utf-8") as f:
+                conteudo = f.read()
+            
+            # Verificar se o conteúdo tem o formato YAML ou JSON
+            import re
+            import json
+            import yaml
+            
+            # Extrair o frontmatter (conteúdo entre ---)
+            frontmatter_match = re.match(r'---\s*(.*?)\s*---', conteudo, re.DOTALL)
+            if frontmatter_match:
+                frontmatter_content = frontmatter_match.group(1).strip()
+                
+                # Tentar determinar se é JSON ou YAML
+                try:
+                    # Tentar como JSON primeiro
+                    if frontmatter_content.startswith('{'):
+                        metadata = json.loads(frontmatter_content)
+                        formato = "JSON"
+                    else:
+                        # Tentar como YAML
+                        metadata = yaml.safe_load(frontmatter_content)
+                        formato = "YAML"
+                    
+                    add_log(f"Formato detectado: {formato}. Metadados: {list(metadata.keys())}")
+                    
+                    # Extrair título - tentar várias chaves possíveis
+                    titulo = metadata.get('title') or metadata.get('titulo') or "Sem título"
+                    url = metadata.get('original_link') or metadata.get('link') or metadata.get('url') or ""
+                    
+                    add_log(f"Título detectado: {titulo}")
+                    add_log(f"URL detectada: {url}")
+                    
+                    # Adicionar mapeamento explícito para os campos necessários
+                    inputs = {
+                        "arquivo_markdown": str(arquivo),
+                        "titulo": titulo,  # Explicitar o título para que a template não falhe
+                        "url": url,       # Explicitar a URL se necessária
+                        "conteudo": conteudo  # Passar o conteúdo completo
+                    }
+                    
+                    add_log(f"Enviando para tradução com parâmetros: {inputs.keys()}")
+                    result = crew.traducao_crew().kickoff(inputs=inputs)
+                    add_log(f"✅ Artigo traduzido com sucesso: {arquivo.name}")
+                    
+                except Exception as e:
+                    import traceback
+                    add_log(f"❌ Erro ao processar metadados do arquivo: {str(e)}")
+                    add_log(f"Trace: {traceback.format_exc()}")
+                    return False
+            else:
+                add_log(f"❌ Formato de arquivo inválido: Não foi encontrado frontmatter delimitado por ---")
+                return False
+            
         except Exception as e:
+            import traceback
             add_log(f"❌ Erro ao traduzir {arquivo.name}: {str(e)}")
+            add_log(f"Trace: {traceback.format_exc()}")
+            return False
         
         st.session_state.last_run = datetime.now()
         return True
@@ -241,6 +297,27 @@ def publicar_post_direto(arquivo_markdown):
         # Extrair o primeiro parágrafo como excerpt
         excerpt = post.content.split('\n\n')[0] if post.content else ""
         
+        # Transformar data em string ISO, se necessário
+        published_date = post.get('date')
+        # Detectar e converter diferentes formatos de data para string ISO
+        if published_date:
+            if isinstance(published_date, datetime):
+                published_date = published_date.isoformat()
+            elif isinstance(published_date, str):
+                # Se já é string, verificar se tem formato ISO
+                if not published_date.endswith('Z') and 'T' in published_date:
+                    # Já parece ser ISO mas podemos garantir
+                    try:
+                        published_date = datetime.fromisoformat(published_date).isoformat()
+                    except:
+                        pass
+            else:
+                # Se não for nem string nem datetime, usar data atual
+                published_date = datetime.now().isoformat()
+        else:
+            # Se não tiver data, usar a atual
+            published_date = datetime.now().isoformat()
+        
         # Formatamos o conteúdo de forma simplificada para iniciar
         # Para um formato completo, seria necessário converter o markdown para blocos Sanity
         documento = {
@@ -268,7 +345,7 @@ def publicar_post_direto(arquivo_markdown):
                     "markDefs": []
                 }
             ],
-            "publishedAt": post.get('date') or datetime.now().isoformat()
+            "publishedAt": published_date
         }
         
         # Enviar para o Sanity
@@ -277,20 +354,40 @@ def publicar_post_direto(arquivo_markdown):
             "Content-Type": "application/json",
             "Authorization": f"Bearer {token}"
         }
-        payload = {
-            "mutations": [
-                {
-                    "create": documento
-                }
-            ]
-        }
         
-        response = requests.post(url, headers=headers, json=payload)
+        # Converter o documento para JSON, garantindo que todas as datas sejam strings
+        import json
+        try:
+            payload_json = json.dumps({
+                "mutations": [
+                    {
+                        "create": documento
+                    }
+                ]
+            })
+        except TypeError as e:
+            # Se falhar, tente encontrar campos problemáticos
+            add_log(f"Erro ao serializar JSON: {str(e)}")
+            # Verificar campos e converter problemas comuns
+            for key, value in documento.items():
+                if isinstance(value, (datetime, date)):
+                    documento[key] = value.isoformat()
+            
+            # Tentar novamente
+            payload_json = json.dumps({
+                "mutations": [
+                    {
+                        "create": documento
+                    }
+                ]
+            })
+        
+        response = requests.post(url, headers=headers, data=payload_json)
         
         if response.status_code == 200:
             resultado = response.json()
             # Debugar a estrutura da resposta para entender o formato
-            print(f"Resposta do Sanity: {resultado}")
+            add_log(f"Resposta do Sanity: {resultado}")
             # Usar o ID do documento que foi enviado, já que sabemos isso
             return True, f"Post publicado com sucesso! ID: {doc_id}"
         else:

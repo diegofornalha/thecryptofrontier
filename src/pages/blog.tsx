@@ -48,6 +48,12 @@ const POSTS_QUERY = `*[_type == "post"] | order(publishedAt desc) {
   "estimatedReadingTime": round(length(pt::text(content)) / 5 / 180)
 }`;
 
+// Consulta para buscar a configuração do blog
+const BLOG_CONFIG_QUERY = `*[_type == "blogConfig"][0]{
+  hideAuthorOnPosts,
+  hideDateOnPosts
+}`;
+
 // Interface atualizada para os posts
 interface Post {
   _id: string;
@@ -88,6 +94,10 @@ interface Post {
 // Propriedades da página
 interface BlogProps {
   posts: Post[];
+  blogConfig?: {
+    hideAuthorOnPosts?: boolean;
+    hideDateOnPosts?: boolean;
+  };
   footerConfig: any;
   headerConfig: any;
 }
@@ -111,7 +121,7 @@ const formatPrice = (price?: number) => {
 };
 
 // Componente de página do blog
-export default function Blog({ posts, footerConfig, headerConfig }: BlogProps) {
+export default function Blog({ posts, blogConfig, footerConfig, headerConfig }: BlogProps) {
   // Obter os links de navegação do Sanity ou usar fallback
   const navLinks = footerConfig?.navLinks?.length > 0 
     ? footerConfig.navLinks 
@@ -120,6 +130,10 @@ export default function Blog({ posts, footerConfig, headerConfig }: BlogProps) {
         { label: "Blog", url: "/blog" },
         { label: "Studio", url: "/studio-redirect" }
       ];
+
+  // Controle de exibição de autor e data
+  const showAuthor = !blogConfig?.hideAuthorOnPosts;
+  const showDate = !blogConfig?.hideDateOnPosts;
 
   return (
     <div className="min-h-screen bg-background">
@@ -179,8 +193,10 @@ export default function Blog({ posts, footerConfig, headerConfig }: BlogProps) {
                   </p>
                 )}
                 <div className="text-sm text-muted-foreground">
-                  {post.author?.name && <span>{post.author.name} • </span>}
-                  <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
+                  {showAuthor && post.author?.name && <span>{post.author.name}{showDate && post.publishedAt ? ' • ' : ''}</span>}
+                  {showDate && post.publishedAt && 
+                    <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
+                  }
                   {post.estimatedReadingTime && (
                     <span> • {post.estimatedReadingTime} min de leitura</span>
                   )}
@@ -264,8 +280,9 @@ export default function Blog({ posts, footerConfig, headerConfig }: BlogProps) {
 // Buscar dados no momento da compilação
 export async function getStaticProps() {
   try {
-    const posts = await client.fetch(POSTS_QUERY);
-    const [footerConfig, headerConfig] = await Promise.all([
+    const [posts, blogConfig, footerConfig, headerConfig] = await Promise.all([
+      client.fetch(POSTS_QUERY),
+      client.fetch(BLOG_CONFIG_QUERY),
       getFooterConfig(),
       getHeaderConfig(),
     ]);
@@ -273,6 +290,7 @@ export async function getStaticProps() {
     return {
       props: {
         posts,
+        blogConfig,
         footerConfig,
         headerConfig,
       },
@@ -284,6 +302,7 @@ export async function getStaticProps() {
     return {
       props: {
         posts: [],
+        blogConfig: {},
         footerConfig: {},
         headerConfig: {},
       },
