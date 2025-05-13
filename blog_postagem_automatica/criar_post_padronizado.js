@@ -52,6 +52,12 @@ const CRIPTO_SIMBOLOS = {
   'avalanche': 'AVAX'
 };
 
+// Autor padrão - ID do Alexandre Bianchi
+const AUTOR_PADRAO = {
+  _type: 'reference',
+  _ref: 'ca38a3d5-cba1-47a0-aa29-4af17a15e17c'
+};
+
 // Criar diretório de saída se não existir
 if (!fs.existsSync(DIR_POSTS_PADRONIZADOS)) {
   fs.mkdirSync(DIR_POSTS_PADRONIZADOS, { recursive: true });
@@ -172,12 +178,28 @@ function detectarCryptoMeta(conteudo, titulo) {
 function extrairImagemPrincipal(htmlContent) {
   try {
     const dom = new JSDOM(htmlContent);
-    const imgTag = dom.window.document.querySelector('img');
+    const imgTags = dom.window.document.querySelectorAll('img');
     
-    if (imgTag && imgTag.src) {
+    // Procura primeiro por imagens grandes (provável imagem principal)
+    for (const img of imgTags) {
+      // Imagens com width/height definidos e maiores que 300px são prováveis candidatas
+      const width = img.getAttribute('width');
+      const height = img.getAttribute('height');
+      
+      if ((width && parseInt(width) > 300) || (height && parseInt(height) > 200) || 
+          img.src.includes('header') || img.src.includes('cover') || img.src.includes('featured')) {
+        return {
+          url: img.src,
+          alt: img.alt || ''
+        };
+      }
+    }
+    
+    // Se não encontrou nenhuma com critérios específicos, pega a primeira
+    if (imgTags.length > 0) {
       return {
-        url: imgTag.src,
-        alt: imgTag.alt || ''
+        url: imgTags[0].src,
+        alt: imgTags[0].alt || ''
       };
     }
     
@@ -190,88 +212,207 @@ function extrairImagemPrincipal(htmlContent) {
 
 /**
  * Converte HTML para estrutura portable text do Sanity
+ * Formato compatível com o schema de post do Sanity
  */
 function htmlParaPortableText(htmlContent) {
-  const dom = new JSDOM(htmlContent);
-  const body = dom.window.document.body;
-  const portableText = [];
-  
-  // Processa cada elemento filho do body
-  Array.from(body.childNodes).forEach(node => {
-    // Ignorar nós de texto vazios
-    if (node.nodeType === 3 && node.textContent.trim() === '') {
-      return;
+  try {
+    const dom = new JSDOM(htmlContent);
+    const body = dom.window.document.body;
+    const portableText = [];
+    let markDefs = [];
+    let currentMarkId = 0;
+    
+    // Função recursiva para processar nós e seus filhos
+    function processNode(node, style = 'normal') {
+      // Ignorar nós de texto vazios
+      if (node.nodeType === 3 && node.textContent.trim() === '') {
+        return null;
+      }
+      
+      // Processar elementos de acordo com o tipo
+      if (node.nodeType === 1) { // Element node
+        const tagName = node.tagName.toLowerCase();
+        
+        // Imagens - tratamento especial para o schema do Sanity
+        if (tagName === 'img') {
+          return {
+            _type: 'image',
+            asset: {
+              _type: 'reference',
+              _ref: `image-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+              url: node.src
+            },
+            alt: node.alt || '',
+            caption: ''
+          };
+        } 
+        
+        // Determina o estilo a partir da tag
+        let blockStyle = 'normal';
+        if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tagName)) {
+          blockStyle = tagName;
+        } else if (tagName === 'blockquote') {
+          blockStyle = 'blockquote';
+        }
+        
+        // Para links, adicionamos à lista de markDefs e criamos um span especial
+        if (tagName === 'a') {
+          const markId = `link-${currentMarkId++}`;
+          markDefs.push({
+            _key: markId,
+            _type: 'link',
+            href: node.href
+          });
+          
+          return {
+            _type: 'block',
+            style: blockStyle,
+            children: [{
+              _type: 'span',
+              text: node.textContent,
+              marks: [markId]
+            }]
+          };
+        }
+        
+        // Para elementos com filhos, processamos recursivamente
+        if (node.hasChildNodes()) {
+          const children = [];
+          let hasTextContent = false;
+          
+          // Processar filhos
+          Array.from(node.childNodes).forEach(childNode => {
+            // Para nós de texto simples dentro de elementos
+            if (childNode.nodeType === 3 && childNode.textContent.trim() !== '') {
+              hasTextContent = true;
+              children.push({
+                _type: 'span',
+                text: childNode.textContent
+              });
+            } 
+            // Para elementos aninhados
+            else if (childNode.nodeType === 1) {
+              // Determinar marks para elementos inline
+              const marks = [];
+              
+              if (childNode.tagName.toLowerCase() === 'strong' || childNode.tagName.toLowerCase() === 'b') {
+                marks.push('strong');
+              } else if (childNode.tagName.toLowerCase() === 'em' || childNode.tagName.toLowerCase() === 'i') {
+                marks.push('em');
+              } else if (childNode.tagName.toLowerCase() === 'u') {
+                marks.push('underline');
+              } else if (childNode.tagName.toLowerCase() === 'code') {
+                marks.push('code');
+              } else if (childNode.tagName.toLowerCase() === 'strike' || childNode.tagName.toLowerCase() === 's') {
+                marks.push('strike-through');
+              }
+              
+              // Se é um elemento inline com marks, adicionamos como span
+              if (marks.length > 0) {
+                hasTextContent = true;
+                children.push({
+                  _type: 'span',
+                  text: childNode.textContent,
+                  marks: marks
+                });
+              } 
+              // Caso contrário, processamos o nó normalmente (block-level)
+              else {
+                const childResult = processNode(childNode, blockStyle);
+                if (childResult) {
+                  if (Array.isArray(childResult)) {
+                    childResult.forEach(item => portableText.push(item));
+                  } else {
+                    portableText.push(childResult);
+                  }
+                }
+              }
+            }
+          });
+          
+          // Se temos conteúdo de texto, criamos um bloco
+          if (hasTextContent) {
+            return {
+              _type: 'block',
+              style: blockStyle,
+              children: children
+            };
+          }
+          
+          // Caso contrário, retornamos null (já adicionamos os filhos ao portableText)
+          return null;
+        } 
+        
+        // Para elementos sem filhos (vazio ou texto simples)
+        return {
+          _type: 'block',
+          style: blockStyle,
+          children: [{
+            _type: 'span',
+            text: node.textContent
+          }]
+        };
+      } 
+      // Nós de texto diretos
+      else if (node.nodeType === 3 && node.textContent.trim() !== '') {
+        return {
+          _type: 'block',
+          style: style,
+          children: [{
+            _type: 'span',
+            text: node.textContent
+          }]
+        };
+      }
+      
+      return null;
     }
     
-    // Processar elementos de acordo com o tipo
-    if (node.nodeType === 1) { // Element node
-      const tagName = node.tagName.toLowerCase();
-      
-      // Imagens
-      if (tagName === 'img') {
-        portableText.push({
-          _type: 'image',
-          asset: {
-            _type: 'reference',
-            url: node.src
-          },
-          alt: node.alt || '',
-          caption: ''
-        });
-      } 
-      // Headings
-      else if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tagName)) {
-        portableText.push({
-          _type: 'block',
-          style: tagName,
-          children: [{
-            _type: 'span',
-            text: node.textContent
-          }]
-        });
+    // Processar cada elemento do body
+    Array.from(body.childNodes).forEach(node => {
+      const result = processNode(node);
+      if (result) {
+        if (Array.isArray(result)) {
+          result.forEach(item => portableText.push(item));
+        } else {
+          portableText.push(result);
+        }
       }
-      // Links
-      else if (tagName === 'a') {
-        portableText.push({
-          _type: 'block',
-          style: 'normal',
-          children: [{
-            _type: 'span',
-            text: node.textContent,
-            marks: ['link'],
-            markDefs: [{
-              _type: 'link',
-              href: node.href
-            }]
-          }]
-        });
+    });
+    
+    // Adicionar markDefs aos blocos que precisam
+    portableText.forEach(block => {
+      if (block._type === 'block' && block.children) {
+        block.markDefs = markDefs;
       }
-      // Parágrafos e outros elementos de texto
-      else {
-        portableText.push({
-          _type: 'block',
-          style: tagName === 'blockquote' ? 'blockquote' : 'normal',
-          children: [{
-            _type: 'span',
-            text: node.textContent
-          }]
-        });
-      }
-    }
-    // Nós de texto diretos
-    else if (node.nodeType === 3 && node.textContent.trim() !== '') {
+    });
+    
+    // Se não houver conteúdo, adicionar um bloco vazio para evitar erros no Sanity
+    if (portableText.length === 0) {
       portableText.push({
         _type: 'block',
         style: 'normal',
         children: [{
           _type: 'span',
-          text: node.textContent
+          text: ''
         }]
       });
     }
-  });
-  
-  return portableText;
+    
+    return portableText;
+  } catch (error) {
+    console.error('Erro ao converter HTML para Portable Text:', error);
+    
+    // Em caso de erro, retornar um bloco simples com o texto
+    return [{
+      _type: 'block',
+      style: 'normal',
+      children: [{
+        _type: 'span',
+        text: htmlContent.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+      }]
+    }];
+  }
 }
 
 /**
@@ -301,22 +442,29 @@ function processarArquivo(arquivo) {
     const imagemPrincipal = extrairImagemPrincipal(htmlContent);
     const cryptoMeta = detectarCryptoMeta(content, data.title);
     
+    // Certificar que o título tem entre 10 e 100 caracteres (requisito do schema)
+    const titulo = data.title.length < 10 ? 
+      data.title + ' - Últimas Notícias' : 
+      (data.title.length > 100 ? data.title.substring(0, 97) + '...' : data.title);
+    
     // Preparar objeto Sanity-compatível
     const sanityDocument = {
       _type: 'post',
-      title: data.title,
+      title: titulo,
       slug: {
         _type: 'slug',
         current: slug
       },
       publishedAt: data.date || new Date().toISOString(),
-      excerpt: excerpt,
+      excerpt: excerpt.substring(0, 300), // máximo 300 caracteres
       content: htmlParaPortableText(htmlContent),
       mainImage: imagemPrincipal ? {
+        _type: 'mainImage',
         alt: imagemPrincipal.alt || data.title,
         caption: '',
         asset: {
           _type: 'reference',
+          _ref: `image-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
           url: imagemPrincipal.url
         }
       } : undefined,
@@ -328,17 +476,20 @@ function processarArquivo(arquivo) {
         _type: 'reference',
         _ref: 'tag-' + slugify(tag)
       })),
-      author: {
-        _type: 'reference',
-        _ref: 'author-crypto-frontier'
-      },
-      cryptoMeta: cryptoMeta.coinName ? cryptoMeta : undefined,
+      author: AUTOR_PADRAO,
+      cryptoMeta: cryptoMeta.coinName ? {
+        _type: 'cryptoMeta',
+        coinName: cryptoMeta.coinName,
+        coinSymbol: cryptoMeta.coinSymbol
+      } : undefined,
       seo: {
+        _type: 'seo',
         metaTitle: data.title,
-        metaDescription: excerpt,
+        metaDescription: excerpt.substring(0, 300),
         keywords: tags
       },
       originalSource: {
+        _type: 'object',
         url: data.original_link || "",
         title: data.source || "",
         site: data.source || ""

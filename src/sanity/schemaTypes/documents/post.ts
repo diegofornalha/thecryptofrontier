@@ -31,14 +31,12 @@ export default defineType({
       name: 'mainImage',
       title: 'Imagem Principal',
       type: 'mainImage',
-      validation: Rule => Rule.required(),
     }),
     defineField({
       name: 'categories',
       title: 'Categorias',
       type: 'array',
       of: [{ type: 'reference', to: { type: 'category' } }],
-      validation: Rule => Rule.required().min(1),
     }),
     defineField({
       name: 'tags',
@@ -57,7 +55,7 @@ export default defineType({
       title: 'Resumo',
       type: 'text',
       rows: 3,
-      validation: Rule => Rule.required().min(20).max(300),
+      validation: Rule => Rule.max(300),
     }),
     defineField({
       name: 'cryptoMeta',
