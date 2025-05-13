@@ -186,8 +186,8 @@ seo_optimization_task:
     Mantenha os campos 'content_text_traduzido' e 'content_html_traduzido' no nível raiz do JSON retornado, 
     juntamente com o novo objeto 'sanity_document_payload'.
   expected_output: >
-    Uma string representando o objeto JSON COMPLETO E ATUALIZADO, contendo os campos de conteúdo 
-    ('content_text_traduzido', 'content_html_traduzido') e o novo objeto 'sanity_document_payload'.
+    Uma string representando um NOVO objeto JSON contendo APENAS os campos 'sanity_document_payload', 
+    'content_text_traduzido', e 'content_html_traduzido'.
   agent: seo_analyst
   context: 
     - editing_task

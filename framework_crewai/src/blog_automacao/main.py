@@ -157,111 +157,153 @@ def executar_monitoramento(crew, base_dir, loop_minutes=None):
         print(f"Aguardando {loop_minutes} minutos até a próxima verificação...")
         time.sleep(loop_minutes * 60)
 
-def executar_traducao(crew, base_dir, arquivo_especifico_para_teste=None):
-    """Executa apenas a tradução e adaptação de conteúdo.
-    
-    Args:
-        crew: Instância do BlogAutomacaoCrew
-        base_dir: Diretório base para os subdiretórios de posts.
-        arquivo_especifico_para_teste: Caminho completo para um arquivo JSON específico a ser testado.
-    """
+def executar_traducao(crew_components: BlogAutomacaoCrew, base_dir, arquivo_especifico_para_teste=None, modo_apenas_teste_sem_api=False):
+    """Executa apenas a tradução e adaptação de conteúdo."""
     print(f"=== INICIANDO TRADUÇÃO DE ARTIGOS (CrewAI - Base Dir: {base_dir}) ===")
-    dir_para_traduzir = Path(base_dir) / "posts_para_traduzir" # Certificar que base_dir é Path
+    dir_para_traduzir = Path(base_dir) / "posts_para_traduzir"
     dir_traduzidos = Path(base_dir) / "posts_traduzidos"
     dir_traduzidos.mkdir(parents=True, exist_ok=True)
-    
-    arquivos_para_processar = []
-    if arquivo_especifico_para_teste:
-        arquivo_teste_path = Path(arquivo_especifico_para_teste)
-        if arquivo_teste_path.exists():
-            arquivos_para_processar.append(arquivo_teste_path)
-            print(f"Modo de teste: Processando arquivo específico: {arquivo_teste_path}")
-        else:
-            print(f"Erro no modo de teste: Arquivo específico não encontrado: {arquivo_teste_path}")
-            return
-    else:
-        arquivos_para_processar = list(dir_para_traduzir.glob("para_traduzir_*.json"))
 
-    if not arquivos_para_processar:
-        print("Nenhum artigo encontrado para traduzir.")
+    arquivos_para_processar_str = []
+    if arquivo_especifico_para_teste:
+        path_especifico = Path(arquivo_especifico_para_teste)
+        if not path_especifico.is_absolute():
+             # Se não for absoluto, assume que é relativo ao CWD (raiz do projeto)
+            path_especifico = Path.cwd() / path_especifico
+        
+        # Normaliza para garantir que estamos comparando caminhos consistentes
+        path_especifico = path_especifico.resolve()
+        print(f"Modo de teste: Processando arquivo específico: {path_especifico}")
+        
+        # Verifica se o arquivo de teste realmente está no diretório esperado para tradução
+        # Isso ajuda a garantir que a lógica de "transformação" (se houver) seja aplicada corretamente
+        # e que os caminhos relativos para a crew sejam consistentes.
+        dir_esperado_para_traduzir_teste = path_especifico.parent
+        if dir_esperado_para_traduzir_teste.name != 'posts_para_traduzir':
+            print(f"AVISO: O arquivo de teste {path_especifico.name} não está em um subdiretório 'posts_para_traduzir'.")
+            # Mesmo assim, vamos processá-lo se ele existir.
+            if path_especifico.exists() and path_especifico.is_file():
+                 arquivos_para_processar_str.append(str(path_especifico))
+            else:
+                print(f"ERRO: Arquivo de teste específico {path_especifico} não encontrado.")
+                return
+        else:
+            if path_especifico.exists() and path_especifico.is_file():
+                arquivos_para_processar_str.append(str(path_especifico))
+            else:
+                print(f"ERRO: Arquivo de teste específico {path_especifico} (em posts_para_traduzir) não encontrado.")
+                return
+    else:
+        print(f"Procurando arquivos JSON em: {dir_para_traduzir}")
+        if dir_para_traduzir.exists():
+            arquivos_para_processar_str = [str(f) for f in dir_para_traduzir.glob("*.json")]
+        else:
+            print(f"Diretório {dir_para_traduzir} não encontrado.")
+
+    print(f"Encontrados {len(arquivos_para_processar_str)} artigos para traduzir.")
+
+    if not arquivos_para_processar_str:
+        print("Nenhum arquivo para traduzir encontrado.")
         return
 
-    print(f"Encontrados {len(arquivos_para_processar)} artigos para traduzir.")
-    
-    for arquivo_origem_path in arquivos_para_processar: # Renomeado para arquivo_origem_path
-        print(f"\nProcessando tradução de: {arquivo_origem_path.name}")
+    traducao_crew = crew_components.traducao_crew()
 
-        # Adicionar lógica de transformação se for o arquivo de teste
-        arquivo_para_crew = arquivo_origem_path
-        if arquivo_especifico_para_teste and arquivo_origem_path == Path(arquivo_especifico_para_teste):
-            print(f"Transformando arquivo de teste: {arquivo_origem_path.name}")
-            try:
-                with open(arquivo_origem_path, 'r', encoding='utf-8') as f:
-                    dados_originais = json.load(f)
+    for arquivo_json_path_original_str in arquivos_para_processar_str:
+        print(f"\nProcessando tradução de: {Path(arquivo_json_path_original_str).name}")
+        arquivo_json_path_original = Path(arquivo_json_path_original_str).resolve() # Resolve para absoluto
 
-                frontmatter_original = {
-                    "title": dados_originais.get("metadata", {}).get("title", "Sem Título Original"),
-                    "original_link": dados_originais.get("metadata", {}).get("original_link", ""),
-                    "published_date": dados_originais.get("metadata", {}).get("date", datetime.now().isoformat()),
-                    "source_name": dados_originais.get("metadata", {}).get("source", "Desconhecido"),
-                    "tags_originais": dados_originais.get("metadata", {}).get("tags", []),
-                    "slug_original": dados_originais.get("metadata", {}).get("title", "sem_titulo").lower().replace(" ", "-")[:50],
-                    "timestamp_captura": int(time.time())
-                }
+        # A lógica de transformação do arquivo de teste foi removida daqui, 
+        # pois agora o arquivo de entrada já deve estar no formato JSON esperado pela translation_task.
+        # O próprio arquivo {arquivo_json} é passado para a task.
 
-                dados_transformados = {
-                    "frontmatter_original": frontmatter_original,
-                    "content_text_original": "", # Deixar vazio, pois o original só tem HTML
-                    "content_html_original": dados_originais.get("content", ""),
-                    "resumo_original": "", # Adicionar se disponível no futuro
-                    "content_text_traduzido": None,
-                    "content_html_traduzido": None,
-                    "frontmatter_traduzido": None
-                }
-                
-                # Salvar o arquivo transformado (pode ser com novo nome ou sobrescrever)
-                # Para este teste, vamos sobrescrever o arquivo original dentro de temp_test_dir_single_post
-                # É importante que esta lógica só rode para o arquivo de teste!
-                with open(arquivo_origem_path, 'w', encoding='utf-8') as f:
-                    json.dump(dados_transformados, f, ensure_ascii=False, indent=4)
-                print(f"Arquivo de teste transformado e salvo em: {arquivo_origem_path}")
-                arquivo_para_crew = arquivo_origem_path # crew usará o arquivo transformado
-
-            except Exception as e_transform:
-                print(f"Erro ao transformar o arquivo de teste {arquivo_origem_path.name}: {e_transform}")
-                continue # Pular para o próximo arquivo se a transformação falhar
-
-        inputs = {
-            "arquivo_json": str(arquivo_para_crew), # Passa o caminho do arquivo JSON para a crew
-            "base_dir": str(Path(base_dir)) # Passa base_dir para a crew/tasks
-        }
-        
-        try:
-            # A traducao_crew deve retornar o caminho do arquivo JSON salvo em posts_traduzidos
-            print(f"Executando traducao_crew().kickoff() para {arquivo_para_crew.name}...")
-            resultado_crew = crew.traducao_crew().kickoff(inputs=inputs)
-            
-            # O resultado esperado da localization_task é o caminho do arquivo salvo
-            caminho_arquivo_traduzido_str = str(resultado_crew).strip()
-            caminho_arquivo_traduzido_str = resultado_crew
-            print(f"Resultado da traducao_crew: {caminho_arquivo_traduzido_str}")
-
-            if isinstance(caminho_arquivo_traduzido_str, str) and Path(caminho_arquivo_traduzido_str).exists():
-                caminho_arquivo_traduzido = Path(caminho_arquivo_traduzido_str)
-                print(f"Arquivo traduzido e adaptado salvo em: {caminho_arquivo_traduzido}")
-                # Mover o arquivo original após sucesso
-                try:
-                    arquivo_origem_path.unlink() # Remover o arquivo de 'posts_para_traduzir'
-                    print(f"Arquivo original removido: {arquivo_origem_path}")
-                except OSError as e_move:
-                    print(f"Erro ao remover arquivo original {arquivo_origem_path}: {e_move}")
+        if modo_apenas_teste_sem_api:
+            # Simula a criação de um arquivo traduzido para testar o fluxo restante sem API
+            print(f"MODO TESTE SEM API: Simulando tradução para {arquivo_json_path_original.name}")
+            nome_arquivo_traduzido = f"traduzido_teste_{arquivo_json_path_original.stem}.json"
+            # Garante que o dir_traduzidos use o mesmo base_dir que a lógica principal
+            # Se o arquivo de teste estiver em um local completamente diferente, precisamos ajustar.
+            if arquivo_especifico_para_teste:
+                caminho_base_para_salvar_teste = arquivo_json_path_original.parent.parent # ex: temp_test_dir_single_post
             else:
-                print(f"Erro: A crew de tradução não retornou um caminho de arquivo válido ou o arquivo não existe: {caminho_arquivo_traduzido_str}")
+                caminho_base_para_salvar_teste = Path(base_dir)
+            
+            dir_traduzidos_teste = caminho_base_para_salvar_teste / "posts_traduzidos"
+            dir_traduzidos_teste.mkdir(parents=True, exist_ok=True)
+            caminho_arquivo_traduzido = dir_traduzidos_teste / nome_arquivo_traduzido
+            
+            conteudo_simulado = {
+                "simulacao": True,
+                "original_file": str(arquivo_json_path_original),
+                "translated_content": "Este é um conteúdo traduzido simulado."
+            }
+            with open(caminho_arquivo_traduzido, 'w', encoding='utf-8') as f:
+                json.dump(conteudo_simulado, f, indent=2)
+            print(f"Arquivo traduzido simulado salvo em: {caminho_arquivo_traduzido}")
+            # Não remove o original no modo de teste sem API
+        else:
+            # Bloco ELSE para a execução normal com a CrewAI
+            inputs_crew = {'arquivo_json': str(arquivo_json_path_original)} # Passa caminho absoluto
+            print(f"Executando traducao_crew().kickoff() para {arquivo_json_path_original.name}...")
+            
+            resultado_traducao = traducao_crew.kickoff(inputs=inputs_crew)
+            print(f"Resultado da traducao_crew (bruto): {resultado_traducao!r}")
 
-        except Exception as e_trad:
-            print(f"Erro ao executar traducao_crew para {arquivo_para_crew.name}: {e_trad}")
+            caminho_arquivo_traduzido_str = str(resultado_traducao).strip()
+            print(f"Caminho do arquivo traduzido (string após strip): {caminho_arquivo_traduzido_str!r}")
 
-def executar_publicacao(crew, base_dir):
+            # Debugging adicional:
+            cwd = Path.cwd()
+            print(f"CWD atual: {cwd}")
+            
+            path_obj_debug = Path(caminho_arquivo_traduzido_str)
+            print(f"Objeto Path criado a partir do resultado da crew: {path_obj_debug}")
+            
+            if not path_obj_debug.is_absolute():
+                print(f"Caminho \"{path_obj_debug}\" NÃO é absoluto. Tentando resolver com base no CWD ({cwd}).")
+                path_obj_debug_resolvido_cwd = (cwd / path_obj_debug).resolve(strict=False)
+                print(f"Resolvido com CWD: {path_obj_debug_resolvido_cwd}")
+                print(f"Existe (resolvido com CWD)?: {path_obj_debug_resolvido_cwd.exists()}")
+                print(f"É arquivo (resolvido com CWD)?: {path_obj_debug_resolvido_cwd.is_file()}")
+            else:
+                print(f"Caminho \"{path_obj_debug}\" JÁ é absoluto.")
+
+            # Tentar resolver para um caminho absoluto (mesmo que já seja, para normalizar e verificar)
+            try:
+                # Usar o path_obj_debug diretamente, que já é o caminho retornado pela crew
+                caminho_absoluto_final_check = path_obj_debug.resolve(strict=True) 
+                print(f"Caminho absoluto final para verificação (strict=True): {caminho_absoluto_final_check}")
+                print(f"Existe (final_check)?: {caminho_absoluto_final_check.exists()}")
+                print(f"É arquivo (final_check)?: {caminho_absoluto_final_check.is_file()}")
+            except FileNotFoundError:
+                print(f"ERRO ao resolver o caminho da crew com strict=True: Arquivo não encontrado em {path_obj_debug}")
+                caminho_absoluto_final_check_non_strict = path_obj_debug.resolve(strict=False)
+                print(f"Caminho absoluto final (strict=False): {caminho_absoluto_final_check_non_strict}")
+                print(f"Existe (non_strict)?: {caminho_absoluto_final_check_non_strict.exists()}")
+                print(f"É arquivo (non_strict)?: {caminho_absoluto_final_check_non_strict.is_file()}")
+
+            # Verifica se o resultado é um caminho de arquivo válido e se o arquivo existe
+            # A crew deve retornar o caminho do arquivo salvo pela localization_task
+            # Usar o objeto Path diretamente, que já foi validado/resolvido acima.
+            if not caminho_arquivo_traduzido_str or not path_obj_debug.is_file(): # path_obj_debug é Path(caminho_string_da_crew)
+                print(f"ERRO NA CONDICIONAL: A crew de tradução não retornou um caminho de arquivo válido ou o arquivo ({path_obj_debug}) não existe/não é arquivo.")
+                continue 
+            
+            caminho_arquivo_traduzido = path_obj_debug # Já é um objeto Path
+            print(f"Arquivo traduzido gerado por crewAI: {caminho_arquivo_traduzido}")
+
+            # Mover o arquivo original após sucesso (APENAS SE NÃO FOR O MODO DE TESTE ESPECÍFICO)
+            if not arquivo_especifico_para_teste:
+                try:
+                    dir_processados = Path(base_dir) / "posts_processados_original"
+                    dir_processados.mkdir(parents=True, exist_ok=True)
+                    arquivo_json_path_original.rename(dir_processados / arquivo_json_path_original.name)
+                    print(f"Arquivo original movido para: {dir_processados / arquivo_json_path_original.name}")
+                except OSError as e_move:
+                    print(f"Erro ao mover arquivo original {arquivo_json_path_original.name}: {e_move}")
+            else:
+                print("Modo de teste com arquivo específico: arquivo original NÃO será movido/deletado de posts_para_traduzir.")
+
+def executar_publicacao(crew_components: BlogAutomacaoCrew, base_dir, arquivo_especifico_para_teste=None, modo_apenas_teste_sem_api=False):
     """Executa apenas a revisão e publicação de conteúdo.
     
     Args:
@@ -292,7 +334,7 @@ def executar_publicacao(crew, base_dir):
         try:
             # A publicacao_crew deve retornar o resultado da SanityPublishTool
             print(f"Executando publicacao_crew().kickoff() para {arquivo_origem.name}...")
-            resultado_crew = crew.publicacao_crew().kickoff(inputs=inputs)
+            resultado_crew = crew_components.publicacao_crew().kickoff(inputs=inputs)
             
             print(f"Resultado da SanityPublishTool (via crew): {resultado_crew}")
             

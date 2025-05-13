@@ -8,3 +8,4 @@ pydantic
 python-frontmatter
 requests
 python-dotenv
+streamlit
