@@ -41,7 +41,7 @@ fi
 
 # Pasta raiz do projeto
 PROJECT_ROOT="/home/sanity/thecryptofrontier"
-BLOG_AUTOMACAO="${PROJECT_ROOT}/blog_postagem_automatica"
+BLOG_AUTOMACAO="${PROJECT_ROOT}/framework_crewai"
 SANITY_PATH="${BLOG_AUTOMACAO}/src/sanity"
 
 # Passo 1: Deploy do Sanity Studio

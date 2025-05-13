@@ -16,7 +16,7 @@ Este sistema automatiza todo o fluxo de trabalho para criação de conteúdo par
 Este projeto segue a estrutura padrão do CrewAI:
 
 ```
-blog_postagem_automatica/
+framework_crewai/
 ├── .env                      # Arquivo de variáveis de ambiente (criar a partir do .env.example)
 ├── feeds.json                # Configuração dos feeds RSS a serem monitorados
 ├── pyproject.toml            # Configuração do projeto Python
@@ -184,7 +184,7 @@ node publicar_posts_markdown.js --verify
 Caso o Sanity não esteja acessível, o sistema usa a configuração local em `utils/config.js`:
 
 ```bash
-cd blog_postagem_automatica
+cd framework_crewai
 node utils/mostrar-config.js
 ```
 
@@ -225,7 +225,7 @@ Existem duas formas de alterar o autor padrão:
 #### 1. Usando o script automatizado (recomendado)
 
 ```bash
-cd blog_postagem_automatica
+cd framework_crewai
 node utils/alterar-autor.js <ID_DO_AUTOR> "<NOME_DO_AUTOR>"
 
 # Exemplos:
