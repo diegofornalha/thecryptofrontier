@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Cointelegraph",
+    "url": "https://cointelegraph.com/rss"
+  },
+  {
+    "name": "CoinDesk",
+    "url": "https://www.coindesk.com/arc/outboundfeeds/rss/"
+  },
+  {
+    "name": "Decrypt",
+    "url": "https://decrypt.co/feed"
+  },
+  {
+    "name": "Chainlink Blog",
+    "url": "https://blog.chain.link/rss/"
+  },
+  {
+    "name": "Bitcoin.org Blog",
+    "url": "https://bitcoin.org/en/rss/blog.xml"
+  }
+]

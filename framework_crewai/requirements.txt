@@ -1,0 +1,11 @@
+crewai
+crewai-tools
+google-generativeai
+langchain-google-genai
+litellm
+feedparser
+pydantic
+python-frontmatter
+requests
+python-dotenv
+streamlit

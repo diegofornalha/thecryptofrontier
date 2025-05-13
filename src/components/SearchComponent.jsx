@@ -56,7 +56,7 @@ const Hit = ({ hit }) => {
               <div className="search-result-categories">
                 {hit.categories.map((category, index) => (
                   <span key={index} className="category-tag">
-                    {category}
+                    {typeof category === 'object' && category._ref ? category.title || 'Categoria' : category}
                   </span>
                 ))}
               </div>

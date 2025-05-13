@@ -4,6 +4,10 @@ import Section from '../Section';
 import Link from '../../atoms/Link';
 import { ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY, buildIndexName } from '../../../utils/indexer/consts';
 import algoliasearch from 'algoliasearch/lite';
+import * as React from 'react';
+import classNames from 'classnames';
+import dayjs from 'dayjs';
+import client from '../../../lib/sanityClient';
 
 // Verifica se as credenciais do Algolia estão disponíveis
 const hasAlgoliaCredentials = ALGOLIA_APP_ID && ALGOLIA_SEARCH_API_KEY;
@@ -38,11 +42,16 @@ export default function RelatedPostsSection(props) {
         currentPostCategories = [], // categorias do post atual
         currentPostSlug = '', // slug do post atual para evitar que ele apareça nos relacionados
         limit = 3, // número máximo de posts relacionados
-        className
+        className,
+        sortBy = 'date',
+        sortOrder = 'desc',
+        enableAnnotations = true
     } = props;
 
     const [isLoading, setIsLoading] = useState(true);
     const [relatedPosts, setRelatedPosts] = useState<any[]>([]);
+    const [showAuthorConfig, setShowAuthorConfig] = useState(showAuthor);
+    const [showDateConfig, setShowDateConfig] = useState(showDate);
 
     useEffect(() => {
         const fetchRelatedPosts = async () => {
@@ -85,6 +94,26 @@ export default function RelatedPostsSection(props) {
 
         fetchRelatedPosts();
     }, [currentPostCategories, currentPostSlug, limit]);
+
+    useEffect(() => {
+        async function fetchBlogConfig() {
+            try {
+                const config = await client.fetch(`*[_type == "blogConfig"][0]{
+                    hideAuthorOnPosts,
+                    hideDateOnPosts
+                }`);
+                
+                if (config) {
+                    setShowAuthorConfig(!config.hideAuthorOnPosts);
+                    setShowDateConfig(!config.hideDateOnPosts);
+                }
+            } catch (error) {
+                console.error('Erro ao buscar configurações do blog:', error);
+            }
+        }
+        
+        fetchBlogConfig();
+    }, []);
 
     // Se não houver credenciais ou se os posts fornecidos manualmente estiverem disponíveis, use-os
     const postsToDisplay = posts && posts.length > 0 ? posts : relatedPosts;
@@ -135,7 +164,16 @@ export default function RelatedPostsSection(props) {
                     } : post;
 
                     return (
-                        <div className="flex flex-col" key={index} data-sb-field-path={`.posts.${index}`}>
+                        <div
+                            key={index}
+                            className={classNames(
+                                'flex flex-1 relative rounded-md bg-white text-dark dark:bg-dark-card dark:text-light',
+                                'flex-col space-y-4 overflow-hidden pb-8 h-full mx-4',
+                                'min-w-[300px] md:min-w-[300px] lg:min-w-[300px]',
+                                'transform transition-transform duration-300 hover:shadow-lg hover:-translate-y-1'
+                            )}
+                            {...(enableAnnotations && { 'data-sb-field-path': `.items.${index}` })}
+                        >
                             {showThumbnail && postItem.featuredImage?.url && (
                                 <Link href={postItem.slug} className="block h-0 w-full pt-2/3 relative overflow-hidden">
                                     <img
@@ -164,7 +202,7 @@ export default function RelatedPostsSection(props) {
                                     )}
                                 </div>
                                 <div className="flex items-center text-sm">
-                                    {showAuthor && postItem.author && (
+                                    {showAuthorConfig && postItem.author && (
                                         <div className="flex items-center mr-3">
                                             {postItem.author.image && (
                                                 <img
@@ -177,7 +215,7 @@ export default function RelatedPostsSection(props) {
                                             <span data-sb-field-path=".author.name">{postItem.author.name}</span>
                                         </div>
                                     )}
-                                    {showDate && postItem.date && (
+                                    {showDateConfig && postItem.date && (
                                         <time className="text-gray-500 dark:text-gray-400" dateTime={postItem.date} data-sb-field-path=".date">
                                             {formatDate(postItem.date)}
                                         </time>

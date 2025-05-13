@@ -1,202 +1,43 @@
 // Esquema do Sanity
 import { SchemaTypeDefinition } from 'sanity';
 
-// Tipo básico de página
-const page: SchemaTypeDefinition = {
-  name: 'page',
-  title: 'Página',
-  type: 'document',
-  fields: [
-    {
-      name: 'title',
-      title: 'Título',
-      type: 'string',
-      validation: Rule => Rule.required(),
-    },
-    {
-      name: 'slug',
-      title: 'Slug',
-      type: 'slug',
-      options: {
-        source: 'title',
-        maxLength: 96,
-      },
-      validation: Rule => Rule.required(),
-    },
-    {
-      name: 'content',
-      title: 'Conteúdo',
-      type: 'array',
-      of: [{ type: 'block' }],
-    },
-  ],
-};
+// Tipos de documentos principais
+import page from './documents/page';
+import post from './documents/post';
+import category from './documents/category';
+import author from './documents/author';
+import tag from './documents/tag';
 
-// Tipo para post do blog
-const post: SchemaTypeDefinition = {
-  name: 'post',
-  title: 'Post',
-  type: 'document',
-  fields: [
-    {
-      name: 'title',
-      title: 'Título',
-      type: 'string',
-      validation: Rule => Rule.required(),
-    },
-    {
-      name: 'slug',
-      title: 'Slug',
-      type: 'slug',
-      options: {
-        source: 'title',
-        maxLength: 96,
-      },
-      validation: Rule => Rule.required(),
-    },
-    {
-      name: 'publishedAt',
-      title: 'Data de Publicação',
-      type: 'datetime',
-    },
-    {
-      name: 'mainImage',
-      title: 'Imagem Principal',
-      type: 'image',
-      options: {
-        hotspot: true,
-      },
-    },
-    {
-      name: 'excerpt',
-      title: 'Resumo',
-      type: 'text',
-    },
-    {
-      name: 'content',
-      title: 'Conteúdo',
-      type: 'array',
-      of: [
-        { 
-          type: 'block',
-        },
-        {
-          type: 'image',
-          options: {
-            hotspot: true,
-          },
-        },
-        {
-          type: 'code',
-        }
-      ],
-    },
-  ],
-};
+// Tipos de configuração
+import siteConfig from './settings/siteConfig';
+import header from './settings/header';
+import footer from './settings/footer';
 
-// Tipo para configuração do site
-const siteConfig: SchemaTypeDefinition = {
-  name: 'siteConfig',
-  title: 'Configuração do Site',
-  type: 'document',
-  fields: [
-    {
-      name: 'title',
-      title: 'Título do Site',
-      type: 'string',
-    },
-    {
-      name: 'favicon',
-      title: 'Favicon',
-      type: 'image',
-    },
-    {
-      name: 'defaultSocialImage',
-      title: 'Imagem Social Padrão',
-      type: 'image',
-    },
-  ],
-};
+// Tipos de objetos reutilizáveis
+import mainImage from './objects/mainImage';
+import seo from './objects/seo';
+import navLink from './objects/navLink';
+import cryptoMeta from './objects/cryptoMeta';
 
-// Tipo para cabeçalho
-const header: SchemaTypeDefinition = {
-  name: 'header',
-  title: 'Cabeçalho',
-  type: 'document',
-  fields: [
-    {
-      name: 'title',
-      title: 'Título',
-      type: 'string',
-    },
-    {
-      name: 'navLinks',
-      title: 'Links de Navegação',
-      type: 'array',
-      of: [
-        {
-          type: 'object',
-          fields: [
-            {
-              name: 'label',
-              title: 'Label',
-              type: 'string',
-            },
-            {
-              name: 'url',
-              title: 'URL',
-              type: 'string',
-            },
-          ],
-        },
-      ],
-    },
-  ],
-};
-
-// Tipo para rodapé
-const footer: SchemaTypeDefinition = {
-  name: 'footer',
-  title: 'Rodapé',
-  type: 'document',
-  fields: [
-    {
-      name: 'copyrightText',
-      title: 'Texto de Copyright',
-      type: 'string',
-    },
-    {
-      name: 'navLinks',
-      title: 'Links de Navegação',
-      type: 'array',
-      of: [
-        {
-          type: 'object',
-          fields: [
-            {
-              name: 'label',
-              title: 'Label',
-              type: 'string',
-            },
-            {
-              name: 'url',
-              title: 'URL',
-              type: 'string',
-            },
-          ],
-        },
-      ],
-    },
-  ],
-};
-
-// Exportando todos os esquemas
+// Exportando todos os schemas
 export const schemaTypes = [
-  page,
+  // Documentos
   post,
+  page,
+  category,
+  author,
+  tag,
+  
+  // Configurações
   siteConfig,
   header,
   footer,
+  
+  // Objetos
+  mainImage,
+  seo,
+  navLink,
+  cryptoMeta,
 ];
 
 // O schema exportado para o Sanity Studio

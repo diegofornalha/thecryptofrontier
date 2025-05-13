@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "blog_automacao"
+version = "1.0.0"
+description = "Automação de blog de criptomoedas usando CrewAI"
+readme = "README.json"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "The Crypto Frontier", email = "contato@thecryptofrontier.com" }
+]
+dependencies = [
+    "crewai>=0.28.0",
+    "feedparser>=6.0.11",
+    "requests>=2.32.3",
+    "python-frontmatter>=1.0.0",
+    "tqdm>=4.67.1",
+    "google-generativeai>=0.8.5",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "pytest",
+]
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 88
+target-version = ["py310"] 

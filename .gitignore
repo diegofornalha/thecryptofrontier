@@ -119,26 +119,26 @@ firebase.json
 /functions
 .DS_Store
 
-# Ambientes virtuais Python específicos do blog_postagem_automatica
-blog_postagem_automatica/venv/
-blog_postagem_automatica/.venv/
-blog_postagem_automatica/fresh_env/
-blog_postagem_automatica/novo_env/
+# Ambientes virtuais Python específicos do framework_crewai
+framework_crewai/venv/
+framework_crewai/.venv/
+framework_crewai/fresh_env/
+framework_crewai/novo_env/
 
-# Arquivos temporários específicos do blog_postagem_automatica
-blog_postagem_automatica/**/__pycache__/
-blog_postagem_automatica/**/*.pyc
+# Arquivos temporários específicos do framework_crewai
+framework_crewai/**/__pycache__/
+framework_crewai/**/*.pyc
 *.sqlite
 log_monitor.txt
 monitor_pid.txt
 
 # Binários e dependências geradas
-blog_postagem_automatica/fresh_env/bin/
-blog_postagem_automatica/fresh_env/lib/
-blog_postagem_automatica/fresh_env/include/
-blog_postagem_automatica/fresh_env/share/
-blog_postagem_automatica/fresh_env/etc/
-blog_postagem_automatica/fresh_env/lib64/
+framework_crewai/fresh_env/bin/
+framework_crewai/fresh_env/lib/
+framework_crewai/fresh_env/include/
+framework_crewai/fresh_env/share/
+framework_crewai/fresh_env/etc/
+framework_crewai/fresh_env/lib64/
 
 # Arquivos de backup específicos
 *.bak

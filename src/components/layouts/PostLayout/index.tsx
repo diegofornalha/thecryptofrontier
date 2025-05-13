@@ -1,6 +1,8 @@
 import * as React from 'react';
+import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import Markdown from 'markdown-to-jsx';
+import { useRouter } from 'next/router';
 
 import { getBaseLayoutComponent } from '../../../utils/base-layout';
 import { getComponent } from '../../components-registry';
@@ -8,16 +10,45 @@ import Link from '../../atoms/Link';
 import RelatedPostsSection from '../../sections/RelatedPostsSection';
 import SocialShare from '../../atoms/SocialShare';
 
+// Cliente Sanity para buscar configurações
+import client from '../../../lib/sanityClient';
+
 export default function PostLayout(props) {
     const { page, site } = props;
+    const router = useRouter();
     const BaseLayout = getBaseLayoutComponent(page.baseLayout, site.baseLayout);
     const { enableAnnotations = true } = site;
     const { title, date, author = null, markdown_content, bottomSections = [], categories = [], slug } = page;
     const dateTimeAttr = dayjs(date).format('YYYY-MM-DD HH:mm:ss');
     const formattedDate = dayjs(date).format('YYYY-MM-DD');
     // URL completa do post para compartilhamento
-    const siteUrl = site.siteUrl || 'https://thecryptofrontier.agentesintegrados.com';
+    const siteUrl = site.siteUrl || 'https://thecryptofrontier.com';
     const postUrl = `${siteUrl}/post/${slug}`;
+
+    // Estado para armazenar configurações do blog
+    const [showAuthor, setShowAuthor] = useState(true);
+    const [showDate, setShowDate] = useState(true);
+
+    // Buscar configurações do blog ao montar o componente
+    useEffect(() => {
+        async function fetchBlogConfig() {
+            try {
+                const config = await client.fetch(`*[_type == "blogConfig"][0]{
+                    hideAuthorOnPosts,
+                    hideDateOnPosts
+                }`);
+                
+                if (config) {
+                    setShowAuthor(!config.hideAuthorOnPosts);
+                    setShowDate(!config.hideDateOnPosts);
+                }
+            } catch (error) {
+                console.error('Erro ao buscar configurações do blog:', error);
+            }
+        }
+        
+        fetchBlogConfig();
+    }, []);
 
     return (
         <BaseLayout page={page} site={site}>
@@ -26,17 +57,19 @@ export default function PostLayout(props) {
                     <div className="mx-auto max-w-screen-2xl">
                         <header className="max-w-4xl mx-auto mb-12 text-center">
                             <h1 {...(enableAnnotations && { 'data-sb-field-path': 'title' })}>{title}</h1>
-                            <div className="mt-4 text-sm uppercase">
-                                <time dateTime={dateTimeAttr} {...(enableAnnotations && { 'data-sb-field-path': 'date' })}>
-                                    {formattedDate}
-                                </time>
-                                {author && (
-                                    <>
-                                        <span className="mx-2">|</span>
+                            {(showDate || (showAuthor && author)) && (
+                                <div className="mt-4 text-sm uppercase">
+                                    {showDate && (
+                                        <time dateTime={dateTimeAttr} {...(enableAnnotations && { 'data-sb-field-path': 'date' })}>
+                                            {formattedDate}
+                                        </time>
+                                    )}
+                                    {showAuthor && author && showDate && <span className="mx-2">|</span>}
+                                    {showAuthor && author && (
                                         <PostAuthor author={author} enableAnnotations={enableAnnotations} />
-                                    </>
-                                )}
-                            </div>
+                                    )}
+                                </div>
+                            )}
                         </header>
                         {markdown_content && (
                             <Markdown

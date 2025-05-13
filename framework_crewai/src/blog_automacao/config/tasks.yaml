@@ -1,0 +1,217 @@
+# Configuração das tarefas para automação de blog de criptomoedas
+# ------------------------------------------------------
+
+# Tarefas de monitoramento
+monitoring_task:
+  description: >
+    Monitore os feeds RSS configurados usando a RssFeedTool para encontrar novos artigos sobre criptomoedas.
+    Para cada artigo encontrado, forneça:
+    1. Um resumo conciso do artigo (max 3 frases)
+    2. Os principais tópicos abordados (max 5 tópicos)
+    3. Razão pela qual pode ser relevante para investidores brasileiros
+    4. O conteúdo original completo do artigo e seus metadados (título, url, data, fonte) para passagem para a próxima tarefa.
+
+    Formato de resposta esperado para CADA artigo:
+    {{
+     "resumo": "Resumo aqui", 
+     "topicos": ["tópico 1", "tópico 2", ...], 
+     "relevancia": "Explicação da relevância",
+     "original_article": {{ "title": "...", "url": "...", "date": "...", "content": "...", "source": "..." }}
+    }}
+  expected_output: >
+    Uma lista de JSONs, cada um representando a análise de um artigo novo encontrado, 
+    incluindo os dados originais do artigo. Ou uma mensagem indicando que nenhum artigo novo foi encontrado.
+  agent: monitor
+
+selection_task:
+  description: >
+    Avalie a relevância de CADA artigo fornecido pela tarefa anterior para o público brasileiro.
+    Input esperado: Uma lista de JSONs (output da monitoring_task).
+
+    Para cada artigo na lista:
+    Use os campos "resumo", "topicos", "relevancia" para avaliar.
+    Critérios de avaliação:
+    1. Relevância para investidores brasileiros
+    2. Novidade da informação
+    3. Potencial de interesse
+    4. Impacto no mercado brasileiro
+
+    Se o artigo for relevante (SIM):
+    - Pegue os dados do campo "original_article".
+    - Crie um nome de arquivo único (ex: para_traduzir_artigo.json).
+    - Salve um arquivo JSON/Markdown em \'posts_para_traduzir/\' contendo os dados originais 
+      (título, url, data, conteúdo, fonte) com um frontmatter apropriado.
+    - Retorne o caminho completo do arquivo salvo.
+    
+    Se o artigo NÃO for relevante:
+    - Retorne None ou uma string vazia para este artigo.
+
+  expected_output: >
+    Uma lista contendo os caminhos dos arquivos salvos em \'posts_para_traduzir\' para os artigos
+    selecionados, ou None/vazio para os não selecionados. 
+    Ex: ["posts_para_traduzir/arq1.json", null, "posts_para_traduzir/arq3.json"]
+  agent: selector
+  # Esta tarefa agora é responsável por salvar o arquivo, como faz a lógica de fallback no main.py
+
+# Tarefas de tradução
+translation_task:
+  description: >
+    Traduza o conteúdo do artigo fornecido no arquivo JSON {arquivo_json}.
+    O arquivo JSON contém vários campos, incluindo 'content_text_original' e/ou 'content_html_original'.
+    Leia o arquivo JSON, identifique o conteúdo principal a ser traduzido (priorize 'content_text_original').
+
+    Siga estas diretrizes:
+    1. Traduza o CONTEÚDO identificado do inglês para português brasileiro formal.
+    2. Mantenha termos técnicos de cripto quando não houver equivalente em português.
+    3. Preserve a formatação se estiver traduzindo conteúdo HTML. Se for texto puro, preserve parágrafos.
+    4. O resultado da tradução deve ser uma string.
+    
+    Retorne o OBJETO JSON COMPLETO recebido como input, mas com DOIS NOVOS campos adicionados:
+    - 'content_text_traduzido': contendo a tradução do texto puro.
+    - 'content_html_traduzido': contendo a tradução do HTML (se o original era HTML, caso contrário pode ser o texto puro com tags <p>).
+    Se o original era apenas texto, preencha ambos os campos traduzidos com o texto traduzido (o HTML pode ser o texto puro envolvido em parágrafos simples).
+  expected_output: >
+    Uma string representando o objeto JSON COMPLETO e ATUALIZADO, incluindo os novos campos 
+    'content_text_traduzido' e 'content_html_traduzido'.
+  agent: translator
+  # Input: {arquivo_json} (caminho do arquivo em posts_para_traduzir)
+
+# Tarefa de Edição (Movida para cima)
+editing_task:
+  description: >
+    Revise e melhore o artigo traduzido e adaptado, fornecido como um objeto JSON (resultado da tarefa de tradução).
+    O objeto JSON contém campos como 'content_text_traduzido', 'content_html_traduzido', e o 'frontmatter_original'.
+    Você também tem acesso ao caminho do arquivo JSON original via {arquivo_json} se precisar de metadados extras.
+
+    Siga estas diretrizes:
+    1. Corrija erros gramaticais e ortográficos em 'content_text_traduzido'.
+    2. Melhore a coerência e fluidez do texto em 'content_text_traduzido'.
+    3. Verifique a precisão das informações técnicas.
+    4. Garanta que o tom seja adequado ao público-alvo.
+    
+    Retorne o OBJETO JSON COMPLETO E ATUALIZADO. Este objeto será então passado para a tarefa de localização.
+  expected_output: >
+    Uma string representando o objeto JSON COMPLETO E ATUALIZADO, com o conteúdo revisado.
+  agent: editor
+  context: 
+    - translation_task
+
+localization_task:
+  description: >
+    Adapte o artigo traduzido, fornecido como um objeto JSON (resultado da tarefa anterior), para o público brasileiro.
+    O objeto JSON contém campos como 'content_text_traduzido', 'content_html_traduzido', e 'frontmatter_original'.
+    Você também tem acesso ao caminho do arquivo JSON original via {arquivo_json} se precisar de metadados extras.
+    
+    Siga estas diretrizes:
+    1. Analise o CONTEÚDO em 'content_text_traduzido'.
+    2. Adicione contextualizações relevantes para o mercado brasileiro quando necessário.
+    3. Adapte exemplos para o contexto brasileiro se apropriado.
+    4. Explique conceitos que podem ser menos conhecidos no Brasil.
+    5. Mantenha o tom e estilo do artigo original.
+    6. O resultado da adaptação deve ser uma string (texto puro ou HTML, conforme o conteúdo traduzido).
+    7. Crie um novo objeto 'frontmatter_traduzido' dentro do JSON. Ele deve conter:
+       - title: O título original (de frontmatter_original.title) traduzido e adaptado.
+       - tags: 5-8 tags relevantes em português.
+       - category: Classifique o artigo em uma categoria principal (ex: Bitcoin, Ethereum, DeFi, NFTs, Regulamentação, etc.)
+       - seo_meta_description: Uma meta descrição otimizada para SEO (máx 160 caracteres) em português.
+       - published_date: Mantenha a data de 'frontmatter_original.published_date'.
+       - slug: Gere um novo slug em português a partir do título traduzido.
+
+    Atualize o objeto JSON recebido: 
+    - Modifique 'content_text_traduzido' e/ou 'content_html_traduzido' com o conteúdo adaptado.
+    - Adicione o novo 'frontmatter_traduzido'.
+    
+    Para salvar o arquivo:
+    1. Gere um nome de arquivo de saída baseado no nome do {arquivo_json} original, 
+       substituindo 'para_traduzir_' por 'traduzido_' (mantendo a extensão .json).
+    2. Determine o caminho completo de salvamento: o diretório base para salvamento será o diretório pai 
+       do diretório 'posts_para_traduzir' que contém o {arquivo_json}. O arquivo deve ser salvo no 
+       subdiretório 'posts_traduzidos' dentro deste caminho base. 
+       (Ex: se {arquivo_json} é 'pasta_workspace/dir_teste/posts_para_traduzir/original.json', 
+       o file_path será 'pasta_workspace/dir_teste/posts_traduzidos/traduzido_original.json').
+    3. Serialize o objeto JSON COMPLETO E ATUALIZADO para uma string.
+    4. Utilize a ferramenta 'File Save Tool'. Forneça um dicionário como input para a ferramenta contendo:
+       - 'file_path': o caminho completo de salvamento determinado no passo 2.
+       - 'content': a string JSON serializada do passo 3.
+    
+  expected_output: >
+    APENAS o CAMINHO COMPLETO (file_path) onde o arquivo JSON foi salvo pela 'File Save Tool'.
+    Exemplo: 'framework_crewai/src/temp_test_dir_single_post/posts_traduzidos/traduzido_artigo_xyz.json'
+  agent: localizer
+  context: 
+    - editing_task # Agora editing_task está definida acima
+
+# Tarefas de publicação
+# editing_task: <- Bloco inteiro removido daqui
+#   description: >
+#     Revise e melhore o artigo traduzido e adaptado, fornecido como um objeto JSON (resultado da tarefa de tradução).
+#     O objeto JSON contém campos como 'content_text_traduzido', 'content_html_traduzido', e o 'frontmatter_original'.
+#     Você também tem acesso ao caminho do arquivo JSON original via {arquivo_json} se precisar de metadados extras.
+# 
+#     Siga estas diretrizes:
+#     1. Corrija erros gramaticais e ortográficos em 'content_text_traduzido'.
+#     2. Melhore a coerência e fluidez do texto em 'content_text_traduzido'.
+#     3. Verifique a precisão das informações técnicas.
+#     4. Garanta que o tom seja adequado ao público-alvo.
+#     
+#     Retorne o OBJETO JSON COMPLETO E ATUALIZADO. Este objeto será então passado para a tarefa de localização.
+#   expected_output: >
+#     Uma string representando o objeto JSON COMPLETO E ATUALIZADO, com o conteúdo revisado.
+#   agent: editor
+#   context: 
+#     - translation_task
+
+seo_optimization_task:
+  description: >
+    Otimize o artigo revisado (recebido como um objeto JSON da tarefa anterior, ou lido do arquivo JSON {arquivo_json}) para SEO
+    e prepare um payload para o Sanity CMS.
+    O objeto/arquivo JSON contém 'content_text_traduzido', 'content_html_traduzido' e 'frontmatter_traduzido'.
+    
+    Siga estas diretrizes:
+    1. Analise o 'content_text_traduzido' e o 'frontmatter_traduzido.title'.
+    2. Identifique 3-5 palavras-chave principais.
+    3. Otimize o 'frontmatter_traduzido.title' para SEO (mantendo significado).
+    4. Verifique a densidade de palavras-chave no 'content_text_traduzido'.
+    5. Crie/Atualize a 'frontmatter_traduzido.seo_meta_description' (máx 160 caracteres).
+    6. Baseado no 'frontmatter_traduzido' otimizado, construa um novo objeto chamado 'sanity_document_payload'. Este objeto deve conter:
+       - _type: "post" (ou o tipo de schema que você usa no Sanity para posts)
+       - title: (string) O título otimizado de 'frontmatter_traduzido.title'.
+       - slug: (object) Um objeto com formato {"_type": "slug", "current": "slug-gerado-a-partir-do-titulo-otimizado"}.
+       - tags: (array de strings) As tags de 'frontmatter_traduzido.tags'.
+       - categories: (array de strings) A categoria de 'frontmatter_traduzido.category' (coloque-a dentro de um array, ex: ["Nome da Categoria"]). A SanityPublishTool pode precisar resolver isso para referências se necessário.
+       - seo: (object) Um objeto com {"meta_title": "título otimizado", "meta_description": "meta descrição otimizada"}.
+       - publishedAt: (string) A data de 'frontmatter_traduzido.published_date'.
+       - Mais campos podem ser adicionados aqui se fizerem parte do seu schema Sanity para metadados (ex: autor, imagem principal se tiver essa info).
+    
+    Mantenha os campos 'content_text_traduzido' e 'content_html_traduzido' no nível raiz do JSON retornado, 
+    juntamente com o novo objeto 'sanity_document_payload'.
+  expected_output: >
+    Uma string representando um NOVO objeto JSON contendo APENAS os campos 'sanity_document_payload', 
+    'content_text_traduzido', e 'content_html_traduzido'.
+  agent: seo_analyst
+  context: 
+    - editing_task
+
+publish_task:
+  description: >
+    Publique o artigo otimizado no Sanity CMS, usando o payload preparado e o conteúdo do objeto JSON da tarefa anterior.
+    O objeto JSON contém 'sanity_document_payload', 'content_text_traduzido', e/ou 'content_html_traduzido'.
+    Você também tem acesso ao caminho do arquivo JSON original via {arquivo_json} para referência, se necessário.
+
+    Use a ferramenta 'SanityPublishTool'.
+    Passe os seguintes para a ferramenta:
+    - O objeto 'sanity_document_payload' (que já contém title, slug, tags, categories, seo, publishedAt, _type).
+    - O conteúdo principal a ser convertido para o campo 'body' do Sanity (priorize 'content_html_traduzido', senão use 'content_text_traduzido').
+    A ferramenta é responsável por:
+      1. Usar o 'sanity_document_payload' como base para o documento Sanity.
+      2. Converter o conteúdo principal (HTML ou texto) para o formato Portable Text do Sanity e adicioná-lo como o campo 'body'.
+      3. Resolver referências de categoria se necessário (se as categorias foram passadas como strings).
+      4. Enviar o documento final para a API do Sanity.
+
+    Verifique o resultado da ferramenta.
+  expected_output: >
+    O resultado retornado pela SanityPublishTool, geralmente um JSON indicando 
+    sucesso (com ID/slug) ou falha (com detalhes do erro).
+  agent: publisher
+  context: 
+    - seo_optimization_task
