@@ -20,12 +20,7 @@ class RssFeedTool(Tool):
     
     processed_items: Set[str] = Field(default_factory=set)
     default_feeds: List[str] = Field(default=[
-        "https://cointelegraph.com/rss",
-        "https://www.coindesk.com/arc/outboundfeeds/rss/",
-        "https://decrypt.co/feed",
-        "https://blog.chain.link/rss/",
-        "https://bitcoin.org/en/rss/blog.xml",
-        "https://bitcoinmagazine.com/feed",
+        "https://thecryptobasic.com/feed"
     ])
     db_path: str = Field(default="posts_database.sqlite")
     

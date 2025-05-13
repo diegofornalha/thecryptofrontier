@@ -1,15 +1,4 @@
 #!/usr/bin/env python
-"""
-Interface Streamlit para o Blog Automação
-
-Este aplicativo oferece uma interface visual para gerenciar o fluxo de automação
-do blog de criptomoedas, permitindo:
-- Monitorar feeds RSS
-- Traduzir artigos
-- Publicar no Sanity CMS
-- Visualizar logs e estatísticas
-"""
-
 import os
 import sys
 import time
@@ -1045,9 +1034,7 @@ with col_content:
                 feeds = tool.default_feeds
             except:
                 feeds = [
-                    "https://cointelegraph.com/rss",
-                    "https://www.coindesk.com/arc/outboundfeeds/rss/",
-                    "https://decrypt.co/feed"
+                    "https://thecryptobasic.com/feed",
                 ]
         
         feeds_str = "\n".join(feeds)

@@ -1,18 +1,4 @@
 #!/usr/bin/env python
-"""
-Script principal para execução da automação de blog usando CrewAI.
-
-Uso:
-    python -m src.blog_automacao.main [--monitoramento|--traducao|--publicacao|--completo] [--loop N]
-
-Opções:
-    --monitoramento  Executa apenas o monitoramento e seleção de conteúdo
-    --traducao       Executa apenas a tradução e adaptação de conteúdo
-    --publicacao     Executa apenas a revisão e publicação de conteúdo
-    --completo       Executa o fluxo completo (padrão)
-    --loop N         Executa em loop a cada N minutos
-"""
-
 import os
 import sys
 import time
@@ -410,8 +396,7 @@ def executar_fluxo_completo(crew, base_dir, loop_minutes=None):
 
     if not feed_urls:
         print("ERRO: Não foi possível carregar URLs de feed do feeds.json. Verifique os caminhos.")
-        # Poderia usar um fallback para uma lista hardcoded aqui se necessário
-        # feed_urls = ["http://default-feed.com/rss"]
+
 
     parser = argparse.ArgumentParser(
         description="Executa a automação de blog usando CrewAI.",
@@ -528,8 +513,6 @@ def main():
 
     if not feed_urls:
         print("ERRO: Não foi possível carregar URLs de feed do feeds.json. Verifique os caminhos.")
-        # Poderia usar um fallback para uma lista hardcoded aqui se necessário
-        # feed_urls = ["http://default-feed.com/rss"]
 
     parser = argparse.ArgumentParser(
         description="Executa a automação de blog usando CrewAI.",
