@@ -65,33 +65,40 @@ def executar_monitoramento_direto(base_dir, loop_minutes=None):
             # Salvar artigos para tradução
             for i, artigo in enumerate(artigos):
                 # Gerar nome de arquivo único para o artigo
-                titulo_slug = artigo["title"].lower()
+                titulo_slug = artigo.get("title", "sem_titulo").lower()
                 titulo_slug = "".join(c if c.isalnum() else "_" for c in titulo_slug)
                 titulo_slug = titulo_slug[:50]  # Limitar tamanho
                 
-                arquivo_nome = f"para_traduzir_{int(time.time())}_{i}_{titulo_slug}.json"
+                timestamp_atual = int(time.time())
+                arquivo_nome = f"para_traduzir_{timestamp_atual}_{i}_{titulo_slug}.json"
                 caminho_arquivo = dir_para_traduzir / arquivo_nome
                 
-                # Criar cabeçalho YAML Front Matter
-                front_matter = {
-                    "title": artigo["title"],
-                    "original_link": artigo["link"],
-                    "date": artigo["date"],
-                    "source": artigo["source"],
-                    "tags": artigo.get("tags", ["bitcoin", "criptomoedas"]),
-                    "status": "para_traduzir"
+                # Estrutura JSON detalhada
+                frontmatter_original = {
+                    "title": artigo.get("title", "Sem Título Original"),
+                    "original_link": artigo.get("link", ""),
+                    "published_date": artigo.get("date", datetime.now().isoformat()), # Usar uma data consistente
+                    "source_name": artigo.get("source", "Desconhecido"),
+                    "tags_originais": artigo.get("tags", []), # Campo para tags originais se houver
+                    "slug_original": titulo_slug, # Adicionar slug original
+                    "timestamp_captura": timestamp_atual
+                }
+
+                dados_salvar = {
+                    "frontmatter_original": frontmatter_original,
+                    "content_text_original": artigo.get("content_text", ""), # Assumindo que rss_tool retorna content_text
+                    "content_html_original": artigo.get("content_html", ""), # E/ou content_html
+                    "resumo_original": artigo.get("summary", ""), # Se a ferramenta RSS fornecer resumo
+                    # Campos para serem preenchidos posteriormente
+                    "content_text_traduzido": None,
+                    "content_html_traduzido": None,
+                    "frontmatter_traduzido": None 
                 }
                 
-                # Salvar como markdown (ou JSON, o nome do arquivo é .json)
-                # Salvar como JSON pode ser mais robusto para metadados complexos
-                dados_salvar = {
-                    "metadata": front_matter,
-                    "content": artigo["content"]
-                }
                 try:
                     with open(caminho_arquivo, "w", encoding="utf-8") as f:
-                        json.dump(dados_salvar, f, ensure_ascii=False, indent=2)
-                    print(f"SUCESSO AO SALVAR: {caminho_arquivo}") # Mensagem explícita
+                        json.dump(dados_salvar, f, ensure_ascii=False, indent=4) # Usar indent=4 para melhor legibilidade
+                    print(f"SUCESSO AO SALVAR: {caminho_arquivo}") 
                 except Exception as e_save:
                     print(f"!!!!!! ERRO REAL AO SALVAR ARQUIVO {caminho_arquivo}: {e_save} !!!!!!") # Erro mais visível
                     # Considerar levantar o erro aqui para que o main.py retorne um código de erro
@@ -150,36 +157,88 @@ def executar_monitoramento(crew, base_dir, loop_minutes=None):
         print(f"Aguardando {loop_minutes} minutos até a próxima verificação...")
         time.sleep(loop_minutes * 60)
 
-def executar_traducao(crew, base_dir):
+def executar_traducao(crew, base_dir, arquivo_especifico_para_teste=None):
     """Executa apenas a tradução e adaptação de conteúdo.
     
     Args:
         crew: Instância do BlogAutomacaoCrew
         base_dir: Diretório base para os subdiretórios de posts.
+        arquivo_especifico_para_teste: Caminho completo para um arquivo JSON específico a ser testado.
     """
     print(f"=== INICIANDO TRADUÇÃO DE ARTIGOS (CrewAI - Base Dir: {base_dir}) ===")
-    dir_para_traduzir = base_dir / "posts_para_traduzir"
-    dir_traduzidos = base_dir / "posts_traduzidos"
+    dir_para_traduzir = Path(base_dir) / "posts_para_traduzir" # Certificar que base_dir é Path
+    dir_traduzidos = Path(base_dir) / "posts_traduzidos"
     dir_traduzidos.mkdir(parents=True, exist_ok=True)
     
-    arquivos = list(dir_para_traduzir.glob("para_traduzir_*.json"))
-    
-    if not arquivos:
+    arquivos_para_processar = []
+    if arquivo_especifico_para_teste:
+        arquivo_teste_path = Path(arquivo_especifico_para_teste)
+        if arquivo_teste_path.exists():
+            arquivos_para_processar.append(arquivo_teste_path)
+            print(f"Modo de teste: Processando arquivo específico: {arquivo_teste_path}")
+        else:
+            print(f"Erro no modo de teste: Arquivo específico não encontrado: {arquivo_teste_path}")
+            return
+    else:
+        arquivos_para_processar = list(dir_para_traduzir.glob("para_traduzir_*.json"))
+
+    if not arquivos_para_processar:
         print("Nenhum artigo encontrado para traduzir.")
         return
+
+    print(f"Encontrados {len(arquivos_para_processar)} artigos para traduzir.")
     
-    print(f"Encontrados {len(arquivos)} artigos para traduzir.")
-    
-    for arquivo_origem in arquivos:
-        print(f"\nProcessando tradução de: {arquivo_origem.name}")
+    for arquivo_origem_path in arquivos_para_processar: # Renomeado para arquivo_origem_path
+        print(f"\nProcessando tradução de: {arquivo_origem_path.name}")
+
+        # Adicionar lógica de transformação se for o arquivo de teste
+        arquivo_para_crew = arquivo_origem_path
+        if arquivo_especifico_para_teste and arquivo_origem_path == Path(arquivo_especifico_para_teste):
+            print(f"Transformando arquivo de teste: {arquivo_origem_path.name}")
+            try:
+                with open(arquivo_origem_path, 'r', encoding='utf-8') as f:
+                    dados_originais = json.load(f)
+
+                frontmatter_original = {
+                    "title": dados_originais.get("metadata", {}).get("title", "Sem Título Original"),
+                    "original_link": dados_originais.get("metadata", {}).get("original_link", ""),
+                    "published_date": dados_originais.get("metadata", {}).get("date", datetime.now().isoformat()),
+                    "source_name": dados_originais.get("metadata", {}).get("source", "Desconhecido"),
+                    "tags_originais": dados_originais.get("metadata", {}).get("tags", []),
+                    "slug_original": dados_originais.get("metadata", {}).get("title", "sem_titulo").lower().replace(" ", "-")[:50],
+                    "timestamp_captura": int(time.time())
+                }
+
+                dados_transformados = {
+                    "frontmatter_original": frontmatter_original,
+                    "content_text_original": "", # Deixar vazio, pois o original só tem HTML
+                    "content_html_original": dados_originais.get("content", ""),
+                    "resumo_original": "", # Adicionar se disponível no futuro
+                    "content_text_traduzido": None,
+                    "content_html_traduzido": None,
+                    "frontmatter_traduzido": None
+                }
+                
+                # Salvar o arquivo transformado (pode ser com novo nome ou sobrescrever)
+                # Para este teste, vamos sobrescrever o arquivo original dentro de temp_test_dir_single_post
+                # É importante que esta lógica só rode para o arquivo de teste!
+                with open(arquivo_origem_path, 'w', encoding='utf-8') as f:
+                    json.dump(dados_transformados, f, ensure_ascii=False, indent=4)
+                print(f"Arquivo de teste transformado e salvo em: {arquivo_origem_path}")
+                arquivo_para_crew = arquivo_origem_path # crew usará o arquivo transformado
+
+            except Exception as e_transform:
+                print(f"Erro ao transformar o arquivo de teste {arquivo_origem_path.name}: {e_transform}")
+                continue # Pular para o próximo arquivo se a transformação falhar
+
         inputs = {
-            "arquivo_markdown": str(arquivo_origem), # Passa o caminho do arquivo original
-            "base_dir": str(base_dir) # Passa base_dir para a crew/tasks
+            "arquivo_json": str(arquivo_para_crew), # Passa o caminho do arquivo JSON para a crew
+            "base_dir": str(Path(base_dir)) # Passa base_dir para a crew/tasks
         }
         
         try:
-            # A traducao_crew (translation + localization) deve retornar o caminho do arquivo salvo em posts_traduzidos
-            print(f"Executando traducao_crew().kickoff() para {arquivo_origem.name}...")
+            # A traducao_crew deve retornar o caminho do arquivo JSON salvo em posts_traduzidos
+            print(f"Executando traducao_crew().kickoff() para {arquivo_para_crew.name}...")
             resultado_crew = crew.traducao_crew().kickoff(inputs=inputs)
             
             # O resultado esperado da localization_task é o caminho do arquivo salvo
@@ -191,15 +250,15 @@ def executar_traducao(crew, base_dir):
                 print(f"Arquivo traduzido e adaptado salvo em: {caminho_arquivo_traduzido}")
                 # Mover o arquivo original após sucesso
                 try:
-                    arquivo_origem.unlink() # Remover o arquivo de 'posts_para_traduzir'
-                    print(f"Arquivo original removido: {arquivo_origem}")
+                    arquivo_origem_path.unlink() # Remover o arquivo de 'posts_para_traduzir'
+                    print(f"Arquivo original removido: {arquivo_origem_path}")
                 except OSError as e_move:
-                    print(f"Erro ao remover arquivo original {arquivo_origem}: {e_move}")
+                    print(f"Erro ao remover arquivo original {arquivo_origem_path}: {e_move}")
             else:
                 print(f"Erro: A crew de tradução não retornou um caminho de arquivo válido ou o arquivo não existe: {caminho_arquivo_traduzido_str}")
 
         except Exception as e_trad:
-            print(f"Erro ao executar traducao_crew para {arquivo_origem.name}: {e_trad}")
+            print(f"Erro ao executar traducao_crew para {arquivo_para_crew.name}: {e_trad}")
 
 def executar_publicacao(crew, base_dir):
     """Executa apenas a revisão e publicação de conteúdo.
@@ -225,12 +284,12 @@ def executar_publicacao(crew, base_dir):
     for arquivo_origem in arquivos:
         print(f"\nProcessando publicação de: {arquivo_origem.name}")
         inputs = {
-            "arquivo_markdown": str(arquivo_origem), # Passa o caminho do arquivo original
+            "arquivo_json": str(arquivo_origem), # Passa o caminho do arquivo JSON original
             "base_dir": str(base_dir) # Passa base_dir para a crew/tasks
         }
         
         try:
-            # A publicacao_crew (editing + seo + publish) deve retornar o resultado da SanityPublishTool
+            # A publicacao_crew deve retornar o resultado da SanityPublishTool
             print(f"Executando publicacao_crew().kickoff() para {arquivo_origem.name}...")
             resultado_crew = crew.publicacao_crew().kickoff(inputs=inputs)
             
@@ -339,6 +398,9 @@ def executar_fluxo_completo(crew, base_dir, loop_minutes=None):
         "--base_dir", type=str, default=".",
         help="Diretório base para os subdiretórios de posts (posts_para_traduzir, etc.). Padrão: diretório atual."
     )
+    parser.add_argument(
+        "--teste_traducao_arquivo", type=str, help="Caminho para um arquivo JSON específico para testar o fluxo de tradução"
+    )
     
     args = parser.parse_args()
     
@@ -367,21 +429,22 @@ def executar_fluxo_completo(crew, base_dir, loop_minutes=None):
         return # Sair da main se a crew falhou e o fallback foi executado ou não era aplicável
 
     # Lógica de execução baseada nos argumentos
+    executou_algo = False
     if args.monitoramento:
         executar_monitoramento(blog_crew, base_dir, args.loop)
+        executou_algo = True
     elif args.traducao:
-        if args.loop:
-            print("Aviso: --loop não é aplicável a --traducao. Executando uma vez.")
-        executar_traducao(blog_crew, base_dir)
+        if args.teste_traducao_arquivo:
+            # Usar o base_dir específico para o arquivo de teste
+            executar_traducao(blog_crew, base_dir, args.teste_traducao_arquivo)
+        else:
+            # Usar o base_dir padrão para a execução normal da tradução
+            executar_traducao(blog_crew, base_dir)
+        executou_algo = True
     elif args.publicacao:
-        if args.loop:
-            print("Aviso: --loop não é aplicável a --publicacao. Executando uma vez.")
         executar_publicacao(blog_crew, base_dir)
-    elif args.completo:
-        executar_fluxo_completo(blog_crew, base_dir, args.loop)
-    else:
-        # Comportamento padrão: executar fluxo completo uma vez
-        print("Nenhuma flag específica fornecida, executando o fluxo completo por padrão.")
+        executou_algo = True
+    elif args.completo or not executou_algo: # Executar completo se nenhuma flag específica for passada
         executar_fluxo_completo(blog_crew, base_dir, args.loop)
 
 def load_feed_urls_from_config(filepath):
@@ -443,15 +506,18 @@ def main():
     )
     parser.add_argument(
         "--completo", action="store_true", 
-        help="Executa o fluxo completo (padrão se nenhuma outra ação for especificada)"
+        help="Executa o fluxo completo (padrão se nenhuma outra flag for passada)"
     )
     parser.add_argument(
         "--loop", type=int, metavar="N", 
-        help="Executa em loop a cada N minutos (aplicável a --monitoramento ou --completo)"
+        help="Executa em loop a cada N minutos (aplicável ao monitoramento e completo)"
     )
     parser.add_argument(
         "--base_dir", type=str, default=".",
         help="Diretório base para os subdiretórios de posts (posts_para_traduzir, etc.). Padrão: diretório atual."
+    )
+    parser.add_argument(
+        "--teste_traducao_arquivo", type=str, help="Caminho para um arquivo JSON específico para testar o fluxo de tradução"
     )
     
     args = parser.parse_args()
@@ -481,21 +547,22 @@ def main():
         return # Sair da main se a crew falhou e o fallback foi executado ou não era aplicável
 
     # Lógica de execução baseada nos argumentos
+    executou_algo = False
     if args.monitoramento:
         executar_monitoramento(blog_crew, base_dir, args.loop)
+        executou_algo = True
     elif args.traducao:
-        if args.loop:
-            print("Aviso: --loop não é aplicável a --traducao. Executando uma vez.")
-        executar_traducao(blog_crew, base_dir)
+        if args.teste_traducao_arquivo:
+            # Usar o base_dir específico para o arquivo de teste
+            executar_traducao(blog_crew, base_dir, args.teste_traducao_arquivo)
+        else:
+            # Usar o base_dir padrão para a execução normal da tradução
+            executar_traducao(blog_crew, base_dir)
+        executou_algo = True
     elif args.publicacao:
-        if args.loop:
-            print("Aviso: --loop não é aplicável a --publicacao. Executando uma vez.")
         executar_publicacao(blog_crew, base_dir)
-    elif args.completo:
-        executar_fluxo_completo(blog_crew, base_dir, args.loop)
-    else:
-        # Comportamento padrão: executar fluxo completo uma vez
-        print("Nenhuma flag específica fornecida, executando o fluxo completo por padrão.")
+        executou_algo = True
+    elif args.completo or not executou_algo: # Executar completo se nenhuma flag específica for passada
         executar_fluxo_completo(blog_crew, base_dir, args.loop)
     # << FIM DO BLOCO INDENTADO >>
 

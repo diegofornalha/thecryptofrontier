@@ -9,15 +9,21 @@ from crewai.project import CrewBase, agent, crew, task, tool
 from crewai.llm import LLM
 from .tools.rss_tools import RssFeedTool
 from .tools.sanity_tools import SanityPublishTool
+from .tools.file_tools import FileSaveTool
 # from langchain_google_genai import ChatGoogleGenerativeAI
 import litellm
 import json
 import importlib.util
+from dotenv import load_dotenv
+from datetime import datetime
 
 # Ferramentas
 from .tools.rss_tools import RssFeedTool
 from .tools.sanity_tools import SanityPublishTool
 # Importar outros tools conforme necessário
+
+# Carregar variáveis de ambiente do arquivo .env
+load_dotenv()
 
 # Tentativa de carregar configurações do arquivo legado se as variáveis de ambiente não estiverem definidas
 def load_legacy_config():
@@ -109,6 +115,7 @@ class BaseCrewComponents:
         
         self.rss_feed_tool = RssFeedTool()
         self.sanity_publish_tool = SanityPublishTool()
+        self.file_save_tool = FileSaveTool()
 
 @CrewBase
 class BlogAutomacaoCrew(BaseCrewComponents):
@@ -143,7 +150,7 @@ class BlogAutomacaoCrew(BaseCrewComponents):
         """Agente para monitorar feeds RSS."""
         return Agent(
             config=self.agents_config["monitor"],
-            tools=[self.rss_feed_tool], # Passa a instância da ferramenta
+            tools=[self.rss_feed_tool], 
             verbose=True,
             llm=self.llm
         )
@@ -171,6 +178,7 @@ class BlogAutomacaoCrew(BaseCrewComponents):
         """Agente para adaptar o conteúdo para o público brasileiro."""
         return Agent(
             config=self.agents_config["localizer"],
+            tools=[self.file_save_tool],
             verbose=True,
             llm=self.llm
         )
@@ -207,19 +215,10 @@ class BlogAutomacaoCrew(BaseCrewComponents):
         """Agente para publicar o conteúdo no CMS."""
         return Agent(
             config=self.agents_config["publisher"],
-            tools=[self.sanity_publish_tool], # Passa a instância da ferramenta
+            tools=[self.sanity_publish_tool], 
             verbose=True,
             llm=self.llm
         )
-    
-    # ----- Definição das Ferramentas (agora como métodos) -----
-    def sanity_publish_tool(self) -> SanityPublishTool:
-        """Retorna uma instância da ferramenta para publicar no Sanity."""
-        return SanityPublishTool()
-
-    def rss_feed_tool(self) -> RssFeedTool:
-        """Retorna uma instância da ferramenta de RSS."""
-        return RssFeedTool()
     
     # ----- Definição das Tarefas -----    
     @task
@@ -288,35 +287,35 @@ class BlogAutomacaoCrew(BaseCrewComponents):
     # ----- Configuração da Crew -----    
     @crew
     def monitoramento_crew(self) -> Crew:
-        """Crew específica para monitoramento e seleção de conteúdo."""
+        """Crew para monitoramento e seleção de artigos."""
         return Crew(
-            agents=[self.monitor(), self.selector()], # Readicionar selector
-            tasks=[self.monitoring_task(), self.selection_task()], # Readicionar selection_task
-            verbose=True,
+            agents=[self.monitor(), self.selector()],
+            tasks=[self.monitoring_task(), self.selection_task()],
             process=Process.sequential,
-            llm=self.llm
+            verbose=True
         )
     
     @crew
     def traducao_crew(self) -> Crew:
-        """Crew específica para tradução e adaptação de conteúdo."""
+        """Crew para tradução e adaptação de conteúdo."""
+        # A ordem das tarefas deve seguir a lógica de dependência e o resultado desejado.
+        # 1. translation_task: Traduz o conteúdo bruto.
+        # 2. editing_task: Revisa o conteúdo traduzido (depende da translation_task).
+        # 3. localization_task: Adapta o conteúdo editado, salva o arquivo e retorna o caminho (depende da editing_task).
+        # O resultado da localization_task (caminho do arquivo) será o resultado da crew.
         return Crew(
-            agents=[self.translator(), self.localizer(), self.editor()],
-            tasks=[self.translation_task(), self.localization_task(), self.editing_task()],
+            agents=[self.translator(), self.editor(), self.localizer()], 
+            tasks=[self.translation_task(), self.editing_task(), self.localization_task()], 
             verbose=True,
-            process=Process.sequential,
-            llm=self.llm
         )
     
     @crew
     def publicacao_crew(self) -> Crew:
-        """Crew específica para revisão, otimização e publicação."""
+        """Crew para otimização SEO e publicação no Sanity."""
         return Crew(
-            agents=[self.formatter(), self.seo_analyst(), self.publisher()],
-            tasks=[self.editing_task(), self.seo_optimization_task(), self.publish_task()],
-            verbose=True,
-            process=Process.sequential,
-            llm=self.llm
+            agents=[self.seo_analyst(), self.publisher()],
+            tasks=[self.seo_optimization_task(), self.publish_task()],
+            verbose=True
         )
     
     @crew
