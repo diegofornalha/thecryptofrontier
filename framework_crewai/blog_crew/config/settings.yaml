@@ -1,0 +1,18 @@
+# Configurações do Blog Automação com CrewAI
+
+# Configurações de diretórios
+directories:
+  posts_para_traduzir: "posts_para_traduzir"
+  posts_traduzidos: "posts_traduzidos"
+  posts_formatados: "posts_formatados"
+  posts_publicados: "posts_publicados"
+
+# Configurações LLM
+llm:
+  model: "gemini-pro"
+  temperature: 0.7
+
+# Configurações do processo
+process:
+  type: "sequential"  # sequential ou hierarchical
+  verbose: true
