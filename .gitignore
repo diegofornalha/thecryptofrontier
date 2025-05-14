@@ -146,3 +146,4 @@ framework_crewai/fresh_env/lib64/
 *storybook.log
 /new_env/
 /env/
+**/.claude/settings.local.json

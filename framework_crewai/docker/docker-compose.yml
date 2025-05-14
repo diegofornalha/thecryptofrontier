@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # Serviço Redis para cache e filas
+  redis:
+    image: redis:alpine
+    container_name: redis-crewai-cache
+    ports:
+      - "6380:6379"  # Mapeando a porta 6380 do host para 6379 do container
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    networks:
+      - crewai-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Serviço de processamento da fila (processador em Python)
+  # Este serviço executa o script process_article_queue.py para processar a fila Redis
+  queue-processor:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.processor
+    container_name: crewai-queue-processor
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis  # Nome do serviço Redis no docker-compose
+      - REDIS_PORT=6379   # Porta padrão dentro do container
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - SANITY_PROJECT_ID=${SANITY_PROJECT_ID}
+      - SANITY_API_TOKEN=${SANITY_API_TOKEN}
+    volumes:
+      - ../:/app  # Mapeia o diretório raiz do projeto para /app no container
+    restart: unless-stopped
+    networks:
+      - crewai-network
+    command: ["python", "process_article_queue.py", "--loop", "5", "--max", "10"]
+
+volumes:
+  redis_data:
+
+networks:
+  crewai-network:
+    driver: bridge

@@ -160,6 +160,87 @@ def translate_article(arquivo_json=None):
             SessionManager.add_log(f"Trace: {traceback.format_exc()}")
             return False
 
+def check_duplicate_post(title, guid=None):
+    """
+    Verifica se já existe um post com título similar no Sanity CMS.
+    Retorna True se encontrar um post similar, False caso contrário.
+    """
+    # Obter tokens e configurações do Sanity
+    project_id = os.environ.get("NEXT_PUBLIC_SANITY_PROJECT_ID") or os.environ.get("SANITY_PROJECT_ID", "brby2yrg")
+    dataset = os.environ.get("NEXT_PUBLIC_SANITY_DATASET", "production")
+    api_version = os.environ.get("NEXT_PUBLIC_SANITY_API_VERSION", "2023-05-03")
+    token = os.environ.get("SANITY_DEV_TOKEN", "")
+    
+    # Se não encontrou o token DEV, verificar outros tokens
+    if not token:
+        token = os.environ.get("SANITY_API_TOKEN", "")
+    if not token:
+        token = os.environ.get("SANITY_DEPLOY_TOKEN", "")
+    
+    # Remover quebras de linha do token
+    token = token.replace('\n', '')
+    
+    # Formatar título para busca
+    # Remove aspas e caracteres especiais para evitar erros na consulta
+    search_title = title.replace('"', '').replace("'", "").strip()
+    
+    # Construir URL da API com consulta GROQ para posts com título similar
+    url = f"https://{project_id}.api.sanity.io/v{api_version}/data/query/{dataset}?query=*[_type == 'post' && title match '{search_title}*']"
+    
+    # Definir headers com token
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+    
+    try:
+        # Fazer requisição à API
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        
+        # Analisar resultado
+        posts = response.json().get('result', [])
+        
+        if posts:
+            print(f"⚠️ ATENÇÃO: Encontrados {len(posts)} posts similares no Sanity:")
+            for i, post in enumerate(posts, 1):
+                post_id = post.get('_id', 'ID não disponível')
+                post_title = post.get('title', 'Título não disponível')
+                print(f"  {i}. ID: {post_id}, Título: {post_title}")
+            
+            return True
+        
+        return False
+        
+    except Exception as e:
+        print(f"Erro ao verificar duplicatas: {e}")
+        # Em caso de erro, é melhor continuar o processo
+        return False
+
+def get_json_post_title(file_path):
+    """
+    Extrai o título de um arquivo JSON de post traduzido.
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        # Tentar obter o título do frontmatter traduzido
+        if data.get('frontmatter_traduzido', {}).get('title'):
+            return data['frontmatter_traduzido']['title']
+        
+        # Se não encontrar, tentar no frontmatter original
+        if data.get('frontmatter_original', {}).get('title'):
+            return data['frontmatter_original']['title']
+        
+        # Última tentativa
+        if data.get('title'):
+            return data['title']
+            
+        return None
+    except Exception as e:
+        print(f"Erro ao extrair título do JSON: {e}")
+        return None
+
 def publish_article(translated_file_path: Path):
     """
     Publica um artigo no Sanity a partir de um arquivo traduzido.
@@ -176,6 +257,36 @@ def publish_article(translated_file_path: Path):
         return
         
     print(f"Publicando artigo traduzido: {translated_file_path}")
+    
+    # Verificar duplicatas apenas para arquivos JSON
+    if translated_file_path.suffix.lower() == '.json':
+        post_title = get_json_post_title(translated_file_path)
+        if post_title and check_duplicate_post(post_title):
+            print(f"Detectado artigo similar já publicado no Sanity. Cancelando publicação para evitar duplicata.")
+            
+            # Tentar obter o ID do artigo para atualizar o status
+            article_id = None
+            try:
+                # Tentar extrair ID do nome do arquivo
+                filename = translated_file_path.stem
+                if filename.startswith("traduzido_"):
+                    article_id = filename.split("_")[1]
+                    
+                if article_id and article_id.isdigit():
+                    # Conectar ao banco de dados e atualizar status
+                    conn = sqlite3.connect("posts_database.sqlite")
+                    cursor = conn.cursor()
+                    cursor.execute(
+                        "UPDATE posts SET status = 'duplicate' WHERE id = ?",
+                        (int(article_id),)
+                    )
+                    conn.commit()
+                    conn.close()
+                    print(f"Artigo marcado como duplicado no banco de dados.")
+            except Exception as e:
+                print(f"Erro ao atualizar status no banco de dados: {e}")
+                
+            return "Publicação cancelada: artigo duplicado detectado"
     
     try:
         # Obter ferramentas de publicação
@@ -665,39 +776,352 @@ def save_feeds(feed_urls):
         SessionManager.add_log(f"Erro ao salvar feeds: {str(e)}")
         return False
 
+# Integração com Redis para o framework CrewAI
+def enqueue_crewai_article(article_data, process_now=False):
+    """
+    Enfileira um artigo no Redis para processamento posterior ou imediato via CrewAI.
+    
+    Args:
+        article_data: Dicionário com os dados do artigo
+        process_now: Se True, processa imediatamente após enfileirar
+        
+    Returns:
+        Resultado da operação (sucesso/erro)
+    """
+    try:
+        # Importar o cliente Redis
+        import sys
+        import os
+        parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
+        if parent_dir not in sys.path:
+            sys.path.insert(0, parent_dir)
+        
+        from redis_tools import RedisArticleQueue
+        queue = RedisArticleQueue()
+        
+        SessionManager.add_log(f"Enfileirando artigo: {article_data.get('title', 'Sem título')}")
+        
+        # Garantir que temos um ID
+        if "id" not in article_data:
+            import uuid
+            article_data["id"] = f"crewai_{str(uuid.uuid4())[:8]}"
+        
+        # Enfileirar
+        if queue.queue_article(article_data):
+            SessionManager.add_log(f"✅ Artigo enfileirado com sucesso: {article_data.get('title', 'Sem título')}")
+            
+            # Processar imediatamente se solicitado
+            if process_now:
+                try:
+                    from process_article_queue import process_queue
+                    # Processar apenas um artigo
+                    process_queue(max_articles=1, interval=1)
+                    SessionManager.add_log("✅ Artigo processado imediatamente")
+                except Exception as e:
+                    SessionManager.add_log(f"❌ Erro ao processar artigo imediatamente: {str(e)}")
+            
+            return True
+        else:
+            SessionManager.add_log(f"❌ Falha ao enfileirar artigo: {article_data.get('title', 'Sem título')}")
+            return False
+    
+    except Exception as e:
+        SessionManager.add_log(f"❌ Erro ao enfileirar artigo: {str(e)}")
+        import traceback
+        SessionManager.add_log(f"Trace: {traceback.format_exc()}")
+        return False
+
 # Fluxo completo
+def start_translation_for_kanban(article_path=None):
+    """
+    Inicia o processo de tradução para um artigo específico ou o primeiro disponível
+    para o fluxo Kanban.
+    
+    Args:
+        article_path: Caminho para o arquivo a ser traduzido (opcional)
+        
+    Returns:
+        Path do arquivo sendo traduzido ou None se falhar
+    """
+    # Se não foi especificado um arquivo, buscar o primeiro disponível
+    if not article_path:
+        dir_posts = Path("posts_para_traduzir")
+        if not dir_posts.exists():
+            dir_posts = Path("posts_traduzidos")  # Fallback para compatibilidade
+            
+        arquivos = list(dir_posts.glob("para_traduzir_*.json"))
+        
+        if not arquivos:
+            SessionManager.add_log("Nenhum artigo encontrado para traduzir.")
+            return None
+        
+        # Ordenar por nome para pegar o mais antigo primeiro
+        arquivos.sort()
+        article_path = arquivos[0]
+    else:
+        # Garantir que é um objeto Path
+        article_path = Path(article_path)
+        
+    SessionManager.add_log(f"Artigo selecionado para tradução: {article_path.name}")
+    return article_path
+
+def complete_translation_for_kanban(article_path):
+    """
+    Completa a tradução de um artigo em progresso no fluxo Kanban.
+    
+    Args:
+        article_path: Caminho para o arquivo que está sendo traduzido
+        
+    Returns:
+        True se traduzido com sucesso, False caso contrário
+    """
+    if not isinstance(article_path, Path):
+        article_path = Path(article_path)
+        
+    SessionManager.add_log(f"Completando tradução para {article_path}")
+    
+    # Executar a tradução normal
+    return translate_article(article_path)
+
+def publish_specific_article(article_path):
+    """
+    Publica um artigo específico no Sanity CMS.
+    
+    Args:
+        article_path: Caminho para o arquivo traduzido a ser publicado
+        
+    Returns:
+        True se publicado com sucesso, False caso contrário
+    """
+    if not isinstance(article_path, Path):
+        article_path = Path(article_path)
+        
+    SessionManager.add_log(f"Publicando artigo específico: {article_path}")
+    
+    try:
+        # Verificar se o artigo já está no formato correto
+        with open(article_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            
+        # Verificar duplicatas
+        if "frontmatter_traduzido" in data and data["frontmatter_traduzido"]:
+            title = data["frontmatter_traduzido"].get("title", "")
+            if title and check_duplicate_post(title):
+                SessionManager.add_log(f"⚠️ Artigo similar já existe no Sanity: {title}")
+                return False
+                
+        # Usar função existente para publicar
+        publish_article(article_path)
+        return True
+        
+    except Exception as e:
+        SessionManager.add_log(f"Erro ao publicar artigo específico: {str(e)}")
+        return False
+
 def execute_full_flow():
     """Executa o fluxo completo de monitoramento, tradução e publicação."""
     with st.spinner("Executando fluxo completo..."):
         SessionManager.add_log("Iniciando fluxo completo...")
         
-        # Passo 1: Monitoramento
-        monitor_feeds()
+        try:
+            # Verificar se o Redis está disponível
+            import sys
+            import os
+            parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
+            if parent_dir not in sys.path:
+                sys.path.insert(0, parent_dir)
+            
+            from redis_tools import redis_client
+            
+            # Se o Redis estiver disponível, usamos a fila
+            if redis_client and redis_client.ping():
+                SessionManager.add_log("✅ Redis disponível. Usando sistema de filas.")
+                
+                # Passo 1: Monitoramento
+                monitor_feeds()
+                
+                # Passo 2: Importar e usar process_article_queue
+                try:
+                    from process_article_queue import process_queue
+                    # Processar até 3 artigos em sequência
+                    SessionManager.add_log("📝 Processando artigos da fila...")
+                    process_queue(max_articles=3, interval=1)
+                    SessionManager.add_log("✅ Processamento de artigos concluído")
+                except Exception as e:
+                    SessionManager.add_log(f"❌ Erro ao processar artigos da fila: {str(e)}")
+                    import traceback
+                    SessionManager.add_log(f"Trace: {traceback.format_exc()}")
+            
+            else:
+                SessionManager.add_log("⚠️ Redis não disponível. Usando fluxo de arquivos.")
+                
+                # Passo 1: Monitoramento
+                monitor_feeds()
+                
+                # Passo 2: Verificar se há arquivos para traduzir
+                dir_para_traduzir = Path("posts_para_traduzir")
+                if not dir_para_traduzir.exists():
+                    dir_para_traduzir = Path("posts_traduzidos")
+                
+                arquivos_para_traduzir = list(dir_para_traduzir.glob("para_traduzir_*.json"))
+                if arquivos_para_traduzir:
+                    SessionManager.add_log(f"Encontrados {len(arquivos_para_traduzir)} artigos para traduzir. Traduzindo o primeiro...")
+                    translate_article()
+                else:
+                    SessionManager.add_log("Nenhum artigo encontrado para traduzir após monitoramento.")
+                
+                # Passo 3: Verificar se há arquivos traduzidos para publicar
+                dir_traduzidos = Path("posts_traduzidos")
+                arquivos_traduzidos = [a for a in dir_traduzidos.glob("*.json") if not a.name.startswith("para_traduzir_")]
+                
+                if arquivos_traduzidos:
+                    SessionManager.add_log(f"Encontrados {len(arquivos_traduzidos)} artigos traduzidos. Publicando o primeiro...")
+                    publish_article()
+                else:
+                    SessionManager.add_log("Nenhum artigo traduzido encontrado para publicar.")
+            
+            SessionManager.add_log("Fluxo completo finalizado!")
+            SessionManager.update_last_run()
+            # Atualizar a contagem de posts
+            fetch_sanity_posts(refresh=True)
+            return True
+            
+        except Exception as e:
+            SessionManager.add_log(f"❌ Erro ao executar fluxo completo: {str(e)}")
+            import traceback
+            SessionManager.add_log(f"Trace: {traceback.format_exc()}")
+            return False
+
+def delete_sanity_post(post_id, title=None):
+    """
+    Exclui um post do Sanity CMS pelo ID.
+    
+    Args:
+        post_id (str): ID do post no Sanity
+        title (str, opcional): Título do post para registro
         
-        # Passo 2: Verificar se há arquivos para traduzir
-        dir_para_traduzir = Path("posts_para_traduzir")
-        if not dir_para_traduzir.exists():
-            dir_para_traduzir = Path("posts_traduzidos")
+    Returns:
+        bool: True se excluído com sucesso, False caso contrário
+    """
+    try:
+        # Verificar se o post_id é válido
+        if not post_id:
+            SessionManager.add_log("❌ Erro: ID do post não fornecido")
+            return False
+            
+        SessionManager.add_log(f"🔄 Iniciando exclusão do post ID: {post_id}")
         
-        arquivos_para_traduzir = list(dir_para_traduzir.glob("para_traduzir_*.json"))
-        if arquivos_para_traduzir:
-            SessionManager.add_log(f"Encontrados {len(arquivos_para_traduzir)} artigos para traduzir. Traduzindo o primeiro...")
-            translate_article()
+        # Obter credenciais do Sanity
+        project_id = os.environ.get("NEXT_PUBLIC_SANITY_PROJECT_ID") or os.environ.get("SANITY_PROJECT_ID", "brby2yrg")
+        dataset = os.environ.get("NEXT_PUBLIC_SANITY_DATASET", "production")
+        api_version = os.environ.get("NEXT_PUBLIC_SANITY_API_VERSION", "2023-05-03")
+        token = os.environ.get("SANITY_DEV_TOKEN", "")
+        
+        # Se não encontrou o token DEV, verificar outros tokens
+        if not token:
+            token = os.environ.get("SANITY_API_TOKEN", "")
+        if not token:
+            token = os.environ.get("SANITY_DEPLOY_TOKEN", "")
+        
+        # Remover quebras de linha do token
+        token = token.replace('\n', '')
+        
+        if not token:
+            # Tentar obter do arquivo .env
+            try:
+                with open(".env", "r") as f:
+                    for line in f:
+                        if "SANITY_DEV_TOKEN" in line or "SANITY_API_TOKEN" in line or "SANITY_DEPLOY_TOKEN" in line:
+                            parts = line.strip().split("=")
+                            if len(parts) > 1:
+                                token = parts[1].strip().strip('"').strip("'")
+                                break
+            except Exception as env_error:
+                SessionManager.add_log(f"❌ Erro ao ler arquivo .env: {env_error}")
+                
+        if not token:
+            SessionManager.add_log("❌ Erro: Token do Sanity não encontrado")
+            return False
+            
+        SessionManager.add_log(f"ℹ️ Usando projeto Sanity: {project_id}, dataset: {dataset}")
+        
+        # Construir URL da API para deleção
+        url = f"https://{project_id}.api.sanity.io/v{api_version}/data/mutate/{dataset}"
+        
+        # Definir headers com token
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
+        }
+        
+        # Lidar com IDs que têm "drafts." prefixo
+        original_id = post_id
+        if not post_id.startswith("drafts."):
+            # Tentar excluir tanto o rascunho quanto o documento publicado
+            draft_id = f"drafts.{post_id}"
+            SessionManager.add_log(f"ℹ️ Tentando excluir também o rascunho com ID: {draft_id}")
+            
+            # Criar dados para excluir rascunho
+            draft_data = {
+                "mutations": [
+                    {
+                        "delete": {
+                            "id": draft_id
+                        }
+                    }
+                ]
+            }
+            
+            # Tentar excluir o rascunho primeiro
+            try:
+                draft_response = requests.post(url, headers=headers, json=draft_data)
+                draft_response.raise_for_status()
+                SessionManager.add_log(f"✅ Rascunho excluído com sucesso (ID: {draft_id})")
+            except Exception as draft_error:
+                SessionManager.add_log(f"⚠️ Aviso ao excluir rascunho: {str(draft_error)}")
+                # Continuar mesmo se falhar, pois pode não existir um rascunho
+        
+        # Dados para deleção do documento principal
+        data = {
+            "mutations": [
+                {
+                    "delete": {
+                        "id": post_id
+                    }
+                }
+            ]
+        }
+        
+        # Fazer requisição à API
+        SessionManager.add_log(f"🔄 Enviando requisição para excluir {post_id}")
+        response = requests.post(url, headers=headers, json=data)
+        
+        # Exibir detalhes da resposta para debug
+        if response.status_code != 200:
+            SessionManager.add_log(f"⚠️ Resposta não-200: {response.status_code} - {response.text}")
+        
+        response.raise_for_status()
+        response_json = response.json()
+        SessionManager.add_log(f"📄 Resposta: {response_json}")
+        
+        # Verificar se a resposta indica sucesso
+        if "results" in response_json and response_json["results"]:
+            # Registrar sucesso
+            title_info = f" '{title}'" if title else ""
+            SessionManager.add_log(f"✅ Post{title_info} excluído com sucesso (ID: {post_id})")
+            
+            # Atualizar cache de posts
+            if 'sanity_posts' in st.session_state:
+                st.session_state.sanity_posts = [post for post in st.session_state.sanity_posts if post.get('_id') != post_id]
+                SessionManager.add_log(f"✅ Cache de posts atualizado")
+            
+            return True
         else:
-            SessionManager.add_log("Nenhum artigo encontrado para traduzir após monitoramento.")
+            SessionManager.add_log(f"⚠️ Resposta não contém resultados esperados: {response_json}")
+            return False
         
-        # Passo 3: Verificar se há arquivos traduzidos para publicar
-        dir_traduzidos = Path("posts_traduzidos")
-        arquivos_traduzidos = [a for a in dir_traduzidos.glob("*.json") if not a.name.startswith("para_traduzir_")]
-        
-        if arquivos_traduzidos:
-            SessionManager.add_log(f"Encontrados {len(arquivos_traduzidos)} artigos traduzidos. Publicando o primeiro...")
-            publish_article()
-        else:
-            SessionManager.add_log("Nenhum artigo traduzido encontrado para publicar.")
-        
-        SessionManager.add_log("Fluxo completo finalizado!")
-        SessionManager.update_last_run()
-        # Atualizar a contagem de posts
-        fetch_sanity_posts(refresh=True)
-        return True 
+    except Exception as e:
+        SessionManager.add_log(f"❌ Erro ao excluir post: {str(e)}")
+        import traceback
+        SessionManager.add_log(f"🔍 Trace de erro: {traceback.format_exc()}")
+        return False 

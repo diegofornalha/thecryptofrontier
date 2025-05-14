@@ -3,7 +3,6 @@
  * Este arquivo contém as configurações necessárias para conexão com o Sanity
  */
 import { defineConfig } from 'sanity'
-import { deskTool } from 'sanity/desk'
 import { visionTool } from '@sanity/vision'
 import { schemaTypes } from './src/sanity/schemaTypes/index.js'
 
@@ -16,7 +15,6 @@ export default defineConfig({
   apiVersion: '2023-05-03',
   
   plugins: [
-    deskTool(),
     visionTool(),
   ],
 
