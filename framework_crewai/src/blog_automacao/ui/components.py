@@ -19,12 +19,12 @@ def render_sidebar():
     # Botão para limpar cache
     if st.button("🧹 Limpar Cache", key="limpar_cache_sidebar"):
         SessionManager.clear_cache()
-        st.experimental_rerun()
+        st.rerun()
     
     # Botão para ver logs
     if st.button("Ver Logs", key="view_logs_sidebar"):
         SessionManager.toggle_show_logs()
-        st.experimental_rerun()
+        st.rerun()
     
     # Última execução
     if st.session_state.last_run:
@@ -38,7 +38,7 @@ def render_sidebar():
         # Limpar logs
         if st.button("Limpar Logs", key="clear_logs_sidebar"):
             SessionManager.clear_logs()
-            st.experimental_rerun()
+            st.rerun()
         
         # Exibir logs em uma área de texto expansível
         log_text = "\n".join(st.session_state.log_messages)
@@ -94,7 +94,7 @@ def render_article_item(arquivo, tipo="traducao"):
                         with st.spinner(f"Traduzindo {arquivo.name}..."):
                             if translate_article(arquivo):
                                 st.success(f"Artigo traduzido com sucesso: {arquivo.name}")
-                                st.experimental_rerun()
+                                st.rerun()
                             else:
                                 st.error(f"Erro ao traduzir {arquivo.name}")
                 
@@ -104,7 +104,7 @@ def render_article_item(arquivo, tipo="traducao"):
                         with st.spinner(f"Publicando {arquivo.name}..."):
                             if publish_article(arquivo):
                                 st.success(f"Artigo publicado com sucesso: {arquivo.name}")
-                                st.experimental_rerun()
+                                st.rerun()
                             else:
                                 st.error(f"Erro ao publicar {arquivo.name}")
                 
@@ -121,7 +121,7 @@ def render_article_item(arquivo, tipo="traducao"):
                         
                         SessionManager.add_log(f"✅ Arquivo {arquivo.name} removido")
                         st.success(f"Arquivo removido: {arquivo.name}")
-                        st.experimental_rerun()  # Recarregar a página para atualizar a lista
+                        st.rerun()  # Recarregar a página para atualizar a lista
                     except Exception as e:
                         SessionManager.add_log(f"❌ Erro ao remover arquivo {arquivo.name}: {str(e)}")
                         st.error(f"Erro ao remover arquivo: {str(e)}")
@@ -180,10 +180,21 @@ def render_post_card(post, index):
         with col1:
             if st.button("Excluir", key=f"delete_{index}", type="primary"):
                 from ..logic.business_logic import delete_sanity_post
-                delete_sanity_post(post.get("_id"), post.get("title", "Sem título"))
-                # Forçar atualização da página depois de alguns segundos
+                
+                with st.spinner(f"Excluindo post {post.get('title', 'Sem título')}..."):
+                    success = delete_sanity_post(post.get("_id"), post.get("title", "Sem título"))
+                    
+                    if success:
+                        st.success(f"Post excluído com sucesso!")
+                        # Forçar atualização da lista de posts do Sanity
+                        from ..logic.business_logic import fetch_sanity_posts
+                        fetch_sanity_posts(refresh=True)
+                    else:
+                        st.error("Erro ao excluir post. Verifique os logs para mais detalhes.")
+                
+                # Esperar um momento antes de atualizar a página
                 import time
-                time.sleep(1)
+                time.sleep(2)
                 st.rerun()
         with col2:
             if st.button("Indexar no Algolia", key=f"index_{index}"):

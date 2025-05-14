@@ -39,6 +39,7 @@ with col_stats:
 with col_content:
     # Definição das abas
     tabs = [
+        "Kanban", 
         "Agente Monitor", 
         "Agente Tradutor", 
         "Agente Publisher", 
@@ -47,7 +48,12 @@ with col_content:
         "Redis Status"
     ]
     
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(tabs)
+    tab0, tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(tabs)
+    
+    # Aba 0: Kanban
+    with tab0:
+        st.session_state.active_tab = "Kanban"
+        render_kanban_board()
     
     # Aba 1: Agente Monitor
     with tab1:
@@ -71,7 +77,7 @@ with col_content:
         if st.button("Monitorar Feeds RSS", key="monitorar_feeds_btn"):
             if monitor_feeds():
                 st.success("Monitoramento de feeds concluído com sucesso!")
-                st.experimental_rerun()
+                st.rerun()
             else:
                 st.error("Erro ao monitorar feeds.")
         
@@ -112,7 +118,7 @@ with col_content:
         if st.button("Traduzir Próximo Artigo", key="traduzir_proximo_btn"):
             if translate_article():
                 st.success("Artigo traduzido com sucesso!")
-                st.experimental_rerun()
+                st.rerun()
             else:
                 st.error("Erro ao traduzir artigo ou nenhum artigo disponível.")
         
@@ -149,7 +155,7 @@ with col_content:
         if st.button("Publicar Próximo Artigo", key="publicar_proximo_btn"):
             if publish_article():
                 st.success("Artigo publicado com sucesso!")
-                st.experimental_rerun()
+                st.rerun()
             else:
                 st.error("Erro ao publicar artigo ou nenhum artigo disponível.")
         
@@ -346,7 +352,7 @@ with col_content:
                                 
                                 # Iniciar tradução
                                 st.success(f"Artigo salvo para tradução: {arquivo_nome}")
-                                st.experimental_rerun()
+                                st.rerun()
                                     
                             except Exception as e:
                                 import traceback

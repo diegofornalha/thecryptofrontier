@@ -832,6 +832,92 @@ def enqueue_crewai_article(article_data, process_now=False):
         return False
 
 # Fluxo completo
+def start_translation_for_kanban(article_path=None):
+    """
+    Inicia o processo de tradução para um artigo específico ou o primeiro disponível
+    para o fluxo Kanban.
+    
+    Args:
+        article_path: Caminho para o arquivo a ser traduzido (opcional)
+        
+    Returns:
+        Path do arquivo sendo traduzido ou None se falhar
+    """
+    # Se não foi especificado um arquivo, buscar o primeiro disponível
+    if not article_path:
+        dir_posts = Path("posts_para_traduzir")
+        if not dir_posts.exists():
+            dir_posts = Path("posts_traduzidos")  # Fallback para compatibilidade
+            
+        arquivos = list(dir_posts.glob("para_traduzir_*.json"))
+        
+        if not arquivos:
+            SessionManager.add_log("Nenhum artigo encontrado para traduzir.")
+            return None
+        
+        # Ordenar por nome para pegar o mais antigo primeiro
+        arquivos.sort()
+        article_path = arquivos[0]
+    else:
+        # Garantir que é um objeto Path
+        article_path = Path(article_path)
+        
+    SessionManager.add_log(f"Artigo selecionado para tradução: {article_path.name}")
+    return article_path
+
+def complete_translation_for_kanban(article_path):
+    """
+    Completa a tradução de um artigo em progresso no fluxo Kanban.
+    
+    Args:
+        article_path: Caminho para o arquivo que está sendo traduzido
+        
+    Returns:
+        True se traduzido com sucesso, False caso contrário
+    """
+    if not isinstance(article_path, Path):
+        article_path = Path(article_path)
+        
+    SessionManager.add_log(f"Completando tradução para {article_path}")
+    
+    # Executar a tradução normal
+    return translate_article(article_path)
+
+def publish_specific_article(article_path):
+    """
+    Publica um artigo específico no Sanity CMS.
+    
+    Args:
+        article_path: Caminho para o arquivo traduzido a ser publicado
+        
+    Returns:
+        True se publicado com sucesso, False caso contrário
+    """
+    if not isinstance(article_path, Path):
+        article_path = Path(article_path)
+        
+    SessionManager.add_log(f"Publicando artigo específico: {article_path}")
+    
+    try:
+        # Verificar se o artigo já está no formato correto
+        with open(article_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            
+        # Verificar duplicatas
+        if "frontmatter_traduzido" in data and data["frontmatter_traduzido"]:
+            title = data["frontmatter_traduzido"].get("title", "")
+            if title and check_duplicate_post(title):
+                SessionManager.add_log(f"⚠️ Artigo similar já existe no Sanity: {title}")
+                return False
+                
+        # Usar função existente para publicar
+        publish_article(article_path)
+        return True
+        
+    except Exception as e:
+        SessionManager.add_log(f"Erro ao publicar artigo específico: {str(e)}")
+        return False
+
 def execute_full_flow():
     """Executa o fluxo completo de monitoramento, tradução e publicação."""
     with st.spinner("Executando fluxo completo..."):
@@ -918,6 +1004,13 @@ def delete_sanity_post(post_id, title=None):
         bool: True se excluído com sucesso, False caso contrário
     """
     try:
+        # Verificar se o post_id é válido
+        if not post_id:
+            SessionManager.add_log("❌ Erro: ID do post não fornecido")
+            return False
+            
+        SessionManager.add_log(f"🔄 Iniciando exclusão do post ID: {post_id}")
+        
         # Obter credenciais do Sanity
         project_id = os.environ.get("NEXT_PUBLIC_SANITY_PROJECT_ID") or os.environ.get("SANITY_PROJECT_ID", "brby2yrg")
         dataset = os.environ.get("NEXT_PUBLIC_SANITY_DATASET", "production")
@@ -934,8 +1027,23 @@ def delete_sanity_post(post_id, title=None):
         token = token.replace('\n', '')
         
         if not token:
-            SessionManager.add_log("Erro: Token do Sanity não encontrado")
+            # Tentar obter do arquivo .env
+            try:
+                with open(".env", "r") as f:
+                    for line in f:
+                        if "SANITY_DEV_TOKEN" in line or "SANITY_API_TOKEN" in line or "SANITY_DEPLOY_TOKEN" in line:
+                            parts = line.strip().split("=")
+                            if len(parts) > 1:
+                                token = parts[1].strip().strip('"').strip("'")
+                                break
+            except Exception as env_error:
+                SessionManager.add_log(f"❌ Erro ao ler arquivo .env: {env_error}")
+                
+        if not token:
+            SessionManager.add_log("❌ Erro: Token do Sanity não encontrado")
             return False
+            
+        SessionManager.add_log(f"ℹ️ Usando projeto Sanity: {project_id}, dataset: {dataset}")
         
         # Construir URL da API para deleção
         url = f"https://{project_id}.api.sanity.io/v{api_version}/data/mutate/{dataset}"
@@ -946,7 +1054,34 @@ def delete_sanity_post(post_id, title=None):
             "Content-Type": "application/json"
         }
         
-        # Dados para deleção
+        # Lidar com IDs que têm "drafts." prefixo
+        original_id = post_id
+        if not post_id.startswith("drafts."):
+            # Tentar excluir tanto o rascunho quanto o documento publicado
+            draft_id = f"drafts.{post_id}"
+            SessionManager.add_log(f"ℹ️ Tentando excluir também o rascunho com ID: {draft_id}")
+            
+            # Criar dados para excluir rascunho
+            draft_data = {
+                "mutations": [
+                    {
+                        "delete": {
+                            "id": draft_id
+                        }
+                    }
+                ]
+            }
+            
+            # Tentar excluir o rascunho primeiro
+            try:
+                draft_response = requests.post(url, headers=headers, json=draft_data)
+                draft_response.raise_for_status()
+                SessionManager.add_log(f"✅ Rascunho excluído com sucesso (ID: {draft_id})")
+            except Exception as draft_error:
+                SessionManager.add_log(f"⚠️ Aviso ao excluir rascunho: {str(draft_error)}")
+                # Continuar mesmo se falhar, pois pode não existir um rascunho
+        
+        # Dados para deleção do documento principal
         data = {
             "mutations": [
                 {
@@ -958,19 +1093,35 @@ def delete_sanity_post(post_id, title=None):
         }
         
         # Fazer requisição à API
+        SessionManager.add_log(f"🔄 Enviando requisição para excluir {post_id}")
         response = requests.post(url, headers=headers, json=data)
+        
+        # Exibir detalhes da resposta para debug
+        if response.status_code != 200:
+            SessionManager.add_log(f"⚠️ Resposta não-200: {response.status_code} - {response.text}")
+        
         response.raise_for_status()
+        response_json = response.json()
+        SessionManager.add_log(f"📄 Resposta: {response_json}")
         
-        # Registrar sucesso
-        title_info = f" '{title}'" if title else ""
-        SessionManager.add_log(f"Post{title_info} excluído com sucesso (ID: {post_id})")
-        
-        # Atualizar cache de posts
-        if 'sanity_posts' in st.session_state:
-            st.session_state.sanity_posts = [post for post in st.session_state.sanity_posts if post.get('_id') != post_id]
-        
-        return True
+        # Verificar se a resposta indica sucesso
+        if "results" in response_json and response_json["results"]:
+            # Registrar sucesso
+            title_info = f" '{title}'" if title else ""
+            SessionManager.add_log(f"✅ Post{title_info} excluído com sucesso (ID: {post_id})")
+            
+            # Atualizar cache de posts
+            if 'sanity_posts' in st.session_state:
+                st.session_state.sanity_posts = [post for post in st.session_state.sanity_posts if post.get('_id') != post_id]
+                SessionManager.add_log(f"✅ Cache de posts atualizado")
+            
+            return True
+        else:
+            SessionManager.add_log(f"⚠️ Resposta não contém resultados esperados: {response_json}")
+            return False
         
     except Exception as e:
-        SessionManager.add_log(f"Erro ao excluir post: {str(e)}")
+        SessionManager.add_log(f"❌ Erro ao excluir post: {str(e)}")
+        import traceback
+        SessionManager.add_log(f"🔍 Trace de erro: {traceback.format_exc()}")
         return False 
