@@ -144,3 +144,5 @@ framework_crewai/fresh_env/lib64/
 *.bak
 
 *storybook.log
+/new_env/
+/env/

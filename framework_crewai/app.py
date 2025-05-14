@@ -1,15 +1,4 @@
 #!/usr/bin/env python
-"""
-Interface Streamlit para o Blog Automação
-
-Este aplicativo oferece uma interface visual para gerenciar o fluxo de automação
-do blog de criptomoedas, permitindo:
-- Monitorar feeds RSS
-- Traduzir artigos
-- Publicar no Sanity CMS
-- Visualizar logs e estatísticas
-"""
-
 import os
 import sys
 import time
@@ -24,6 +13,7 @@ import subprocess
 import shutil
 import uuid
 import frontmatter
+import sqlite3
 
 # Adiciona o diretório src ao path para importar o módulo blog_automacao
 sys.path.append(os.path.abspath('.'))
@@ -42,6 +32,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
 
 # Estilos
 st.markdown("""
@@ -133,13 +124,14 @@ if 'sanity_posts' not in st.session_state:
     st.session_state.sanity_posts = []
 if 'last_posts_fetch' not in st.session_state:
     st.session_state.last_posts_fetch = None
-# Removida variável post_to_delete, não necessária mais
 if 'post_to_index' not in st.session_state:
     st.session_state.post_to_index = None
 if 'post_to_edit' not in st.session_state:
     st.session_state.post_to_edit = None
 if 'active_tab' not in st.session_state:
-    st.session_state.active_tab = "Logs"
+    st.session_state.active_tab = "Monitoramento"
+if 'show_logs' not in st.session_state:
+    st.session_state.show_logs = False
 
 # Função para inicializar a crew
 def inicializar_crew():
@@ -249,11 +241,10 @@ def traduzir_artigos():
         st.session_state.last_run = datetime.now()
         return True
 
-# Função para publicar diretamente no Sanity, baseada no código JS legado
+# Função para publicar diretamente no Sanity
 def publicar_post_direto(arquivo_markdown):
     """
     Publica um post diretamente no Sanity CMS sem usar o CrewAI.
-    Baseado no código legado publicar_posts_markdown.js
     """
     try:
         # Ler arquivo markdown
@@ -276,6 +267,12 @@ def publicar_post_direto(arquivo_markdown):
         api_version = os.environ.get("NEXT_PUBLIC_SANITY_API_VERSION") or "2023-05-03"
         token = os.environ.get("SANITY_DEV_TOKEN")
         
+        # Se não encontrou o token DEV, verificar outros tokens
+        if not token:
+            token = os.environ.get("SANITY_API_TOKEN")
+        if not token:
+            token = os.environ.get("SANITY_DEPLOY_TOKEN")
+        
         if not project_id or not token:
             # Tentar ler do .env
             try:
@@ -286,6 +283,14 @@ def publicar_post_direto(arquivo_markdown):
                             if len(parts) > 1:
                                 project_id = parts[1].strip().strip('"').strip("'")
                         elif "SANITY_DEV_TOKEN" in line:
+                            parts = line.strip().split("=")
+                            if len(parts) > 1:
+                                token = parts[1].strip().strip('"').strip("'")
+                        elif "SANITY_API_TOKEN" in line:
+                            parts = line.strip().split("=")
+                            if len(parts) > 1:
+                                token = parts[1].strip().strip('"').strip("'")
+                        elif "SANITY_DEPLOY_TOKEN" in line:
                             parts = line.strip().split("=")
                             if len(parts) > 1:
                                 token = parts[1].strip().strip('"').strip("'")
@@ -801,42 +806,129 @@ def indexar_artigo_individual():
         else:
             return False
 
+# Função para obter posts do banco de dados
+def obter_posts_do_banco():
+    """Retorna todos os posts processados do banco de dados."""
+    db_path = "posts_database.sqlite"
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        # Verificar se a tabela existe
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='posts'")
+        if not cursor.fetchone():
+            conn.close()
+            return []
+        
+        # Obter todos os posts ordenados por data de processamento (mais recentes primeiro)
+        cursor.execute("""
+        SELECT id, guid, title, link, processed_date, published_date, source, status
+        FROM posts
+        ORDER BY processed_date DESC
+        """)
+        
+        # Converter para lista de dicionários
+        columns = [col[0] for col in cursor.description]
+        posts = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        
+        conn.close()
+        return posts
+    except Exception as e:
+        add_log(f"Erro ao consultar banco de dados: {e}")
+        return []
+
+# Função para excluir um post do banco de dados
+def excluir_post_do_banco(post_id):
+    """Exclui um post do banco de dados pelo ID."""
+    db_path = "posts_database.sqlite"
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        # Excluir o post
+        cursor.execute("DELETE FROM posts WHERE id = ?", (post_id,))
+        
+        # Obter número de linhas afetadas
+        rows_affected = cursor.rowcount
+        
+        conn.commit()
+        conn.close()
+        
+        if rows_affected > 0:
+            add_log(f"Post ID {post_id} excluído com sucesso.")
+            return True
+        else:
+            add_log(f"Post ID {post_id} não encontrado.")
+            return False
+    
+    except Exception as e:
+        add_log(f"Erro ao excluir post: {e}")
+        return False
+
+# Função para limpar todo o banco de dados
+def limpar_banco_dados():
+    """Limpa todos os posts do banco de dados."""
+    db_path = "posts_database.sqlite"
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        # Obter contagem antes
+        cursor.execute("SELECT COUNT(*) FROM posts")
+        count_before = cursor.fetchone()[0]
+        
+        # Deletar todos os registros
+        cursor.execute("DELETE FROM posts")
+        
+        # Reiniciar o autoincrement
+        cursor.execute("DELETE FROM sqlite_sequence WHERE name='posts'")
+        
+        # Commit das alterações
+        conn.commit()
+        conn.close()
+        
+        add_log(f"Banco de dados limpo com sucesso. {count_before} posts removidos.")
+        return True
+    
+    except Exception as e:
+        add_log(f"Erro ao limpar banco de dados: {e}")
+        return False
+
 # Interface principal
 st.markdown('<h1 class="main-header">Blog Automação - The Crypto Frontier</h1>', unsafe_allow_html=True)
 st.markdown('<p>Sistema de automação para o blog The Crypto Frontier usando CrewAI</p>', unsafe_allow_html=True)
 
 # Sidebar para controles
 with st.sidebar:
-    st.markdown('<h2 class="sub-header">Controles</h2>', unsafe_allow_html=True)
     
+    # Botão para limpar cache
+    if st.button("🧹 Limpar Cache", key="limpar_cache_sidebar"):
+        st.cache_data.clear()
+        st.cache_resource.clear()
+        st.experimental_rerun()
     # Botão para ver logs
-    if st.button("Ver Logs", key="view_logs"):
-        st.session_state.active_tab = "Logs"
+    if st.button("Ver Logs", key="view_logs_sidebar"):
+        st.session_state.show_logs = not st.session_state.get('show_logs', False)
         st.experimental_rerun()
     
     # Última execução
     if st.session_state.last_run:
         st.info(f"Última execução: {st.session_state.last_run.strftime('%Y-%m-%d %H:%M:%S')}")
     
-    st.markdown("---")
-    
-    # Ações
-    st.markdown('<h3>Ações</h3>', unsafe_allow_html=True)
-    
-    # Operações disponíveis
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        if st.button("Traduzir", key="btn_traduzir"):
-            traduzir_artigos()
-    
-    with col2:
-        if st.button("Publicar", key="btn_publicar"):
-            publicar_artigos()
-    
-    with col3:
-        if st.button("Indexar", key="btn_indexar"):
-            indexar_artigo_individual()
+    # Exibir logs na barra lateral se a opção estiver ativada
+    if st.session_state.get('show_logs', False):
+        st.markdown("---")
+        st.markdown('<h3>Logs do Sistema</h3>', unsafe_allow_html=True)
+        
+        # Limpar logs
+        if st.button("Limpar Logs", key="clear_logs_sidebar"):
+            st.session_state.log_messages = []
+            st.experimental_rerun()
+        
+        # Exibir logs em uma área de texto expansível
+        log_text = "\n".join(st.session_state.log_messages)
+        with st.expander("Ver logs completos", expanded=True):
+            st.code(log_text)
 
 # Removido diálogo de confirmação para exclusão direta
 
@@ -844,19 +936,25 @@ with st.sidebar:
 col_stats, col_content = st.columns([1, 3])
 
 with col_stats:
-    st.markdown('<h2 class="sub-header">Estatísticas</h2>', unsafe_allow_html=True)
+    st.markdown('<h2 class="sub-header">Estatísticas por Crew</h2>', unsafe_allow_html=True)
     
     # Obter estatísticas sem buscar do Sanity
     stats = obter_estatisticas()
     
+    # Monitoramento Crew
+    st.markdown('<h4>Artigos Prontos para Tradução</h4>', unsafe_allow_html=True)
     st.markdown('<div class="info-box">', unsafe_allow_html=True)
-    st.metric("Artigos para traduzir", stats["para_traduzir"])
+    st.metric("Artigos identificados", stats["para_traduzir"])
     st.markdown('</div>', unsafe_allow_html=True)
     
+    # Tradução Crew
+    st.markdown('<h4>Tradução Crew</h4>', unsafe_allow_html=True)
     st.markdown('<div class="info-box">', unsafe_allow_html=True)
     st.metric("Artigos traduzidos", stats["traduzidos"])
     st.markdown('</div>', unsafe_allow_html=True)
     
+    # Publicação Crew
+    st.markdown('<h4>Publicação Crew</h4>', unsafe_allow_html=True)
     st.markdown('<div class="success-box">', unsafe_allow_html=True)
     st.metric("Artigos publicados", stats["publicados"])
     st.markdown('</div>', unsafe_allow_html=True)
@@ -864,102 +962,270 @@ with col_stats:
 with col_content:
     # Tabs para diferentes visualizações
     if 'active_tab' not in st.session_state:
-        st.session_state.active_tab = "Logs"
+        st.session_state.active_tab = "Monitoramento"
         
-    tab1, tab2, tab3, tab4 = st.tabs(["Logs", "Artigos", "Sanity CMS", "Configuração"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["Agente Monitor", "Agente Tradutor", "Agente Publisher", "RSS", "Agente Monitor - BD"])
     
     # Detectar qual tab está ativa
-    # Como o Streamlit não permite detectar diretamente, usar a seleção para atualizar variáveis de sessão
     
     with tab1:
-        st.session_state.active_tab = "Logs"
-        st.markdown('<h2 class="sub-header">Logs</h2>', unsafe_allow_html=True)
+        st.session_state.active_tab = "Monitoramento"
+        st.markdown('<h2 class="sub-header">Agente Monitor</h2>', unsafe_allow_html=True)
         
-        # Limpar logs
-        if st.button("Limpar Logs"):
-            st.session_state.log_messages = []
+        # Explicação do agente monitor
+        st.markdown("""
+        <div class="info-box">
+        O <b>Agente Monitor</b> é responsável por:
+        <ul>
+            <li>Monitorar feeds RSS configurados de fontes de criptomoedas</li>
+            <li>Filtrar apenas os artigos que não existem no banco de dados</li>
+            <li>Salvar artigos relevantes em formato JSON na pasta 'posts_para_traduzir'</li>
+            <li>Fornecer um resumo, tópicos e explicação da relevância para o público brasileiro</li>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
         
-        # Exibir logs
-        log_text = "\n".join(st.session_state.log_messages)
-        st.code(log_text)
+        # Verificar primeiro em posts_para_traduzir e se não existir, verificar em posts_traduzidos
+        dir_posts = Path("posts_para_traduzir")
+        if not dir_posts.exists():
+            dir_posts = Path("posts_traduzidos")
+        
+        artigos = list(dir_posts.glob("para_traduzir_*.json"))
+        
+        if not artigos:
+            st.info("Nenhum artigo identificado para tradução.")
+        else:
+            st.success(f"{len(artigos)} artigos identificados e prontos para tradução")
+            for arquivo in artigos:
+                with st.expander(arquivo.name):
+                    try:
+                        with open(arquivo, "r", encoding="utf-8") as f:
+                            conteudo = f.read()
+                        
+                        # Exibir o conteúdo do arquivo
+                        col1, col2 = st.columns([4, 1])
+                        with col1:
+                            st.code(conteudo[:500] + "...", language="markdown")
+                        
+                        with col2:
+                            # Botão para traduzir diretamente este artigo
+                            if st.button("Traduzir", key=f"traduzir_direto_{arquivo.name}"):
+                                with st.spinner(f"Traduzindo {arquivo.name}..."):
+                                    try:
+                                        crew = st.session_state.crew or inicializar_crew()
+                                        add_log(f"Iniciando tradução direta do artigo: {arquivo.name}")
+                                        
+                                        # Ler o conteúdo para verificar formato e extrair dados
+                                        try:
+                                            # Verificar se é JSON ou tem frontmatter
+                                            import json
+                                            import re
+                                            import yaml
+                                            
+                                            # Primeiro, tentar como JSON
+                                            try:
+                                                dados_json = json.loads(conteudo)
+                                                inputs = {"arquivo_json": str(arquivo)}
+                                                add_log(f"Arquivo detectado como JSON: {arquivo.name}")
+                                            except json.JSONDecodeError:
+                                                # Não é JSON, tentar como markdown com frontmatter
+                                                frontmatter_match = re.match(r'---\s*(.*?)\s*---', conteudo, re.DOTALL)
+                                                if frontmatter_match:
+                                                    add_log(f"Arquivo detectado com frontmatter: {arquivo.name}")
+                                                    # Extrair metadados do frontmatter
+                                                    frontmatter_content = frontmatter_match.group(1).strip()
+                                                    if frontmatter_content.startswith('{'):
+                                                        metadata = json.loads(frontmatter_content)
+                                                    else:
+                                                        metadata = yaml.safe_load(frontmatter_content)
+                                                    
+                                                    # Extrair título e URL
+                                                    titulo = metadata.get('title') or metadata.get('titulo') or "Sem título"
+                                                    url = metadata.get('original_link') or metadata.get('link') or metadata.get('url') or ""
+                                                    
+                                                    inputs = {
+                                                        "arquivo_markdown": str(arquivo),
+                                                        "titulo": titulo,
+                                                        "url": url,
+                                                        "conteudo": conteudo
+                                                    }
+                                                else:
+                                                    # Não tem frontmatter, usar como texto simples
+                                                    add_log(f"Arquivo sem estrutura reconhecida, usando como texto puro: {arquivo.name}")
+                                                    inputs = {
+                                                        "arquivo_markdown": str(arquivo),
+                                                        "conteudo": conteudo
+                                                    }
+                                            
+                                            # Executar a tradução
+                                            resultado = crew.traducao_crew().kickoff(inputs=inputs)
+                                            add_log(f"✅ Tradução concluída para {arquivo.name}: {resultado}")
+                                            st.success(f"Artigo traduzido com sucesso: {arquivo.name}")
+                                            
+                                        except Exception as e:
+                                            import traceback
+                                            add_log(f"❌ Erro ao processar arquivo para tradução: {str(e)}")
+                                            add_log(f"Trace: {traceback.format_exc()}")
+                                            st.error(f"Erro ao processar arquivo: {str(e)}")
+                                        
+                                    except Exception as e:
+                                        add_log(f"❌ Erro ao traduzir {arquivo.name}: {str(e)}")
+                                        st.error(f"Erro ao traduzir: {str(e)}")
+                        
+                            # Botão para remover da lista de prontos para tradução
+                            if st.button("Remover", key=f"remover_arquivo_{arquivo.name}"):
+                                try:
+                                    # Mover o arquivo para uma pasta de arquivos ignorados
+                                    dir_ignorados = Path("posts_ignorados")
+                                    dir_ignorados.mkdir(parents=True, exist_ok=True)
+                                    
+                                    # Mover para a pasta de ignorados em vez de deletar permanentemente
+                                    shutil.move(str(arquivo), str(dir_ignorados / arquivo.name))
+                                    
+                                    add_log(f"✅ Arquivo {arquivo.name} removido da lista de prontos para tradução")
+                                    st.success(f"Arquivo removido: {arquivo.name}")
+                                    st.experimental_rerun()  # Recarregar a página para atualizar a lista
+                                except Exception as e:
+                                    add_log(f"❌ Erro ao remover arquivo {arquivo.name}: {str(e)}")
+                                    st.error(f"Erro ao remover arquivo: {str(e)}")
+                    except Exception as e:
+                        st.error(f"Erro ao ler arquivo: {str(e)}")
     
     with tab2:
-        st.session_state.active_tab = "Artigos"
-        st.markdown('<h2 class="sub-header">Artigos</h2>', unsafe_allow_html=True)
+        st.session_state.active_tab = "Tradução"
+        st.markdown('<h2 class="sub-header">Agente Tradutor</h2>', unsafe_allow_html=True)
         
-        # Subtabs para diferentes estados
-        subtab1, subtab2, subtab3 = st.tabs(["Para Traduzir", "Traduzidos", "Publicados"])
+        # Explicação do agente tradutor
+        st.markdown("""
+        <div class="info-box">
+        O <b>Agente Tradutor</b> é responsável por:
+        <ul>
+            <li>Traduzir o conteúdo do inglês para português brasileiro</li>
+            <li>Revisar e corrigir erros gramaticais e ortográficos</li>
+            <li>Adaptar o conteúdo para o público brasileiro</li>
+            <li>Criar metadados traduzidos (frontmatter)</li>
+            <li>Salvar o arquivo traduzido</li>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
         
-        with subtab1:
-            # Verificar primeiro em posts_para_traduzir e se não existir, verificar em posts_traduzidos
-            dir_posts = Path("posts_para_traduzir")
-            if not dir_posts.exists():
-                dir_posts = Path("posts_traduzidos")
-                
-            artigos = list(dir_posts.glob("para_traduzir_*.json"))
-            
-            if not artigos:
-                st.info("Nenhum artigo para traduzir.")
-            else:
-                for arquivo in artigos:
-                    with st.expander(arquivo.name):
-                        try:
-                            with open(arquivo, "r", encoding="utf-8") as f:
-                                conteudo = f.read()
+        dir_posts = Path("posts_traduzidos")
+        artigos = [a for a in dir_posts.glob("*.json") if not a.name.startswith("para_traduzir_")]
+        
+        if not artigos:
+            st.info("Nenhum artigo traduzido ainda.")
+        else:
+            st.success(f"{len(artigos)} artigos traduzidos, prontos para publicação")
+            for arquivo in artigos:
+                with st.expander(arquivo.name):
+                    try:
+                        with open(arquivo, "r", encoding="utf-8") as f:
+                            conteudo = f.read()
+                        
+                        # Exibir o conteúdo do arquivo
+                        col1, col2 = st.columns([4, 1])
+                        with col1:
                             st.code(conteudo[:500] + "...", language="markdown")
-                        except Exception as e:
-                            st.error(f"Erro ao ler arquivo: {str(e)}")
-        
-        with subtab2:
-            dir_posts = Path("posts_traduzidos")
-            artigos = [a for a in dir_posts.glob("*.json") if not a.name.startswith("para_traduzir_")]
-            
-            if not artigos:
-                st.info("Nenhum artigo traduzido.")
-            else:
-                for arquivo in artigos:
-                    with st.expander(arquivo.name):
-                        try:
-                            with open(arquivo, "r", encoding="utf-8") as f:
-                                conteudo = f.read()
-                            st.code(conteudo[:500] + "...", language="markdown")
-                        except Exception as e:
-                            st.error(f"Erro ao ler arquivo: {str(e)}")
-        
-        with subtab3:
-            dir_publicados = Path("posts_publicados")
-            if not dir_publicados.exists():
-                st.info("Diretório de posts publicados não encontrado.")
-            else:
-                artigos = list(dir_publicados.glob("*.json"))
-                
-                if not artigos:
-                    st.info("Nenhum artigo publicado localmente.")
-                else:
-                    for arquivo in artigos:
-                        with st.expander(arquivo.name):
-                            try:
-                                with open(arquivo, "r", encoding="utf-8") as f:
-                                    conteudo = f.read()
-                                st.code(conteudo[:500] + "...", language="markdown")
-                            except Exception as e:
-                                st.error(f"Erro ao ler arquivo: {str(e)}")
+                        
+                        with col2:
+                            # Botão para publicar diretamente este artigo
+                            if st.button("Publicar", key=f"publicar_direto_{arquivo.name}"):
+                                with st.spinner(f"Publicando {arquivo.name}..."):
+                                    try:
+                                        add_log(f"Iniciando publicação direta do artigo: {arquivo.name}")
+                                        
+                                        # Publicar usando o método de publicação direta
+                                        sucesso, mensagem = publicar_post_direto(arquivo)
+                                        
+                                        if sucesso:
+                                            add_log(f"✅ {mensagem}")
+                                            st.success(f"Artigo publicado com sucesso: {arquivo.name}")
+                                            
+                                            # Mover o arquivo para a pasta posts_publicados
+                                            dir_publicados = Path("posts_publicados")
+                                            if not dir_publicados.exists():
+                                                dir_publicados.mkdir(exist_ok=True)
+                                                
+                                            arquivo_destino = dir_publicados / arquivo.name.replace("traduzido_", "publicado_")
+                                            try:
+                                                # Usar shutil para garantir que funcione entre sistemas de arquivos
+                                                shutil.copy2(arquivo, arquivo_destino)
+                                                # Só excluir o original se a cópia foi bem-sucedida
+                                                if arquivo_destino.exists():
+                                                    arquivo.unlink()
+                                                add_log(f"✅ Arquivo movido para posts_publicados: {arquivo.name}")
+                                                st.experimental_rerun()
+                                            except Exception as e:
+                                                add_log(f"⚠️ Aviso: Não foi possível mover o arquivo: {str(e)}")
+                                        else:
+                                            add_log(f"❌ Erro ao publicar: {mensagem}")
+                                            st.error(f"Erro ao publicar: {mensagem}")
+                                        
+                                    except Exception as e:
+                                        add_log(f"❌ Erro ao publicar {arquivo.name}: {str(e)}")
+                                        st.error(f"Erro ao publicar: {str(e)}")
+                            
+                            # Botão para remover da lista de tradução
+                            if st.button("Remover", key=f"remover_traduzido_{arquivo.name}"):
+                                try:
+                                    # Mover o arquivo para uma pasta de arquivos ignorados
+                                    dir_ignorados = Path("posts_ignorados")
+                                    dir_ignorados.mkdir(parents=True, exist_ok=True)
+                                    
+                                    # Mover para a pasta de ignorados em vez de deletar permanentemente
+                                    shutil.move(str(arquivo), str(dir_ignorados / arquivo.name))
+                                    
+                                    add_log(f"✅ Arquivo {arquivo.name} removido da lista de traduzidos")
+                                    st.success(f"Arquivo removido: {arquivo.name}")
+                                    st.experimental_rerun()  # Recarregar a página para atualizar a lista
+                                except Exception as e:
+                                    add_log(f"❌ Erro ao remover arquivo {arquivo.name}: {str(e)}")
+                                    st.error(f"Erro ao remover arquivo: {str(e)}")
+                    except Exception as e:
+                        st.error(f"Erro ao ler arquivo: {str(e)}")
     
     with tab3:
-        st.session_state.active_tab = "Sanity CMS"
-        st.markdown('<h2 class="sub-header">Posts no Sanity CMS</h2>', unsafe_allow_html=True)
+        st.session_state.active_tab = "Publicação"
+        st.markdown('<h2 class="sub-header">Agente Publisher</h2>', unsafe_allow_html=True)
+        
+        # Explicação do agente publisher
+        st.markdown("""
+        <div class="info-box">
+        O <b>Agente Publisher</b> é responsável por:
+        <ul>
+            <li>Organizar o conteúdo traduzido conforme o schema do Sanity</li>
+            <li>Converter o conteúdo para o formato Portable Text do Sanity</li>
+            <li>Garantir total conformidade com o schema do projeto</li>
+            <li>Publicar o artigo no CMS Sanity</li>
+            <li>Resolver referências de categoria se necessário</li>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
         
         # Botão para atualizar posts
         if st.button("Atualizar Posts do Sanity", key="refresh_sanity"):
             st.session_state.sanity_posts = []
             st.session_state.last_posts_fetch = None
         
-        # Apenas nesta tab devemos buscar posts do Sanity
+        # Buscando os posts publicados
         posts = buscar_posts_do_sanity()
         
+        # Também mostrar os arquivos de posts publicados localmente
+        dir_publicados = Path("posts_publicados")
+        if dir_publicados.exists():
+            arquivos_publicados = list(dir_publicados.glob("*.json"))
+            if arquivos_publicados:
+                st.success(f"{len(arquivos_publicados)} artigos marcados como publicados localmente")
+                with st.expander("Ver arquivos locais de posts publicados"):
+                    for arquivo in arquivos_publicados:
+                        st.write(arquivo.name)
+        
+        # Exibir posts do Sanity CMS
         if not posts:
             st.info("Nenhum post encontrado no Sanity CMS ou não foi possível conectar.")
         else:
+            st.success(f"{len(posts)} posts encontrados no Sanity CMS")
+            
             # Filtros
             st.markdown("### Filtros")
             filter_col1, filter_col2 = st.columns(2)
@@ -1020,9 +1286,31 @@ with col_content:
                         post_url = f"https://thecryptofrontier.com/post/{post_slug}"
                         # Usar html para abrir em nova aba
                         st.markdown(f'<a href="{post_url}" target="_blank"><button style="background-color: #2196F3; color: white; border: none; border-radius: 0.25rem; padding: 0.25rem 0.5rem; font-size: 0.85rem; cursor: pointer;">Ver Detalhes</button></a>', unsafe_allow_html=True)
-    
+            
+            # Opção para exportar
+            if st.button("Exportar para CSV"):
+                import pandas as pd
+                df = pd.DataFrame([{
+                    "ID": p.get("id"),
+                    "Título": p.get("title", "Sem título"),
+                    "Fonte": p.get("source", "Desconhecida"),
+                    "Link": p.get("link", ""),
+                    "Data Publicação": p.get("published_date", ""),
+                    "Processado em": p.get("processed_date", ""),
+                    "Status": p.get("status", "processado")
+                } for p in filtered_posts])
+                
+                csv = df.to_csv(index=False)
+                st.download_button(
+                    label="Baixar CSV",
+                    data=csv,
+                    file_name="posts_processados.csv",
+                    mime="text/csv"
+                )
+
     with tab4:
-        st.markdown('<h2 class="sub-header">Configuração</h2>', unsafe_allow_html=True)
+        st.session_state.active_tab = "Configuração"
+        st.markdown('<h2 class="sub-header">Configuração do Sistema</h2>', unsafe_allow_html=True)
         
         st.markdown("### Feeds RSS")
         
@@ -1045,26 +1333,205 @@ with col_content:
                 feeds = tool.default_feeds
             except:
                 feeds = [
-                    "https://cointelegraph.com/rss",
-                    "https://www.coindesk.com/arc/outboundfeeds/rss/",
-                    "https://decrypt.co/feed"
+                    "https://thecryptobasic.com/feed",
                 ]
         
-        feeds_str = "\n".join(feeds)
+        # Verificar se feeds é uma lista de strings ou de dicionários
+        if feeds and isinstance(feeds[0], dict):
+            # Se for dicionário, extrair as URLs
+            feeds_str = "\n".join([feed.get("url", "") for feed in feeds])
+        else:
+            # Se for lista de strings
+            feeds_str = "\n".join(feeds)
+            
         new_feeds = st.text_area("Feeds RSS (um por linha)", feeds_str, height=200)
         
         if st.button("Salvar Feeds"):
             try:
                 new_feeds_list = [f for f in new_feeds.split("\n") if f.strip()]
+                # Converter para o formato de objeto com name e url
+                formatted_feeds = []
+                for feed_url in new_feeds_list:
+                    # Extrair um nome simples da URL
+                    feed_name = feed_url.split("//")[-1].split("/")[0].replace("www.", "")
+                    formatted_feeds.append({
+                        "name": feed_name,
+                        "url": feed_url
+                    })
+                
                 with open(feeds_file, "w", encoding="utf-8") as f:
-                    json.dump(new_feeds_list, f, indent=2)
+                    json.dump(formatted_feeds, f, indent=2)
                 add_log("Feeds RSS salvos com sucesso!")
                 st.success("Feeds RSS salvos com sucesso!")
             except Exception as e:
                 add_log(f"Erro ao salvar feeds: {str(e)}")
                 st.error(f"Erro ao salvar feeds: {str(e)}")
 
-
+    with tab5:
+        st.session_state.active_tab = "Prontos para tradução"
+        st.markdown('<h2 class="sub-header">Agente Monitor - Banco de Dados</h2>', unsafe_allow_html=True)
+        
+        # Explicação do agente monitor - banco de dados
+        st.markdown("""
+        <div class="info-box">
+        Esta é a interface de banco de dados do <b>Agente Monitor</b> que gerencia:
+        <ul>
+            <li>Artigos capturados dos feeds RSS</li>
+            <li>Filtro de artigos que já existem no sistema</li>
+            <li>Seleção manual de conteúdo para tradução</li>
+            <li>Gerenciamento do histórico de artigos processados</li>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Ações de gerenciamento
+        st.markdown("### Gerenciamento do Banco de Dados")
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("Atualizar Posts do Banco", key="refresh_db"):
+                add_log("Atualizando visualização do banco de dados...")
+        with col2:
+            if st.button("Limpar Banco de Dados", type="primary", key="clear_db"):
+                if limpar_banco_dados():
+                    st.success("Banco de dados limpo com sucesso!")
+                    st.rerun()  # Recarregar a página
+                else:
+                    st.error("Erro ao limpar banco de dados.")
+        
+        # Obter posts do banco
+        posts_db = obter_posts_do_banco()
+        
+        # Mostrar contagens
+        st.success(f"Total de posts no banco de dados: {len(posts_db)}")
+        
+        # Filtros
+        filter_col1, filter_col2 = st.columns(2)
+        with filter_col1:
+            search_term = st.text_input("Buscar por título", key="db_search")
+        with filter_col2:
+            source_filter = st.selectbox(
+                "Filtrar por fonte", 
+                ["Todas"] + sorted(list(set([p.get("source", "Desconhecida") for p in posts_db if p.get("source")]))),
+                key="db_source"
+            )
+        
+        # Aplicar filtros
+        filtered_posts = posts_db
+        if search_term:
+            filtered_posts = [p for p in filtered_posts if search_term.lower() in p.get("title", "").lower()]
+        if source_filter != "Todas":
+            filtered_posts = [p for p in filtered_posts if p.get("source") == source_filter]
+        
+        # Mostrar posts em uma tabela
+        if not filtered_posts:
+            st.info("Nenhum post encontrado com os filtros atuais.")
+        else:
+            st.markdown(f"### {len(filtered_posts)} Posts Encontrados")
+            
+            # Exibir posts um a um com detalhes e botões de ação
+            for i, post in enumerate(filtered_posts):
+                with st.container():
+                    col1, col2 = st.columns([4, 1])
+                    
+                    # Informações do post
+                    with col1:
+                        st.markdown(f"""
+                        <div style="border: 1px solid #ddd; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+                            <div style="font-weight: bold; font-size: 1.1em;">{post.get('title', 'Sem título')}</div>
+                            <div style="color: #666; margin-top: 5px;">
+                                <span style="margin-right: 15px;">ID: {post.get('id')}</span>
+                                <span style="margin-right: 15px;">Fonte: {post.get('source', 'Desconhecida')}</span>
+                                <span style="margin-right: 15px;">Processado: {datetime.fromisoformat(post.get('processed_date', '')).strftime('%d/%m/%Y %H:%M') if post.get('processed_date') else 'N/A'}</span>
+                            </div>
+                            <div style="margin-top: 5px;">
+                                <a href="{post.get('link', '#')}" target="_blank">Ver artigo original</a>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    
+                    # Botões de ação
+                    with col2:
+                        # Em vez de criar sub-colunas, colocar os botões um abaixo do outro
+                        if st.button("Excluir", key=f"delete_db_{i}", type="primary"):
+                            if excluir_post_do_banco(post.get('id')):
+                                st.success(f"Post {post.get('id')} excluído!")
+                                time.sleep(1)
+                                st.rerun()
+                            else:
+                                st.error("Erro ao excluir post.")
+                        
+                        if st.button("Traduzir", key=f"translate_db_{i}"):
+                            # Iniciar processo de tradução manual
+                            try:
+                                # Criar JSON com estrutura para tradução
+                                data_post = {
+                                    "frontmatter_original": {
+                                        "title": post.get('title', 'Sem Título Original'),
+                                        "original_link": post.get('link', ''),
+                                        "published_date": post.get('published_date', datetime.now().isoformat()),
+                                        "source_name": post.get('source', 'Desconhecido'),
+                                        "tags_originais": post.get('tags', []),
+                                        "slug_original": criar_slug(post.get('title', 'sem-titulo')),
+                                        "timestamp_captura": int(datetime.now().timestamp())
+                                    },
+                                    "content_text_original": post.get('content', ''),
+                                    "content_html_original": post.get('content_html', ''),
+                                    "resumo_original": post.get('summary', ''),
+                                    "content_text_traduzido": None,
+                                    "content_html_traduzido": None,
+                                    "frontmatter_traduzido": None
+                                }
+                                
+                                # Verificar se o diretório existe ou criar se necessário
+                                dir_posts = Path("posts_para_traduzir")
+                                dir_posts.mkdir(parents=True, exist_ok=True)
+                                
+                                # Gerar nome de arquivo único
+                                timestamp_atual = int(datetime.now().timestamp())
+                                arquivo_nome = f"para_traduzir_manual_{timestamp_atual}_{post.get('id')}.json"
+                                caminho_arquivo = dir_posts / arquivo_nome
+                                
+                                # Salvar arquivo para tradução
+                                with open(caminho_arquivo, "w", encoding="utf-8") as f:
+                                    json.dump(data_post, f, ensure_ascii=False, indent=4)
+                                
+                                # Iniciar tradução usando a crew
+                                add_log(f"Iniciando tradução manual do artigo ID: {post.get('id')}")
+                                
+                                crew = st.session_state.crew or inicializar_crew()
+                                inputs = {"arquivo_json": str(caminho_arquivo)}
+                                
+                                with st.spinner("Traduzindo artigo..."):
+                                    resultado_traducao = crew.traducao_crew().kickoff(inputs=inputs)
+                                    add_log(f"Resultado da tradução: {resultado_traducao}")
+                                    st.success(f"Artigo ID {post.get('id')} traduzido com sucesso!")
+                                    
+                            except Exception as e:
+                                import traceback
+                                add_log(f"Erro ao traduzir artigo: {str(e)}")
+                                add_log(f"Trace: {traceback.format_exc()}")
+                                st.error(f"Erro ao traduzir artigo: {str(e)}")
+            
+            # Opção para exportar
+            if st.button("Exportar para CSV"):
+                import pandas as pd
+                df = pd.DataFrame([{
+                    "ID": p.get("id"),
+                    "Título": p.get("title", "Sem título"),
+                    "Fonte": p.get("source", "Desconhecida"),
+                    "Link": p.get("link", ""),
+                    "Data Publicação": p.get("published_date", ""),
+                    "Processado em": p.get("processed_date", ""),
+                    "Status": p.get("status", "processado")
+                } for p in filtered_posts])
+                
+                csv = df.to_csv(index=False)
+                st.download_button(
+                    label="Baixar CSV",
+                    data=csv,
+                    file_name="posts_processados.csv",
+                    mime="text/csv"
+                )
 
 # Footer
 st.markdown("---")
