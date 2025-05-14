@@ -14,6 +14,9 @@ COPY requirements.txt .
 # Instalar dependências Python
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Instalar dependências adicionais (Algolia, etc)
+RUN pip install --no-cache-dir algoliasearch "sanity-io>=0.10.0" backoff
+
 # Copiar o código da aplicação
 COPY . .
 

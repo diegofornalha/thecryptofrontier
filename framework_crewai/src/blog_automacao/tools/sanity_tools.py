@@ -219,12 +219,24 @@ class SanityFormatTool(Tool):
             # Autor (usa um valor padrão)
             autor_ref = "ca38a3d5-cba1-47a0-aa29-4af17a15e17c"  # ID padrão do autor
             
-            # Fonte original
+            # Fonte original obtida do frontmatter_original, campo original_link
             fonte_original = {
-                'url': frontmatter_original.get('url', ''),
-                'title': frontmatter_original.get('title', ''),
-                'site': frontmatter_original.get('site', '')
+                'url': frontmatter_original.get('original_link', ''),  # Usar o campo correto que contém o link original
+                'title': frontmatter_original.get('title', ''),  # Título original do artigo
+                'site': frontmatter_original.get('source_name', '')  # Nome do site de origem
             }
+            
+            # Verificar se a URL parece ser um exemplo/placeholder e não usar nesse caso
+            if 'example.com' in fonte_original['url']:
+                fonte_original['url'] = ''
+                
+            # Se não tiver todos os campos necessários, não incluir informação incompleta
+            if not fonte_original['url'] or not fonte_original['site']:
+                fonte_original = {
+                    'url': '',
+                    'title': '',
+                    'site': ''
+                }
             
             # Montar o documento final
             timestamp = datetime.now().strftime('%Y%m%d%H%M%S')

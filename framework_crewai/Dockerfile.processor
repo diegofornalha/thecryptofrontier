@@ -11,8 +11,8 @@ COPY setup_redis.sh .
 # Instalar dependências
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Instalar backoff para retry automático
-RUN pip install --no-cache-dir backoff
+# Instalar dependências adicionais
+RUN pip install --no-cache-dir backoff algoliasearch "sanity-io>=0.10.0"
 
 # Criar diretórios necessários
 RUN mkdir -p output/published output/errors output/pending

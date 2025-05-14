@@ -1,6 +1,49 @@
 version: '3.8'
 
 services:
+  # Serviço Streamlit para interface de usuário
+  streamlit:
+    build: .
+    container_name: streamlit-crewai-ui
+    ports:
+      - "8501:8501"
+    environment:
+      # Redis
+      - REDIS_HOST=redis  # Nome do serviço Redis no docker-compose
+      - REDIS_PORT=6379   # Porta padrão dentro do container
+      
+      # Gemini API
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      
+      # Sanity
+      - NEXT_PUBLIC_SANITY_PROJECT_ID=${NEXT_PUBLIC_SANITY_PROJECT_ID}
+      - NEXT_PUBLIC_SANITY_DATASET=${NEXT_PUBLIC_SANITY_DATASET}
+      - NEXT_PUBLIC_SANITY_API_VERSION=${NEXT_PUBLIC_SANITY_API_VERSION}
+      - SANITY_PROJECT_ID=${SANITY_PROJECT_ID}
+      - SANITY_API_TOKEN=${SANITY_API_TOKEN}
+      - SANITY_DEV_TOKEN=${SANITY_DEV_TOKEN}
+      - SANITY_DEPLOY_TOKEN=${SANITY_DEPLOY_TOKEN}
+      - SANITY_WEBHOOK_SECRET=${SANITY_WEBHOOK_SECRET}
+      
+      # Algolia
+      - NEXT_PUBLIC_ALGOLIA_APP_ID=${NEXT_PUBLIC_ALGOLIA_APP_ID}
+      - NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY=${NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY}
+      - ALGOLIA_ADMIN_API_KEY=${ALGOLIA_ADMIN_API_KEY}
+      - NEXT_PUBLIC_ALGOLIA_INDEX_NAME=${NEXT_PUBLIC_ALGOLIA_INDEX_NAME}
+      - ALGOLIA_WRITE_API_KEY=${ALGOLIA_WRITE_API_KEY}
+    volumes:
+      - ./posts_para_traduzir:/app/posts_para_traduzir
+      - ./posts_traduzidos:/app/posts_traduzidos
+      - ./posts_formatados:/app/posts_formatados
+      - ./posts_publicados:/app/posts_publicados
+      - ./output:/app/output
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - crewai-network
+    command: ["streamlit", "run", "app_modular.py", "--server.port=8501", "--server.address=0.0.0.0"]
+    
   # Serviço Redis para cache e filas
   redis:
     image: redis:alpine
@@ -29,13 +72,35 @@ services:
     depends_on:
       - redis
     environment:
+      # Redis
       - REDIS_HOST=redis  # Nome do serviço Redis no docker-compose
       - REDIS_PORT=6379   # Porta padrão dentro do container
+      
+      # Gemini API
       - GEMINI_API_KEY=${GEMINI_API_KEY}
+      
+      # Sanity
+      - NEXT_PUBLIC_SANITY_PROJECT_ID=${NEXT_PUBLIC_SANITY_PROJECT_ID}
+      - NEXT_PUBLIC_SANITY_DATASET=${NEXT_PUBLIC_SANITY_DATASET}
+      - NEXT_PUBLIC_SANITY_API_VERSION=${NEXT_PUBLIC_SANITY_API_VERSION}
       - SANITY_PROJECT_ID=${SANITY_PROJECT_ID}
       - SANITY_API_TOKEN=${SANITY_API_TOKEN}
+      - SANITY_DEV_TOKEN=${SANITY_DEV_TOKEN}
+      - SANITY_DEPLOY_TOKEN=${SANITY_DEPLOY_TOKEN}
+      - SANITY_WEBHOOK_SECRET=${SANITY_WEBHOOK_SECRET}
+      
+      # Algolia
+      - NEXT_PUBLIC_ALGOLIA_APP_ID=${NEXT_PUBLIC_ALGOLIA_APP_ID}
+      - NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY=${NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY}
+      - ALGOLIA_ADMIN_API_KEY=${ALGOLIA_ADMIN_API_KEY}
+      - NEXT_PUBLIC_ALGOLIA_INDEX_NAME=${NEXT_PUBLIC_ALGOLIA_INDEX_NAME}
+      - ALGOLIA_WRITE_API_KEY=${ALGOLIA_WRITE_API_KEY}
     volumes:
-      - ./:/app  # Mapeia o diretório atual para /app no container
+      - ./posts_para_traduzir:/app/posts_para_traduzir
+      - ./posts_traduzidos:/app/posts_traduzidos
+      - ./posts_formatados:/app/posts_formatados
+      - ./posts_publicados:/app/posts_publicados
+      - ./output:/app/output
     restart: unless-stopped
     networks:
       - crewai-network

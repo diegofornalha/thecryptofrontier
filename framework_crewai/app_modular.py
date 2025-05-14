@@ -2,11 +2,226 @@
 import os
 import streamlit as st
 from pathlib import Path
+import json
+from datetime import datetime
 
 # Importar apenas o que é necessário
 from src.blog_automacao import BlogAutomacaoCrew
 from src.blog_automacao.ui import load_css, render_sidebar, render_stats_column, render_article_item, render_rss_tab
 from src.blog_automacao.logic import SessionManager, monitor_feeds, translate_article, publish_article, fetch_sanity_posts, get_db_posts, delete_db_post, clear_db, execute_full_flow
+
+# Implementação inline do render_kanban_board para resolver o problema de importação
+def render_kanban_board():
+    """Render a simplified Kanban board interface for content workflow"""
+    
+    # Header
+    st.markdown(
+        """
+        <h1 style="text-align: center; margin-bottom: 20px;">📋 Content Workflow</h1>
+        <p style="text-align: center; margin-bottom: 30px;">Manage the content workflow from RSS to publication</p>
+        """, 
+        unsafe_allow_html=True
+    )
+    
+    # Use tabs for kanban stages to avoid column nesting issues
+    tab1, tab2, tab3 = st.tabs(["📥 Pending", "🔄 Translation", "🚀 Publication"])
+    
+    with tab1:
+        render_pending_column_content()
+    
+    with tab2:
+        render_translation_column_content()
+        
+    with tab3:
+        render_publication_column_content()
+        
+def render_pending_column_content():
+    """Renders the content of the Pending column without the header"""
+    # Control buttons - simpler interface with emphasized buttons
+    if st.button("📡 MONITOR RSS FEEDS", key="monitor_rss_btn", use_container_width=True, type="primary"):
+        if monitor_feeds():
+            st.success("RSS monitoring completed!")
+            st.rerun()
+        else:
+            st.error("Error monitoring feeds")
+    
+    # Find articles to translate
+    dir_posts = Path("posts_para_traduzir")
+    if dir_posts.exists():
+        articles = list(dir_posts.glob("para_traduzir_*.json"))
+        
+        if not articles:
+            st.info("No pending articles found")
+        else:
+            st.success(f"{len(articles)} articles ready for translation")
+            # Show each article card
+            for article in articles:
+                render_article_card(article, stage="pending")
+    else:
+        st.info("No pending articles found")
+
+def render_translation_column_content():
+    """Renders the content of the Translation column"""
+    # Translation controls - avoid nested columns
+    st.button("🔤 Translate Next", key="translate_next_btn", use_container_width=True, 
+             on_click=lambda: translate_and_rerun())
+    
+    st.button("👁️ View Translated", key="view_translated_btn", use_container_width=True,
+             on_click=lambda: st.rerun())
+    
+    # Find translated articles
+    dir_posts = Path("posts_traduzidos")
+    if dir_posts.exists():
+        articles = [a for a in dir_posts.glob("*.json") if not a.name.startswith("para_traduzir_")]
+        
+        if not articles:
+            st.info("No translated articles yet")
+        else:
+            st.success(f"{len(articles)} articles translated")
+            # Show each article card
+            for article in articles:
+                render_article_card(article, stage="translated")
+    else:
+        st.info("No translated articles found")
+
+def translate_and_rerun():
+    """Helper function to translate article and rerun"""
+    if translate_article():
+        st.success("Article translated!")
+        st.rerun()
+    else:
+        st.error("Translation failed or no articles")
+
+def render_publication_column_content():
+    """Renders the content of the Publication column"""
+    # Publication controls - avoid nested columns
+    st.button("📤 Publish Next", key="publish_next_btn", use_container_width=True,
+             on_click=lambda: publish_and_rerun())
+    
+    st.button("🔄 Refresh Sanity", key="refresh_sanity_btn", use_container_width=True,
+             on_click=lambda: refresh_sanity_and_rerun())
+    
+    # Show published articles from Sanity CMS
+    posts = fetch_sanity_posts()
+    
+    if not posts:
+        st.info("No published articles found in Sanity")
+    else:
+        # Show the 5 most recently published
+        recent_posts = sorted(
+            posts, 
+            key=lambda p: p.get("publishedAt", ""), 
+            reverse=True
+        )[:5]
+        
+        st.success(f"{len(posts)} articles published to Sanity")
+        
+        for post in recent_posts:
+            render_published_card(post)
+
+def publish_and_rerun():
+    """Helper function to publish article and rerun"""
+    if publish_article():
+        st.success("Article published to Sanity!")
+        st.rerun()
+    else:
+        st.error("Publication failed or no articles")
+        
+def refresh_sanity_and_rerun():
+    """Helper function to refresh Sanity cache and rerun"""
+    SessionManager.clear_sanity_cache()
+    st.rerun()
+
+def render_article_card(article_path, stage="pending"):
+    """
+    Renders a card for an article
+    
+    Args:
+        article_path: Path to the article JSON file
+        stage: The workflow stage (pending, translated)
+    """
+    try:
+        with open(article_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            
+        # Extract title based on article stage
+        if stage == "pending":
+            if "frontmatter_original" in data:
+                title = data["frontmatter_original"].get("title", "No Title")
+            else:
+                title = data.get("title", "No Title")
+        else:
+            if "frontmatter_traduzido" in data and data["frontmatter_traduzido"]:
+                title = data["frontmatter_traduzido"].get("title", "No Title")
+            elif "frontmatter_original" in data:
+                title = data["frontmatter_original"].get("title", "No Title")
+            else:
+                title = data.get("title", "No Title")
+        
+        # Create card UI with consistent styling and appropriate actions
+        with st.container():
+            st.markdown(
+                f"""
+                <div style="border: 1px solid #ddd; border-left: 5px solid {get_stage_color(stage)}; 
+                            padding: 10px; border-radius: 5px; margin-bottom: 10px; 
+                            background-color: white;">
+                    <div style="font-weight: bold; margin-bottom: 8px;">{title[:50]}{'...' if len(title) > 50 else ''}</div>
+                    <div style="color: #666; font-size: 0.8em; margin-bottom: 5px;">
+                        {article_path.name[:20]}...
+                    </div>
+                </div>
+                """, 
+                unsafe_allow_html=True
+            )
+            
+            # Sem botões individuais para evitar inconsistências, usamos apenas os botões de ação coletiva no topo
+    
+    except Exception as e:
+        st.error(f"Error loading article: {str(e)}")
+
+def render_published_card(post):
+    """
+    Renders a card for a published article from Sanity
+    
+    Args:
+        post: The Sanity post data
+    """
+    title = post.get("title", "No Title")
+    published_at = post.get("publishedAt", "")
+    post_id = post.get("_id", "")
+    
+    # Format date if available
+    date_display = ""
+    if published_at:
+        try:
+            date_obj = datetime.fromisoformat(published_at.replace('Z', '+00:00'))
+            date_display = date_obj.strftime("%d/%m/%Y")
+        except:
+            date_display = published_at[:10]
+    
+    # Create card UI with consistent styling
+    st.markdown(
+        f"""
+        <div style="border: 1px solid #ddd; border-left: 5px solid #28a745; 
+                    padding: 10px; border-radius: 5px; margin-bottom: 10px; 
+                    background-color: white;">
+            <div style="font-weight: bold; margin-bottom: 8px;">{title[:50]}{'...' if len(title) > 50 else ''}</div>
+            <div style="color: #666; font-size: 0.8em;">
+                Published: {date_display}
+            </div>
+        </div>
+        """, 
+        unsafe_allow_html=True
+    )
+
+def get_stage_color(stage):
+    """Returns a color code based on the article stage"""
+    if stage == "pending":
+        return "#ffc107"  # Yellow
+    elif stage == "translated":
+        return "#17a2b8"  # Blue
+    else:
+        return "#28a745"  # Green
 
 # Configuração da página
 st.set_page_config(

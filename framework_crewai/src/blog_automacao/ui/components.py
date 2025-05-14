@@ -30,6 +30,20 @@ def render_sidebar():
     if st.session_state.last_run:
         st.info(f"Última execução: {st.session_state.last_run.strftime('%Y-%m-%d %H:%M:%S')}")
     
+    # Sempre exibir estatísticas por agente na sidebar
+    st.markdown("---")
+    st.markdown('<h3>Estatísticas por Agente</h3>', unsafe_allow_html=True)
+    
+    # Obter estatísticas
+    stats = get_stats()
+    
+    # Formatação compacta para sidebar
+    st.markdown(f"""
+    📊 **Monitor**: {stats["para_traduzir"]} artigos pendentes  
+    🔄 **Tradutor**: {stats["traduzidos"]} artigos traduzidos  
+    📝 **Publisher**: {stats["publicados"]} artigos publicados
+    """)
+    
     # Exibir logs na barra lateral se a opção estiver ativada
     if st.session_state.get('show_logs', False):
         st.markdown("---")
@@ -44,6 +58,7 @@ def render_sidebar():
         log_text = "\n".join(st.session_state.log_messages)
         with st.expander("Ver logs completos", expanded=True):
             st.code(log_text)
+        
 
 
 # Componentes de estatísticas
