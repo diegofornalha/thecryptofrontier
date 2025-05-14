@@ -776,39 +776,201 @@ def save_feeds(feed_urls):
         SessionManager.add_log(f"Erro ao salvar feeds: {str(e)}")
         return False
 
+# Integração com Redis para o framework CrewAI
+def enqueue_crewai_article(article_data, process_now=False):
+    """
+    Enfileira um artigo no Redis para processamento posterior ou imediato via CrewAI.
+    
+    Args:
+        article_data: Dicionário com os dados do artigo
+        process_now: Se True, processa imediatamente após enfileirar
+        
+    Returns:
+        Resultado da operação (sucesso/erro)
+    """
+    try:
+        # Importar o cliente Redis
+        import sys
+        import os
+        parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
+        if parent_dir not in sys.path:
+            sys.path.insert(0, parent_dir)
+        
+        from redis_tools import RedisArticleQueue
+        queue = RedisArticleQueue()
+        
+        SessionManager.add_log(f"Enfileirando artigo: {article_data.get('title', 'Sem título')}")
+        
+        # Garantir que temos um ID
+        if "id" not in article_data:
+            import uuid
+            article_data["id"] = f"crewai_{str(uuid.uuid4())[:8]}"
+        
+        # Enfileirar
+        if queue.queue_article(article_data):
+            SessionManager.add_log(f"✅ Artigo enfileirado com sucesso: {article_data.get('title', 'Sem título')}")
+            
+            # Processar imediatamente se solicitado
+            if process_now:
+                try:
+                    from process_article_queue import process_queue
+                    # Processar apenas um artigo
+                    process_queue(max_articles=1, interval=1)
+                    SessionManager.add_log("✅ Artigo processado imediatamente")
+                except Exception as e:
+                    SessionManager.add_log(f"❌ Erro ao processar artigo imediatamente: {str(e)}")
+            
+            return True
+        else:
+            SessionManager.add_log(f"❌ Falha ao enfileirar artigo: {article_data.get('title', 'Sem título')}")
+            return False
+    
+    except Exception as e:
+        SessionManager.add_log(f"❌ Erro ao enfileirar artigo: {str(e)}")
+        import traceback
+        SessionManager.add_log(f"Trace: {traceback.format_exc()}")
+        return False
+
 # Fluxo completo
 def execute_full_flow():
     """Executa o fluxo completo de monitoramento, tradução e publicação."""
     with st.spinner("Executando fluxo completo..."):
         SessionManager.add_log("Iniciando fluxo completo...")
         
-        # Passo 1: Monitoramento
-        monitor_feeds()
+        try:
+            # Verificar se o Redis está disponível
+            import sys
+            import os
+            parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
+            if parent_dir not in sys.path:
+                sys.path.insert(0, parent_dir)
+            
+            from redis_tools import redis_client
+            
+            # Se o Redis estiver disponível, usamos a fila
+            if redis_client and redis_client.ping():
+                SessionManager.add_log("✅ Redis disponível. Usando sistema de filas.")
+                
+                # Passo 1: Monitoramento
+                monitor_feeds()
+                
+                # Passo 2: Importar e usar process_article_queue
+                try:
+                    from process_article_queue import process_queue
+                    # Processar até 3 artigos em sequência
+                    SessionManager.add_log("📝 Processando artigos da fila...")
+                    process_queue(max_articles=3, interval=1)
+                    SessionManager.add_log("✅ Processamento de artigos concluído")
+                except Exception as e:
+                    SessionManager.add_log(f"❌ Erro ao processar artigos da fila: {str(e)}")
+                    import traceback
+                    SessionManager.add_log(f"Trace: {traceback.format_exc()}")
+            
+            else:
+                SessionManager.add_log("⚠️ Redis não disponível. Usando fluxo de arquivos.")
+                
+                # Passo 1: Monitoramento
+                monitor_feeds()
+                
+                # Passo 2: Verificar se há arquivos para traduzir
+                dir_para_traduzir = Path("posts_para_traduzir")
+                if not dir_para_traduzir.exists():
+                    dir_para_traduzir = Path("posts_traduzidos")
+                
+                arquivos_para_traduzir = list(dir_para_traduzir.glob("para_traduzir_*.json"))
+                if arquivos_para_traduzir:
+                    SessionManager.add_log(f"Encontrados {len(arquivos_para_traduzir)} artigos para traduzir. Traduzindo o primeiro...")
+                    translate_article()
+                else:
+                    SessionManager.add_log("Nenhum artigo encontrado para traduzir após monitoramento.")
+                
+                # Passo 3: Verificar se há arquivos traduzidos para publicar
+                dir_traduzidos = Path("posts_traduzidos")
+                arquivos_traduzidos = [a for a in dir_traduzidos.glob("*.json") if not a.name.startswith("para_traduzir_")]
+                
+                if arquivos_traduzidos:
+                    SessionManager.add_log(f"Encontrados {len(arquivos_traduzidos)} artigos traduzidos. Publicando o primeiro...")
+                    publish_article()
+                else:
+                    SessionManager.add_log("Nenhum artigo traduzido encontrado para publicar.")
+            
+            SessionManager.add_log("Fluxo completo finalizado!")
+            SessionManager.update_last_run()
+            # Atualizar a contagem de posts
+            fetch_sanity_posts(refresh=True)
+            return True
+            
+        except Exception as e:
+            SessionManager.add_log(f"❌ Erro ao executar fluxo completo: {str(e)}")
+            import traceback
+            SessionManager.add_log(f"Trace: {traceback.format_exc()}")
+            return False
+
+def delete_sanity_post(post_id, title=None):
+    """
+    Exclui um post do Sanity CMS pelo ID.
+    
+    Args:
+        post_id (str): ID do post no Sanity
+        title (str, opcional): Título do post para registro
         
-        # Passo 2: Verificar se há arquivos para traduzir
-        dir_para_traduzir = Path("posts_para_traduzir")
-        if not dir_para_traduzir.exists():
-            dir_para_traduzir = Path("posts_traduzidos")
+    Returns:
+        bool: True se excluído com sucesso, False caso contrário
+    """
+    try:
+        # Obter credenciais do Sanity
+        project_id = os.environ.get("NEXT_PUBLIC_SANITY_PROJECT_ID") or os.environ.get("SANITY_PROJECT_ID", "brby2yrg")
+        dataset = os.environ.get("NEXT_PUBLIC_SANITY_DATASET", "production")
+        api_version = os.environ.get("NEXT_PUBLIC_SANITY_API_VERSION", "2023-05-03")
+        token = os.environ.get("SANITY_DEV_TOKEN", "")
         
-        arquivos_para_traduzir = list(dir_para_traduzir.glob("para_traduzir_*.json"))
-        if arquivos_para_traduzir:
-            SessionManager.add_log(f"Encontrados {len(arquivos_para_traduzir)} artigos para traduzir. Traduzindo o primeiro...")
-            translate_article()
-        else:
-            SessionManager.add_log("Nenhum artigo encontrado para traduzir após monitoramento.")
+        # Se não encontrou o token DEV, verificar outros tokens
+        if not token:
+            token = os.environ.get("SANITY_API_TOKEN", "")
+        if not token:
+            token = os.environ.get("SANITY_DEPLOY_TOKEN", "")
         
-        # Passo 3: Verificar se há arquivos traduzidos para publicar
-        dir_traduzidos = Path("posts_traduzidos")
-        arquivos_traduzidos = [a for a in dir_traduzidos.glob("*.json") if not a.name.startswith("para_traduzir_")]
+        # Remover quebras de linha do token
+        token = token.replace('\n', '')
         
-        if arquivos_traduzidos:
-            SessionManager.add_log(f"Encontrados {len(arquivos_traduzidos)} artigos traduzidos. Publicando o primeiro...")
-            publish_article()
-        else:
-            SessionManager.add_log("Nenhum artigo traduzido encontrado para publicar.")
+        if not token:
+            SessionManager.add_log("Erro: Token do Sanity não encontrado")
+            return False
         
-        SessionManager.add_log("Fluxo completo finalizado!")
-        SessionManager.update_last_run()
-        # Atualizar a contagem de posts
-        fetch_sanity_posts(refresh=True)
-        return True 
+        # Construir URL da API para deleção
+        url = f"https://{project_id}.api.sanity.io/v{api_version}/data/mutate/{dataset}"
+        
+        # Definir headers com token
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
+        }
+        
+        # Dados para deleção
+        data = {
+            "mutations": [
+                {
+                    "delete": {
+                        "id": post_id
+                    }
+                }
+            ]
+        }
+        
+        # Fazer requisição à API
+        response = requests.post(url, headers=headers, json=data)
+        response.raise_for_status()
+        
+        # Registrar sucesso
+        title_info = f" '{title}'" if title else ""
+        SessionManager.add_log(f"Post{title_info} excluído com sucesso (ID: {post_id})")
+        
+        # Atualizar cache de posts
+        if 'sanity_posts' in st.session_state:
+            st.session_state.sanity_posts = [post for post in st.session_state.sanity_posts if post.get('_id') != post_id]
+        
+        return True
+        
+    except Exception as e:
+        SessionManager.add_log(f"Erro ao excluir post: {str(e)}")
+        return False 

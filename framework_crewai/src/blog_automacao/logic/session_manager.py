@@ -32,10 +32,20 @@ class SessionManager:
     @staticmethod
     def get_crew():
         """Retorna a instância atual da crew, inicializando se necessário."""
-        if 'crew' not in st.session_state or st.session_state.crew is None:
-            st.session_state.crew = BlogAutomacaoCrew()
-            SessionManager.add_log("Crew inicializada com sucesso!")
-        return st.session_state.crew
+        # Usamos st.cache_resource para manter uma única instância da Crew
+        # entre reruns do Streamlit, o que é mais eficiente
+        return SessionManager._get_crew_singleton()
+        
+    @st.cache_resource
+    def _get_crew_singleton():
+        """Cria uma única instância da BlogAutomacaoCrew que persiste entre refreshes.
+        
+        Este método é decorado com st.cache_resource para garantir que a instância
+        da Crew (que inclui conexões com APIs como Google Gemini) seja reutilizada,
+        evitando inicializações desnecessárias e economizando recursos.
+        """
+        crew = BlogAutomacaoCrew() 
+        return crew
     
     @staticmethod
     def add_log(message):

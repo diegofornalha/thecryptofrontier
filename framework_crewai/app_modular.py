@@ -43,10 +43,11 @@ with col_content:
         "Agente Tradutor", 
         "Agente Publisher", 
         "RSS", 
-        "Agente Monitor - BD"
+        "Agente Monitor - BD",
+        "Redis Status"
     ]
     
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(tabs)
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(tabs)
     
     # Aba 1: Agente Monitor
     with tab1:
@@ -352,6 +353,14 @@ with col_content:
                                 SessionManager.add_log(f"Erro ao traduzir artigo: {str(e)}")
                                 SessionManager.add_log(f"Trace: {traceback.format_exc()}")
                                 st.error(f"Erro ao traduzir artigo: {str(e)}")
+                                
+    # Aba 6: Status do Redis
+    with tab6:
+        st.session_state.active_tab = "Redis Status"
+        # Importamos o componente de status do Redis
+        from src.blog_automacao.ui.redis_status import render_redis_status
+        # Renderizamos o componente
+        render_redis_status()
 
 # Seção para fluxo completo
 st.markdown("---")

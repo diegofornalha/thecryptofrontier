@@ -5,6 +5,7 @@ Ferramentas para interação com o Sanity CMS.
 import os
 import uuid
 import json
+import time
 from pathlib import Path
 from crewai.tools.base_tool import Tool
 import frontmatter
@@ -199,25 +200,21 @@ class SanityFormatTool(Tool):
             # Formatação do conteúdo em blocos
             blocos_conteudo = self.formatar_conteudo_em_blocos(content_text)
             
-            # Categorias e tags
-            categorias = []
+            # Em vez de usar referências, vamos usar campos simples
+            # Convertendo categorias e tags para strings simples
+            category_names = []
             if 'category' in frontmatter_traduzido:
                 categoria = frontmatter_traduzido['category']
                 if isinstance(categoria, str):
-                    categorias.append({
-                        '_type': 'reference',
-                        '_key': str(uuid.uuid4()).replace('-', ''),
-                        '_ref': categoria  # Idealmente, deveria ser um ID real de categoria no Sanity
-                    })
-                    
-            tags = []
+                    category_names.append(categoria)
+                elif isinstance(categoria, list):
+                    category_names.extend(categoria)
+                
+            # Tags como array de strings
+            tag_names = []
             if 'tags' in frontmatter_traduzido:
-                for tag in frontmatter_traduzido['tags']:
-                    tags.append({
-                        '_type': 'reference',
-                        '_key': str(uuid.uuid4()).replace('-', ''),
-                        '_ref': tag  # Idealmente, deveria ser um ID real de tag no Sanity
-                    })
+                if isinstance(frontmatter_traduzido['tags'], list):
+                    tag_names = frontmatter_traduzido['tags']
             
             # Autor (usa um valor padrão)
             autor_ref = "ca38a3d5-cba1-47a0-aa29-4af17a15e17c"  # ID padrão do autor
@@ -241,15 +238,23 @@ class SanityFormatTool(Tool):
                 },
                 'publishedAt': data_publicacao,
                 'excerpt': excerpt,
-                'content': blocos_conteudo,
-                'categories': categorias,
-                'tags': tags,
-                'author': {
-                    '_type': 'reference',
-                    '_ref': autor_ref
-                },
-                'originalSource': fonte_original
+                'content': blocos_conteudo
             }
+            
+            # Adicionar categorias como array de strings simples
+            if category_names:
+                documento_sanity['categoryNames'] = category_names
+                
+            # Adicionar tags como array de strings simples
+            if tag_names:
+                documento_sanity['tagNames'] = tag_names
+                
+            # Adicionar autor como string simples (em vez de referência)
+            autor_nome = frontmatter_traduzido.get('author', 'Autor Desconhecido')
+            documento_sanity['authorName'] = autor_nome
+            
+            # Adicionar fonte original
+            documento_sanity['originalSource'] = fonte_original
             
             # Opcional: SEO metadata se disponível
             if 'seo_meta_description' in frontmatter_traduzido:

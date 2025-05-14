@@ -113,13 +113,13 @@ def executar_monitoramento(crew, base_dir, loop_minutes=None):
         
         try:
             # Executar crew de monitoramento
-            # A crew (monitor + selector) deve retornar a lista de arquivos salvos
+            # A crew (apenas monitor) deve retornar a lista de arquivos salvos
             inputs = {"base_dir": str(base_dir)} # Passar base_dir para a crew/tasks
             print("Executando monitoramento_crew().kickoff()...")
             result = crew.monitoramento_crew().kickoff(inputs=inputs)
             
             print(f"\nProcessamento de monitoramento CrewAI concluído.")
-            # O resultado esperado de selection_task é a lista de arquivos salvos
+            # O resultado esperado é a lista de arquivos salvos
             print(f"Arquivos salvos para tradução (resultado da crew): {result}") 
 
         except Exception as e:

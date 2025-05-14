@@ -49,6 +49,8 @@ class BlogAutomacaoCrew(BaseCrewComponents):
 
     agents_config = 'config/agents.yaml'
     tasks_config = 'config/tasks.yaml'
+    
+    # NOTA: A task selection_task foi removida pois requeria um agente 'selector' que não existe
 
     def __init__(self):
         """Inicializar a crew com configurações necessárias."""
@@ -71,6 +73,7 @@ class BlogAutomacaoCrew(BaseCrewComponents):
             verbose=True,
             llm=self.llm
         )
+    
     
     @agent
     def translator(self) -> Agent:
@@ -121,13 +124,23 @@ class BlogAutomacaoCrew(BaseCrewComponents):
             agent=self.monitor() # Associar agente
         )
 
-    
+    # Tarefa selection_task removida para evitar problemas de inicialização
+
     @task
     def translation_task(self) -> Task:
         """Tarefa para traduzir artigos."""
         return Task(
             config=self.tasks_config["translation_task"],
             agent=self.translator() # Associar agente
+        )
+    
+    @task
+    def json_formatting_task(self) -> Task:
+        """Tarefa para formatar o conteúdo JSON para o Sanity."""
+        return Task(
+            config=self.tasks_config["json_formatting_task"],
+            agent=self.json_formatter(), # Associar agente
+            context=[self.translation_task()]  # Depende da tradução
         )
     
     @task
@@ -204,16 +217,17 @@ class BlogAutomacaoCrew(BaseCrewComponents):
         # são mais para a ordem lógica dentro de uma etapa, se aplicável.
         return Crew(
             agents=[
-                self.monitor(), self.selector(),
+                self.monitor(), 
                 self.translator(), 
-                self.json_formatter(), # Novo agente
+                self.json_formatter(), 
                 self.publisher(),
                 self.duplicate_detector() 
             ],
             tasks=[
-                self.monitoring_task(), self.selection_task(),
+                self.monitoring_task(),
+                # selection_task removida
                 self.translation_task(), 
-                self.json_formatting_task(), # Nova tarefa
+                self.json_formatting_task(), 
                 self.publish_task(),
                 self.duplicate_detection_task() 
             ],

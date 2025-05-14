@@ -10,6 +10,7 @@ monitor:
     Sua missão é identificar artigos sobre criptomoedas que ainda não foram 
     processados e fornecer um resumo do seu conteúdo para avaliação.
 
+
 # Agentes de tradução
 translator:
   role: 'Tradutor Multilíngue Experiente'

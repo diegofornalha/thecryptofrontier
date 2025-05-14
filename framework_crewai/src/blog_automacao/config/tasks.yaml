@@ -55,7 +55,7 @@ selection_task:
     Uma lista contendo os caminhos dos arquivos salvos em \'posts_para_traduzir\' para os artigos
     selecionados, ou None/vazio para os não selecionados. 
     Ex: ["posts_para_traduzir/arq1.json", null, "posts_para_traduzir/arq3.json"]
-  agent: selector
+  agent: monitor
   # Esta tarefa agora é responsável por salvar o arquivo, como faz a lógica de fallback no main.py
 
 # Tarefas de tradução
@@ -210,7 +210,7 @@ editing_task:
     Retorne o OBJETO JSON COMPLETO E ATUALIZADO. Este objeto será então passado para a tarefa de localização.
   expected_output: >
     Uma string representando o objeto JSON COMPLETO E ATUALIZADO, com o conteúdo revisado.
-  agent: editor
+  agent: translator
   context: 
     - translation_task
 
@@ -255,9 +255,9 @@ localization_task:
   expected_output: >
     APENAS o CAMINHO COMPLETO (file_path) onde o arquivo JSON foi salvo pela 'File Save Tool'.
     Exemplo: '/src/temp_test_dir_single_post/posts_traduzidos/traduzido_artigo_xyz.json'
-  agent: localizer
+  agent: translator
   context: 
-    - editing_task # Agora editing_task está definida acima
+    - translation_task # Referência atualizada para task existente
 
 # Tarefas de publicação
 seo_optimization_task:
@@ -287,7 +287,7 @@ seo_optimization_task:
   expected_output: >
     Uma string representando um NOVO objeto JSON contendo APENAS os campos 'sanity_document_payload', 
     'content_text_traduzido', e 'content_html_traduzido'.
-  agent: seo_analyst
+  agent: json_formatter
   context: 
     - translation_task
 
