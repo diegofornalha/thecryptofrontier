@@ -6,6 +6,9 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     git \
+    procps \
+    netcat-openbsd \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copiar arquivos de dependências
@@ -20,7 +23,6 @@ RUN pip install --no-cache-dir algoliasearch backoff python-dotenv
 # Copiar apenas os arquivos necessários
 COPY app_modular.py .
 COPY src/ ./src/
-COPY utils/ ./utils/
 COPY static/ ./static/
 
 # Criar diretórios necessários
@@ -33,4 +35,4 @@ EXPOSE 8501
 ENV PYTHONUNBUFFERED=1
 
 # Comando para iniciar a aplicação
-CMD ["streamlit", "run", "app_modular.py", "--server.port=8501", "--server.address=0.0.0.0"]
+CMD ["streamlit", "run", "app_modular.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true"]

@@ -1,0 +1,17 @@
+[server]
+enableCORS = false
+enableXsrfProtection = false
+headless = true
+baseUrlPath = "streamlit"
+
+[browser]
+serverAddress = "localhost"
+serverPort = 8501
+gatherUsageStats = false
+
+[theme]
+primaryColor = "#7E57C2"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F0F2F6"
+textColor = "#262730"
+font = "sans serif"
