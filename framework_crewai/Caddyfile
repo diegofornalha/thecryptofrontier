@@ -1,24 +1,20 @@
 :8080 {
-    # Desativar TLS para testes
-    tls off
-
-    # Servir arquivos estáticos 
-    root * /app/static
-    file_server
-
-    # Rota para o serviço Streamlit - abordagem simplificada
-    handle_path /streamlit/* {
-        reverse_proxy streamlit:8501
-    }
-    
-    # Redirecionar / para /streamlit se o usuário acessar a raiz
-    handle / {
-        redir /streamlit permanent
-    }
+    # Configuração simples sem TLS
     
     # Log de requisições
     log {
         output stdout
         format console
+    }
+
+    # Rota para o serviço Streamlit
+    handle /streamlit* {
+        reverse_proxy streamlit:8501
+    }
+    
+    # Servir arquivos estáticos para outras rotas
+    handle {
+        root * /app/static
+        file_server
     }
 }

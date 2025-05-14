@@ -20,12 +20,14 @@ services:
       - NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY=${NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY}
     volumes:
       - .:/app
+      - ./.streamlit:/root/.streamlit  # Garantir que a config do Streamlit seja montada
     working_dir: /app
     depends_on:
       - redis
     restart: unless-stopped
     networks:
       - crewai-network
+    command: ["streamlit", "run", "app_modular.py", "--server.port=8501", "--server.address=0.0.0.0"]
     
   # Serviço Redis para cache e filas
   redis:
