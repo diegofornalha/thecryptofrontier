@@ -7,12 +7,8 @@ import traceback
 import sys
 import os
 
-# Adicionar diretório pai ao path para importar redis_tools
-parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
-if parent_dir not in sys.path:
-    sys.path.insert(0, parent_dir)
-
-from backup_legado_aprendizados.redis_tools import RedisArticleQueue, redis_client, get_redis_client
+# Importar do novo módulo redis_tools
+from ..tools.redis_tools import RedisArticleQueue, redis_client, get_redis_client
 
 @st.cache_data(ttl=10)  # Cache por 10 segundos
 def get_queue_stats():
@@ -119,7 +115,7 @@ def render_redis_status():
     # Botão para testar conexão
     if st.button("Testar Conexão Redis"):
         try:
-            from backup_legado_aprendizados.redis_tools import get_redis_client
+            from ..tools.redis_tools import get_redis_client
             client = get_redis_client()
             if client and client.ping():
                 st.success("✅ Conexão com Redis estabelecida com sucesso!")

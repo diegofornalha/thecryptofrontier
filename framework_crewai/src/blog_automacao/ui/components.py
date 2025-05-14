@@ -19,13 +19,7 @@ def render_sidebar():
     # Verificar status do Redis
     try:
         # Importar Redis client
-        import sys
-        import os
-        parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
-        if parent_dir not in sys.path:
-            sys.path.insert(0, parent_dir)
-        
-        from backup_legado_aprendizados.redis_tools import redis_client
+        from ..tools.redis_tools import redis_client
 
         # Verificar conexão
         if redis_client and redis_client.ping():
