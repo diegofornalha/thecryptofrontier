@@ -16,6 +16,25 @@ def load_css():
 # Componentes da Sidebar
 def render_sidebar():
     """Renderiza a barra lateral do app."""
+    # Verificar status do Redis
+    try:
+        # Importar Redis client
+        import sys
+        import os
+        parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
+        if parent_dir not in sys.path:
+            sys.path.insert(0, parent_dir)
+        
+        from redis_tools import redis_client
+
+        # Verificar conexão
+        if redis_client and redis_client.ping():
+            st.sidebar.success("Redis: ✅ Conectado")
+        else:
+            st.sidebar.error("Redis: ⚠️ Desconectado")
+    except Exception as e:
+        st.sidebar.error(f"Redis: ⚠️ Desconectado ({str(e)[:50]}...)")
+    
     # Botão para limpar cache
     if st.button("🧹 Limpar Cache", key="limpar_cache_sidebar"):
         SessionManager.clear_cache()

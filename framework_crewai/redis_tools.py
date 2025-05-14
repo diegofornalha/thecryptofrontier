@@ -29,7 +29,7 @@ logger = logging.getLogger("redis_tools")
 
 # Configuração dinâmica do Redis
 REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
-REDIS_PORT = int(os.environ.get('REDIS_PORT', '6380'))  # Alterado para porta 6380 para Docker
+REDIS_PORT = int(os.environ.get('REDIS_PORT', '6381'))  # Alterado para porta 6381 para Docker
 REDIS_DB = int(os.environ.get('REDIS_DB', '0'))
 REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', None)
 REDIS_SOCKET_TIMEOUT = int(os.environ.get('REDIS_SOCKET_TIMEOUT', '5'))
