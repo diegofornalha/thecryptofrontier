@@ -7,18 +7,9 @@ https://docs.crewai.com/
 
 import os
 import logging
-from crewai import Crew, Process
 
 # Importações locais
-from agents import MonitorAgent, TranslatorAgent, FormatterAgent, PublisherAgent
-from tools import tools
-from tasks import (
-    create_monitoring_task,
-    create_translation_task, 
-    create_formatting_task,
-    create_publishing_task
-)
-from config import config
+from crew import get_crew
 
 # Configuração de logging
 logging.basicConfig(
@@ -26,12 +17,6 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
 logger = logging.getLogger("blog_crew")
-
-def setup_directories():
-    """Cria os diretórios necessários para o fluxo"""
-    for dir_name in config['directories'].values():
-        os.makedirs(dir_name, exist_ok=True)
-        logger.info(f"Diretório '{dir_name}' criado/verificado com sucesso")
 
 def run_crew():
     """Executa o fluxo completo de automação do blog"""
@@ -44,33 +29,11 @@ def run_crew():
         logger.warning(f"As seguintes variáveis de ambiente não estão definidas: {', '.join(missing_vars)}")
         logger.warning("O fluxo pode falhar sem estas variáveis.")
     
-    # Criar diretórios de trabalho
-    setup_directories()
+    # Garantir que a API Key do Gemini está definida
+    os.environ["GOOGLE_API_KEY"] = os.environ.get("GEMINI_API_KEY", "")
     
-    # Criar agentes
-    logger.info("Criando agentes...")
-    monitor = MonitorAgent.create(tools)
-    translator = TranslatorAgent.create(tools)
-    formatter = FormatterAgent.create(tools)
-    publisher = PublisherAgent.create(tools)
-    
-    # Criar tarefas
-    logger.info("Definindo tarefas...")
-    tasks = [
-        create_monitoring_task(monitor),
-        create_translation_task(translator),
-        create_formatting_task(formatter),
-        create_publishing_task(publisher)
-    ]
-    
-    # Criar a crew
-    logger.info("Montando a equipe de agentes...")
-    crew = Crew(
-        agents=[monitor, translator, formatter, publisher],
-        tasks=tasks,
-        verbose=config['process']['verbose'],
-        process=Process.sequential if config['process']['type'] == 'sequential' else Process.hierarchical
-    )
+    # Obter o Crew
+    crew = get_crew()
     
     # Executar o fluxo
     logger.info("Iniciando o fluxo de automação...")

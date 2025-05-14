@@ -1,0 +1,6 @@
+name: blog-crew
+description: Automação de blog com CrewAI - Monitor, Tradutor, Formatador e Publicador
+version: 1.0.0
+author: TheCryptoFrontier
+modules:
+  - crew.py

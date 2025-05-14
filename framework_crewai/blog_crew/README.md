@@ -17,20 +17,48 @@ blog_crew/
 │
 ├── tools/                 # Ferramentas para os agentes
 │   ├── rss_tools.py       # Ferramentas de leitura de RSS
-│   ├── file_tools.py      # Ferramentas de manipulação de arquivos
+│   ├── file_tools.py      # Ferramentas de manipulação de arquivos 
+│   ├── formatter_tools.py  # Ferramentas de formatação
 │   └── sanity_tools.py    # Ferramentas de publicação no Sanity
 │
 ├── tasks/                 # Definição das tarefas
 │   └── blog_tasks.py      # Tarefas do fluxo de blog
 │
-├── config/                # Configurações do projeto
-│   └── settings.yaml      # Arquivo de configuração
+├── logic/                 # Lógica de negócios
+│   ├── feed_manager.py    # Gerenciador de feeds RSS
+│   └── sanity_client.py   # Cliente para Sanity CMS
 │
+├── config/                # Configurações do projeto
+│   ├── settings.yaml      # Configurações gerais
+│   └── sanity_config.py   # Configurações do Sanity
+│
+├── schemas/               # Schemas do Sanity CMS
+│   └── post_schema.py     # Schema de post
+│
+├── crew.py                # Definição do Crew para CLI
+├── crewai.yaml            # Configuração para o CLI da CrewAI
 ├── main.py                # Script principal
 │
 ├── requirements.txt       # Dependências do projeto
 │
 └── README.md              # Esta documentação
+```
+
+## Feeds RSS
+
+O sistema está configurado para monitorar os seguintes feeds RSS:
+
+```json
+[
+  {
+    "name": "thecryptobasic.com",
+    "url": "https://thecryptobasic.com/feed"
+  },
+  {
+    "name": "u.today",
+    "url": "https://u.today/rss"
+  }
+]
 ```
 
 ## Funcionalidades
@@ -63,37 +91,40 @@ blog_crew/
 - API Key do Google Gemini
 - Credenciais do Sanity CMS
 
-## Configuração
+## Instalação
 
-1. Instale as dependências:
+1. Instale o CLI da CrewAI:
 ```bash
-pip install -r requirements.txt
+pip install crewai --upgrade
 ```
 
-2. Configure as variáveis de ambiente:
+2. Instale o projeto blog_crew:
+```bash
+cd blog_crew
+crewai install
+```
+
+3. Configure as variáveis de ambiente:
 ```bash
 export GEMINI_API_KEY="sua-chave-api-do-gemini"
 export SANITY_PROJECT_ID="seu-id-do-projeto-sanity"
 export SANITY_API_TOKEN="seu-token-do-sanity"
 ```
 
-3. Crie um arquivo `feeds.json` na raiz do projeto com o formato:
-```json
-[
-  {
-    "name": "CoinDesk",
-    "url": "https://www.coindesk.com/arc/outboundfeeds/rss/"
-  },
-  {
-    "name": "CryptoPotato",
-    "url": "https://cryptopotato.com/feed/"
-  }
-]
-```
-
 ## Uso
 
-Execute o script principal:
+### Usando o CLI da CrewAI
+
+Execute o Crew diretamente usando o CLI:
+
+```bash
+cd blog_crew
+crewai run
+```
+
+### Usando o script Python
+
+Alternativamente, você pode executar via script Python:
 
 ```bash
 cd blog_crew
@@ -111,3 +142,4 @@ O programa irá:
 - Modifique `config/settings.yaml` para ajustar configurações globais
 - Altere os agentes em `agents/` para customizar habilidades e comportamentos
 - Adicione novas ferramentas em `tools/` para expandir capacidades
+- Edite `crewai.yaml` para configurar o comportamento do CLI
