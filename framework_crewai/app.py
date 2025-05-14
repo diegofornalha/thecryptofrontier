@@ -964,13 +964,26 @@ with col_content:
     if 'active_tab' not in st.session_state:
         st.session_state.active_tab = "Monitoramento"
         
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(["Monitoramento", "Prontos para tradução", "Tradução", "Publicação", "Configuração"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["Agente Monitor", "Agente Tradutor", "Agente Publisher", "RSS", "Agente Monitor - BD"])
     
     # Detectar qual tab está ativa
     
     with tab1:
         st.session_state.active_tab = "Monitoramento"
-        st.markdown('<h2 class="sub-header">Monitoramento</h2>', unsafe_allow_html=True)
+        st.markdown('<h2 class="sub-header">Agente Monitor</h2>', unsafe_allow_html=True)
+        
+        # Explicação do agente monitor
+        st.markdown("""
+        <div class="info-box">
+        O <b>Agente Monitor</b> é responsável por:
+        <ul>
+            <li>Monitorar feeds RSS configurados de fontes de criptomoedas</li>
+            <li>Filtrar apenas os artigos que não existem no banco de dados</li>
+            <li>Salvar artigos relevantes em formato JSON na pasta 'posts_para_traduzir'</li>
+            <li>Fornecer um resumo, tópicos e explicação da relevância para o público brasileiro</li>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
         
         # Verificar primeiro em posts_para_traduzir e se não existir, verificar em posts_traduzidos
         dir_posts = Path("posts_para_traduzir")
@@ -1080,7 +1093,21 @@ with col_content:
     
     with tab2:
         st.session_state.active_tab = "Tradução"
-        st.markdown('<h2 class="sub-header">Tradução Crew</h2>', unsafe_allow_html=True)
+        st.markdown('<h2 class="sub-header">Agente Tradutor</h2>', unsafe_allow_html=True)
+        
+        # Explicação do agente tradutor
+        st.markdown("""
+        <div class="info-box">
+        O <b>Agente Tradutor</b> é responsável por:
+        <ul>
+            <li>Traduzir o conteúdo do inglês para português brasileiro</li>
+            <li>Revisar e corrigir erros gramaticais e ortográficos</li>
+            <li>Adaptar o conteúdo para o público brasileiro</li>
+            <li>Criar metadados traduzidos (frontmatter)</li>
+            <li>Salvar o arquivo traduzido</li>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
         
         dir_posts = Path("posts_traduzidos")
         artigos = [a for a in dir_posts.glob("*.json") if not a.name.startswith("para_traduzir_")]
@@ -1159,7 +1186,21 @@ with col_content:
     
     with tab3:
         st.session_state.active_tab = "Publicação"
-        st.markdown('<h2 class="sub-header">Publicação Crew</h2>', unsafe_allow_html=True)
+        st.markdown('<h2 class="sub-header">Agente Publisher</h2>', unsafe_allow_html=True)
+        
+        # Explicação do agente publisher
+        st.markdown("""
+        <div class="info-box">
+        O <b>Agente Publisher</b> é responsável por:
+        <ul>
+            <li>Organizar o conteúdo traduzido conforme o schema do Sanity</li>
+            <li>Converter o conteúdo para o formato Portable Text do Sanity</li>
+            <li>Garantir total conformidade com o schema do projeto</li>
+            <li>Publicar o artigo no CMS Sanity</li>
+            <li>Resolver referências de categoria se necessário</li>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
         
         # Botão para atualizar posts
         if st.button("Atualizar Posts do Sanity", key="refresh_sanity"):
@@ -1328,7 +1369,20 @@ with col_content:
 
     with tab5:
         st.session_state.active_tab = "Prontos para tradução"
-        st.markdown('<h2 class="sub-header">Artigos Prontos para Tradução</h2>', unsafe_allow_html=True)
+        st.markdown('<h2 class="sub-header">Agente Monitor - Banco de Dados</h2>', unsafe_allow_html=True)
+        
+        # Explicação do agente monitor - banco de dados
+        st.markdown("""
+        <div class="info-box">
+        Esta é a interface de banco de dados do <b>Agente Monitor</b> que gerencia:
+        <ul>
+            <li>Artigos capturados dos feeds RSS</li>
+            <li>Filtro de artigos que já existem no sistema</li>
+            <li>Seleção manual de conteúdo para tradução</li>
+            <li>Gerenciamento do histórico de artigos processados</li>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
         
         # Ações de gerenciamento
         st.markdown("### Gerenciamento do Banco de Dados")

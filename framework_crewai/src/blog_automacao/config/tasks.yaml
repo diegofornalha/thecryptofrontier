@@ -5,22 +5,27 @@
 monitoring_task:
   description: >
     Monitore os feeds RSS configurados usando a RssFeedTool para encontrar novos artigos sobre criptomoedas.
-    Para cada artigo encontrado, forneça:
-    1. Um resumo conciso do artigo (max 3 frases)
-    2. Os principais tópicos abordados (max 5 tópicos)
-    3. Razão pela qual pode ser relevante para investidores brasileiros
-    4. O conteúdo original completo do artigo e seus metadados (título, url, data, fonte) para passagem para a próxima tarefa.
+    IMPORTANTE: Filtre apenas os artigos que não existem no banco de dados. Para cada artigo:
+    1. Verifique se o URL do artigo já existe no banco de dados, caso exista, ignore-o.
+    2. Um resumo conciso do artigo (max 3 frases)
+    3. Os principais tópicos abordados (max 5 tópicos)
+    4. Razão pela qual pode ser relevante para investidores brasileiros
+    5. Você deve salvar diretamente cada artigo relevante em 'posts_para_traduzir/' em formato JSON.
+       Use o nome de arquivo no formato 'para_traduzir_{timestamp}_{fonte}.json', onde:
+       - timestamp é o tempo atual no formato YYYYMMDDHHMMSS
+       - fonte é um identificador curto da origem do artigo
 
     Formato de resposta esperado para CADA artigo:
     {{
      "resumo": "Resumo aqui", 
      "topicos": ["tópico 1", "tópico 2", ...], 
      "relevancia": "Explicação da relevância",
+     "arquivo_salvo": "caminho do arquivo JSON salvo",
      "original_article": {{ "title": "...", "url": "...", "date": "...", "content": "...", "source": "..." }}
     }}
   expected_output: >
-    Uma lista de JSONs, cada um representando a análise de um artigo novo encontrado, 
-    incluindo os dados originais do artigo. Ou uma mensagem indicando que nenhum artigo novo foi encontrado.
+    Uma lista de JSONs, cada um representando um artigo relevante encontrado e salvo, 
+    incluindo o caminho do arquivo JSON salvo. Ou uma mensagem indicando que nenhum artigo novo foi encontrado.
   agent: monitor
 
 selection_task:
@@ -64,15 +69,40 @@ translation_task:
     1. Traduza o CONTEÚDO identificado do inglês para português brasileiro formal.
     2. Mantenha termos técnicos de cripto quando não houver equivalente em português.
     3. Preserve a formatação se estiver traduzindo conteúdo HTML. Se for texto puro, preserve parágrafos.
-    4. O resultado da tradução deve ser uma string.
+    4. Revise e corrija erros gramaticais e ortográficos no texto traduzido.
+    5. Melhore a coerência e fluidez do texto.
+    6. Adapte o conteúdo para o público brasileiro:
+       - Adicione contextualizações relevantes para o mercado brasileiro quando necessário
+       - Adapte exemplos para o contexto brasileiro se apropriado
+       - Explique conceitos que podem ser menos conhecidos no Brasil
+    7. Crie um objeto 'frontmatter_traduzido' que deve conter:
+       - title: O título original (de frontmatter_original.title) traduzido e adaptado
+       - tags: 5-8 tags relevantes em português
+       - category: Classifique o artigo em uma categoria principal (ex: Bitcoin, Ethereum, DeFi, NFTs, Regulamentação, etc.)
+       - seo_meta_description: Uma meta descrição otimizada para SEO (máx 160 caracteres) em português
+       - published_date: Mantenha a data de 'frontmatter_original.published_date'
+       - slug: Gere um novo slug em português a partir do título traduzido
     
-    Retorne o OBJETO JSON COMPLETO recebido como input, mas com DOIS NOVOS campos adicionados:
-    - 'content_text_traduzido': contendo a tradução do texto puro.
-    - 'content_html_traduzido': contendo a tradução do HTML (se o original era HTML, caso contrário pode ser o texto puro com tags <p>).
-    Se o original era apenas texto, preencha ambos os campos traduzidos com o texto traduzido (o HTML pode ser o texto puro envolvido em parágrafos simples).
+    Retorne o OBJETO JSON COMPLETO atualizado com os seguintes campos adicionados:
+    - 'content_text_traduzido': contendo a tradução do texto puro, revisada e adaptada.
+    - 'content_html_traduzido': contendo a tradução do HTML, revisada e adaptada.
+    - 'frontmatter_traduzido': contendo os metadados traduzidos e adaptados.
+    
+    Para salvar o arquivo:
+    1. Gere um nome de arquivo de saída baseado no nome do {arquivo_json} original, 
+       substituindo 'para_traduzir_' por 'traduzido_' (mantendo a extensão .json).
+    2. Determine o caminho completo de salvamento: o diretório base para salvamento será o diretório pai 
+       do diretório 'posts_para_traduzir' que contém o {arquivo_json}. O arquivo deve ser salvo no 
+       subdiretório 'posts_traduzidos' dentro deste caminho base. 
+       (Ex: se {arquivo_json} é 'pasta_workspace/dir_teste/posts_para_traduzir/original.json', 
+       o file_path será 'pasta_workspace/dir_teste/posts_traduzidos/traduzido_original.json').
+    3. Serialize o objeto JSON COMPLETO E ATUALIZADO para uma string.
+    4. Utilize a ferramenta 'File Save Tool'. Forneça um dicionário como input para a ferramenta contendo:
+       - 'file_path': o caminho completo de salvamento determinado no passo 2.
+       - 'content': a string JSON serializada do passo 3.
   expected_output: >
-    Uma string representando o objeto JSON COMPLETO e ATUALIZADO, incluindo os novos campos 
-    'content_text_traduzido' e 'content_html_traduzido'.
+    APENAS o CAMINHO COMPLETO (file_path) onde o arquivo JSON foi salvo pela 'File Save Tool'.
+    Exemplo: 'framework_crewai/src/temp_test_dir_single_post/posts_traduzidos/traduzido_artigo_xyz.json'
   agent: translator
   # Input: {arquivo_json} (caminho do arquivo em posts_para_traduzir)
 
@@ -163,7 +193,7 @@ localization_task:
 
 seo_optimization_task:
   description: >
-    Otimize o artigo revisado (recebido como um objeto JSON da tarefa anterior, ou lido do arquivo JSON {arquivo_json}) para SEO
+    Otimize o artigo traduzido (recebido como um objeto JSON da tarefa anterior, ou lido do arquivo JSON {arquivo_json}) para SEO
     e prepare um payload para o Sanity CMS.
     O objeto/arquivo JSON contém 'content_text_traduzido', 'content_html_traduzido' e 'frontmatter_traduzido'.
     
@@ -190,28 +220,41 @@ seo_optimization_task:
     'content_text_traduzido', e 'content_html_traduzido'.
   agent: seo_analyst
   context: 
-    - editing_task
+    - translation_task
 
 publish_task:
   description: >
-    Publique o artigo otimizado no Sanity CMS, usando o payload preparado e o conteúdo do objeto JSON da tarefa anterior.
-    O objeto JSON contém 'sanity_document_payload', 'content_text_traduzido', e/ou 'content_html_traduzido'.
-    Você também tem acesso ao caminho do arquivo JSON original via {arquivo_json} para referência, se necessário.
+    Organize e publique o artigo traduzido no Sanity CMS, garantindo completa conformidade com o schema do projeto.
+    O artigo será fornecido como um objeto JSON da tarefa anterior ou lido do arquivo JSON {arquivo_json}.
+    O objeto/arquivo JSON contém 'content_text_traduzido', 'content_html_traduzido' e 'frontmatter_traduzido'.
+    
+    Siga estas diretrizes:
+    1. Analise o conteúdo traduzido e o 'frontmatter_traduzido'.
+    2. Construa um objeto 'sanity_document_payload' que esteja em TOTAL CONFORMIDADE com o schema do Sanity do projeto:
+       - _type: "post" (ou o tipo de schema adequado para posts no projeto)
+       - title: (string) O título do 'frontmatter_traduzido.title'.
+       - slug: (object) Um objeto com formato {"_type": "slug", "current": "slug-em-portugues-gerado-do-titulo"}.
+       - tags: (array de strings) As tags de 'frontmatter_traduzido.tags'.
+       - categories: (array de strings) A categoria de 'frontmatter_traduzido.category' (coloque-a dentro de um array, ex: ["Nome da Categoria"]).
+       - seo: (object) Um objeto com {"meta_title": "título", "meta_description": "descrição de 'frontmatter_traduzido.seo_meta_description'"}.
+       - publishedAt: (string) A data de 'frontmatter_traduzido.published_date' no formato ISO.
+       - Inclua quaisquer outros campos obrigatórios no schema do Sanity para posts.
 
     Use a ferramenta 'SanityPublishTool'.
-    Passe os seguintes para a ferramenta:
-    - O objeto 'sanity_document_payload' (que já contém title, slug, tags, categories, seo, publishedAt, _type).
+    Passe os seguintes parâmetros para a ferramenta:
+    - O objeto 'sanity_document_payload' completo e em conformidade com o schema.
     - O conteúdo principal a ser convertido para o campo 'body' do Sanity (priorize 'content_html_traduzido', senão use 'content_text_traduzido').
-    A ferramenta é responsável por:
+    
+    A ferramenta irá:
       1. Usar o 'sanity_document_payload' como base para o documento Sanity.
       2. Converter o conteúdo principal (HTML ou texto) para o formato Portable Text do Sanity e adicioná-lo como o campo 'body'.
       3. Resolver referências de categoria se necessário (se as categorias foram passadas como strings).
       4. Enviar o documento final para a API do Sanity.
 
-    Verifique o resultado da ferramenta.
+    Verifique o resultado da ferramenta e confirme a publicação bem-sucedida.
   expected_output: >
     O resultado retornado pela SanityPublishTool, geralmente um JSON indicando 
     sucesso (com ID/slug) ou falha (com detalhes do erro).
   agent: publisher
   context: 
-    - seo_optimization_task
+    - translation_task

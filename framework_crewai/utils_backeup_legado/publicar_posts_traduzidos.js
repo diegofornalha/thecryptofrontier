@@ -2,11 +2,6 @@
 const fs = require('fs');
 const path = require('path');
 const { createClient } = require('@sanity/client');
-const frontMatter = require('front-matter');
-const blockTools = require('@portabletext/block-tools');
-const { htmlToBlocks } = require('@portabletext/block-tools');
-const jsdom = require('jsdom');
-const { JSDOM } = jsdom;
 const dotenv = require('dotenv');
 
 // Carregar variáveis de ambiente
@@ -21,56 +16,18 @@ const client = createClient({
   useCdn: false
 });
 
-// Configurar os schemas necessários para a conversão html -> portable text
-const blockContentType = {
-  name: 'blockContent',
-  type: 'array',
-  of: [
-    {
-      type: 'block',
-      title: 'Block',
-      // Default styles
-      styles: [
-        { title: 'Normal', value: 'normal' },
-        { title: 'H1', value: 'h1' },
-        { title: 'H2', value: 'h2' },
-        { title: 'H3', value: 'h3' },
-        { title: 'H4', value: 'h4' },
-        { title: 'Quote', value: 'blockquote' }
-      ],
-      lists: [
-        { title: 'Bullet', value: 'bullet' },
-        { title: 'Number', value: 'number' }
-      ],
-      marks: {
-        decorators: [
-          { title: 'Strong', value: 'strong' },
-          { title: 'Emphasis', value: 'em' },
-          { title: 'Code', value: 'code' },
-          { title: 'Underline', value: 'underline' },
-          { title: 'Strike', value: 'strike-through' }
-        ],
-        annotations: []
-      },
-      // Importante: definir valores padrão
-      fields: []
-    }
-  ]
-};
-
-// Necessário definir o schema do block para o @portabletext/block-tools
-blockContentType.of[0].name = 'block';
-
 // Função para converter HTML em blocos Portable Text
 function htmlToPortableText(html) {
   try {
     // Abordagem simples: converter para blocos de texto plano
     const paragrafos = html
-      .replace(/<[^>]*>/g, '') // Remover todas as tags HTML
-      .split(/\n+/) // Dividir por quebras de linha
+      .replace(/<p>/g, '') // Remover tags de parágrafo de abertura
+      .replace(/<\/p>/g, '\n\n') // Substituir tags de fechamento por quebras duplas de linha
+      .replace(/<[^>]*>/g, '') // Remover todas as outras tags HTML
+      .split(/\n\n+/) // Dividir por quebras duplas de linha
       .filter(p => p.trim() !== ''); // Remover parágrafos vazios
       
-    // Criar blocos manualmente (mais simples e confiável que htmlToBlocks)
+    // Criar blocos manualmente (mais simples e confiável)
     return paragrafos.map(texto => {
       return {
         _type: 'block',
@@ -141,7 +98,91 @@ function criarReferenciaTag(tag) {
   };
 }
 
-// Função para ler arquivos JSON traduzidos e publicá-los no Sanity
+// Função para verificar se categoria existe e criar se necessário
+async function verificarECriarCategoria(categoria) {
+  // Normalizar categoria para criar slug
+  const categoriaSlug = categoria
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[^\w\s]/g, '')
+    .replace(/\s+/g, '-');
+  
+  const categoriaId = `category-${categoriaSlug}`;
+  
+  try {
+    // Verificar se a categoria já existe
+    const categoriaExistente = await client.fetch(
+      `*[_type == "category" && _id == $id][0]`,
+      { id: categoriaId }
+    );
+    
+    if (categoriaExistente) {
+      console.log(`Categoria "${categoria}" já existe.`);
+      return categoriaId;
+    }
+    
+    // Criar categoria
+    console.log(`Criando categoria "${categoria}"...`);
+    await client.createIfNotExists({
+      _type: 'category',
+      _id: categoriaId,
+      title: categoria,
+      slug: {
+        _type: 'slug',
+        current: categoriaSlug
+      }
+    });
+    
+    return categoriaId;
+  } catch (error) {
+    console.error(`Erro ao verificar/criar categoria "${categoria}":`, error);
+    return categoriaId;  // Retorna ID mesmo assim para não quebrar o fluxo
+  }
+}
+
+// Função para verificar se tag existe e criar se necessário
+async function verificarECriarTag(tag) {
+  // Normalizar tag para criar slug
+  const tagSlug = tag
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[^\w\s]/g, '')
+    .replace(/\s+/g, '-');
+  
+  const tagId = `tag-${tagSlug}`;
+  
+  try {
+    // Verificar se a tag já existe
+    const tagExistente = await client.fetch(
+      `*[_type == "tag" && _id == $id][0]`,
+      { id: tagId }
+    );
+    
+    if (tagExistente) {
+      console.log(`Tag "${tag}" já existe.`);
+      return tagId;
+    }
+    
+    // Criar tag
+    console.log(`Criando tag "${tag}"...`);
+    await client.createIfNotExists({
+      _type: 'tag',
+      _id: tagId,
+      name: tag,
+      slug: {
+        _type: 'slug',
+        current: tagSlug
+      }
+    });
+    
+    return tagId;
+  } catch (error) {
+    console.error(`Erro ao verificar/criar tag "${tag}":`, error);
+    return tagId;  // Retorna ID mesmo assim para não quebrar o fluxo
+  }
+}
+
+// Função principal para publicar posts traduzidos
 async function publicarPostsTraduzidos() {
   const diretorioTraduzidos = path.join(__dirname, 'posts_traduzidos');
   const diretorioPublicados = path.join(__dirname, 'posts_publicados');
@@ -170,7 +211,7 @@ async function publicarPostsTraduzidos() {
 
   // Obter autor padrão (Alexandre Bianchi)
   const autorId = 'ca38a3d5-cba1-47a0-aa29-4af17a15e17c';
-
+  
   for (const arquivo of arquivos) {
     try {
       console.log(`\nProcessando publicação de ${arquivo}...`);
@@ -184,15 +225,7 @@ async function publicarPostsTraduzidos() {
         .replace(/\\\$/g, '$') // Remove escape de cifrão
         .replace(/\\'/g, "'"); // Remove escape de aspas simples
         
-      let conteudoJson;
-      try {
-        conteudoJson = JSON.parse(conteudoLimpo);
-      } catch (erro) {
-        console.error(`Erro ao analisar JSON: ${erro}`);
-        console.log("Usando método alternativo para ler o arquivo...");
-        // Método alternativo para ler o arquivo como texto e extrair dados manualmente
-        conteudoJson = {};
-      }
+      const conteudoJson = JSON.parse(conteudoLimpo);
       
       // Extrair dados
       let title, content, tags, category, slug, publishedAt, seoDescription, seoTitle;
@@ -209,7 +242,7 @@ async function publicarPostsTraduzidos() {
         seoTitle = fm.seo_title || title;
       } else {
         // Tentar extrair de outros campos
-        title = conteudoJson.title || 'Sem título';
+        title = conteudoJson.title_traduzido || 'Sem título';
         tags = conteudoJson.tags || [];
         category = conteudoJson.category || 'Criptomoedas';
         slug = conteudoJson.slug || criarSlug(title);
@@ -237,10 +270,19 @@ async function publicarPostsTraduzidos() {
       // Converter para Portable Text
       const portableText = htmlToPortableText(conteudoParaConverter);
       
+      // Criar/verificar categoria
+      const categoriaId = await verificarECriarCategoria(category);
+      
+      // Criar/verificar tags
+      const tagsPromises = tags.map(tag => verificarECriarTag(tag));
+      const tagsIds = await Promise.all(tagsPromises);
+      
       // Converter tags para o formato correto (referências)
-      const tagsReferencia = Array.isArray(tags) 
-        ? tags.map(tag => criarReferenciaTag(tag))
-        : [];
+      const tagsReferencia = tagsIds.map(tagId => ({
+        _type: 'reference',
+        _key: `tag-${Math.random().toString(36).substring(2, 10)}`,
+        _ref: tagId
+      }));
       
       // Gerar ID do documento
       const docId = `post-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
@@ -254,52 +296,47 @@ async function publicarPostsTraduzidos() {
           _type: 'slug',
           current: slug
         },
-        excerpt: conteudoParaConverter.replace(/<[^>]*>/g, '').substring(0, 150) + '...',
-        content: portableText, // Usar 'content' em vez de 'body'
-        tags: tagsReferencia, // Tags como referências
-        categories: [{
-          _type: 'reference', 
-          _key: Math.random().toString(36).substring(2, 10), 
-          _ref: 'category-criptomoedas'
-        }],
+        excerpt: conteudoJson.resumo_traduzido || title,
+        content: portableText,
+        categories: [
+          {
+            _type: 'reference',
+            _key: `category-${Math.random().toString(36).substring(2, 10)}`,
+            _ref: categoriaId
+          }
+        ],
+        tags: tagsReferencia,
         author: {
           _type: 'reference',
           _ref: autorId
         },
         publishedAt: publishedAt,
         seo: {
-          metaTitle: seoTitle, // Usar camelCase
-          metaDescription: seoDescription // Usar camelCase
+          metaTitle: seoTitle || title,
+          metaDescription: seoDescription || title
         }
       };
       
-      // Salvar o documento JSON no diretório de publicados para referência
-      const arquivoPublicado = arquivo.replace('traduzido_', 'publicado_');
-      const caminhoPublicado = path.join(diretorioPublicados, arquivoPublicado);
-      fs.writeFileSync(caminhoPublicado, JSON.stringify(documento, null, 2));
-      console.log(`Arquivo salvo em ${caminhoPublicado}`);
-      
       // Publicar no Sanity
-      console.log(`Enviando para o Sanity: ${title}`);
+      console.log(`Publicando post "${title}"...`);
       const resultado = await client.createOrReplace(documento);
-      console.log(`Artigo publicado com sucesso! ID: ${resultado._id}`);
       
-    } catch (erro) {
-      console.error(`Erro ao processar ${arquivo}:`, erro);
+      console.log(`Post publicado com sucesso! ID: ${resultado._id}`);
+      
+      // Mover arquivo para pasta de publicados
+      const caminhoPublicado = path.join(diretorioPublicados, arquivo);
+      fs.renameSync(caminhoArquivo, caminhoPublicado);
+      console.log(`Arquivo ${arquivo} movido para pasta de publicados.`);
+      
+    } catch (error) {
+      console.error(`Erro ao publicar post ${arquivo}:`, error);
     }
   }
+  
+  console.log('\nProcessamento de publicação concluído!');
 }
 
-// Função para lidar com erros gerais
-function handleError(error, message) {
-  console.error(`${message}: ${error.message}`);
-  console.error('Stack trace:', error.stack || 'Sem stack trace disponível');
-  return null;
-}
-
-// Executar função principal com tratamento de erros geral
+// Executar função principal
 publicarPostsTraduzidos().catch(error => {
-  console.error('Erro geral na execução do script:');
-  console.error(error);
-  process.exit(1);
+  console.error('Erro durante a execução:', error);
 }); 
