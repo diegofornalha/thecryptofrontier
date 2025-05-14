@@ -7,7 +7,7 @@ import os
 
 # Adiciona o diretório raiz ao path para poder importar o módulo redis_tools
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from redis_tools import RedisFeedCache, RedisMemoryTool, RedisArticleQueue
+from backup_legado_aprendizados.redis_tools import RedisFeedCache, RedisMemoryTool, RedisArticleQueue
 
 class RSSFeedTool:
     """Ferramenta para buscar e processar feeds RSS."""

@@ -796,7 +796,7 @@ def enqueue_crewai_article(article_data, process_now=False):
         if parent_dir not in sys.path:
             sys.path.insert(0, parent_dir)
         
-        from redis_tools import RedisArticleQueue
+        from backup_legado_aprendizados.redis_tools import RedisArticleQueue
         queue = RedisArticleQueue()
         
         SessionManager.add_log(f"Enfileirando artigo: {article_data.get('title', 'Sem título')}")
@@ -813,7 +813,7 @@ def enqueue_crewai_article(article_data, process_now=False):
             # Processar imediatamente se solicitado
             if process_now:
                 try:
-                    from process_article_queue import process_queue
+                    from backup_legado_aprendizados.process_article_queue import process_queue
                     # Processar apenas um artigo
                     process_queue(max_articles=1, interval=1)
                     SessionManager.add_log("✅ Artigo processado imediatamente")
@@ -931,7 +931,7 @@ def execute_full_flow():
             if parent_dir not in sys.path:
                 sys.path.insert(0, parent_dir)
             
-            from redis_tools import redis_client
+            from backup_legado_aprendizados.redis_tools import redis_client
             
             # Se o Redis estiver disponível, usamos a fila
             if redis_client and redis_client.ping():
@@ -942,7 +942,7 @@ def execute_full_flow():
                 
                 # Passo 2: Importar e usar process_article_queue
                 try:
-                    from process_article_queue import process_queue
+                    from backup_legado_aprendizados.process_article_queue import process_queue
                     # Processar até 3 artigos em sequência
                     SessionManager.add_log("📝 Processando artigos da fila...")
                     process_queue(max_articles=3, interval=1)

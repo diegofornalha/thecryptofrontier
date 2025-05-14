@@ -10,7 +10,7 @@ import logging
 import argparse
 from datetime import datetime
 import os
-from redis_tools import RedisArticleQueue, get_redis_client
+from backup_legado_aprendizados.redis_tools import RedisArticleQueue, get_redis_client
 
 # Configurar logging
 logging.basicConfig(

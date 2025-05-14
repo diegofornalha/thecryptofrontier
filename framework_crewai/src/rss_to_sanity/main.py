@@ -8,7 +8,7 @@ from pathlib import Path
 
 # Adiciona o diretório raiz ao path para poder importar o módulo redis_tools
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from redis_tools import RedisArticleQueue, redis_client
+from backup_legado_aprendizados.redis_tools import RedisArticleQueue, redis_client
 
 # Feeds RSS de criptomoedas
 CRYPTO_RSS_FEEDS = [

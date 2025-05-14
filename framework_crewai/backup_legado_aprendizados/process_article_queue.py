@@ -14,7 +14,7 @@ from pathlib import Path
 from datetime import datetime
 import traceback
 
-from redis_tools import RedisArticleQueue, redis_client, get_redis_client
+from backup_legado_aprendizados.redis_tools import RedisArticleQueue, redis_client, get_redis_client
 from src.blog_automacao.tools.sanity_tools import SanityPublishTool
 
 # Configurar logging

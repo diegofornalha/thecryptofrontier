@@ -14,9 +14,7 @@ from langchain_community.llms import Ollama
 
 # Lista de feeds RSS de criptomoedas
 RSS_FEEDS = [
-    "https://cointelegraph.com/rss",
-    "https://decrypt.co/feed",
-    "https://bitcoinmagazine.com/.rss/full/"
+    "https://thecryptobasic.com/feed/"
 ]
 
 def fetch_rss(urls):

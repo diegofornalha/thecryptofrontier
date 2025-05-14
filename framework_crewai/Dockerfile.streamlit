@@ -17,11 +17,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Instalar dependências adicionais (Algolia, etc)
 RUN pip install --no-cache-dir algoliasearch backoff python-dotenv
 
-# Copiar o código da aplicação
-COPY . .
+# Copiar apenas os arquivos necessários
+COPY app_modular.py .
+COPY src/ ./src/
+COPY utils/ ./utils/
+COPY static/ ./static/
 
 # Criar diretórios necessários
-RUN mkdir -p posts_para_traduzir posts_traduzidos posts_formatados posts_publicados
+RUN mkdir -p posts_para_traduzir posts_traduzidos posts_formatados posts_publicados output/published output/errors
 
 # Expor a porta que o Streamlit usa
 EXPOSE 8501

@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # Serviço Streamlit para interface de usuário
   streamlit:
-    build: .
+    image: python:3.11-slim
     container_name: streamlit-crewai-ui
     ports:
       - "8501:8501"
@@ -16,17 +16,14 @@ services:
       - NEXT_PUBLIC_ALGOLIA_APP_ID=${NEXT_PUBLIC_ALGOLIA_APP_ID}
       - NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY=${NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY}
     volumes:
-      - ./posts_para_traduzir:/app/posts_para_traduzir
-      - ./posts_traduzidos:/app/posts_traduzidos
-      - ./posts_formatados:/app/posts_formatados
-      - ./posts_publicados:/app/posts_publicados
-      - ./output:/app/output
+      - .:/app
+    working_dir: /app
     depends_on:
       - redis
     restart: unless-stopped
     networks:
       - crewai-network
-    command: ["streamlit", "run", "app_modular.py", "--server.port=8501", "--server.address=0.0.0.0"]
+    command: bash -c "pip install -r requirements.txt && pip install algoliasearch backoff python-dotenv && streamlit run app_modular.py --server.port=8501 --server.address=0.0.0.0"
     
   # Serviço Redis para cache e filas
   redis:

@@ -25,7 +25,7 @@ def render_sidebar():
         if parent_dir not in sys.path:
             sys.path.insert(0, parent_dir)
         
-        from redis_tools import redis_client
+        from backup_legado_aprendizados.redis_tools import redis_client
 
         # Verificar conexão
         if redis_client and redis_client.ping():
