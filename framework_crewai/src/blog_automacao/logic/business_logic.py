@@ -160,77 +160,166 @@ def translate_article(arquivo_json=None):
             SessionManager.add_log(f"Trace: {traceback.format_exc()}")
             return False
 
-def publish_article(arquivo_json=None):
-    """Publica um artigo traduzido no Sanity CMS."""
-    with st.spinner("Publicando artigo..."):
-        # Se não foi especificado um arquivo, buscar o primeiro disponível
-        if not arquivo_json:
-            dir_posts = Path("posts_traduzidos")
-            arquivos = [a for a in dir_posts.glob("*.json") if not a.name.startswith("para_traduzir_")]
-            
-            if not arquivos:
-                SessionManager.add_log("Nenhum artigo traduzido encontrado para publicar.")
-                return False
-            
-            # Ordenar por data de modificação para pegar o mais antigo primeiro
-            arquivos.sort(key=lambda x: x.stat().st_mtime)
-            arquivo_json = arquivos[0]
+def publish_article(translated_file_path: Path):
+    """
+    Publica um artigo no Sanity a partir de um arquivo traduzido.
+    """
+    # Adicionar às variáveis de ambiente
+    load_environment_variables()
+
+    # Carregar a Crew
+    crew = BlogAutomacaoCrew()
+    
+    # Validar arquivo
+    if not translated_file_path.exists():
+        print(f"Arquivo não encontrado: {translated_file_path}")
+        return
         
-        SessionManager.add_log(f"Iniciando publicação direta do artigo: {arquivo_json.name}")
+    print(f"Publicando artigo traduzido: {translated_file_path}")
+    
+    try:
+        # Obter ferramentas de publicação
+        publication_tools = crew.publication_tools()
         
-        # Tentar publicar usando o método direto
-        crew = SessionManager.get_crew()
+        if not publication_tools:
+            print("Nenhuma ferramenta de publicação disponível!")
+            raise ValueError("Nenhuma ferramenta de publicação disponível")
+            
+        # Pegar a primeira ferramenta de publicação
+        sanity_tool = publication_tools[0]
+        
+        # Tentar publicar com a ferramenta
         try:
-            sucesso, mensagem = publish_direct(arquivo_json)
+            print("Tentando publicar com a ferramenta SanityPublishTool...")
+            result = sanity_tool._run(str(translated_file_path))
+            print(f"Resultado da publicação: {result}")
             
-            if sucesso:
-                SessionManager.add_log(f"✅ {mensagem}")
-                
-                # Mover o arquivo para a pasta posts_publicados
-                dir_publicados = Path("posts_publicados")
-                if not dir_publicados.exists():
-                    dir_publicados.mkdir(exist_ok=True)
-                    
-                arquivo_destino = dir_publicados / arquivo_json.name.replace("traduzido_", "publicado_")
-                try:
-                    # Usar shutil para garantir que funcione entre sistemas de arquivos
-                    shutil.copy2(arquivo_json, arquivo_destino)
-                    # Só excluir o original se a cópia foi bem-sucedida
-                    if arquivo_destino.exists():
-                        arquivo_json.unlink()
-                    SessionManager.add_log(f"✅ Arquivo movido para posts_publicados: {arquivo_json.name}")
-                except Exception as e:
-                    SessionManager.add_log(f"⚠️ Aviso: Não foi possível mover o arquivo: {str(e)}")
-            else:
-                SessionManager.add_log(f"❌ Erro ao publicar: {mensagem}")
-                
-                # Tentar via CrewAI como fallback
-                try:
-                    SessionManager.add_log("Tentando publicar usando CrewAI como alternativa...")
-                    
-                    # Ler o conteúdo do arquivo
-                    with open(arquivo_json, "r", encoding="utf-8") as f:
-                        conteudo = f.read()
-                        
-                    # Passar para a publicação
-                    result = crew.publicacao_crew().kickoff(inputs={
-                        "arquivo_json": str(arquivo_json)
-                    })
-                    
-                    SessionManager.add_log(f"✅ Artigo publicado com sucesso via CrewAI: {arquivo_json.name}")
-                    return True
-                except Exception as e:
-                    SessionManager.add_log(f"❌ Erro na publicação via CrewAI: {str(e)}")
-                    return False
+            # Verificar se o caminho existe
+            posts_dir = Path("posts_publicados")
+            posts_dir.mkdir(exist_ok=True)
             
-            SessionManager.update_last_run()
-            # Limpar o cache de posts para forçar atualização
-            SessionManager.clear_sanity_cache()
-            return sucesso
-        
+            # Determinar nome do arquivo
+            published_file = posts_dir / f"publicado_{translated_file_path.stem.replace('traduzido_', '')}.json"
+            
+            # Copiar arquivo para o diretório de publicados
+            import shutil
+            shutil.copy(translated_file_path, published_file)
+            
+            # Atualizar banco de dados
+            update_article_status(translated_file_path, 'published', str(published_file))
+            
+            return result
+            
         except Exception as e:
-            SessionManager.add_log(f"❌ Erro ao publicar {arquivo_json.name}: {str(e)}")
-            return False
+            print(f"Erro ao publicar com SanityPublishTool: {e}")
+            print("Tentando método alternativo de publicação via publish_direct...")
+            
+            # Tentativa alternativa: converter JSON para Markdown e publicar diretamente
+            try:
+                # Verificar se é um arquivo JSON
+                if translated_file_path.suffix.lower() == '.json':
+                    # Converter JSON para Markdown
+                    print("Convertendo JSON para Markdown...")
+                    
+                    with open(translated_file_path, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                        
+                    # Extrair dados
+                    frontmatter = data.get('frontmatter_traduzido', {})
+                    content = data.get('content_text_traduzido', '')
+                    
+                    if not frontmatter or not content:
+                        raise ValueError("Dados traduzidos incompletos")
+                        
+                    # Criar conteúdo Markdown
+                    markdown_content = "---\n"
+                    markdown_content += f"title: \"{frontmatter.get('title', 'Sem título')}\"\n"
+                    markdown_content += f"date: {frontmatter.get('published_date', datetime.now().isoformat())}\n"
+                    
+                    # Adicionar tags
+                    tags = frontmatter.get('tags', [])
+                    if tags:
+                        markdown_content += "tags:\n"
+                        for tag in tags:
+                            markdown_content += f"  - {tag}\n"
+                            
+                    # Adicionar categoria
+                    category = frontmatter.get('category', '')
+                    if category:
+                        markdown_content += f"category: {category}\n"
+                        
+                    # Adicionar descrição SEO
+                    seo_description = frontmatter.get('seo_meta_description', '')
+                    if seo_description:
+                        markdown_content += f"seo_meta_description: \"{seo_description}\"\n"
+                        
+                    # Adicionar slug
+                    slug = frontmatter.get('slug', '')
+                    if slug:
+                        markdown_content += f"slug: {slug}\n"
+                        
+                    # Fechar frontmatter
+                    markdown_content += "---\n\n"
+                    
+                    # Adicionar conteúdo
+                    markdown_content += content
+                    
+                    # Gerar caminho para arquivo Markdown
+                    md_file_path = translated_file_path.with_suffix('.md')
+                    
+                    # Salvar arquivo Markdown
+                    with open(md_file_path, 'w', encoding='utf-8') as f:
+                        f.write(markdown_content)
+                        
+                    print(f"Arquivo Markdown criado: {md_file_path}")
+                    
+                    # Publicar com método direto
+                    success, message = publish_direct(md_file_path)
+                    
+                    if success:
+                        # Copiar para pasta de publicados
+                        published_file = Path("posts_publicados") / f"publicado_{md_file_path.stem.replace('traduzido_', '')}.md"
+                        Path("posts_publicados").mkdir(exist_ok=True)
+                        
+                        with open(md_file_path, 'r') as source:
+                            with open(published_file, 'w') as dest:
+                                dest.write(source.read())
+                                
+                        # Atualizar banco de dados
+                        update_article_status(translated_file_path, 'published', str(published_file))
+                        
+                        print(f"Artigo publicado com sucesso via método alternativo! ID: {message}")
+                        return f"Publicado com método alternativo: {message}"
+                    else:
+                        raise ValueError(f"Falha ao publicar com método alternativo: {message}")
+                else:
+                    # Se já for um arquivo Markdown, publicar diretamente
+                    success, message = publish_direct(translated_file_path)
+                    
+                    if success:
+                        # Copiar para pasta de publicados
+                        published_file = Path("posts_publicados") / f"publicado_{translated_file_path.stem.replace('traduzido_', '')}.md"
+                        Path("posts_publicados").mkdir(exist_ok=True)
+                        
+                        with open(translated_file_path, 'r') as source:
+                            with open(published_file, 'w') as dest:
+                                dest.write(source.read())
+                                
+                        # Atualizar banco de dados
+                        update_article_status(translated_file_path, 'published', str(published_file))
+                        
+                        print(f"Artigo Markdown publicado com sucesso! ID: {message}")
+                        return f"Publicado diretamente: {message}"
+                    else:
+                        raise ValueError(f"Falha ao publicar arquivo Markdown: {message}")
+            
+            except Exception as alt_e:
+                print(f"Erro no método alternativo de publicação: {alt_e}")
+                raise ValueError(f"Falha em ambos os métodos de publicação: {e} / {alt_e}")
+                
+    except Exception as e:
+        print(f"Erro durante o processo de publicação: {e}")
+        raise e
 
 def publish_direct(arquivo_markdown):
     """Publica um post diretamente no Sanity CMS sem usar o CrewAI."""
