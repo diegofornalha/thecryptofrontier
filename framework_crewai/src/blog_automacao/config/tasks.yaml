@@ -102,9 +102,97 @@ translation_task:
        - 'content': a string JSON serializada do passo 3.
   expected_output: >
     APENAS o CAMINHO COMPLETO (file_path) onde o arquivo JSON foi salvo pela 'File Save Tool'.
-    Exemplo: 'framework_crewai/src/temp_test_dir_single_post/posts_traduzidos/traduzido_artigo_xyz.json'
+    Exemplo: 'src/temp_test_dir_single_post/posts_traduzidos/traduzido_artigo_xyz.json'
   agent: translator
   # Input: {arquivo_json} (caminho do arquivo em posts_para_traduzir)
+
+# Nova tarefa para formatação do JSON para o Sanity
+json_formatting_task:
+  description: >
+    Formate o conteúdo traduzido do arquivo JSON {arquivo_json} para o formato específico do schema Sanity.
+    O arquivo JSON contém 'content_text_traduzido', 'content_html_traduzido' e 'frontmatter_traduzido'.
+    
+    Siga estas diretrizes para criar um documento JSON compatível com o schema do Sanity:
+    
+    1. Leia o arquivo JSON traduzido e extraia o conteúdo e metadados.
+    
+    2. Crie um novo objeto JSON com a seguinte estrutura:
+       {
+         "_type": "post",
+         "_id": "drafts.post-YYYYMMDDHHMMSS", (utilize a data atual)
+         "title": "Título traduzido do frontmatter",
+         "slug": {
+           "_type": "slug", 
+           "current": "slug-em-portugues"
+         },
+         "publishedAt": "Data ISO de publicação",
+         "excerpt": "Primeiro parágrafo ou resumo do conteúdo (máx 300 caracteres)",
+         "content": [ 
+           // Array de blocos no formato Portable Text do Sanity
+           {
+             "_key": "UUID gerado",
+             "_type": "block",
+             "children": [
+               {
+                 "_key": "UUID gerado",
+                 "_type": "span",
+                 "marks": [],
+                 "text": "Texto do parágrafo"
+               }
+             ],
+             "markDefs": [],
+             "style": "normal" // ou "h1", "h2", "h3", etc. para títulos
+           },
+           // Mais blocos...
+         ],
+         "categories": [
+           {
+             "_type": "reference",
+             "_key": "UUID gerado",
+             "_ref": "ID da categoria no Sanity"
+           }
+         ],
+         "tags": [
+           {
+             "_type": "reference",
+             "_key": "UUID gerado",
+             "_ref": "ID da tag no Sanity"
+           }
+         ],
+         "author": {
+           "_type": "reference",
+           "_ref": "ID do autor no Sanity"
+         },
+         "originalSource": {
+           "url": "URL original do artigo",
+           "title": "Título original",
+           "site": "Nome do site de origem"
+         }
+       }
+       
+    3. Para gerar o array de blocos "content", divida o conteúdo traduzido em parágrafos e:
+       - Para cada parágrafo, crie um objeto de bloco com um "_key" único
+       - Identifique cabeçalhos (linhas começando com #, ##, ###) e defina o "style" adequadamente
+       - Crie um objeto "span" filho para cada bloco com o texto do parágrafo
+       
+    4. Para as referências (categorias, tags, autor):
+       - Utilizar IDs válidos do Sanity para estas entidades
+       - Para categorias e tags, usar os valores do frontmatter_traduzido
+       - Para autor, usar um ID padrão (se não especificado)
+       
+    5. Para o excerpt, use os primeiros 300 caracteres do primeiro parágrafo do conteúdo
+    
+    6. Salve o objeto JSON formatado em um novo arquivo:
+       - Nome do arquivo: substitua "traduzido_" por "formatado_" no nome do arquivo original
+       - Diretório: mesmo diretório do arquivo traduzido, mas em uma pasta "posts_formatados"
+       - Utilize a ferramenta 'File Save Tool' para salvar
+    
+  expected_output: >
+    APENAS o CAMINHO COMPLETO (file_path) onde o arquivo JSON formatado foi salvo pela 'File Save Tool'.
+    Exemplo: '/src/temp_test_dir_single_post/posts_formatados/formatado_artigo_xyz.json'
+  agent: json_formatter
+  context:
+    - translation_task
 
 # Tarefa de Edição (Movida para cima)
 editing_task:
@@ -166,31 +254,12 @@ localization_task:
     
   expected_output: >
     APENAS o CAMINHO COMPLETO (file_path) onde o arquivo JSON foi salvo pela 'File Save Tool'.
-    Exemplo: 'framework_crewai/src/temp_test_dir_single_post/posts_traduzidos/traduzido_artigo_xyz.json'
+    Exemplo: '/src/temp_test_dir_single_post/posts_traduzidos/traduzido_artigo_xyz.json'
   agent: localizer
   context: 
     - editing_task # Agora editing_task está definida acima
 
 # Tarefas de publicação
-# editing_task: <- Bloco inteiro removido daqui
-#   description: >
-#     Revise e melhore o artigo traduzido e adaptado, fornecido como um objeto JSON (resultado da tarefa de tradução).
-#     O objeto JSON contém campos como 'content_text_traduzido', 'content_html_traduzido', e o 'frontmatter_original'.
-#     Você também tem acesso ao caminho do arquivo JSON original via {arquivo_json} se precisar de metadados extras.
-# 
-#     Siga estas diretrizes:
-#     1. Corrija erros gramaticais e ortográficos em 'content_text_traduzido'.
-#     2. Melhore a coerência e fluidez do texto em 'content_text_traduzido'.
-#     3. Verifique a precisão das informações técnicas.
-#     4. Garanta que o tom seja adequado ao público-alvo.
-#     
-#     Retorne o OBJETO JSON COMPLETO E ATUALIZADO. Este objeto será então passado para a tarefa de localização.
-#   expected_output: >
-#     Uma string representando o objeto JSON COMPLETO E ATUALIZADO, com o conteúdo revisado.
-#   agent: editor
-#   context: 
-#     - translation_task
-
 seo_optimization_task:
   description: >
     Otimize o artigo traduzido (recebido como um objeto JSON da tarefa anterior, ou lido do arquivo JSON {arquivo_json}) para SEO
@@ -224,37 +293,78 @@ seo_optimization_task:
 
 publish_task:
   description: >
-    Organize e publique o artigo traduzido no Sanity CMS, garantindo completa conformidade com o schema do projeto.
-    O artigo será fornecido como um objeto JSON da tarefa anterior ou lido do arquivo JSON {arquivo_json}.
-    O objeto/arquivo JSON contém 'content_text_traduzido', 'content_html_traduzido' e 'frontmatter_traduzido'.
+    Publique o artigo pré-formatado no Sanity CMS.
+    O arquivo JSON {arquivo_json} contém o documento já formatado de acordo com o schema do Sanity.
     
-    Siga estas diretrizes:
-    1. Analise o conteúdo traduzido e o 'frontmatter_traduzido'.
-    2. Construa um objeto 'sanity_document_payload' que esteja em TOTAL CONFORMIDADE com o schema do Sanity do projeto:
-       - _type: "post" (ou o tipo de schema adequado para posts no projeto)
-       - title: (string) O título do 'frontmatter_traduzido.title'.
-       - slug: (object) Um objeto com formato {"_type": "slug", "current": "slug-em-portugues-gerado-do-titulo"}.
-       - tags: (array de strings) As tags de 'frontmatter_traduzido.tags'.
-       - categories: (array de strings) A categoria de 'frontmatter_traduzido.category' (coloque-a dentro de um array, ex: ["Nome da Categoria"]).
-       - seo: (object) Um objeto com {"meta_title": "título", "meta_description": "descrição de 'frontmatter_traduzido.seo_meta_description'"}.
-       - publishedAt: (string) A data de 'frontmatter_traduzido.published_date' no formato ISO.
-       - Inclua quaisquer outros campos obrigatórios no schema do Sanity para posts.
-
-    Use a ferramenta 'SanityPublishTool'.
-    Passe os seguintes parâmetros para a ferramenta:
-    - O objeto 'sanity_document_payload' completo e em conformidade com o schema.
-    - O conteúdo principal a ser convertido para o campo 'body' do Sanity (priorize 'content_html_traduzido', senão use 'content_text_traduzido').
+    Siga estas etapas:
+    1. Leia o arquivo JSON formatado completo.
+    2. Verifique se o formato JSON corresponde exatamente ao schema do Sanity:
+       - Todos os campos obrigatórios estão presentes (_type, title, slug, content, etc.)
+       - As referências (tags, categorias, autor) estão no formato correto
+       - Os blocos de conteúdo estão formatados corretamente como Portable Text
+       - Todos os campos têm os tipos de dados corretos
     
-    A ferramenta irá:
-      1. Usar o 'sanity_document_payload' como base para o documento Sanity.
-      2. Converter o conteúdo principal (HTML ou texto) para o formato Portable Text do Sanity e adicioná-lo como o campo 'body'.
-      3. Resolver referências de categoria se necessário (se as categorias foram passadas como strings).
-      4. Enviar o documento final para a API do Sanity.
-
-    Verifique o resultado da ferramenta e confirme a publicação bem-sucedida.
+    3. Use a ferramenta 'SanityPublishTool' para publicar o documento, enviando o objeto JSON
+       completo exatamente como está no arquivo formatado.
+    
+    4. Após a publicação bem-sucedida, mova o arquivo de posts_formatados para posts_publicados,
+       alterando o prefixo de "formatado_" para "publicado_".
+    
   expected_output: >
-    O resultado retornado pela SanityPublishTool, geralmente um JSON indicando 
-    sucesso (com ID/slug) ou falha (com detalhes do erro).
+    Um objeto com informações sobre o resultado da publicação, incluindo:
+    - "success": true/false
+    - "document_id": ID do documento publicado (se bem-sucedido)
+    - "url": URL do post publicado (se disponível)
+    - "arquivo_publicado": Caminho do arquivo movido para posts_publicados (se aplicável)
   agent: publisher
   context: 
-    - translation_task
+    - json_formatting_task # Agora depende da tarefa de formatação JSON
+
+# Nova tarefa de detecção e remoção de duplicatas
+duplicate_detection_task:
+  description: >
+    Analise os últimos 20 artigos publicados no Sanity CMS e identifique possíveis duplicatas.
+    
+    Siga estas diretrizes:
+    1. Use a ferramenta 'DuplicateDetectorTool' para verificar os últimos 20 artigos publicados.
+    2. Configure o parâmetro 'action' da ferramenta:
+       - Primeiro faça uma análise usando 'action="detect"' para apenas listar duplicatas.
+       - Se encontrar duplicatas, determine se devem ser removidas com base nestas regras:
+         a) Se os artigos têm exatamente o mesmo título, remova o mais recente.
+         b) Se os artigos têm títulos muito similares (diferindo apenas em capitalização ou pontuação), remova o mais recente.
+    3. Se a decisão for remover artigos duplicados, execute a ferramenta novamente com 'action="remove"'.
+    4. Limite a análise aos últimos 20 artigos por padrão, ou ao número especificado em {limit} se fornecido.
+    
+    IMPORTANTE: Antes de remover qualquer artigo:
+    - Documente claramente qual artigo será removido e por quê.
+    - Inclua os IDs e títulos dos artigos envolvidos.
+    - Justifique a decisão de remoção baseada nas regras acima.
+    
+    Esta tarefa deve ser executada:
+    - Após cada ciclo de publicação de novos artigos
+    - Periodicamente (uma vez por dia) para garantir que não existam duplicatas
+    
+    A ferramenta irá verificar o título dos artigos para identificar duplicatas. 
+    Artigos são considerados duplicados se tiverem o mesmo título (ignorando diferenças de capitalização e espaços).
+  expected_output: >
+    Um relatório detalhado sobre os artigos duplicados encontrados e a ação tomada para cada um,
+    no formato JSON com as seguintes informações:
+    {
+      "verificados": número de artigos analisados,
+      "duplicatas_encontradas": número de duplicatas encontradas,
+      "duplicatas_removidas": número de duplicatas efetivamente removidas,
+      "detalhes": [
+        {
+          "id": ID do artigo duplicado,
+          "título": título do artigo,
+          "duplicata_de": {
+            "id": ID do artigo original,
+            "título": título do artigo original
+          },
+          "removido": true/false,
+          "justificativa": razão da remoção ou não remoção
+        },
+        ...
+      ]
+    }
+  agent: duplicate_detector

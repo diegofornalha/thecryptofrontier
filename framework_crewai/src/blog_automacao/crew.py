@@ -5,8 +5,9 @@ from crewai import Agent, Crew, Task, Process
 from crewai.project import CrewBase, agent, crew, task, tool
 from crewai.llm import LLM
 from .tools.rss_tools import RssFeedTool
-from .tools.sanity_tools import SanityPublishTool
+from .tools.sanity_tools import SanityPublishTool, SanityFormatTool
 from .tools.file_tools import FileSaveTool
+from .tools.duplicate_detector_tool import DuplicateDetectorTool
 import litellm
 import json
 import importlib.util
@@ -38,7 +39,9 @@ class BaseCrewComponents:
         
         self.rss_feed_tool = RssFeedTool()
         self.sanity_publish_tool = SanityPublishTool()
+        self.sanity_format_tool = SanityFormatTool()
         self.file_save_tool = FileSaveTool()
+        self.duplicate_detector_tool = DuplicateDetectorTool()
 
 @CrewBase
 class BlogAutomacaoCrew(BaseCrewComponents):
@@ -70,15 +73,6 @@ class BlogAutomacaoCrew(BaseCrewComponents):
         )
     
     @agent
-    def selector(self) -> Agent:
-        """Agente para selecionar conteúdo relevante."""
-        return Agent(
-            config=self.agents_config["selector"],
-            verbose=True,
-            llm=self.llm
-        )
-    
-    @agent
     def translator(self) -> Agent:
         """Agente para traduzir conteúdo."""
         return Agent(
@@ -89,38 +83,11 @@ class BlogAutomacaoCrew(BaseCrewComponents):
         )
     
     @agent
-    def localizer(self) -> Agent:
-        """Agente para adaptar o conteúdo para o público brasileiro."""
+    def json_formatter(self) -> Agent:
+        """Agente para formatar o conteúdo JSON para o Sanity."""
         return Agent(
-            config=self.agents_config["localizer"],
-            tools=[self.file_save_tool],
-            verbose=True,
-            llm=self.llm
-        )
-    
-    @agent
-    def editor(self) -> Agent:
-        """Agente para editar e revisar o conteúdo."""
-        return Agent(
-            config=self.agents_config["editor"],
-            verbose=True,
-            llm=self.llm
-        )
-    
-    @agent
-    def formatter(self) -> Agent:
-        """Agente para formatar o conteúdo em Markdown."""
-        return Agent(
-            config=self.agents_config["formatter"],
-            verbose=True,
-            llm=self.llm
-        )
-    
-    @agent
-    def seo_analyst(self) -> Agent:
-        """Agente para otimizar o conteúdo para SEO."""
-        return Agent(
-            config=self.agents_config["seo_analyst"],
+            config=self.agents_config["json_formatter"],
+            tools=[self.file_save_tool, self.sanity_format_tool],
             verbose=True,
             llm=self.llm
         )
@@ -135,6 +102,16 @@ class BlogAutomacaoCrew(BaseCrewComponents):
             llm=self.llm
         )
     
+    @agent
+    def duplicate_detector(self) -> Agent:
+        """Agente para detectar e remover artigos duplicados."""
+        return Agent(
+            config=self.agents_config["duplicate_detector"],
+            tools=[self.duplicate_detector_tool],
+            verbose=True,
+            llm=self.llm
+        )
+    
     # ----- Definição das Tarefas -----    
     @task
     def monitoring_task(self) -> Task:
@@ -143,51 +120,14 @@ class BlogAutomacaoCrew(BaseCrewComponents):
             config=self.tasks_config["monitoring_task"],
             agent=self.monitor() # Associar agente
         )
-    
-    @task
-    def selection_task(self) -> Task:
-        """Tarefa para selecionar artigos relevantes."""
-        return Task(
-            config=self.tasks_config["selection_task"],
-            agent=self.selector(), # Associar agente
-            context=[self.monitoring_task()] # Definir dependência
-        )
+
     
     @task
     def translation_task(self) -> Task:
-        """Tarefa para traduzir artigos selecionados."""
+        """Tarefa para traduzir artigos."""
         return Task(
             config=self.tasks_config["translation_task"],
             agent=self.translator() # Associar agente
-        )
-    
-    @task
-    def localization_task(self) -> Task:
-        """Tarefa para adaptar o conteúdo para o público brasileiro."""
-        return Task(
-            config=self.tasks_config["localization_task"],
-            agent=self.localizer(), # Associar agente
-            context=[self.translation_task()] # Definir dependência
-        )
-    
-    @task
-    def editing_task(self) -> Task:
-        """Tarefa para revisar e editar o conteúdo."""
-        return Task(
-            config=self.tasks_config["editing_task"],
-            agent=self.editor(), # Associar agente
-            # O contexto (output da localization_task) é passado pelo main.py via input da crew
-            # ou se a localization_task salvar em arquivo e esta ler.
-            # Para fluxo em memória, precisaria de `context=[self.localization_task()]` se fizesse parte da MESMA crew
-        )
-    
-    @task
-    def seo_optimization_task(self) -> Task:
-        """Tarefa para otimizar o conteúdo para SEO."""
-        return Task(
-            config=self.tasks_config["seo_optimization_task"],
-            agent=self.seo_analyst(), # Associar agente
-            context=[self.editing_task()] # Definir dependência
         )
     
     @task
@@ -196,7 +136,16 @@ class BlogAutomacaoCrew(BaseCrewComponents):
         return Task(
             config=self.tasks_config["publish_task"],
             agent=self.publisher(), # Associar agente
-            context=[self.translation_task()] # Dependência atualizada para translation_task
+            context=[self.json_formatting_task()] # Dependência atualizada para json_formatting_task
+        )
+    
+    @task
+    def duplicate_detection_task(self) -> Task:
+        """Tarefa para detectar e remover artigos duplicados."""
+        return Task(
+            config=self.tasks_config["duplicate_detection_task"],
+            agent=self.duplicate_detector(), # Associar agente
+            # Esta tarefa não depende diretamente de outras, pode ser executada a qualquer momento
         )
     
     # ----- Configuração da Crew -----    
@@ -221,11 +170,29 @@ class BlogAutomacaoCrew(BaseCrewComponents):
         )
     
     @crew
+    def formatacao_json_crew(self) -> Crew:
+        """Crew para formatar o conteúdo JSON para o Sanity."""
+        return Crew(
+            agents=[self.json_formatter()],
+            tasks=[self.json_formatting_task()],
+            verbose=True
+        )
+    
+    @crew
     def publicacao_crew(self) -> Crew:
-        """Crew para publicação no Sanity CMS, organizando o arquivo conforme o schema do projeto."""
+        """Crew para publicação no Sanity CMS, utilizando o JSON já formatado."""
         return Crew(
             agents=[self.publisher()],
             tasks=[self.publish_task()],
+            verbose=True
+        )
+    
+    @crew
+    def verificacao_duplicatas_crew(self) -> Crew:
+        """Crew para detecção e remoção de artigos duplicados no Sanity CMS."""
+        return Crew(
+            agents=[self.duplicate_detector()],
+            tasks=[self.duplicate_detection_task()],
             verbose=True
         )
     
@@ -239,12 +206,16 @@ class BlogAutomacaoCrew(BaseCrewComponents):
             agents=[
                 self.monitor(), self.selector(),
                 self.translator(), 
-                self.formatter(), self.publisher()
+                self.json_formatter(), # Novo agente
+                self.publisher(),
+                self.duplicate_detector() 
             ],
             tasks=[
                 self.monitoring_task(), self.selection_task(),
                 self.translation_task(), 
-                self.publish_task()
+                self.json_formatting_task(), # Nova tarefa
+                self.publish_task(),
+                self.duplicate_detection_task() 
             ],
             verbose=True,
             process=Process.sequential,

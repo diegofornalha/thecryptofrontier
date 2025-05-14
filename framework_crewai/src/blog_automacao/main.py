@@ -148,7 +148,9 @@ def executar_traducao(crew_components: BlogAutomacaoCrew, base_dir, arquivo_espe
     print(f"=== INICIANDO TRADUÇÃO DE ARTIGOS (CrewAI - Base Dir: {base_dir}) ===")
     dir_para_traduzir = Path(base_dir) / "posts_para_traduzir"
     dir_traduzidos = Path(base_dir) / "posts_traduzidos"
+    dir_formatados = Path(base_dir) / "posts_formatados"
     dir_traduzidos.mkdir(parents=True, exist_ok=True)
+    dir_formatados.mkdir(parents=True, exist_ok=True)
 
     arquivos_para_processar_str = []
     if arquivo_especifico_para_teste:
@@ -289,31 +291,98 @@ def executar_traducao(crew_components: BlogAutomacaoCrew, base_dir, arquivo_espe
             else:
                 print("Modo de teste com arquivo específico: arquivo original NÃO será movido/deletado de posts_para_traduzir.")
 
+def executar_formatacao_json(crew_components: BlogAutomacaoCrew, base_dir, arquivo_especifico_para_teste=None):
+    """Executa a formatação do conteúdo traduzido para o formato JSON específico do Sanity."""
+    print(f"=== INICIANDO FORMATAÇÃO JSON DE ARTIGOS (CrewAI - Base Dir: {base_dir}) ===")
+    dir_traduzidos = base_dir / "posts_traduzidos"
+    dir_formatados = base_dir / "posts_formatados"
+    dir_formatados.mkdir(parents=True, exist_ok=True)
+    
+    # Determinar quais arquivos processar
+    arquivos_para_processar = []
+    if arquivo_especifico_para_teste:
+        path_especifico = Path(arquivo_especifico_para_teste)
+        if not path_especifico.is_absolute():
+            path_especifico = Path.cwd() / path_especifico
+        path_especifico = path_especifico.resolve()
+        
+        if path_especifico.exists() and path_especifico.is_file():
+            arquivos_para_processar.append(path_especifico)
+        else:
+            print(f"ERRO: Arquivo de teste específico {path_especifico} não encontrado.")
+            return
+    else:
+        # Busca arquivos .json que começam com 'traduzido_'
+        arquivos_para_processar = list(dir_traduzidos.glob("traduzido_*.json"))
+    
+    if not arquivos_para_processar:
+        print("Nenhum artigo traduzido encontrado para formatar.")
+        return
+    
+    print(f"Encontrados {len(arquivos_para_processar)} artigos para formatar.")
+    
+    formatacao_crew = crew_components.formatacao_json_crew()
+    
+    for arquivo_origem in arquivos_para_processar:
+        print(f"\nProcessando formatação de: {arquivo_origem.name}")
+        inputs = {
+            "arquivo_json": str(arquivo_origem),
+            "base_dir": str(base_dir)
+        }
+        
+        try:
+            # Executar a crew de formatação
+            print(f"Executando formatacao_json_crew().kickoff() para {arquivo_origem.name}...")
+            resultado_crew = formatacao_crew.kickoff(inputs=inputs)
+            
+            print(f"Resultado da formatação JSON (via crew): {resultado_crew}")
+            
+            # O arquivo formatado já é salvo pela crew (pelo agente json_formatter)
+            
+        except Exception as e:
+            print(f"Erro ao executar formatacao_json_crew para {arquivo_origem.name}: {e}")
+
 def executar_publicacao(crew_components: BlogAutomacaoCrew, base_dir, arquivo_especifico_para_teste=None, modo_apenas_teste_sem_api=False):
-    """Executa apenas a revisão e publicação de conteúdo.
+    """Executa apenas a publicação de conteúdo no Sanity CMS.
     
     Args:
-        crew: Instância do BlogAutomacaoCrew
+        crew_components: Instância do BlogAutomacaoCrew
         base_dir: Diretório base para os subdiretórios de posts.
+        arquivo_especifico_para_teste: Caminho para um arquivo específico para teste
+        modo_apenas_teste_sem_api: Se True, não faz chamadas reais para APIs externas
     """
     print(f"=== INICIANDO PUBLICAÇÃO DE ARTIGOS (CrewAI - Base Dir: {base_dir}) ===")
-    dir_traduzidos = base_dir / "posts_traduzidos"
+    dir_formatados = base_dir / "posts_formatados"
     dir_publicados = base_dir / "posts_publicados"
     dir_publicados.mkdir(parents=True, exist_ok=True)
     
-    # Busca arquivos .json que começam com 'traduzido_'
-    arquivos = list(dir_traduzidos.glob("traduzido_*.json"))
+    # Determinar quais arquivos processar
+    arquivos_para_processar = []
+    if arquivo_especifico_para_teste:
+        path_especifico = Path(arquivo_especifico_para_teste)
+        if not path_especifico.is_absolute():
+            path_especifico = Path.cwd() / path_especifico
+        path_especifico = path_especifico.resolve()
+        
+        if path_especifico.exists() and path_especifico.is_file():
+            arquivos_para_processar.append(path_especifico)
+        else:
+            print(f"ERRO: Arquivo de teste específico {path_especifico} não encontrado.")
+            return
+    else:
+        # Busca arquivos .json que começam com 'formatado_'
+        arquivos_para_processar = list(dir_formatados.glob("formatado_*.json"))
     
-    if not arquivos:
-        print("Nenhum artigo traduzido encontrado para publicar.")
+    if not arquivos_para_processar:
+        print("Nenhum artigo formatado encontrado para publicar.")
         return
     
-    print(f"Encontrados {len(arquivos)} artigos para publicar.")
+    print(f"Encontrados {len(arquivos_para_processar)} artigos para publicar.")
     
-    for arquivo_origem in arquivos:
+    for arquivo_origem in arquivos_para_processar:
         print(f"\nProcessando publicação de: {arquivo_origem.name}")
         inputs = {
-            "arquivo_json": str(arquivo_origem), # Passa o caminho do arquivo JSON original
+            "arquivo_json": str(arquivo_origem), # Passa o caminho do arquivo JSON formatado
             "base_dir": str(base_dir) # Passa base_dir para a crew/tasks
         }
         
@@ -336,23 +405,13 @@ def executar_publicacao(crew_components: BlogAutomacaoCrew, base_dir, arquivo_es
             else:
                  print(f"Falha na publicação ou formato de resposta inesperado para: {arquivo_origem.name}. Resposta: {resultado_crew}")
 
-            if sucesso:
-                 # Mover arquivo para 'posts_publicados' após sucesso
-                arquivo_destino = dir_publicados / arquivo_origem.name.replace("traduzido_", "publicado_")
-                try:
-                    # Usar shutil.move para mais robustez entre sistemas de arquivos
-                    shutil.move(str(arquivo_origem), str(arquivo_destino))
-                    print(f"Arquivo movido para publicados: {arquivo_destino}")
-                except Exception as e_move:
-                    print(f"Erro ao mover arquivo {arquivo_origem} para {arquivo_destino}: {e_move}")
-                    # Mesmo com erro ao mover, não tentar republicar
-            # else: Não mover se a publicação falhar, para tentar novamente depois
+            # O arquivo já é movido para posts_publicados pela SanityPublishTool
 
         except Exception as e_pub:
             print(f"Erro ao executar publicacao_crew para {arquivo_origem.name}: {e_pub}")
 
 def executar_fluxo_completo(crew, base_dir, loop_minutes=None):
-    """Executa o fluxo completo: Monitoramento -> Tradução -> Publicação.
+    """Executa o fluxo completo: Monitoramento -> Tradução -> Formatação JSON -> Publicação.
     
     Args:
         crew: Instância do BlogAutomacaoCrew
@@ -364,6 +423,7 @@ def executar_fluxo_completo(crew, base_dir, loop_minutes=None):
         print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Iniciando novo ciclo completo...")
         executar_monitoramento(crew, base_dir, None)  # Executar uma vez dentro do loop completo
         executar_traducao(crew, base_dir)
+        executar_formatacao_json(crew, base_dir)  # Nova etapa adicionada
         executar_publicacao(crew, base_dir)
         
         if not loop_minutes:
@@ -397,163 +457,68 @@ def executar_fluxo_completo(crew, base_dir, loop_minutes=None):
     if not feed_urls:
         print("ERRO: Não foi possível carregar URLs de feed do feeds.json. Verifique os caminhos.")
 
-
-    parser = argparse.ArgumentParser(
-        description="Executa a automação de blog usando CrewAI.",
-        formatter_class=argparse.RawTextHelpFormatter
-    )
-    parser.add_argument(
-        "--monitoramento", action="store_true", 
-        help="Executa apenas o monitoramento e seleção de conteúdo"
-    )
-    parser.add_argument(
-        "--traducao", action="store_true", 
-        help="Executa apenas a tradução e adaptação de conteúdo"
-    )
-    parser.add_argument(
-        "--publicacao", action="store_true", 
-        help="Executa apenas a revisão e publicação de conteúdo"
-    )
-    parser.add_argument(
-        "--completo", action="store_true", 
-        help="Executa o fluxo completo (padrão se nenhuma outra ação for especificada)"
-    )
-    parser.add_argument(
-        "--loop", type=int, metavar="N", 
-        help="Executa em loop a cada N minutos (aplicável a --monitoramento ou --completo)"
-    )
-    parser.add_argument(
-        "--base_dir", type=str, default=".",
-        help="Diretório base para os subdiretórios de posts (posts_para_traduzir, etc.). Padrão: diretório atual."
-    )
-    parser.add_argument(
-        "--teste_traducao_arquivo", type=str, help="Caminho para um arquivo JSON específico para testar o fluxo de tradução"
-    )
+def executar_verificacao_duplicatas(crew_components: BlogAutomacaoCrew, limite=20, modo_remocao=False):
+    """Executa a verificação e opcionalmente a remoção de artigos duplicados.
     
-    args = parser.parse_args()
+    Args:
+        crew_components: Instância do BlogAutomacaoCrew
+        limite: Número de artigos recentes a verificar
+        modo_remocao: Se True, remove automaticamente os artigos duplicados; se False, apenas detecta
+    """
+    print(f"=== INICIANDO VERIFICAÇÃO DE DUPLICATAS NO SANITY CMS (CrewAI) ===")
+    print(f"Modo: {'Detecção e Remoção' if modo_remocao else 'Apenas Detecção'}")
+    print(f"Analisando os {limite} artigos mais recentes")
     
-    base_dir = Path(args.base_dir).resolve() # Resolve para caminho absoluto
-    print(f"Usando diretório base: {base_dir}")
-    
-    # Garantir que os diretórios base existam
-    (base_dir / "posts_para_traduzir").mkdir(parents=True, exist_ok=True)
-    (base_dir / "posts_traduzidos").mkdir(parents=True, exist_ok=True)
-    (base_dir / "posts_publicados").mkdir(parents=True, exist_ok=True)
-
-    # Inicializar a CrewAI (isso pode carregar configs, LLM, etc.)
     try:
-        blog_crew = BlogAutomacaoCrew()
-        print("BlogAutomacaoCrew inicializada com sucesso.")
-    except Exception as e_crew:
-        print(f"ERRO CRÍTICO ao inicializar BlogAutomacaoCrew: {e_crew}")
-        print("Verifique as configurações de API (ex: GEMINI_API_KEY) e dependências.")
-        # Se a crew não puder ser inicializada, apenas o modo de monitoramento direto pode funcionar
-        if args.monitoramento and not (args.traducao or args.publicacao or args.completo):
-            print("Tentando executar monitoramento direto devido à falha na inicialização da Crew...")
-            executar_monitoramento_direto(base_dir, args.loop)
-        else:
-            print("Não é possível continuar sem a inicialização bem-sucedida da Crew para esta operação.")
-            sys.exit(1)
-        return # Sair da main se a crew falhou e o fallback foi executado ou não era aplicável
-
-    # Lógica de execução baseada nos argumentos
-    executou_algo = False
-    if args.monitoramento:
-        executar_monitoramento(blog_crew, base_dir, args.loop)
-        executou_algo = True
-    elif args.traducao:
-        if args.teste_traducao_arquivo:
-            # Usar o base_dir específico para o arquivo de teste
-            executar_traducao(blog_crew, base_dir, args.teste_traducao_arquivo)
-        else:
-            # Usar o base_dir padrão para a execução normal da tradução
-            executar_traducao(blog_crew, base_dir)
-        executou_algo = True
-    elif args.publicacao:
-        executar_publicacao(blog_crew, base_dir)
-        executou_algo = True
-    elif args.completo or not executou_algo: # Executar completo se nenhuma flag específica for passada
-        executar_fluxo_completo(blog_crew, base_dir, args.loop)
-
-def load_feed_urls_from_config(filepath):
-    """Carrega URLs de feed de um arquivo JSON que contém uma lista de objetos com 'name' e 'url'."""
-    if not filepath.exists():
-        print(f"Aviso: Arquivo de configuração de feeds não encontrado em {filepath}")
-        return [] # Retorna lista vazia se o arquivo não existe
-
-    try:
-        with open(filepath, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            if isinstance(data, list) and all(isinstance(item, dict) and 'url' in item for item in data):
-                print(f"Carregados {len(data)} feeds de {filepath}")
-                return data # Retorna a lista de dicionários
-            else:
-                print(f"Erro: Formato inesperado em {filepath}. Esperado: lista de objetos com chave 'url'.")
-                return []
-    except json.JSONDecodeError:
-        print(f"Erro: Falha ao decodificar JSON em {filepath}.")
-        return []
+        # Configurar inputs para a tarefa
+        inputs = {
+            "limit": limite,
+            "action": "remove" if modo_remocao else "detect"
+        }
+        
+        # Executar crew de verificação de duplicatas
+        verificacao_crew = crew_components.verificacao_duplicatas_crew()
+        print("Executando verificacao_duplicatas_crew().kickoff()...")
+        result = verificacao_crew.kickoff(inputs=inputs)
+        
+        # Exibir resultado
+        print("\nVerificação de duplicatas concluída.")
+        print(f"Resultado: {result}")
+        
+        return result
+        
     except Exception as e:
-        print(f"Erro ao ler arquivo de feeds {filepath}: {e}")
-        return []
+        print(f"Erro ao executar verificação de duplicatas: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return {"error": str(e)}
 
 def main():
-    # << INDENTAR TODO O CÓDIGO ABAIXO PARA DENTRO DE main() >>
-    # Tentar carregar URLs de feed do feeds.json na raiz do projeto (framework_crewai)
-    project_root = Path(__file__).parent.parent.parent # framework_crewai
-    feeds_json_path = project_root / "feeds.json"
-    feed_urls = load_feed_urls_from_config(feeds_json_path)
-    
-    # Se não encontrar no local esperado, tenta no diretório src/blog_automacao (local antigo)
-    if not feed_urls:
-        current_dir_feeds_json = Path(__file__).parent / "feeds.json"
-        feed_urls = load_feed_urls_from_config(current_dir_feeds_json)
-        if feed_urls:
-            print(f"Aviso: Usando feeds.json de {current_dir_feeds_json}. Considere movê-lo para {feeds_json_path}")
+    # Configurar e analisar argumentos da linha de comando
+    parser = argparse.ArgumentParser(description='Script para automação de blog de criptomoedas usando CrewAI.')
+    parser.add_argument('--monitoramento', action='store_true', help='Executar apenas o monitoramento de feeds RSS')
+    parser.add_argument('--traducao', action='store_true', help='Executar apenas a tradução de artigos')
+    parser.add_argument('--formatacao-json', action='store_true', help='Executar apenas a formatação JSON de artigos traduzidos')
+    parser.add_argument('--publicacao', action='store_true', help='Executar apenas a publicação no Sanity')
+    parser.add_argument('--completo', action='store_true', help='Executar o fluxo completo: monitoramento -> tradução -> publicação')
+    parser.add_argument('--verificar-duplicatas', action='store_true', help='Verificar artigos duplicados no Sanity')
+    parser.add_argument('--remover-duplicatas', action='store_true', help='Detectar e remover artigos duplicados no Sanity')
+    parser.add_argument('--loop', type=int, help='Executar em loop a cada N minutos')
+    parser.add_argument('--offline-local', action='store_true', help='Modo de teste offline sem APIs externas')
+    parser.add_argument('--arquivo-teste', type=str, help='Arquivo específico para processar (apenas para tradução/publicação)')
+    parser.add_argument('--base-dir', type=str, default='.', help='Diretório base para posts')
+    parser.add_argument('--limite-duplicatas', type=int, default=20, help='Número de artigos recentes a verificar para duplicatas')
 
-    if not feed_urls:
-        print("ERRO: Não foi possível carregar URLs de feed do feeds.json. Verifique os caminhos.")
-
-    parser = argparse.ArgumentParser(
-        description="Executa a automação de blog usando CrewAI.",
-        formatter_class=argparse.RawTextHelpFormatter
-    )
-    parser.add_argument(
-        "--monitoramento", action="store_true", 
-        help="Executa apenas o monitoramento e seleção de conteúdo"
-    )
-    parser.add_argument(
-        "--traducao", action="store_true", 
-        help="Executa apenas a tradução e adaptação de conteúdo"
-    )
-    parser.add_argument(
-        "--publicacao", action="store_true", 
-        help="Executa apenas a revisão e publicação de conteúdo"
-    )
-    parser.add_argument(
-        "--completo", action="store_true", 
-        help="Executa o fluxo completo (padrão se nenhuma outra flag for passada)"
-    )
-    parser.add_argument(
-        "--loop", type=int, metavar="N", 
-        help="Executa em loop a cada N minutos (aplicável ao monitoramento e completo)"
-    )
-    parser.add_argument(
-        "--base_dir", type=str, default=".",
-        help="Diretório base para os subdiretórios de posts (posts_para_traduzir, etc.). Padrão: diretório atual."
-    )
-    parser.add_argument(
-        "--teste_traducao_arquivo", type=str, help="Caminho para um arquivo JSON específico para testar o fluxo de tradução"
-    )
-    
     args = parser.parse_args()
     
-    base_dir = Path(args.base_dir).resolve() # Resolve para caminho absoluto
-    print(f"Usando diretório base: {base_dir}")
+    # Determinar diretório base
+    base_dir = Path(args.base_dir)
+    print(f"Diretório base definido como: {base_dir.absolute()}")
     
     # Garantir que os diretórios base existam
     (base_dir / "posts_para_traduzir").mkdir(parents=True, exist_ok=True)
     (base_dir / "posts_traduzidos").mkdir(parents=True, exist_ok=True)
+    (base_dir / "posts_formatados").mkdir(parents=True, exist_ok=True)
     (base_dir / "posts_publicados").mkdir(parents=True, exist_ok=True)
 
     # Inicializar a CrewAI (isso pode carregar configs, LLM, etc.)
@@ -564,7 +529,7 @@ def main():
         print(f"ERRO CRÍTICO ao inicializar BlogAutomacaoCrew: {e_crew}")
         print("Verifique as configurações de API (ex: GEMINI_API_KEY) e dependências.")
         # Se a crew não puder ser inicializada, apenas o modo de monitoramento direto pode funcionar
-        if args.monitoramento and not (args.traducao or args.publicacao or args.completo):
+        if args.monitoramento and not (args.traducao or args.publicacao or args.completo or args.verificar_duplicatas or args.remover_duplicatas):
             print("Tentando executar monitoramento direto devido à falha na inicialização da Crew...")
             executar_monitoramento_direto(base_dir, args.loop)
         else:
@@ -574,37 +539,39 @@ def main():
 
     # Lógica de execução baseada nos argumentos
     executou_algo = False
+    
+    if args.verificar_duplicatas:
+        executar_verificacao_duplicatas(blog_crew, args.limite_duplicatas, False)
+        executou_algo = True
+    
+    if args.remover_duplicatas:
+        executar_verificacao_duplicatas(blog_crew, args.limite_duplicatas, True)
+        executou_algo = True
+    
     if args.monitoramento:
         executar_monitoramento(blog_crew, base_dir, args.loop)
         executou_algo = True
-    elif args.traducao:
-        if args.teste_traducao_arquivo:
-            # Usar o base_dir específico para o arquivo de teste
-            executar_traducao(blog_crew, base_dir, args.teste_traducao_arquivo)
-        else:
-            # Usar o base_dir padrão para a execução normal da tradução
-            executar_traducao(blog_crew, base_dir)
+        
+    if args.traducao:
+        executar_traducao(blog_crew, base_dir, args.arquivo_teste, args.offline_local)
         executou_algo = True
-    elif args.publicacao:
-        executar_publicacao(blog_crew, base_dir)
+        
+    if args.formatacao_json:
+        executar_formatacao_json(blog_crew, base_dir, args.arquivo_teste)
         executou_algo = True
-    elif args.completo or not executou_algo: # Executar completo se nenhuma flag específica for passada
+    
+    if args.publicacao:
+        executar_publicacao(blog_crew, base_dir, args.arquivo_teste, args.offline_local)
+        executou_algo = True
+        
+    if args.completo:
         executar_fluxo_completo(blog_crew, base_dir, args.loop)
-    # << FIM DO BLOCO INDENTADO >>
+        executou_algo = True
+    
+    # Se nenhum argumento foi fornecido, mostrar ajuda
+    if not executou_algo:
+        parser.print_help()
+        sys.exit(0)
 
 if __name__ == "__main__":
-    # Configuração para garantir que os imports relativos funcionem mesmo se 
-    # o script for chamado de um diretório diferente ou como parte de um pacote maior.
-    # Isso é importante se você executar, por exemplo, `python src/blog_automacao/main.py`
-    # em vez de `python -m src.blog_automacao.main`
-    current_script_path = Path(__file__).resolve()
-    # src_dir vai ser .../framework_crewai/src
-    src_dir = current_script_path.parent.parent 
-    # project_root_dir vai ser .../framework_crewai
-    project_root_dir = src_dir.parent 
-
-    if str(project_root_dir) not in sys.path:
-        sys.path.insert(0, str(project_root_dir))
-        print(f"Adicionado {project_root_dir} ao sys.path para imports de módulo")
-    
     main() 

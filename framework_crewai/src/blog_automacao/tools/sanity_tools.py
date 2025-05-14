@@ -11,7 +11,7 @@ import frontmatter
 import requests
 from datetime import datetime
 from pydantic import Field
-from typing import Optional
+from typing import Optional, Dict, Any, List
 
 # Importar os schemas gerados
 try:
@@ -31,6 +31,243 @@ except ImportError:
     except ImportError as e:
         print(f"ERRO CRÍTICO: Não foi possível importar 'loaded_schemas' de 'generated_sanity_schemas'. Verifique a geração e o PYTHONPATH. Erro: {e}")
         loaded_schemas = {} # Define como vazio para evitar erros posteriores, mas a ferramenta falhará
+
+
+class SanityFormatTool(Tool):
+    """Ferramenta para formatar conteúdo de acordo com o schema do Sanity CMS."""
+    
+    def __init__(self):
+        """Inicializa a ferramenta de formatação para o Sanity."""
+        super().__init__(
+            name="SanityFormatTool",
+            description="Formata o conteúdo traduzido para o formato JSON específico do schema do Sanity CMS.",
+            func=self._run,
+            return_direct=False
+        )
+    
+    def _get_field_name(self, schema, target_name):
+        """Busca o nome real de um campo no schema pelo nome alvo."""
+        if not schema or not isinstance(schema, dict):
+            print(f"Aviso: Schema inválido fornecido para buscar o campo '{target_name}'.")
+            return target_name
+
+        for field in schema.get('fields', []):
+            if isinstance(field, dict) and field.get('name') == target_name:
+                return field.get('name')
+        # Se não encontrar, retorna o nome original
+        print(f"Aviso: Campo '{target_name}' não encontrado no schema '{schema.get('name')}'. Usando nome original.")
+        return target_name
+    
+    def criar_slug(self, titulo):
+        """Cria um slug a partir do título."""
+        import re
+        from unicodedata import normalize
+        
+        # Normalizar para remover acentos
+        slug = normalize('NFKD', titulo).encode('ASCII', 'ignore').decode('utf-8')
+        # Converter para minúsculas
+        slug = slug.lower()
+        # Substituir espaços por hífens
+        slug = re.sub(r'\s+', '-', slug)
+        # Remover caracteres que não são alfanuméricos ou hífens
+        slug = re.sub(r'[^a-z0-9\-]', '', slug)
+        # Remover hífens múltiplos
+        slug = re.sub(r'\-+', '-', slug)
+        # Limitar tamanho
+        slug = slug[:80]
+        
+        return slug
+    
+    def formatar_conteudo_em_blocos(self, conteudo: str) -> List[Dict[str, Any]]:
+        """Converte o conteúdo em blocos de Portable Text para o Sanity.
+        
+        Args:
+            conteudo: Texto do conteúdo a ser formatado
+            
+        Returns:
+            Lista de blocos no formato Portable Text
+        """
+        if not conteudo:
+            return []
+            
+        # Divide o conteúdo em parágrafos (assume que parágrafos são separados por linhas em branco)
+        paragrafos = conteudo.split('\n\n')
+        blocos = []
+        
+        for paragrafo in paragrafos:
+            paragrafo_limpo = paragrafo.strip()
+            if not paragrafo_limpo:
+                continue
+                
+            # Gerar um ID único para o bloco
+            bloco_id = str(uuid.uuid4()).replace('-', '')
+            
+            # Identificar o estilo do bloco (normal, h1, h2, h3, blockquote, etc.)
+            estilo = 'normal'  # Estilo padrão
+            texto = paragrafo_limpo
+            
+            # Detectar cabeçalhos
+            if paragrafo_limpo.startswith('# '):
+                estilo = 'h1'
+                texto = paragrafo_limpo[2:].strip()
+            elif paragrafo_limpo.startswith('## '):
+                estilo = 'h2'
+                texto = paragrafo_limpo[3:].strip()
+            elif paragrafo_limpo.startswith('### '):
+                estilo = 'h3'
+                texto = paragrafo_limpo[4:].strip()
+            elif paragrafo_limpo.startswith('#### '):
+                estilo = 'h4'
+                texto = paragrafo_limpo[5:].strip()
+            elif paragrafo_limpo.startswith('>'):
+                estilo = 'blockquote'
+                texto = paragrafo_limpo[1:].strip()
+            
+            # Criar o bloco
+            bloco = {
+                '_key': bloco_id,
+                '_type': 'block',
+                'style': estilo,
+                'children': [
+                    {
+                        '_key': str(uuid.uuid4()).replace('-', ''),
+                        '_type': 'span',
+                        'marks': [],
+                        'text': texto
+                    }
+                ],
+                'markDefs': []
+            }
+            
+            blocos.append(bloco)
+        
+        return blocos
+    
+    def _run(self, json_content=None, json_file=None):
+        """Formata o conteúdo para o schema do Sanity.
+        
+        Args:
+            json_content: Conteúdo JSON como string ou dicionário
+            json_file: Caminho para o arquivo JSON
+            
+        Returns:
+            Dicionário com o JSON formatado para o Sanity
+        """
+        try:
+            # Carregar o conteúdo
+            if json_file:
+                with open(json_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+            elif json_content:
+                if isinstance(json_content, str):
+                    data = json.loads(json_content)
+                else:
+                    data = json_content
+            else:
+                return {"error": "É necessário fornecer json_content ou json_file"}
+            
+            # Obter o schema do post
+            schema_name = 'post'
+            target_schema = loaded_schemas.get(schema_name)
+            if not target_schema:
+                return {"error": f"Schema '{schema_name}' não encontrado nos schemas gerados"}
+            
+            # Extrair dados necessários
+            content_text = data.get('content_text_traduzido', '')
+            frontmatter_traduzido = data.get('frontmatter_traduzido', {})
+            frontmatter_original = data.get('frontmatter_original', {})
+            
+            # Título
+            titulo = frontmatter_traduzido.get('title', '')
+            if not titulo:
+                return {"error": "Título não encontrado em frontmatter_traduzido"}
+            
+            # Slug
+            slug = frontmatter_traduzido.get('slug', '')
+            if not slug:
+                slug = self.criar_slug(titulo)
+            
+            # Data de publicação
+            data_publicacao = frontmatter_traduzido.get('published_date', datetime.now().isoformat())
+            
+            # Excerpt (resumo)
+            excerpt = ''
+            if content_text:
+                primeiro_paragrafo = content_text.split('\n\n')[0].strip()
+                excerpt = primeiro_paragrafo[:300] # Limitar a 300 caracteres
+            
+            # Formatação do conteúdo em blocos
+            blocos_conteudo = self.formatar_conteudo_em_blocos(content_text)
+            
+            # Categorias e tags
+            categorias = []
+            if 'category' in frontmatter_traduzido:
+                categoria = frontmatter_traduzido['category']
+                if isinstance(categoria, str):
+                    categorias.append({
+                        '_type': 'reference',
+                        '_key': str(uuid.uuid4()).replace('-', ''),
+                        '_ref': categoria  # Idealmente, deveria ser um ID real de categoria no Sanity
+                    })
+                    
+            tags = []
+            if 'tags' in frontmatter_traduzido:
+                for tag in frontmatter_traduzido['tags']:
+                    tags.append({
+                        '_type': 'reference',
+                        '_key': str(uuid.uuid4()).replace('-', ''),
+                        '_ref': tag  # Idealmente, deveria ser um ID real de tag no Sanity
+                    })
+            
+            # Autor (usa um valor padrão)
+            autor_ref = "ca38a3d5-cba1-47a0-aa29-4af17a15e17c"  # ID padrão do autor
+            
+            # Fonte original
+            fonte_original = {
+                'url': frontmatter_original.get('url', ''),
+                'title': frontmatter_original.get('title', ''),
+                'site': frontmatter_original.get('site', '')
+            }
+            
+            # Montar o documento final
+            timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+            documento_sanity = {
+                '_type': 'post',
+                '_id': f'drafts.post-{timestamp}',
+                'title': titulo,
+                'slug': {
+                    '_type': 'slug',
+                    'current': slug
+                },
+                'publishedAt': data_publicacao,
+                'excerpt': excerpt,
+                'content': blocos_conteudo,
+                'categories': categorias,
+                'tags': tags,
+                'author': {
+                    '_type': 'reference',
+                    '_ref': autor_ref
+                },
+                'originalSource': fonte_original
+            }
+            
+            # Opcional: SEO metadata se disponível
+            if 'seo_meta_description' in frontmatter_traduzido:
+                documento_sanity['seo'] = {
+                    'meta_title': titulo,
+                    'meta_description': frontmatter_traduzido['seo_meta_description']
+                }
+            
+            return {
+                'success': True,
+                'formatted_document': documento_sanity
+            }
+            
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e)
+            }
 
 
 class SanityPublishTool(Tool):
@@ -146,75 +383,37 @@ class SanityPublishTool(Tool):
 
         return blocos
     
-    def _run(self, markdown_file=None, markdown_content=None):
+    def _run(self, json_file=None, json_content=None):
         """Publica conteúdo no Sanity CMS usando os schemas gerados."""
-        if not markdown_file and not markdown_content:
-            return {"error": "É necessário fornecer um arquivo markdown ou conteúdo markdown"}
+        if not json_file and not json_content:
+            return {"error": "É necessário fornecer um arquivo JSON ou conteúdo JSON"}
 
         if not loaded_schemas:
              return {"error": "Schemas gerados não foram carregados. Verifique a importação e a geração."}
 
-        # --- Obter Schema --- 
-        schema_name = 'post' # Assumindo que esta ferramenta sempre publica posts
-        target_schema = loaded_schemas.get(schema_name)
-        if not target_schema:
-            return {"error": f"Schema '{schema_name}' não encontrado nos schemas gerados."}
-        schema_type_name = target_schema.get('name', schema_name)
-
         try:
-            # --- Processar Input --- 
-            if markdown_file:
-                arquivo_path = Path(markdown_file)
-                if not arquivo_path.exists():
-                    return {"error": f"Arquivo não encontrado: {markdown_file}"}
-                post = frontmatter.load(arquivo_path)
-            else:
-                post = frontmatter.loads(markdown_content)
-
-            conteudo = post.content
-            metadata = post.metadata
-
-            # --- Extrair Dados --- 
-            titulo_field = self._get_field_name(target_schema, 'title')
-            titulo = metadata.get(titulo_field, metadata.get('title')) # Fallback para 'title'
-            if not titulo:
-                return {"error": f"Metadado '{titulo_field}' (ou 'title') não encontrado"}
-
-            slug_field = self._get_field_name(target_schema, 'slug')
-            slug = self.criar_slug(titulo)
-
-            excerpt_field = self._get_field_name(target_schema, 'excerpt')
-            excerpt = conteudo.split('\n\n')[0].strip() if conteudo else ""
-
-            content_field = self._get_field_name(target_schema, 'content')
-            blocos = self.formatar_markdown_em_blocos(conteudo)
-
-            published_at_field = self._get_field_name(target_schema, 'publishedAt')
-            published_at = metadata.get("date", datetime.now().isoformat())
+            # Carregar o conteúdo do documento Sanity
+            if json_file:
+                with open(json_file, 'r', encoding='utf-8') as f:
+                    documento = json.load(f)
+            elif json_content:
+                if isinstance(json_content, str):
+                    documento = json.loads(json_content)
+                else:  # Assume que é um dicionário
+                    documento = json_content
             
-            # --- Gerar ID e Documento Sanity --- 
-            doc_id = f"{schema_type_name}-{datetime.now().strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6]}"
-
-            documento = {
-                "_type": schema_type_name,
-                "_id": doc_id,
-                titulo_field: titulo,
-                slug_field: {
-                    "_type": "slug",
-                    "current": slug
-                },
-                excerpt_field: excerpt,
-                content_field: blocos,
-                published_at_field: published_at
-                # Adicionar outros campos aqui, buscando em metadata ou usando padrões
-                # Exemplo (precisa lógica para obter author_id, category_refs, etc.):
-                # self._get_field_name(target_schema, 'author'): {"_type": "reference", "_ref": author_id},
-                # self._get_field_name(target_schema, 'categories'): [{ "_type": "reference", "_key": uuid.uuid4().hex, "_ref": cat_ref } for cat_ref in category_refs],
-                # self._get_field_name(target_schema, 'tags'): [{ "_type": "reference", "_key": uuid.uuid4().hex, "_ref": tag_ref } for tag_ref in tag_refs],
-                # self._get_field_name(target_schema, 'mainImage'): { ... } # Precisa construir o objeto da imagem
-            }
-
-            # --- Enviar para Sanity API --- 
+            # Verificar se é um documento formatado ou um documento bruto
+            if '_type' not in documento:
+                # É um documento bruto, precisa ser formatado
+                sanity_format_tool = SanityFormatTool()
+                resultado_formatacao = sanity_format_tool._run(json_content=documento)
+                
+                if not resultado_formatacao.get('success', False):
+                    return {"error": f"Falha ao formatar o documento: {resultado_formatacao.get('error', 'Erro desconhecido')}"}
+                
+                documento = resultado_formatacao['formatted_document']
+            
+            # Enviar para Sanity API
             if not self.project_id or not self.token:
                  return {"error": "Configuração do Sanity (ID do Projeto ou Token) ausente."}
                  
@@ -226,44 +425,79 @@ class SanityPublishTool(Tool):
             body = {
                 "mutations": [
                     {
-                        "createOrReplace": documento # Usar createOrReplace pode ser mais seguro
+                        "createOrReplace": documento
                     }
                 ]
             }
 
             response = requests.post(url, headers=headers, json=body)
 
-            # --- Processar Resposta --- 
+            # Processar Resposta
             if response.status_code == 200:
                 result = response.json()
-                if markdown_file:
+                if json_file:
                     try:
-                        dest_dir = Path("posts_publicados")
+                        # Mover o arquivo para posts_publicados
+                        arquivo_path = Path(json_file)
+                        nome_arquivo = arquivo_path.name
+                        
+                        # Substituir prefixo 'formatado_' por 'publicado_'
+                        if nome_arquivo.startswith('formatado_'):
+                            nome_publicado = nome_arquivo.replace('formatado_', 'publicado_')
+                        else:
+                            nome_publicado = f"publicado_{nome_arquivo}"
+                        
+                        # Criar diretório posts_publicados se não existir
+                        dest_dir = arquivo_path.parent.parent / "posts_publicados"
                         dest_dir.mkdir(exist_ok=True)
-                        dest_file = dest_dir / arquivo_path.name.replace("traduzido", "publicado")
-                        arquivo_path.rename(dest_file)
-                        print(f"Arquivo movido para: {dest_file}")
+                        
+                        # Caminho completo para o arquivo de destino
+                        dest_file = dest_dir / nome_publicado
+                        
+                        # Copiar o arquivo (em vez de mover, para manter o original)
+                        import shutil
+                        shutil.copy2(arquivo_path, dest_file)
+                        
+                        print(f"Arquivo copiado para: {dest_file}")
+                        
+                        return {
+                            "success": True,
+                            "document_id": documento.get('_id', ''),
+                            "result": result,
+                            "arquivo_publicado": str(dest_file)
+                        }
                     except Exception as e:
-                        print(f"Erro ao mover arquivo '{arquivo_path.name}': {e}")
-
-                return {
-                    "success": True,
-                    "message": "Post publicado/atualizado com sucesso no Sanity",
-                    "id": doc_id,
-                    "slug": slug,
-                    "title": titulo
-                }
+                        print(f"Erro ao copiar arquivo '{json_file}': {e}")
+                        return {
+                            "success": True,
+                            "document_id": documento.get('_id', ''),
+                            "result": result,
+                            "warning": f"Erro ao copiar arquivo: {str(e)}"
+                        }
+                else:
+                    return {
+                        "success": True,
+                        "document_id": documento.get('_id', ''),
+                        "result": result
+                    }
             else:
-                print(f"Erro ao publicar no Sanity ({response.status_code}): {response.text}")
+                error_detail = response.text
+                try:
+                    error_json = response.json()
+                    error_detail = json.dumps(error_json, indent=2)
+                except:
+                    pass
+                
                 return {
                     "success": False,
-                    "message": f"Erro ao publicar post no Sanity: {response.status_code}",
-                    "details": response.text[:500] # Limitar tamanho dos detalhes
+                    "error": f"Erro na API do Sanity: {response.status_code}",
+                    "details": error_detail
                 }
-
+        
         except Exception as e:
             import traceback
-            print(f"Erro inesperado na SanityPublishTool: {e}\n{traceback.format_exc()}")
             return {
-                "error": f"Erro inesperado ao processar/publicar: {str(e)}"
+                "success": False,
+                "error": f"Erro ao processar ou publicar o documento: {str(e)}",
+                "traceback": traceback.format_exc()
             } 

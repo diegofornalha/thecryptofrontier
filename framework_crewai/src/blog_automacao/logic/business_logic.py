@@ -160,6 +160,87 @@ def translate_article(arquivo_json=None):
             SessionManager.add_log(f"Trace: {traceback.format_exc()}")
             return False
 
+def check_duplicate_post(title, guid=None):
+    """
+    Verifica se já existe um post com título similar no Sanity CMS.
+    Retorna True se encontrar um post similar, False caso contrário.
+    """
+    # Obter tokens e configurações do Sanity
+    project_id = os.environ.get("NEXT_PUBLIC_SANITY_PROJECT_ID") or os.environ.get("SANITY_PROJECT_ID", "brby2yrg")
+    dataset = os.environ.get("NEXT_PUBLIC_SANITY_DATASET", "production")
+    api_version = os.environ.get("NEXT_PUBLIC_SANITY_API_VERSION", "2023-05-03")
+    token = os.environ.get("SANITY_DEV_TOKEN", "")
+    
+    # Se não encontrou o token DEV, verificar outros tokens
+    if not token:
+        token = os.environ.get("SANITY_API_TOKEN", "")
+    if not token:
+        token = os.environ.get("SANITY_DEPLOY_TOKEN", "")
+    
+    # Remover quebras de linha do token
+    token = token.replace('\n', '')
+    
+    # Formatar título para busca
+    # Remove aspas e caracteres especiais para evitar erros na consulta
+    search_title = title.replace('"', '').replace("'", "").strip()
+    
+    # Construir URL da API com consulta GROQ para posts com título similar
+    url = f"https://{project_id}.api.sanity.io/v{api_version}/data/query/{dataset}?query=*[_type == 'post' && title match '{search_title}*']"
+    
+    # Definir headers com token
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+    
+    try:
+        # Fazer requisição à API
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        
+        # Analisar resultado
+        posts = response.json().get('result', [])
+        
+        if posts:
+            print(f"⚠️ ATENÇÃO: Encontrados {len(posts)} posts similares no Sanity:")
+            for i, post in enumerate(posts, 1):
+                post_id = post.get('_id', 'ID não disponível')
+                post_title = post.get('title', 'Título não disponível')
+                print(f"  {i}. ID: {post_id}, Título: {post_title}")
+            
+            return True
+        
+        return False
+        
+    except Exception as e:
+        print(f"Erro ao verificar duplicatas: {e}")
+        # Em caso de erro, é melhor continuar o processo
+        return False
+
+def get_json_post_title(file_path):
+    """
+    Extrai o título de um arquivo JSON de post traduzido.
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        # Tentar obter o título do frontmatter traduzido
+        if data.get('frontmatter_traduzido', {}).get('title'):
+            return data['frontmatter_traduzido']['title']
+        
+        # Se não encontrar, tentar no frontmatter original
+        if data.get('frontmatter_original', {}).get('title'):
+            return data['frontmatter_original']['title']
+        
+        # Última tentativa
+        if data.get('title'):
+            return data['title']
+            
+        return None
+    except Exception as e:
+        print(f"Erro ao extrair título do JSON: {e}")
+        return None
+
 def publish_article(translated_file_path: Path):
     """
     Publica um artigo no Sanity a partir de um arquivo traduzido.
@@ -176,6 +257,36 @@ def publish_article(translated_file_path: Path):
         return
         
     print(f"Publicando artigo traduzido: {translated_file_path}")
+    
+    # Verificar duplicatas apenas para arquivos JSON
+    if translated_file_path.suffix.lower() == '.json':
+        post_title = get_json_post_title(translated_file_path)
+        if post_title and check_duplicate_post(post_title):
+            print(f"Detectado artigo similar já publicado no Sanity. Cancelando publicação para evitar duplicata.")
+            
+            # Tentar obter o ID do artigo para atualizar o status
+            article_id = None
+            try:
+                # Tentar extrair ID do nome do arquivo
+                filename = translated_file_path.stem
+                if filename.startswith("traduzido_"):
+                    article_id = filename.split("_")[1]
+                    
+                if article_id and article_id.isdigit():
+                    # Conectar ao banco de dados e atualizar status
+                    conn = sqlite3.connect("posts_database.sqlite")
+                    cursor = conn.cursor()
+                    cursor.execute(
+                        "UPDATE posts SET status = 'duplicate' WHERE id = ?",
+                        (int(article_id),)
+                    )
+                    conn.commit()
+                    conn.close()
+                    print(f"Artigo marcado como duplicado no banco de dados.")
+            except Exception as e:
+                print(f"Erro ao atualizar status no banco de dados: {e}")
+                
+            return "Publicação cancelada: artigo duplicado detectado"
     
     try:
         # Obter ferramentas de publicação

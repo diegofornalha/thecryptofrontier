@@ -9,7 +9,7 @@ from pathlib import Path
 from datetime import datetime
 
 from src.blog_automacao import BlogAutomacaoCrew
-from src.blog_automacao.logic.business_logic import translate_article, publish_direct
+from src.blog_automacao.logic.business_logic import translate_article, publish_direct, get_json_post_title, check_duplicate_post
 
 def json_to_markdown(json_file_path):
     """
@@ -96,7 +96,25 @@ def process_all_pending_articles():
     # Inicializar a crew
     crew = BlogAutomacaoCrew()
     
+    # Estatísticas de processamento
+    stats = {
+        "processados": len(pending_articles),
+        "traduzidos": 0,
+        "publicados": 0,
+        "duplicados": 0,
+        "erros": 0
+    }
+    
+    # Armazenar resultados detalhados
+    resultados = []
+    
     for article in pending_articles:
+        resultado = {
+            "id": article['id'],
+            "titulo": article['title'],
+            "status": "processando"
+        }
+        
         try:
             print(f"\n===== Processando artigo: {article['title']} =====")
             
@@ -131,8 +149,8 @@ def process_all_pending_articles():
             # O arquivo traduzido pode estar em diferentes locais. Vamos procurar em todos os possíveis
             translated_file_options = [
                 f"posts_traduzidos/traduzido_{article['id']}.json",
-                f"framework_crewai/src/temp_test_dir_single_post/posts_traduzidos/traduzido_{article['id']}.json",
-                f"framework_crewai/src/temp_test_dir_single_post/posts_traduzidos/traduzido_para_traduzir_{article['id']}.json",
+                f"/src/temp_test_dir_single_post/posts_traduzidos/traduzido_{article['id']}.json",
+                f"/src/temp_test_dir_single_post/posts_traduzidos/traduzido_para_traduzir_{article['id']}.json",
                 f"src/temp_test_dir_single_post/posts_traduzidos/traduzido_{article['id']}.json",
                 f"src/temp_test_dir_single_post/posts_traduzidos/traduzido_para_traduzir_{article['id']}.json"
             ]
@@ -155,6 +173,8 @@ def process_all_pending_articles():
             # Verificar se encontrou algum arquivo traduzido
             if translated_file:
                 print(f"Arquivo traduzido encontrado: {translated_file}")
+                stats["traduzidos"] += 1
+                resultado["status"] = "traduzido"
                 
                 # Copiar para o diretório posts_traduzidos se não estiver lá
                 standard_path = f"posts_traduzidos/traduzido_{article['id']}.json"
@@ -163,6 +183,23 @@ def process_all_pending_articles():
                     shutil.copy(translated_file, standard_path)
                     print(f"Arquivo copiado para localização padrão: {standard_path}")
                     translated_file = standard_path
+                
+                # Verificar duplicatas antes de prosseguir
+                post_title = get_json_post_title(translated_file)
+                
+                if post_title and check_duplicate_post(post_title, article['guid'] if 'guid' in article else None):
+                    print(f"⚠️ Post similar já existe no Sanity! Marcando como duplicado e pulando publicação...")
+                    # Marcar artigo como duplicado no banco de dados
+                    cursor.execute(
+                        "UPDATE posts SET status = 'duplicate' WHERE id = ?",
+                        (article['id'],)
+                    )
+                    conn.commit()
+                    stats["duplicados"] += 1
+                    resultado["status"] = "duplicado"
+                    resultado["mensagem"] = "Artigo similar já existe no Sanity"
+                    resultados.append(resultado)
+                    continue
                 
                 # Converter JSON para Markdown
                 print("Convertendo JSON para Markdown...")
@@ -192,12 +229,24 @@ def process_all_pending_articles():
                         conn.commit()
                         
                         print(f"Artigo {article['id']} publicado com sucesso no Sanity! ID: {message}")
+                        stats["publicados"] += 1
+                        resultado["status"] = "publicado"
+                        resultado["mensagem"] = f"ID: {message}"
                     else:
                         print(f"Falha ao publicar artigo: {message}")
+                        stats["erros"] += 1
+                        resultado["status"] = "erro"
+                        resultado["mensagem"] = f"Erro na publicação: {message}"
                 else:
                     print(f"Erro ao converter JSON para Markdown para o artigo {article['id']}.")
+                    stats["erros"] += 1
+                    resultado["status"] = "erro"
+                    resultado["mensagem"] = "Falha na conversão para Markdown"
             else:
                 print(f"Erro: Não foi possível encontrar o arquivo traduzido para o artigo {article['id']}")
+                stats["erros"] += 1
+                resultado["status"] = "erro"
+                resultado["mensagem"] = "Arquivo traduzido não encontrado"
                 
                 # Criar um arquivo markdown diretamente para publicação
                 md_content = f"""---
@@ -224,6 +273,21 @@ Principais pontos sobre {article['title'].split(' ')[0]}:
                 
                 print(f"Arquivo Markdown alternativo criado: {md_file_path}")
                 
+                # Verificar duplicatas antes de prosseguir
+                if check_duplicate_post(article['title'], article['guid'] if 'guid' in article else None):
+                    print(f"⚠️ Post similar já existe no Sanity! Marcando como duplicado e pulando publicação...")
+                    # Marcar artigo como duplicado no banco de dados
+                    cursor.execute(
+                        "UPDATE posts SET status = 'duplicate' WHERE id = ?",
+                        (article['id'],)
+                    )
+                    conn.commit()
+                    stats["duplicados"] += 1
+                    resultado["status"] = "duplicado"
+                    resultado["mensagem"] = "Artigo similar já existe no Sanity"
+                    resultados.append(resultado)
+                    continue
+                
                 # Tentar publicar usando publish_direct
                 try:
                     success, message = publish_direct(Path(md_file_path))
@@ -240,18 +304,47 @@ Principais pontos sobre {article['title'].split(' ')[0]}:
                         conn.commit()
                         
                         print(f"Artigo {article['id']} publicado com método alternativo. ID: {message}")
+                        stats["publicados"] += 1
+                        resultado["status"] = "publicado"
+                        resultado["mensagem"] = f"ID: {message} (método alternativo)"
                     else:
                         print(f"Falha ao publicar artigo com método alternativo: {message}")
+                        stats["erros"] += 1
+                        resultado["status"] = "erro"
+                        resultado["mensagem"] = f"Erro na publicação: {message}"
                 except Exception as e:
                     print(f"Erro ao tentar método alternativo de publicação: {e}")
+                    stats["erros"] += 1 
+                    resultado["status"] = "erro"
+                    resultado["mensagem"] = f"Erro: {str(e)}"
             
             # Aguardar um pouco entre publicações
             time.sleep(5)
             
         except Exception as e:
             print(f"Erro ao processar artigo {article['id']}: {e}")
+            stats["erros"] += 1
+            resultado["status"] = "erro"
+            resultado["mensagem"] = f"Erro no processamento: {str(e)}"
+        
+        resultados.append(resultado)
     
-    print("\nProcessamento de todos os artigos concluído!")
+    # Exibir resumo do processamento
+    print("\n" + "="*50)
+    print("🔍 RESUMO DO PROCESSAMENTO DE ARTIGOS")
+    print("="*50)
+    print(f"✅ Total processado:   {stats['processados']}")
+    print(f"📝 Traduzidos:         {stats['traduzidos']}")
+    print(f"🚀 Publicados:         {stats['publicados']}")
+    print(f"🔄 Duplicados:         {stats['duplicados']}")
+    print(f"❌ Erros:              {stats['erros']}")
+    print("="*50)
+    print("\nDetalhes dos artigos processados:")
+    for resultado in resultados:
+        status_emoji = "✅" if resultado["status"] == "publicado" else "🔄" if resultado["status"] == "duplicado" else "❌"
+        print(f"{status_emoji} ID {resultado['id']}: {resultado['titulo'][:40]}... => {resultado['status'].upper()}")
+        if resultado.get("mensagem"):
+            print(f"   {resultado['mensagem']}")
     
     # Verificar publicação no Sanity
     verify_sanity_posts()
