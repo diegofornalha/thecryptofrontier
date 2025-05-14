@@ -1,21 +1,18 @@
 #!/usr/bin/env python3
 """
 Processador de Fila de Artigos
-Script para processar artigos da fila Redis em background
+Fornece funções para processar artigos da fila Redis
 """
 
-import os
 import json
 import time
-import sys
 import logging
-import argparse
 from pathlib import Path
 from datetime import datetime
 import traceback
 
-from redis_tools import RedisArticleQueue, redis_client, get_redis_client
-from src.blog_automacao.tools.sanity_tools import SanityPublishTool
+from .redis_tools import RedisArticleQueue
+from .sanity_tools import SanityPublishTool
 
 # Configurar logging
 logging.basicConfig(
@@ -26,19 +23,7 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
-logger = logging.getLogger("process_article_queue")
-
-def check_redis_connection():
-    """Verifica se o Redis está disponível"""
-    try:
-        # Tentar criar uma nova conexão com retry
-        client = get_redis_client()
-        client.ping()
-        logger.info("✅ Conexão com Redis estabelecida com sucesso!")
-        return True
-    except Exception as e:
-        logger.error(f"❌ Erro ao conectar com Redis: {str(e)}")
-        return False
+logger = logging.getLogger("process_queue")
 
 def publish_to_sanity(article_data):
     """
@@ -48,22 +33,13 @@ def publish_to_sanity(article_data):
     logger.info(f"📝 Publicando artigo: {article_data.get('title', 'Sem título')}")
     
     try:
-        # Verificar se temos as credenciais do Sanity
-        project_id = os.environ.get("SANITY_PROJECT_ID") or os.environ.get("NEXT_PUBLIC_SANITY_PROJECT_ID")
-        api_token = os.environ.get("SANITY_API_TOKEN") or os.environ.get("SANITY_DEV_TOKEN")
-        
-        if not project_id or not api_token:
-            logger.warning("Credenciais do Sanity não encontradas. Usando modo de simulação.")
-            return _save_for_later_publish(article_data)
-            
-        # Usar a ferramenta de publicação real
+        # Usar a ferramenta de publicação
         sanity_publisher = SanityPublishTool()
         
         # Verificar se o artigo já está no formato correto para o Sanity
         # ou se precisa ser convertido
         if '_type' not in article_data:
             logger.info("Convertendo artigo para formato Sanity antes de publicar...")
-            # Lógica para preparar o artigo para publicação
             # A ferramenta SanityPublishTool já tem a lógica para isso
         
         # Publicar no Sanity
@@ -179,6 +155,50 @@ def process_queue(max_articles=None, interval=5, recover_stalled=True, max_proce
         if recovered > 0:
             logger.info(f"🔄 Recuperados {recovered} artigos presos na fila de processamento")
     
+    # Se max_articles é 1, só processa um artigo e termina
+    if max_articles == 1:
+        # Busca o próximo artigo
+        article = queue.get_next_article()
+        if not article:
+            logger.info("💤 Nenhum artigo na fila para processar.")
+            return 0
+        
+        try:
+            # Processa o artigo
+            logger.info(f"⚙️ Processando artigo: {article.get('title', 'Sem título')}")
+            
+            # Tenta publicar no Sanity
+            success = publish_to_sanity(article)
+            
+            if success:
+                # Marca como concluído
+                queue.mark_completed(article)
+                processed += 1
+                logger.info(f"✅ Artigo processado com sucesso!")
+            else:
+                # Registra erro
+                error_msg = f"Falha ao processar artigo: {article.get('title', 'Sem título')}"
+                logger.error(f"❌ {error_msg}")
+                queue.mark_error(article, error_msg)
+                errors += 1
+        
+        except Exception as e:
+            error_msg = f"Erro ao processar artigo: {str(e)}"
+            logger.error(f"❌ {error_msg}")
+            logger.debug(traceback.format_exc())
+            
+            # Tenta marcar como erro
+            try:
+                queue.mark_error(article, error_msg)
+            except Exception as e2:
+                logger.error(f"Erro ao marcar artigo com erro: {str(e2)}")
+            
+            errors += 1
+        
+        # Retorna número de artigos processados
+        return processed
+    
+    # Se max_articles é None ou maior que 1, entra em loop
     while True:
         # Verifica se atingimos o limite
         if max_articles is not None and processed >= max_articles:
@@ -226,54 +246,5 @@ def process_queue(max_articles=None, interval=5, recover_stalled=True, max_proce
         
         # Pausa entre processamentos
         time.sleep(interval)
-
-def parse_arguments():
-    """Parse os argumentos da linha de comando"""
-    parser = argparse.ArgumentParser(description="Processador de Fila de Artigos")
-    parser.add_argument('-m', '--max', type=int, default=None, 
-                        help="Número máximo de artigos a processar")
-    parser.add_argument('-i', '--interval', type=int, default=5, 
-                        help="Intervalo em segundos entre processamentos")
-    parser.add_argument('--no-recover', action='store_true', 
-                        help="Não recuperar artigos presos na fila de processamento")
-    parser.add_argument('--max-processing-time', type=int, default=3600, 
-                        help="Tempo máximo (segundos) que um artigo pode ficar em processamento")
-    parser.add_argument('-v', '--verbose', action='store_true', 
-                        help="Habilitar logs detalhados (DEBUG)")
     
-    return parser.parse_args()
-
-if __name__ == "__main__":
-    # Parse argumentos
-    args = parse_arguments()
-    
-    # Configurar nível de log baseado nos argumentos
-    if args.verbose:
-        logging.getLogger().setLevel(logging.DEBUG)
-        logger.setLevel(logging.DEBUG)
-        logger.debug("Modo verbose ativado")
-    
-    # Verificar Redis
-    if not check_redis_connection():
-        logger.error("❌ Sem conexão com Redis. Impossível continuar.")
-        sys.exit(1)
-    
-    # Exibir estatísticas iniciais
-    queue = RedisArticleQueue()
-    stats = queue.get_queue_stats()
-    logger.info(f"📊 Estatísticas iniciais: {stats['pending']} pendentes, {stats['processing']} em processamento, {stats['completed']} concluídos, {stats.get('error', 0)} com erro")
-    
-    # Processar a fila
-    try:
-        process_queue(
-            max_articles=args.max,
-            interval=args.interval,
-            recover_stalled=not args.no_recover,
-            max_processing_time=args.max_processing_time
-        )
-    except KeyboardInterrupt:
-        logger.info("\n🛑 Processamento interrompido pelo usuário")
-    
-    # Exibir estatísticas finais
-    stats = queue.get_queue_stats()
-    logger.info(f"📊 Estatísticas finais: {stats['pending']} pendentes, {stats['processing']} em processamento, {stats['completed']} concluídos, {stats.get('error', 0)} com erro") 
+    return processed

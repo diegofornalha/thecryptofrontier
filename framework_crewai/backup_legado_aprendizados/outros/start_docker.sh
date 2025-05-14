@@ -35,7 +35,7 @@ docker-compose ps
 
 echo ""
 echo "Aplicação Streamlit disponível em: http://localhost:8501"
-echo "Redis disponível na porta 6380"
+echo "Redis disponível na porta 6381"
 echo ""
 echo "Para visualizar logs do Streamlit:"
 echo "docker-compose logs -f streamlit"

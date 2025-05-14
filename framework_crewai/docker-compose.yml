@@ -1,42 +1,50 @@
 version: '3.8'
 
 services:
+  # Frontend NextJS - agora rodando em Docker
+  nextjs:
+    build:
+      context: ..
+      dockerfile: Dockerfile.nextjs
+    container_name: nextjs-frontend
+    ports:
+      - "3000:3000"  # Expor na porta 3000 para acesso direto se necessário
+    environment:
+      - NODE_ENV=production
+      - SANITY_PREVIEW=false
+      - NEXT_PUBLIC_SANITY_PROJECT_ID=brby2yrg
+      - NEXT_PUBLIC_SANITY_DATASET=production
+      - NEXT_PUBLIC_SANITY_API_VERSION=2023-05-03
+      # Variáveis para suporte a proxy
+      - NEXT_PUBLIC_PROXY_ENABLED=true
+      - NEXT_PUBLIC_ASSETS_PREFIX=/frontend
+      - PROXY_BASE_PATH=/frontend
+    restart: unless-stopped
+    networks:
+      - crewai-network
+
   # Serviço Streamlit para interface de usuário
   streamlit:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
     container_name: streamlit-crewai-ui
+    # Expor na porta 8501 para acesso direto se necessário
     ports:
       - "8501:8501"
     environment:
-      # Redis
-      - REDIS_HOST=redis  # Nome do serviço Redis no docker-compose
-      - REDIS_PORT=6379   # Porta padrão dentro do container
-      
-      # Gemini API
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
       - GEMINI_API_KEY=${GEMINI_API_KEY}
-      
-      # Sanity
-      - NEXT_PUBLIC_SANITY_PROJECT_ID=${NEXT_PUBLIC_SANITY_PROJECT_ID}
-      - NEXT_PUBLIC_SANITY_DATASET=${NEXT_PUBLIC_SANITY_DATASET}
-      - NEXT_PUBLIC_SANITY_API_VERSION=${NEXT_PUBLIC_SANITY_API_VERSION}
       - SANITY_PROJECT_ID=${SANITY_PROJECT_ID}
       - SANITY_API_TOKEN=${SANITY_API_TOKEN}
-      - SANITY_DEV_TOKEN=${SANITY_DEV_TOKEN}
-      - SANITY_DEPLOY_TOKEN=${SANITY_DEPLOY_TOKEN}
-      - SANITY_WEBHOOK_SECRET=${SANITY_WEBHOOK_SECRET}
-      
-      # Algolia
       - NEXT_PUBLIC_ALGOLIA_APP_ID=${NEXT_PUBLIC_ALGOLIA_APP_ID}
       - NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY=${NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY}
-      - ALGOLIA_ADMIN_API_KEY=${ALGOLIA_ADMIN_API_KEY}
-      - NEXT_PUBLIC_ALGOLIA_INDEX_NAME=${NEXT_PUBLIC_ALGOLIA_INDEX_NAME}
-      - ALGOLIA_WRITE_API_KEY=${ALGOLIA_WRITE_API_KEY}
+      - PROXY_ENABLED=true
     volumes:
-      - ./posts_para_traduzir:/app/posts_para_traduzir
-      - ./posts_traduzidos:/app/posts_traduzidos
-      - ./posts_formatados:/app/posts_formatados
-      - ./posts_publicados:/app/posts_publicados
-      - ./output:/app/output
+      - .:/app
+      - ./.streamlit:/root/.streamlit  # Garantir que a config do Streamlit seja montada
+    working_dir: /app
     depends_on:
       - redis
     restart: unless-stopped
@@ -48,66 +56,38 @@ services:
   redis:
     image: redis:alpine
     container_name: redis-crewai-cache
-    ports:
-      - "6380:6379"  # Mapeando a porta 6380 do host para 6379 do container
+    expose:
+      - "6379"
     volumes:
       - redis_data:/data
     restart: unless-stopped
     command: redis-server --appendonly yes
     networks:
       - crewai-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-
-  # Serviço de processamento da fila (processador em Python)
-  # Este serviço executa o script process_article_queue.py para processar a fila Redis
-  queue-processor:
-    build:
-      context: .
-      dockerfile: Dockerfile.processor
-    container_name: crewai-queue-processor
-    depends_on:
-      - redis
-    environment:
-      # Redis
-      - REDIS_HOST=redis  # Nome do serviço Redis no docker-compose
-      - REDIS_PORT=6379   # Porta padrão dentro do container
-      
-      # Gemini API
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
-      
-      # Sanity
-      - NEXT_PUBLIC_SANITY_PROJECT_ID=${NEXT_PUBLIC_SANITY_PROJECT_ID}
-      - NEXT_PUBLIC_SANITY_DATASET=${NEXT_PUBLIC_SANITY_DATASET}
-      - NEXT_PUBLIC_SANITY_API_VERSION=${NEXT_PUBLIC_SANITY_API_VERSION}
-      - SANITY_PROJECT_ID=${SANITY_PROJECT_ID}
-      - SANITY_API_TOKEN=${SANITY_API_TOKEN}
-      - SANITY_DEV_TOKEN=${SANITY_DEV_TOKEN}
-      - SANITY_DEPLOY_TOKEN=${SANITY_DEPLOY_TOKEN}
-      - SANITY_WEBHOOK_SECRET=${SANITY_WEBHOOK_SECRET}
-      
-      # Algolia
-      - NEXT_PUBLIC_ALGOLIA_APP_ID=${NEXT_PUBLIC_ALGOLIA_APP_ID}
-      - NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY=${NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY}
-      - ALGOLIA_ADMIN_API_KEY=${ALGOLIA_ADMIN_API_KEY}
-      - NEXT_PUBLIC_ALGOLIA_INDEX_NAME=${NEXT_PUBLIC_ALGOLIA_INDEX_NAME}
-      - ALGOLIA_WRITE_API_KEY=${ALGOLIA_WRITE_API_KEY}
-    volumes:
-      - ./posts_para_traduzir:/app/posts_para_traduzir
-      - ./posts_traduzidos:/app/posts_traduzidos
-      - ./posts_formatados:/app/posts_formatados
-      - ./posts_publicados:/app/posts_publicados
-      - ./output:/app/output
+  
+  # Proxy reverso Caddy
+  caddy:
+    image: caddy:2
+    container_name: caddy-crewai-proxy
     restart: unless-stopped
+    ports:
+      - "8080:8080"  # Exposição na porta 8080 conforme Caddyfile
+      - "3200:3200"  # Exposição na porta 3200 adicional
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./static:/app/static
+      - caddy_data:/data
+      - caddy_config:/config
     networks:
       - crewai-network
-    command: ["python", "process_article_queue.py", "--loop", "5", "--max", "10"]
+    depends_on:
+      - streamlit
+      - nextjs
 
 volumes:
   redis_data:
+  caddy_data:
+  caddy_config:
 
 networks:
   crewai-network:

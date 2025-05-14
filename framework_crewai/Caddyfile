@@ -1,0 +1,47 @@
+{
+    servers {
+        protocols h1 h2c
+    }
+    
+    :8080, :3200, thecryptofrontier.agentesintegrados.com {
+    # Configuração principal do Caddy
+    log {
+        output stdout
+        format console
+    }
+
+    # Servir página inicial estática na raiz
+    handle / {
+        root * /app/static
+        file_server
+    }
+
+    # Servir arquivos estáticos
+    handle /style.css {
+        root * /app/static
+        file_server
+    }
+
+    # Rota para o Streamlit
+    handle_path /streamlit/* {
+        # Direcionar para o serviço Streamlit
+        reverse_proxy streamlit:8501
+    }
+
+    # Rota para o frontend NextJS
+    handle /frontend* {
+        # Acessar o NextJS em container Docker
+        reverse_proxy nextjs:3000
+    }
+
+    # Rotas para recursos estáticos do NextJS
+    handle /_next* {
+        reverse_proxy nextjs:3000
+    }
+
+    # Rotas para APIs
+    handle /api* {
+        reverse_proxy nextjs:3000
+    }
+}
+}

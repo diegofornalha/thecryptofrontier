@@ -102,14 +102,8 @@ interface BlogProps {
   headerConfig: any;
 }
 
-// Função para formatar a data
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric'
-  });
-};
+// Importar utilitário de data
+import { formatDate } from '../utils/date-utils';
 
 // Função para formatar o preço em BRL
 const formatPrice = (price?: number) => {
@@ -195,7 +189,7 @@ export default function Blog({ posts, blogConfig, footerConfig, headerConfig }: 
                 <div className="text-sm text-muted-foreground">
                   {showAuthor && post.author?.name && <span>{post.author.name}{showDate && post.publishedAt ? ' • ' : ''}</span>}
                   {showDate && post.publishedAt && 
-                    <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
+                    <time dateTime={post.publishedAt} suppressHydrationWarning>{formatDate(post.publishedAt)}</time>
                   }
                   {post.estimatedReadingTime && (
                     <span> • {post.estimatedReadingTime} min de leitura</span>

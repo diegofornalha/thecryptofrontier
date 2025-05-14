@@ -78,12 +78,43 @@ def monitor_feeds():
         SessionManager.add_log("Iniciando monitoramento de feeds RSS...")
         
         try:
+            # Verificar se existem feeds configurados
+            feeds = load_feeds()
+            if not feeds:
+                SessionManager.add_log("❌ Nenhum feed RSS configurado! Adicione feeds em 'feeds.json'")
+                return False
+                
+            SessionManager.add_log(f"Encontrados {len(feeds)} feeds configurados: {', '.join([f['name'] for f in feeds])}")
+            
+            # Executar o monitoramento
             result = crew.monitoramento_crew().kickoff(inputs={})
-            SessionManager.add_log(f"Monitoramento concluído: {result.raw[:100]}...")
+            
+            # Verificar resultado
+            result_str = str(result.raw)
+            if "[]" in result_str and len(result_str) < 10:
+                SessionManager.add_log("⚠️ Nenhum novo artigo encontrado nos feeds")
+            else:
+                # Contar arquivos criados no diretório posts_para_traduzir
+                dir_posts = Path("posts_para_traduzir")
+                if dir_posts.exists():
+                    arquivos_antes = set(dir_posts.glob("para_traduzir_*.json"))
+                    
+                    # Se o resultado contém novos artigos, verificar a diferença
+                    arquivos_depois = set(dir_posts.glob("para_traduzir_*.json"))
+                    novos_arquivos = arquivos_depois - arquivos_antes
+                    
+                    if novos_arquivos:
+                        SessionManager.add_log(f"✅ {len(novos_arquivos)} novos artigos adicionados para tradução!")
+                    else:
+                        SessionManager.add_log("⚠️ Nenhum novo artigo adicionado para tradução")
+            
+            SessionManager.add_log(f"Monitoramento concluído com resultado: {result.raw[:100]}...")
             SessionManager.update_last_run()
             return True
         except Exception as e:
             SessionManager.add_log(f"Erro no monitoramento: {str(e)}")
+            import traceback
+            SessionManager.add_log(f"Trace: {traceback.format_exc()}")
             return False
 
 def translate_article(arquivo_json=None):
@@ -106,6 +137,24 @@ def translate_article(arquivo_json=None):
             # Ordenar por nome para pegar o mais antigo primeiro
             arquivos.sort()
             arquivo_json = arquivos[0]  # Pegar apenas o primeiro arquivo
+        
+        # Verificar se o arquivo já está traduzido
+        if isinstance(arquivo_json, str):
+            arquivo_json = Path(arquivo_json)
+        
+        # Verificar se existe um arquivo traduzido com o mesmo nome, mas sem o prefixo
+        arquivo_base = arquivo_json.stem
+        if arquivo_base.startswith("para_traduzir_"):
+            arquivo_base = arquivo_base.replace("para_traduzir_", "")
+            
+        # Checar se existe arquivo traduzido no diretório posts_traduzidos
+        dir_traduzidos = Path("posts_traduzidos")
+        if dir_traduzidos.exists():
+            possivel_traduzido = dir_traduzidos / f"traduzido_{arquivo_base}.json"
+            if possivel_traduzido.exists():
+                SessionManager.add_log(f"⚠️ AVISO: Este artigo já foi traduzido anteriormente: {possivel_traduzido}")
+                # Perguntar se deseja traduzir novamente
+                return False
         
         SessionManager.add_log(f"Iniciando tradução do artigo: {arquivo_json.name}")
         
@@ -152,6 +201,27 @@ def translate_article(arquivo_json=None):
             # Executar a tradução
             resultado = crew.traducao_crew().kickoff(inputs=inputs)
             SessionManager.add_log(f"✅ Tradução concluída para {arquivo_json.name}")
+            
+            # Após traduzir com sucesso, mover o arquivo original para um diretório de processados
+            # para evitar processamento duplicado
+            try:
+                processados_dir = Path("posts_processados")
+                processados_dir.mkdir(exist_ok=True, parents=True)
+                
+                # Criar nome para arquivo processado
+                arquivo_processado = processados_dir / f"processado_{arquivo_json.name}"
+                
+                # Mover arquivo para diretório de processados apenas se ele está em posts_para_traduzir
+                if "posts_para_traduzir" in str(arquivo_json):
+                    import shutil
+                    shutil.copy2(arquivo_json, arquivo_processado)
+                    SessionManager.add_log(f"Arquivo original movido para: {arquivo_processado}")
+                    
+                    # Opcionalmente, remover o arquivo original
+                    # arquivo_json.unlink()
+            except Exception as move_error:
+                SessionManager.add_log(f"⚠️ Aviso ao mover arquivo: {str(move_error)}")
+            
             SessionManager.update_last_run()
             return True
             
@@ -608,6 +678,145 @@ def create_slug(title):
     # Limitar tamanho
     return slug[:80]
 
+def index_algolia_post(post_id, post_title=None):
+    """
+    Indexa um post do Sanity no Algolia para pesquisa.
+    
+    Args:
+        post_id (str): ID do post no Sanity
+        post_title (str, optional): Título do post para logs
+        
+    Returns:
+        bool: True se indexado com sucesso, False caso contrário
+    """
+    try:
+        import os
+        import requests
+        import json
+        
+        SessionManager.add_log(f"🔍 Iniciando indexação no Algolia para post: {post_title or post_id}")
+        
+        # Verificar configurações do Algolia
+        algolia_app_id = os.environ.get("NEXT_PUBLIC_ALGOLIA_APP_ID", "") or os.environ.get("ALGOLIA_APP_ID", "")
+        # Para escrita, usamos a ADMIN ou WRITE API KEY
+        algolia_api_key = os.environ.get("ALGOLIA_ADMIN_API_KEY", "") or os.environ.get("ALGOLIA_WRITE_API_KEY", "") or os.environ.get("ALGOLIA_API_KEY", "")
+        algolia_index_name = os.environ.get("NEXT_PUBLIC_ALGOLIA_INDEX_NAME", "") or os.environ.get("ALGOLIA_INDEX_NAME", "posts")
+        
+        # Se não encontrou nas variáveis de ambiente, tentar ler do .env
+        if not algolia_app_id or not algolia_api_key:
+            try:
+                with open(".env", "r") as f:
+                    for line in f:
+                        if "ALGOLIA_APP_ID" in line or "NEXT_PUBLIC_ALGOLIA_APP_ID" in line:
+                            parts = line.strip().split("=")
+                            if len(parts) > 1:
+                                algolia_app_id = parts[1].strip().strip('"').strip("'")
+                        elif "ALGOLIA_ADMIN_API_KEY" in line:
+                            parts = line.strip().split("=")
+                            if len(parts) > 1:
+                                algolia_api_key = parts[1].strip().strip('"').strip("'")
+                        elif "ALGOLIA_WRITE_API_KEY" in line and not algolia_api_key:
+                            parts = line.strip().split("=")
+                            if len(parts) > 1:
+                                algolia_api_key = parts[1].strip().strip('"').strip("'")
+                        elif "ALGOLIA_API_KEY" in line and not algolia_api_key:
+                            parts = line.strip().split("=")
+                            if len(parts) > 1:
+                                algolia_api_key = parts[1].strip().strip('"').strip("'")
+                        elif "ALGOLIA_INDEX_NAME" in line or "NEXT_PUBLIC_ALGOLIA_INDEX_NAME" in line:
+                            parts = line.strip().split("=")
+                            if len(parts) > 1:
+                                algolia_index_name = parts[1].strip().strip('"').strip("'")
+            except Exception as e:
+                SessionManager.add_log(f"❌ Erro ao ler arquivo .env: {e}")
+        
+        # Verificar se temos as credenciais necessárias
+        if not algolia_app_id or not algolia_api_key:
+            SessionManager.add_log("❌ Credenciais do Algolia não encontradas")
+            return False
+        
+        # Obter dados do post do Sanity
+        project_id = os.environ.get("NEXT_PUBLIC_SANITY_PROJECT_ID") or os.environ.get("SANITY_PROJECT_ID", "brby2yrg")
+        dataset = os.environ.get("NEXT_PUBLIC_SANITY_DATASET", "production")
+        api_version = os.environ.get("NEXT_PUBLIC_SANITY_API_VERSION", "2023-05-03")
+        token = os.environ.get("SANITY_DEV_TOKEN", "")
+        
+        # Se não encontrou o token DEV, verificar outros tokens
+        if not token:
+            token = os.environ.get("SANITY_API_TOKEN", "")
+        if not token:
+            token = os.environ.get("SANITY_DEPLOY_TOKEN", "")
+        
+        # URL para buscar o post específico
+        post_query = f"*[_id == '{post_id}'][0]{{"
+        post_query += "_id, title, slug, publishedAt, excerpt, "
+        post_query += "\"content\": pt::text(content), \"estimatedReadingTime\": round(length(pt::text(content)) / 5 / 180)"
+        post_query += "}"
+        
+        encoded_query = requests.utils.quote(post_query)
+        url = f"https://{project_id}.api.sanity.io/v{api_version}/data/query/{dataset}?query={encoded_query}"
+        
+        # Headers para a requisição
+        headers = {}
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
+        
+        # Buscar o post
+        SessionManager.add_log(f"🔄 Buscando post do Sanity: {post_id}")
+        response = requests.get(url, headers=headers)
+        
+        if response.status_code != 200:
+            SessionManager.add_log(f"❌ Erro ao buscar post do Sanity: {response.status_code} - {response.text}")
+            return False
+        
+        post_data = response.json().get("result", {})
+        
+        if not post_data:
+            SessionManager.add_log(f"❌ Post não encontrado no Sanity: {post_id}")
+            return False
+        
+        # Preparar objeto para o Algolia
+        algolia_object = {
+            "objectID": post_data.get("_id", post_id),
+            "title": post_data.get("title", "Sem título"),
+            "content": post_data.get("content", ""),
+            "excerpt": post_data.get("excerpt", ""),
+            "slug": post_data.get("slug", {}).get("current", ""),
+            "publishedAt": post_data.get("publishedAt", ""),
+            "estimatedReadingTime": post_data.get("estimatedReadingTime", 0)
+        }
+        
+        # URL da API do Algolia
+        algolia_url = f"https://{algolia_app_id}-dsn.algolia.net/1/indexes/{algolia_index_name}/objects/{post_id}"
+        
+        # Headers para a API do Algolia
+        algolia_headers = {
+            "X-Algolia-API-Key": algolia_api_key,
+            "X-Algolia-Application-Id": algolia_app_id,
+            "Content-Type": "application/json"
+        }
+        
+        # Enviar para o Algolia
+        SessionManager.add_log(f"🔄 Enviando post para indexação no Algolia: {post_data.get('title', 'Sem título')}")
+        algolia_response = requests.put(algolia_url, headers=algolia_headers, json=algolia_object)
+        
+        if algolia_response.status_code in [200, 201]:
+            response_data = algolia_response.json()
+            SessionManager.add_log(f"✅ Post indexado com sucesso no Algolia: {post_data.get('title', 'Sem título')}")
+            SessionManager.add_log(f"✅ Detalhes da indexação: ObjectID: {response_data.get('objectID')}, TaskID: {response_data.get('taskID')}")
+            print(f"✅ Post '{post_data.get('title', 'Sem título')}' indexado com sucesso no Algolia!")
+            return True
+        else:
+            SessionManager.add_log(f"❌ Erro ao indexar no Algolia: {algolia_response.status_code} - {algolia_response.text}")
+            print(f"❌ Erro ao indexar '{post_data.get('title', 'Sem título')}' no Algolia: {algolia_response.status_code}")
+            return False
+        
+    except Exception as e:
+        import traceback
+        SessionManager.add_log(f"❌ Erro ao indexar post no Algolia: {str(e)}")
+        SessionManager.add_log(f"Trace: {traceback.format_exc()}")
+        return False
+
 def get_stats():
     """Obtém estatísticas do sistema."""
     stats = {}
@@ -790,13 +999,7 @@ def enqueue_crewai_article(article_data, process_now=False):
     """
     try:
         # Importar o cliente Redis
-        import sys
-        import os
-        parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
-        if parent_dir not in sys.path:
-            sys.path.insert(0, parent_dir)
-        
-        from redis_tools import RedisArticleQueue
+        from ..tools.redis_tools import RedisArticleQueue
         queue = RedisArticleQueue()
         
         SessionManager.add_log(f"Enfileirando artigo: {article_data.get('title', 'Sem título')}")
@@ -813,7 +1016,7 @@ def enqueue_crewai_article(article_data, process_now=False):
             # Processar imediatamente se solicitado
             if process_now:
                 try:
-                    from process_article_queue import process_queue
+                    from ..tools.process_queue import process_queue
                     # Processar apenas um artigo
                     process_queue(max_articles=1, interval=1)
                     SessionManager.add_log("✅ Artigo processado imediatamente")
@@ -931,7 +1134,7 @@ def execute_full_flow():
             if parent_dir not in sys.path:
                 sys.path.insert(0, parent_dir)
             
-            from redis_tools import redis_client
+            from backup_legado_aprendizados.redis_tools import redis_client
             
             # Se o Redis estiver disponível, usamos a fila
             if redis_client and redis_client.ping():
@@ -942,7 +1145,7 @@ def execute_full_flow():
                 
                 # Passo 2: Importar e usar process_article_queue
                 try:
-                    from process_article_queue import process_queue
+                    from backup_legado_aprendizados.process_article_queue import process_queue
                     # Processar até 3 artigos em sequência
                     SessionManager.add_log("📝 Processando artigos da fila...")
                     process_queue(max_articles=3, interval=1)

@@ -42,7 +42,10 @@ const Hit = ({ hit }) => {
             <div className="search-result-meta">
               {hit.date && (
                 <span className="search-date">
-                  {dayjs(hit.date).format('DD [de] MMMM [de] YYYY')}
+                  {/* Use a more consistent date formatter to prevent hydration errors */}
+                  <span suppressHydrationWarning>
+                    {dayjs(hit.date).format('DD [de] MMMM [de] YYYY')}
+                  </span>
                 </span>
               )}
               {hit.timeToRead && (

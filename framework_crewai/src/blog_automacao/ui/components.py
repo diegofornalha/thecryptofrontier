@@ -16,6 +16,19 @@ def load_css():
 # Componentes da Sidebar
 def render_sidebar():
     """Renderiza a barra lateral do app."""
+    # Verificar status do Redis
+    try:
+        # Importar Redis client
+        from ..tools.redis_tools import redis_client
+
+        # Verificar conexão
+        if redis_client and redis_client.ping():
+            st.sidebar.success("Redis: ✅ Conectado")
+        else:
+            st.sidebar.error("Redis: ⚠️ Desconectado")
+    except Exception as e:
+        st.sidebar.error(f"Redis: ⚠️ Desconectado ({str(e)[:50]}...)")
+    
     # Botão para limpar cache
     if st.button("🧹 Limpar Cache", key="limpar_cache_sidebar"):
         SessionManager.clear_cache()
@@ -213,8 +226,33 @@ def render_post_card(post, index):
                 st.rerun()
         with col2:
             if st.button("Indexar no Algolia", key=f"index_{index}"):
+                import os
+                # Verificar se as credenciais do Algolia estão configuradas
+                algolia_app_id = os.environ.get("NEXT_PUBLIC_ALGOLIA_APP_ID", "") or os.environ.get("ALGOLIA_APP_ID", "")
+                algolia_api_key = os.environ.get("ALGOLIA_ADMIN_API_KEY", "") or os.environ.get("ALGOLIA_WRITE_API_KEY", "") or os.environ.get("ALGOLIA_API_KEY", "")
+                
+                # Se não encontrou nas variáveis de ambiente, tentar ler do .env
+                if not algolia_app_id or not algolia_api_key:
+                    try:
+                        with open(".env", "r") as f:
+                            env_content = f.read()
+                            app_id_found = "NEXT_PUBLIC_ALGOLIA_APP_ID" in env_content or "ALGOLIA_APP_ID" in env_content
+                            api_key_found = "ALGOLIA_ADMIN_API_KEY" in env_content or "ALGOLIA_WRITE_API_KEY" in env_content or "ALGOLIA_API_KEY" in env_content
+                            
+                            if not app_id_found or not api_key_found:
+                                st.warning("⚠️ Credenciais do Algolia não configuradas! Adicione NEXT_PUBLIC_ALGOLIA_APP_ID e ALGOLIA_ADMIN_API_KEY ou ALGOLIA_WRITE_API_KEY no arquivo .env")
+                                return
+                    except:
+                        st.warning("⚠️ Credenciais do Algolia não configuradas! Adicione ALGOLIA_APP_ID e ALGOLIA_API_KEY no arquivo .env")
+                        return
+                
                 from ..logic.business_logic import index_algolia_post
-                index_algolia_post(post.get("_id"), post.get("title", "Sem título"))
+                with st.spinner(f"Indexando '{post.get('title', 'Sem título')}' no Algolia..."):
+                    success = index_algolia_post(post.get("_id"), post.get("title", "Sem título"))
+                    if success:
+                        st.success("✅ Post indexado com sucesso no Algolia!")
+                    else:
+                        st.error("❌ Erro ao indexar no Algolia. Verifique os logs para mais detalhes.")
         with col3:
             post_slug = post.get('slug', {}).get('current', '')
             post_url = f"https://thecryptofrontier.com/post/{post_slug}"

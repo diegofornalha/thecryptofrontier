@@ -7,12 +7,8 @@ import traceback
 import sys
 import os
 
-# Adicionar diretório pai ao path para importar redis_tools
-parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
-if parent_dir not in sys.path:
-    sys.path.insert(0, parent_dir)
-
-from redis_tools import RedisArticleQueue, redis_client, get_redis_client
+# Importar do novo módulo redis_tools
+from ..tools.redis_tools import RedisArticleQueue, redis_client, get_redis_client
 
 @st.cache_data(ttl=10)  # Cache por 10 segundos
 def get_queue_stats():
@@ -76,8 +72,57 @@ def render_redis_status():
         redis_status = f"❌ Erro: {str(e)}"
         redis_color = "red"
     
-    # Exibir status
-    st.markdown(f"<p style='color: {redis_color};'><b>Status:</b> {redis_status}</p>", unsafe_allow_html=True)
+    # Exibir status em um container destacado
+    status_container = st.container()
+    with status_container:
+        if redis_color == "green":
+            st.success(f"Status: {redis_status}")
+        else:
+            st.error(f"Status: {redis_status}")
+            
+            # Adicionar instruções para resolver problemas de conexão
+            with st.expander("Como resolver problemas de conexão"):
+                st.markdown("""
+                ### Instruções para conectar ao Redis
+                
+                1. **Verifique se o serviço Redis está em execução:**
+                   ```bash
+                   docker ps | grep redis
+                   ```
+                   
+                2. **Inicie o serviço Redis se estiver parado:**
+                   ```bash
+                   cd /home/sanity/thecryptofrontier/framework_crewai
+                   docker-compose up -d redis
+                   ```
+                   
+                3. **Configure as variáveis de ambiente:**
+                   Verifique se as seguintes variáveis estão configuradas no arquivo `.env`:
+                   ```
+                   REDIS_HOST=redis
+                   REDIS_PORT=6379
+                   ```
+                   
+                4. **Se estiver rodando localmente (fora do Docker):**
+                   ```
+                   REDIS_HOST=localhost
+                   REDIS_PORT=6379
+                   ```
+                   
+                5. **Reinicie a aplicação após fazer alterações**
+                """)
+    
+    # Botão para testar conexão
+    if st.button("Testar Conexão Redis"):
+        try:
+            from ..tools.redis_tools import get_redis_client
+            client = get_redis_client()
+            if client and client.ping():
+                st.success("✅ Conexão com Redis estabelecida com sucesso!")
+            else:
+                st.error("❌ Falha ao conectar com Redis")
+        except Exception as e:
+            st.error(f"❌ Erro ao conectar com Redis: {str(e)}")
     
     # Obter estatísticas
     stats = get_queue_stats()

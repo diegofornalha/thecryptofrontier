@@ -6,7 +6,7 @@ Verifica se a conexão com Redis está funcionando e mostra configurações
 
 import sys
 import time
-from redis_tools import (
+from backup_legado_aprendizados.redis_tools import (
     redis_client, get_redis_client, 
     RedisMemoryTool, RedisFeedCache, RedisArticleQueue,
     REDIS_HOST, REDIS_PORT, REDIS_DB

@@ -6,6 +6,9 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     git \
+    procps \
+    netcat-openbsd \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copiar arquivos de dependências
@@ -17,11 +20,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Instalar dependências adicionais (Algolia, etc)
 RUN pip install --no-cache-dir algoliasearch backoff python-dotenv
 
-# Copiar o código da aplicação
-COPY . .
+# Copiar apenas os arquivos necessários
+COPY app_modular.py .
+COPY src/ ./src/
+COPY static/ ./static/
 
 # Criar diretórios necessários
-RUN mkdir -p posts_para_traduzir posts_traduzidos posts_formatados posts_publicados
+RUN mkdir -p posts_para_traduzir posts_traduzidos posts_formatados posts_publicados output/published output/errors
 
 # Expor a porta que o Streamlit usa
 EXPOSE 8501
@@ -30,4 +35,4 @@ EXPOSE 8501
 ENV PYTHONUNBUFFERED=1
 
 # Comando para iniciar a aplicação
-CMD ["streamlit", "run", "app_modular.py", "--server.port=8501", "--server.address=0.0.0.0"]
+CMD ["streamlit", "run", "app_modular.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true"]

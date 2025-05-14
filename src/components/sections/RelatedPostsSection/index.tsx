@@ -216,7 +216,7 @@ export default function RelatedPostsSection(props) {
                                         </div>
                                     )}
                                     {showDateConfig && postItem.date && (
-                                        <time className="text-gray-500 dark:text-gray-400" dateTime={postItem.date} data-sb-field-path=".date">
+                                        <time className="text-gray-500 dark:text-gray-400" dateTime={postItem.date} data-sb-field-path=".date" suppressHydrationWarning>
                                             {formatDate(postItem.date)}
                                         </time>
                                     )}
@@ -244,16 +244,14 @@ export default function RelatedPostsSection(props) {
     );
 }
 
+// Import utility for date formatting
+import { formatDate as formatDateUtil } from '../../../utils/date-utils';
+
 function formatDate(date) {
     if (!date) {
         return '';
     }
-    const options = { 
-        year: 'numeric' as const, 
-        month: 'long' as const, 
-        day: 'numeric' as const 
-    };
-    return new Date(date).toLocaleDateString('pt-BR', options);
+    return formatDateUtil(date);
 }
 
 function classNames(...classes) {

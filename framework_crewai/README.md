@@ -1,148 +1,78 @@
-# Sistema de Automação de Blog (CrewAI + Redis)
+# The Crypto Frontier - Framework CrewAI
 
-Este sistema automatiza o fluxo de trabalho para tradução e publicação de artigos sobre criptomoedas. O sistema usa Redis como middleware para gerenciar filas de artigos, combinado com CrewAI para processamento inteligente.
+Framework de automação para o blog Crypto Frontier utilizando CrewAI, Streamlit e Redis.
 
-## Arquitetura do Sistema
+## Como acessar a aplicação
 
-O sistema é composto por:
+Após iniciar os contêineres com Docker Compose, você pode acessar a aplicação de duas formas:
 
-1. **Sistema de Fila Redis** - Gerencia artigos em diferentes estágios de processamento
-2. **CrewAI Agents** - Tradução, formatação e publicação de conteúdo
-3. **Integração Sanity** - Publicação dos artigos no CMS Sanity
+### Acesso direto ao Streamlit (recomendado)
+- URL: [http://localhost:8501](http://localhost:8501)
+- Útil para desenvolvimento local e testes
 
-```
-  [Feeds RSS]          [Artigos de Demonstração]
-       |                          |
-       v                          v
-  +------------------------------------------+
-  |               Redis Queue                |
-  | (pending → processing → completed/error) |
-  +------------------------------------------+
-                     |
-                     v
-  +------------------------------------------+
-  |               CrewAI                     |
-  | (Translator → JSON Formatter → Publisher)|
-  +------------------------------------------+
-                     |
-                     v
-  +------------------------------------------+
-  |             Sanity CMS                   |
-  +------------------------------------------+
-```
+### Acesso via proxy Caddy (alternativa)
+- URL: [http://localhost:8080](http://localhost:8080)
 
-## Componentes Principais
+O Caddy atua como um proxy reverso, encaminhando todas as requisições para o Streamlit.
 
-### 1. Sistema de Fila Redis
+### Iniciando a aplicação
 
-O sistema de fila Redis (`redis_tools.py`) gerencia artigos em diferentes estágios:
+```bash
+# Clonar o repositório (se ainda não tiver feito)
+git clone https://github.com/your-username/framework_crewai.git
+cd framework_crewai
 
-- **Fila Pendente**: Artigos prontos para processamento
-- **Fila em Processamento**: Artigos sendo processados
-- **Fila Concluídos**: Artigos processados com sucesso
-- **Fila de Erros**: Artigos que falharam no processamento
+# Criar arquivo .env com as variáveis de ambiente necessárias
+cat > .env << EOF
+GEMINI_API_KEY=sua_chave_api_gemini
+SANITY_PROJECT_ID=seu_project_id_sanity
+SANITY_API_TOKEN=seu_token_sanity
+NEXT_PUBLIC_ALGOLIA_APP_ID=seu_app_id_algolia
+NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY=sua_search_api_key_algolia
+EOF
 
-Principais classes:
-- `RedisMemoryTool`: Armazenamento e recuperação de dados contextuais
-- `RedisFeedCache`: Cache para feeds RSS
-- `RedisArticleQueue`: Gerenciamento da fila de artigos
+# Iniciar os contêineres
+docker-compose up -d
 
-### 2. Ferramentas de CrewAI
-
-- `duplicate_detector_tool.py`: Detecta e remove artigos duplicados
-- `sanity_tools.py`: Integração com Sanity CMS
-- `rss_tools.py`: Monitoramento de feeds RSS
-
-### 3. Scripts de Processamento
-
-- `enqueue_demo_article.py`: Adiciona artigos à fila
-- `process_article_queue.py`: Processa artigos da fila
-
-## Uso
-
-### Configuração
-
-1. Instale as dependências:
-```
-pip install -r requirements.txt
+# Verificar se os contêineres estão rodando
+docker-compose ps
 ```
 
-2. Configure as variáveis de ambiente:
-```
-# Redis (opcional - padrão é localhost:6379)
-export REDIS_HOST=localhost
-export REDIS_PORT=6379
-export REDIS_PASSWORD=senha_segura
+## Estrutura do projeto
 
-# Sanity CMS
-export SANITY_PROJECT_ID=seu_id_do_projeto
-export SANITY_API_TOKEN=seu_token_da_api
+- `src/blog_automacao`: Módulos principais da aplicação
+  - `tools`: Ferramentas para operações (Redis, processamento, etc.)
+  - `logic`: Lógica de negócio e gerenciamento de sessão
+  - `ui`: Componentes da interface Streamlit
 
-# Google Gemini (para CrewAI)
-export GEMINI_API_KEY=sua_chave_da_api
-```
+## Comandos úteis
 
-### Enfileirar Artigos
-
-Para enfileirar artigos de demonstração:
-```
-# Enfileirar 5 artigos de demonstração
-python enqueue_demo_article.py -g 5
-
-# Enfileirar artigos de um diretório específico
-python enqueue_demo_article.py -d /caminho/para/artigos -a
-
-# Enfileirar um arquivo específico
-python enqueue_demo_article.py -f /caminho/para/artigo.json
+Iniciar todos os serviços:
+```bash
+docker-compose up -d
 ```
 
-### Processar Artigos
-
-Para processar artigos da fila:
-```
-# Processar todos os artigos na fila
-python process_article_queue.py
-
-# Processar um número máximo de artigos
-python process_article_queue.py -m 5
-
-# Ajustar intervalo de processamento (segundos)
-python process_article_queue.py -i 10
+Visualizar logs:
+```bash
+docker-compose logs -f
 ```
 
-### Monitoramento e Recuperação
-
-Para monitorar o sistema:
-```
-# Verificar estatísticas da fila
-python -c "from redis_tools import RedisArticleQueue; print(RedisArticleQueue().get_queue_stats())"
-
-# Recuperar artigos presos
-python -c "from redis_tools import RedisArticleQueue; print(RedisArticleQueue().recover_stalled_articles(3600))"
+Parar todos os serviços:
+```bash
+docker-compose down
 ```
 
-## Características Avançadas
+## Migração de código legado
 
-1. **Detecção de Duplicatas**: Sistema inteligente usando distância de Levenshtein para evitar conteúdo duplicado
-2. **Recuperação de Falhas**: Recuperação automática de artigos presos no processamento
-3. **Logging Estruturado**: Sistema de logs para auditoria e depuração
-4. **Exponential Backoff**: Reconexão automática com Redis em caso de falhas
+O código legado foi migrado da pasta `backup_legado_aprendizados` para a estrutura modular em `src/blog_automacao/tools`.
+As principais ferramentas migradas incluem:
 
-## Fluxo de Trabalho Completo
+- Redis: `redis_tools.py` - Gerenciamento de cache e filas no Redis
+- Processamento: `process_queue.py` - Processamento de artigos da fila
 
-1. Artigos são adicionados à fila pendente por `enqueue_demo_article.py` ou `rss_to_sanity.py`
-2. O processador de filas (`process_article_queue.py`) obtém o próximo artigo pendente
-3. O artigo é publicado via SanityPublishTool ou salvo localmente para publicação posterior
-4. O artigo é marcado como concluído ou com erro
-5. O processo continua até a fila estar vazia ou atingir um limite definido
+## Configuração do proxy reverso
 
-## Resolução de Problemas
-
-- **Erro no Redis**: Verifique a conexão com o Redis usando `redis-cli ping`
-- **Artigos Presos**: Execute `recover_stalled_articles()` para recuperar artigos presos
-- **Detecção de Duplicatas**: Verifique os logs em `enqueue.log` por informações sobre duplicatas detectadas
-
-## Limitações Conhecidas
-
-- A implementação atual assume um único processo de processamento por vez
-- As filas Redis não têm persistência garantida em caso de falha do Redis
+A aplicação utiliza o Caddy como proxy reverso para:
+- Servir arquivos estáticos
+- Redirecionar tráfego para o Streamlit
+- Fornecer um ponto de acesso unificado

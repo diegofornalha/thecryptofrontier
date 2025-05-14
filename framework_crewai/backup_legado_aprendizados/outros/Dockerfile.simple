@@ -8,26 +8,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Copiar arquivos de dependências
+# Copiar apenas os requisitos
 COPY requirements.txt .
 
 # Instalar dependências Python
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Instalar dependências adicionais (Algolia, etc)
+# Instalar dependências adicionais
 RUN pip install --no-cache-dir algoliasearch backoff python-dotenv
 
-# Copiar o código da aplicação
-COPY . .
-
 # Criar diretórios necessários
-RUN mkdir -p posts_para_traduzir posts_traduzidos posts_formatados posts_publicados
-
-# Expor a porta que o Streamlit usa
-EXPOSE 8501
+RUN mkdir -p /app/posts_para_traduzir /app/posts_traduzidos /app/posts_formatados /app/posts_publicados /app/output/published /app/output/errors /app/static /app/src
 
 # Definir variáveis de ambiente
 ENV PYTHONUNBUFFERED=1
 
-# Comando para iniciar a aplicação
-CMD ["streamlit", "run", "app_modular.py", "--server.port=8501", "--server.address=0.0.0.0"]
+# Expor a porta do Streamlit
+EXPOSE 8501
+
+# Comando padrão
+CMD ["echo", "Container iniciado. Use volumes para montar os arquivos da aplicação."]

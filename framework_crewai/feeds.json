@@ -2,5 +2,9 @@
   {
     "name": "thecryptobasic.com",
     "url": "https://thecryptobasic.com/feed"
+  },
+  {
+    "name": "u.today",
+    "url": "https://u.today/rss"
   }
 ]

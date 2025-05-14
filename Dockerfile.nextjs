@@ -1,0 +1,67 @@
+FROM node:20-alpine AS base
+
+# Install dependencies only when needed
+FROM base AS deps
+WORKDIR /app
+
+# Copy package files
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Rebuild the source code only when needed
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Set environment variables
+ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV production
+# Adicionar suporte para proxy reverso com detecção de cabeçalhos
+ENV NEXT_PUBLIC_PROXY_ENABLED true
+ENV NEXT_PUBLIC_ASSETS_PREFIX /frontend
+ENV PROXY_BASE_PATH /frontend
+ENV NEXT_PUBLIC_SANITY_PROJECT_ID brby2yrg
+ENV NEXT_PUBLIC_SANITY_DATASET production
+ENV NEXT_PUBLIC_SANITY_API_VERSION 2023-05-03
+# Set timezone to fix date hydration issues
+ENV TZ=America/Sao_Paulo
+
+# Build Next.js application
+RUN npm run build
+
+# Production image, copy all the files and run next
+FROM base AS runner
+WORKDIR /app
+
+# Set environment variables
+ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED 1
+# Configurações para proxy
+ENV NEXT_PUBLIC_PROXY_ENABLED true
+ENV NEXT_PUBLIC_ASSETS_PREFIX /frontend
+ENV PROXY_BASE_PATH /frontend
+ENV NEXT_PUBLIC_SANITY_PROJECT_ID brby2yrg
+ENV NEXT_PUBLIC_SANITY_DATASET production
+ENV NEXT_PUBLIC_SANITY_API_VERSION 2023-05-03
+# Set timezone to fix date hydration issues
+ENV TZ=America/Sao_Paulo
+
+# Don't run as root
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+USER nextjs
+
+# Copy necessary files
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/next.config.js ./next.config.js
+COPY --from=builder --chown=nextjs:nodejs /app/preload-patch.js ./preload-patch.js
+
+# Expose the port
+EXPOSE 3000
+
+# Run the application
+CMD ["npm", "start"]

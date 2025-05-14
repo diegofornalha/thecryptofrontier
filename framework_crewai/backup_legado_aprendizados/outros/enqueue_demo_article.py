@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import List, Optional
 import traceback
 
-from redis_tools import RedisArticleQueue, redis_client, get_redis_client
+from backup_legado_aprendizados.redis_tools import RedisArticleQueue, redis_client, get_redis_client
 
 # Configurar logging
 logging.basicConfig(
