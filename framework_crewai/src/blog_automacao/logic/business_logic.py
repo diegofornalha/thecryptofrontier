@@ -790,13 +790,7 @@ def enqueue_crewai_article(article_data, process_now=False):
     """
     try:
         # Importar o cliente Redis
-        import sys
-        import os
-        parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
-        if parent_dir not in sys.path:
-            sys.path.insert(0, parent_dir)
-        
-        from backup_legado_aprendizados.redis_tools import RedisArticleQueue
+        from ..tools.redis_tools import RedisArticleQueue
         queue = RedisArticleQueue()
         
         SessionManager.add_log(f"Enfileirando artigo: {article_data.get('title', 'Sem título')}")
@@ -813,7 +807,7 @@ def enqueue_crewai_article(article_data, process_now=False):
             # Processar imediatamente se solicitado
             if process_now:
                 try:
-                    from backup_legado_aprendizados.process_article_queue import process_queue
+                    from ..tools.process_queue import process_queue
                     # Processar apenas um artigo
                     process_queue(max_articles=1, interval=1)
                     SessionManager.add_log("✅ Artigo processado imediatamente")
