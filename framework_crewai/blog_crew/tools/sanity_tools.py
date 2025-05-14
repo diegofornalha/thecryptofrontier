@@ -5,7 +5,7 @@ Ferramentas para integração com o Sanity CMS
 import os
 import logging
 from datetime import datetime
-from langchain_core.tools import tool
+from crewai.tools import tool
 import sys
 import importlib.util
 from pathlib import Path
@@ -64,9 +64,101 @@ def load_schema(schema_name):
         return None
 
 @tool
-def publish_to_sanity(post_data):
-    """Publica um post no Sanity CMS."""
+def publish_to_sanity(post_data=None, **kwargs):
+    """Publica um post no Sanity CMS. Recebe um dicionário com dados do post (title, slug, content, etc.)."""
     try:
+        logger.info(f"publish_to_sanity: Recebido post_data={type(post_data)}, kwargs={list(kwargs.keys()) if kwargs else 'nenhum'}")
+        
+        # Processamento avançado para lidar com a forma como o Gemini envia os dados
+        # 1. Se o argumento for uma string, tentar extrair um JSON dela
+        parsed_from_string = False
+        if isinstance(post_data, str):
+            try:
+                # Verifica se parece um JSON
+                if (post_data.strip().startswith('{') and post_data.strip().endswith('}')) or \
+                   (post_data.strip().startswith('[') and post_data.strip().endswith(']')):
+                    parsed_json = json.loads(post_data)
+                    logger.info(f"String convertida para JSON: {type(parsed_json)}")
+                    
+                    # a) Se o resultado for um dicionário, pode ser o próprio post_data ou conter o post_data
+                    if isinstance(parsed_json, dict):
+                        # Procurar o post_data em campos comuns que o Gemini pode usar
+                        for field in ["post_data", "post", "data", "article", "content"]:
+                            if field in parsed_json and isinstance(parsed_json[field], dict):
+                                post_data = parsed_json[field]
+                                parsed_from_string = True
+                                logger.info(f"Dados extraídos do campo '{field}' no JSON")
+                                break
+                        
+                        # Se não encontrou em campos específicos mas o JSON parece um post válido
+                        if not parsed_from_string and "title" in parsed_json:
+                            post_data = parsed_json
+                            parsed_from_string = True
+                            logger.info("JSON usado diretamente como post_data")
+                            
+                        # Se o LLM envolver em {"posts": [...]}, extrair o primeiro post
+                        elif not parsed_from_string and "posts" in parsed_json and isinstance(parsed_json["posts"], list) and len(parsed_json["posts"]) > 0:
+                            post_data = parsed_json["posts"][0]
+                            parsed_from_string = True
+                            logger.info("Primeiro item extraído da lista 'posts'")
+                    
+                    # b) Se o resultado for uma lista, pegar o primeiro item se for um dict
+                    elif isinstance(parsed_json, list) and len(parsed_json) > 0 and isinstance(parsed_json[0], dict):
+                        post_data = parsed_json[0]
+                        parsed_from_string = True
+                        logger.info("Primeiro item da lista JSON usado como post_data")
+            except json.JSONDecodeError:
+                logger.warning(f"Não foi possível parser como JSON: {post_data[:50]}...")
+        
+        # 2. Se ainda não extraímos dados e post_data for None, tentar extrair de kwargs
+        if not parsed_from_string and post_data is None:
+            # Procurar em campos comuns nos kwargs
+            for field in ["post_data", "post", "data", "article", "content"]:
+                if field in kwargs and isinstance(kwargs[field], dict):
+                    post_data = kwargs[field]
+                    logger.info(f"Dados extraídos do kwarg '{field}'")
+                    break
+                    
+            # Se não encontrou em campos específicos, procurar em listas
+            if post_data is None and "posts" in kwargs and isinstance(kwargs["posts"], list) and len(kwargs["posts"]) > 0:
+                post_data = kwargs["posts"][0]
+                logger.info("Dados extraídos do primeiro item da lista 'posts' em kwargs")
+            
+            # Se ainda não encontrou mas os kwargs parecem um post, usar todos os kwargs como post_data
+            elif post_data is None and kwargs and any(k in kwargs for k in ["title", "slug", "content"]):
+                post_data = kwargs
+                logger.info("Todos os kwargs usados como post_data")
+        
+        # 3. Se ainda não temos dados, retornar erro
+        if post_data is None:
+            logger.error("Nenhum dado de post válido fornecido")
+            return {"success": False, "error": "O argumento post_data é obrigatório e não foi encontrado"}
+        
+        # 4. Garantir que post_data seja um dicionário
+        if not isinstance(post_data, dict):
+            logger.error(f"post_data deve ser um dicionário, recebido: {type(post_data)}")
+            return {"success": False, "error": "O argumento post_data deve ser um dicionário válido"}
+        
+        # Tentar importar dinâmicamente os modelos Pydantic
+        try:
+            # Tentar importar os modelos e conversores
+            from models import Post, dict_to_post, post_to_sanity_format
+            
+            # Se importou com sucesso, usar a validação do Pydantic
+            try:
+                logger.info("Validando dados usando modelo Pydantic Post")
+                post_model = dict_to_post(post_data)
+                sanity_post = post_to_sanity_format(post_model)
+                
+                # Atualizar post_data com o formato validado
+                post_data = sanity_post
+                logger.info("Dados validados e convertidos usando Pydantic")
+            except Exception as pydantic_error:
+                logger.warning(f"Erro na validação Pydantic: {str(pydantic_error)}")
+                # Continuar com a abordagem tradicional
+        except ImportError:
+            logger.warning("Modelos Pydantic não encontrados, usando abordagem tradicional")
+            
         # Configurações do Sanity
         project_id = os.environ.get("SANITY_PROJECT_ID", SANITY_CONFIG.get("project_id"))
         dataset = SANITY_CONFIG.get("dataset", "production")
@@ -96,32 +188,62 @@ def publish_to_sanity(post_data):
             "slug": {"_type": "slug", "current": post_data.get("slug")},
             "publishedAt": datetime.now().isoformat(),
             "excerpt": post_data.get("excerpt", ""),
-            "content": post_data.get("content", []),
         }
         
-        # Adicionar campos opcionais se presentes
-        if "mainImage" in post_data and post_data["mainImage"]:
-            create_doc["mainImage"] = post_data["mainImage"]
-            
-        if "categories" in post_data and post_data["categories"]:
-            create_doc["categories"] = post_data["categories"]
-            
-        if "tags" in post_data and post_data["tags"]:
-            create_doc["tags"] = post_data["tags"]
-            
-        if "author" in post_data and post_data["author"]:
-            create_doc["author"] = post_data["author"]
-            
-        if "originalSource" in post_data and post_data["originalSource"]:
-            create_doc["originalSource"] = post_data["originalSource"]
+        # Se post_data já contém "_type" (formatado pelo Pydantic), usar diretamente
+        if "_type" in post_data and post_data["_type"] == "post":
+            create_doc = post_data
         else:
-            # Adicionar informação de fonte original se disponível
-            if "link" in post_data and post_data["link"]:
-                create_doc["originalSource"] = {
-                    "url": post_data.get("link"),
-                    "title": post_data.get("original_title", post_data.get("title")),
-                    "site": post_data.get("source", "Desconhecido")
-                }
+            # Processar conteúdo - pode estar em diferentes formatos
+            content = post_data.get("content")
+            # Se content for um dicionário com campo "blocks", extrair os blocos
+            if isinstance(content, dict) and "blocks" in content:
+                create_doc["content"] = content["blocks"]
+            # Se content for um dicionário com campo "success" (resultado de format_content_for_sanity)
+            elif isinstance(content, dict) and "success" in content and "blocks" in content:
+                create_doc["content"] = content["blocks"]
+            else:
+                create_doc["content"] = content or []
+            
+            # Adicionar campos opcionais se presentes
+            if "mainImage" in post_data and post_data["mainImage"]:
+                create_doc["mainImage"] = post_data["mainImage"]
+                
+            if "categories" in post_data and post_data["categories"]:
+                create_doc["categories"] = post_data["categories"]
+                
+            if "tags" in post_data and post_data["tags"]:
+                create_doc["tags"] = post_data["tags"]
+                
+            if "author" in post_data and post_data["author"]:
+                create_doc["author"] = post_data["author"]
+                
+            if "originalSource" in post_data and post_data["originalSource"]:
+                create_doc["originalSource"] = post_data["originalSource"]
+            else:
+                # Adicionar informação de fonte original se disponível
+                if "link" in post_data and post_data["link"]:
+                    create_doc["originalSource"] = {
+                        "url": post_data.get("link"),
+                        "title": post_data.get("original_title", post_data.get("title")),
+                        "site": post_data.get("source", "Desconhecido")
+                    }
+                    
+            # Procurar slug como objeto retornado pelo tool create_slug
+            if "slug" in post_data and isinstance(post_data["slug"], dict) and "slug" in post_data["slug"]:
+                create_doc["slug"] = {"_type": "slug", "current": post_data["slug"]["slug"]}
+            elif "slug" in post_data and isinstance(post_data["slug"], dict) and "success" in post_data["slug"]:
+                create_doc["slug"] = {"_type": "slug", "current": post_data["slug"].get("slug", "")}
+            elif "slug" in post_data and isinstance(post_data["slug"], dict) and "current" in post_data["slug"]:
+                # Já está no formato correto
+                create_doc["slug"] = post_data["slug"]
+            elif "slug" in post_data and isinstance(post_data["slug"], str):
+                # Converter string para objeto slug
+                create_doc["slug"] = {"_type": "slug", "current": post_data["slug"]}
+                
+            # Verificar format, caso alguém passe o objeto de resposta no campo "formatado"
+            if "formatado" in post_data and isinstance(post_data["formatado"], dict) and "blocks" in post_data["formatado"]:
+                create_doc["content"] = post_data["formatado"]["blocks"]
         
         mutations = {
             "mutations": [

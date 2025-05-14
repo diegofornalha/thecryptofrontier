@@ -5,7 +5,7 @@ Ferramentas para trabalhar com feeds RSS
 import json
 import logging
 from datetime import datetime
-from langchain_core.tools import tool
+from crewai.tools import tool
 import os
 from pathlib import Path
 

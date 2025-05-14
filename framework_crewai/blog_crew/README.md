@@ -24,6 +24,10 @@ blog_crew/
 ├── tasks/                 # Definição das tarefas
 │   └── blog_tasks.py      # Tarefas do fluxo de blog
 │
+├── models/                # Modelos Pydantic para estruturação de dados
+│   ├── post.py            # Modelo para posts no Sanity
+│   └── converters.py      # Conversores entre formatos
+│
 ├── logic/                 # Lógica de negócios
 │   ├── feed_manager.py    # Gerenciador de feeds RSS
 │   └── sanity_client.py   # Cliente para Sanity CMS
@@ -39,6 +43,7 @@ blog_crew/
 ├── crewai.yaml            # Configuração para o CLI da CrewAI
 ├── main.py                # Script principal
 │
+├── pyproject.toml         # Configuração do projeto e dependências
 ├── requirements.txt       # Dependências do projeto
 │
 └── README.md              # Esta documentação
@@ -77,17 +82,22 @@ O sistema está configurado para monitorar os seguintes feeds RSS:
 - Prepara o conteúdo traduzido para o Sanity CMS
 - Cria slugs, organiza metadados e estrutura o conteúdo
 - Otimiza para SEO
+- Utiliza modelos Pydantic para validar e estruturar dados
+- Converte conteúdo para o formato Portable Text do Sanity
 
 ### Publicação
 - Publica o conteúdo formatado no Sanity CMS
-- Verifica sucesso da publicação
+- Verifica e valida dados antes da publicação
+- Rastreia sucesso e falhas de publicação
+- Gera relatórios detalhados de resultados
 - Gerencia o ciclo de vida dos artigos publicados
 
 ## Requisitos
 
-- Python 3.9+
-- CrewAI
+- Python 3.10+
+- CrewAI 0.28.0+
 - Langchain
+- Pydantic 2.5.0+
 - API Key do Google Gemini
 - Credenciais do Sanity CMS
 
@@ -142,4 +152,16 @@ O programa irá:
 - Modifique `config/settings.yaml` para ajustar configurações globais
 - Altere os agentes em `agents/` para customizar habilidades e comportamentos
 - Adicione novas ferramentas em `tools/` para expandir capacidades
+- Edite os modelos Pydantic em `models/` para ajustar estrutura de dados
+- Customize as tarefas em `tasks/blog_tasks.py` para adaptar o fluxo
 - Edite `crewai.yaml` para configurar o comportamento do CLI
+
+## Modelos Pydantic e Saída Estruturada
+
+O projeto utiliza modelos Pydantic para garantir que os dados retornados pelas tarefas estejam no formato correto:
+
+- Cada tarefa define seu retorno utilizando o parâmetro `output_pydantic`
+- Os modelos estão definidos em `tasks/blog_tasks.py` e `models/post.py`
+- A conversão entre dicionários e objetos Pydantic é feita por `models/converters.py`
+- Isso garante validação de dados e tipagem forte em todo o fluxo
+- Os agentes `FormatterAgent` e `PublisherAgent` possuem métodos para validar e converter dados
