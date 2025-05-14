@@ -7,14 +7,8 @@
         format console
     }
 
-    # Rota para o serviço Streamlit
-    handle /streamlit* {
+    # Redirecionar qualquer rota para o Streamlit
+    handle /* {
         reverse_proxy streamlit:8501
-    }
-    
-    # Servir arquivos estáticos para outras rotas
-    handle {
-        root * /app/static
-        file_server
     }
 }

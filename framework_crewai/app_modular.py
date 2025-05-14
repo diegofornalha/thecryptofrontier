@@ -245,6 +245,12 @@ st.markdown('<p>Sistema de automação para o blog The Crypto Frontier usando Cr
 with st.sidebar:
     render_sidebar()
 
+# Mensagem de acesso via proxy
+proxy_info_container = st.container()
+with proxy_info_container:
+    if os.environ.get('PROXY_ENABLED') == 'true' or 'streamlit' in os.environ.get('HOSTNAME', ''):
+        st.success("✅ Aplicação acessada através do proxy Caddy!")
+
 # Conteúdo principal
 col_stats, col_content = st.columns([1, 3])
 
