@@ -1,6 +1,28 @@
 version: '3.8'
 
 services:
+  # Frontend NextJS - agora rodando em Docker
+  nextjs:
+    build:
+      context: ..
+      dockerfile: Dockerfile.nextjs
+    container_name: nextjs-frontend
+    ports:
+      - "3000:3000"  # Expor na porta 3000 para acesso direto se necessário
+    environment:
+      - NODE_ENV=production
+      - SANITY_PREVIEW=false
+      - NEXT_PUBLIC_SANITY_PROJECT_ID=brby2yrg
+      - NEXT_PUBLIC_SANITY_DATASET=production
+      - NEXT_PUBLIC_SANITY_API_VERSION=2023-05-03
+      # Variáveis para suporte a proxy
+      - NEXT_PUBLIC_PROXY_ENABLED=true
+      - NEXT_PUBLIC_ASSETS_PREFIX=/frontend
+      - PROXY_BASE_PATH=/frontend
+    restart: unless-stopped
+    networks:
+      - crewai-network
+
   # Serviço Streamlit para interface de usuário
   streamlit:
     build:
@@ -50,6 +72,7 @@ services:
     restart: unless-stopped
     ports:
       - "8080:8080"  # Exposição na porta 8080 conforme Caddyfile
+      - "3200:3200"  # Exposição na porta 3200 adicional
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - ./static:/app/static
@@ -59,6 +82,7 @@ services:
       - crewai-network
     depends_on:
       - streamlit
+      - nextjs
 
 volumes:
   redis_data:

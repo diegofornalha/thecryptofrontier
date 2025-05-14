@@ -213,14 +213,8 @@ const components = {
   },
 };
 
-// Formatação de data
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric'
-  });
-};
+// Importar utilitário de data
+import { formatDate } from '../../utils/date-utils';
 
 // Função para formatar preço em BRL
 const formatPrice = (price?: number) => {
@@ -344,7 +338,7 @@ export default function Post({ post, footerConfig, headerConfig, blogConfig }: P
                         <span className="mr-2">{post.author.role}</span>
                       )}
                       {showDate && (
-                        <time dateTime={post.publishedAt}>
+                        <time dateTime={post.publishedAt} suppressHydrationWarning>
                           {formatDate(post.publishedAt)}
                         </time>
                       )}

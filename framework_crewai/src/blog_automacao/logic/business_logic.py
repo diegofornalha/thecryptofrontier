@@ -78,12 +78,43 @@ def monitor_feeds():
         SessionManager.add_log("Iniciando monitoramento de feeds RSS...")
         
         try:
+            # Verificar se existem feeds configurados
+            feeds = load_feeds()
+            if not feeds:
+                SessionManager.add_log("❌ Nenhum feed RSS configurado! Adicione feeds em 'feeds.json'")
+                return False
+                
+            SessionManager.add_log(f"Encontrados {len(feeds)} feeds configurados: {', '.join([f['name'] for f in feeds])}")
+            
+            # Executar o monitoramento
             result = crew.monitoramento_crew().kickoff(inputs={})
-            SessionManager.add_log(f"Monitoramento concluído: {result.raw[:100]}...")
+            
+            # Verificar resultado
+            result_str = str(result.raw)
+            if "[]" in result_str and len(result_str) < 10:
+                SessionManager.add_log("⚠️ Nenhum novo artigo encontrado nos feeds")
+            else:
+                # Contar arquivos criados no diretório posts_para_traduzir
+                dir_posts = Path("posts_para_traduzir")
+                if dir_posts.exists():
+                    arquivos_antes = set(dir_posts.glob("para_traduzir_*.json"))
+                    
+                    # Se o resultado contém novos artigos, verificar a diferença
+                    arquivos_depois = set(dir_posts.glob("para_traduzir_*.json"))
+                    novos_arquivos = arquivos_depois - arquivos_antes
+                    
+                    if novos_arquivos:
+                        SessionManager.add_log(f"✅ {len(novos_arquivos)} novos artigos adicionados para tradução!")
+                    else:
+                        SessionManager.add_log("⚠️ Nenhum novo artigo adicionado para tradução")
+            
+            SessionManager.add_log(f"Monitoramento concluído com resultado: {result.raw[:100]}...")
             SessionManager.update_last_run()
             return True
         except Exception as e:
             SessionManager.add_log(f"Erro no monitoramento: {str(e)}")
+            import traceback
+            SessionManager.add_log(f"Trace: {traceback.format_exc()}")
             return False
 
 def translate_article(arquivo_json=None):
@@ -106,6 +137,24 @@ def translate_article(arquivo_json=None):
             # Ordenar por nome para pegar o mais antigo primeiro
             arquivos.sort()
             arquivo_json = arquivos[0]  # Pegar apenas o primeiro arquivo
+        
+        # Verificar se o arquivo já está traduzido
+        if isinstance(arquivo_json, str):
+            arquivo_json = Path(arquivo_json)
+        
+        # Verificar se existe um arquivo traduzido com o mesmo nome, mas sem o prefixo
+        arquivo_base = arquivo_json.stem
+        if arquivo_base.startswith("para_traduzir_"):
+            arquivo_base = arquivo_base.replace("para_traduzir_", "")
+            
+        # Checar se existe arquivo traduzido no diretório posts_traduzidos
+        dir_traduzidos = Path("posts_traduzidos")
+        if dir_traduzidos.exists():
+            possivel_traduzido = dir_traduzidos / f"traduzido_{arquivo_base}.json"
+            if possivel_traduzido.exists():
+                SessionManager.add_log(f"⚠️ AVISO: Este artigo já foi traduzido anteriormente: {possivel_traduzido}")
+                # Perguntar se deseja traduzir novamente
+                return False
         
         SessionManager.add_log(f"Iniciando tradução do artigo: {arquivo_json.name}")
         
@@ -152,6 +201,27 @@ def translate_article(arquivo_json=None):
             # Executar a tradução
             resultado = crew.traducao_crew().kickoff(inputs=inputs)
             SessionManager.add_log(f"✅ Tradução concluída para {arquivo_json.name}")
+            
+            # Após traduzir com sucesso, mover o arquivo original para um diretório de processados
+            # para evitar processamento duplicado
+            try:
+                processados_dir = Path("posts_processados")
+                processados_dir.mkdir(exist_ok=True, parents=True)
+                
+                # Criar nome para arquivo processado
+                arquivo_processado = processados_dir / f"processado_{arquivo_json.name}"
+                
+                # Mover arquivo para diretório de processados apenas se ele está em posts_para_traduzir
+                if "posts_para_traduzir" in str(arquivo_json):
+                    import shutil
+                    shutil.copy2(arquivo_json, arquivo_processado)
+                    SessionManager.add_log(f"Arquivo original movido para: {arquivo_processado}")
+                    
+                    # Opcionalmente, remover o arquivo original
+                    # arquivo_json.unlink()
+            except Exception as move_error:
+                SessionManager.add_log(f"⚠️ Aviso ao mover arquivo: {str(move_error)}")
+            
             SessionManager.update_last_run()
             return True
             
