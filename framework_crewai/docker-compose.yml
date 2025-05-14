@@ -6,7 +6,7 @@ services:
     build:
       context: ..
       dockerfile: Dockerfile.nextjs
-    container_name: nextjs-frontend
+    container_name: sanity-thecryptofrontier
     ports:
       - "3000:3000"  # Expor na porta 3000 para acesso direto se necessário
     environment:

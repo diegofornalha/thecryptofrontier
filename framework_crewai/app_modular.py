@@ -4,6 +4,22 @@ import streamlit as st
 from pathlib import Path
 import json
 from datetime import datetime
+import logging
+
+# Configuração básica de logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("app_modular")
+
+# Inicialização do Redis local automaticamente (se necessário)
+try:
+    from src.blog_automacao.tools.redis_manager import ensure_redis_running
+    # Garante que o Redis esteja rodando antes de iniciar
+    if ensure_redis_running():
+        logger.info("Redis local verificado/iniciado com sucesso")
+    else:
+        logger.warning("Não foi possível iniciar Redis local. Algumas funcionalidades podem não funcionar.")
+except Exception as e:
+    logger.error(f"Erro ao inicializar Redis local: {str(e)}. Continuando sem Redis.")
 
 # Importar apenas o que é necessário
 from src.blog_automacao import BlogAutomacaoCrew

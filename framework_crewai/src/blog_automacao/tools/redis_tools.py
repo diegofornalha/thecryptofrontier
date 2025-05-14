@@ -28,8 +28,32 @@ logging.basicConfig(
 logger = logging.getLogger("redis_tools")
 
 # Configuração dinâmica do Redis
-REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
-REDIS_PORT = int(os.environ.get('REDIS_PORT', '6381'))  # Porta 6381 para Docker
+# Verifica se estamos executando em um ambiente Docker (vários métodos)
+def is_running_in_docker():
+    """Verifica se está rodando dentro de um container Docker usando múltiplos métodos"""
+    # Método 1: Verificar existência do arquivo /.dockerenv
+    if os.path.exists('/.dockerenv'):
+        return True
+    
+    # Método 2: Verificar se cgroup contém docker
+    try:
+        with open('/proc/self/cgroup', 'r') as f:
+            return 'docker' in f.read()
+    except:
+        pass
+    
+    # Método 3: Verificar variável de ambiente definida pelo Docker
+    if os.environ.get('DOCKER_CONTAINER', ''):
+        return True
+        
+    return False
+
+IN_DOCKER = is_running_in_docker()
+logger.info(f"Ambiente detectado: {'Docker' if IN_DOCKER else 'Host local'}")
+
+# Se estiver no Docker, usa o nome do serviço, senão usa localhost
+REDIS_HOST = os.environ.get('REDIS_HOST', 'redis' if IN_DOCKER else 'localhost')
+REDIS_PORT = int(os.environ.get('REDIS_PORT', '6379'))
 REDIS_DB = int(os.environ.get('REDIS_DB', '0'))
 REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', None)
 REDIS_SOCKET_TIMEOUT = int(os.environ.get('REDIS_SOCKET_TIMEOUT', '5'))
