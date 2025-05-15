@@ -224,14 +224,14 @@ def traduzir_artigos(arquivos):
             
             # Simular tradução do resumo e conteúdo
             resumo_original = artigo['summary']
-            # Vamos primeiro remover os links HTML para facilitar a tradução
-            resumo_sem_links = remover_links_html(resumo_original)
-            resumo_traduzido = resumo_sem_links
+            # Vamos primeiro remover todas as tags HTML para facilitar a tradução
+            resumo_sem_tags = remover_todas_tags_html(resumo_original)
+            resumo_traduzido = resumo_sem_tags
             
             conteudo_original = artigo['content']
-            # Vamos primeiro remover os links HTML para facilitar a tradução
-            conteudo_sem_links = remover_links_html(conteudo_original)
-            conteudo_traduzido = conteudo_sem_links
+            # Vamos primeiro remover todas as tags HTML para facilitar a tradução
+            conteudo_sem_tags = remover_todas_tags_html(conteudo_original)
+            conteudo_traduzido = conteudo_sem_tags
             
             # Aplicar algumas traduções básicas ao resumo e conteúdo
             # (em um caso real, usaríamos um LLM para tradução completa)
@@ -331,8 +331,8 @@ def gerar_chave():
 
 def texto_para_portable_text(texto):
     """Converte texto em formato Portable Text do Sanity"""
-    # Remover links HTML do texto
-    texto = remover_links_html(texto)
+    # Remover todas as tags HTML do texto
+    texto = remover_todas_tags_html(texto)
     
     # Dividir o texto em parágrafos
     paragrafos = [p.strip() for p in texto.split("\n\n") if p.strip()]

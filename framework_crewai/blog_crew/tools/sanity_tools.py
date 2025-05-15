@@ -68,11 +68,19 @@ def remover_links_html(texto):
     # Padrão para capturar tags <a> completas com seu conteúdo
     return re.sub(r'<a\s+[^>]*>(.*?)</a>', r'\1', texto)
 
+# Função para remover todas as tags HTML de um texto
+def remover_todas_tags_html(texto):
+    """Remove todas as tags HTML de um texto"""
+    # Primeiro remove links HTML (para preservar o texto dentro deles)
+    texto = remover_links_html(texto)
+    # Depois remove todas as outras tags HTML
+    return re.sub(r'<[^>]*>', '', texto)
+
 # Função para converter texto em formato Portable Text do Sanity
 def texto_para_portable_text(texto):
     """Converte texto em formato Portable Text do Sanity"""
-    # Remover links HTML do texto
-    texto = remover_links_html(texto)
+    # Remover todas as tags HTML do texto
+    texto = remover_todas_tags_html(texto)
     
     # Dividir o texto em parágrafos
     paragrafos = [p.strip() for p in texto.split("\n\n") if p.strip()]
@@ -101,8 +109,8 @@ def texto_para_portable_text(texto):
 # Função para converter HTML em formato Portable Text do Sanity
 def html_para_portable_text(html):
     """Converte HTML em formato Portable Text do Sanity"""
-    # Primeiro remover links HTML
-    html = remover_links_html(html)
+    # Primeiro remover todas as tags HTML
+    html = remover_todas_tags_html(html)
     
     # Abordagem simplificada: remover tags HTML e converter para blocos de texto
     limpo = re.sub(r'<p>', '', html)
@@ -437,11 +445,11 @@ def publish_to_sanity(post_data=None, file_path=None, **kwargs):
         if not post_schema:
             logger.warning("Schema de post não encontrado. Continuando sem validação.")
         
-        # Limitar o resumo a 299 caracteres e remover links HTML
+        # Limitar o resumo a 299 caracteres e remover todas as tags HTML
         resumo = post_data.get("excerpt", "")
         
-        # Remover todos os links HTML (tags <a>)
-        resumo = remover_links_html(resumo)
+        # Remover todas as tags HTML (incluindo <strong>, <em>, etc.)
+        resumo = remover_todas_tags_html(resumo)
         
         # Limitar tamanho a 299 caracteres
         if len(resumo) > 299:
