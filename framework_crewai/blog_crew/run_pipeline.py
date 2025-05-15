@@ -121,82 +121,15 @@ def remover_todas_tags_html(texto):
     # Depois remove todas as outras tags HTML
     return re.sub(r'<[^>]*>', '', texto)
 
-# 2. TRADUZIR: Simular tradução (em um cenário real, usaria LLM)
+# 2. TRADUZIR: Usar nosso módulo de tradução com deep-translator
 def traduzir_artigos(arquivos):
-    """Simula tradução de artigos (em cenário real, usaria LLM)"""
+    """Traduz artigos usando a API do deep-translator"""
     logger.info("2. TRADUZINDO ARTIGOS...")
     
-    resultados = []
+    # Importar nosso módulo de tradução
+    from tools.translator import translate_article, clean_html
     
-    # Dicionário de tradução simples para simular uma tradução básica
-    traducoes = {
-        # Expressões comuns
-        "we're": "estamos",
-        "we are": "estamos",
-        "it's": "é",
-        "it is": "é",
-        "there's": "há",
-        "there is": "há",
-        "i'm": "eu estou",
-        "i am": "eu estou",
-        "they're": "eles estão",
-        "they are": "eles estão",
-        "don't": "não",
-        "do not": "não",
-        "doesn't": "não",
-        "does not": "não",
-        "can't": "não pode",
-        "cannot": "não pode",
-        "won't": "não vai",
-        "will not": "não vai",
-        
-        # Palavras e termos específicos
-        "new": "novo",
-        "partner": "parceiro",
-        "application": "aplicativo",
-        "launched": "lançado",
-        "introducing": "apresentando",
-        "all-new": "totalmente novo",
-        "now available": "agora disponível",
-        "on both": "em ambas",
-        "platforms": "plataformas",
-        "committed": "comprometidos",
-        "delivering": "entregar",
-        "solutions": "soluções",
-        "simplify": "simplificar",
-        "enhance": "melhorar",
-        "trading": "negociação",
-        "experience": "experiência",
-        "focused": "focados",
-        "empowering": "capacitar",
-        "partners": "parceiros",
-        "excited": "empolgados",
-        "unveil": "revelar",
-        "brand-new": "novíssimo",
-        "designed": "projetado",
-        "specifically": "especificamente",
-        "affiliate": "afiliado",
-        "representative": "representante",
-        "community": "comunidade",
-        "discover": "descubra",
-        "what makes": "o que torna",
-        "stand out": "se destacar",
-        "effortless": "sem esforço",
-        "campaign": "campanha",
-        "management": "gerenciamento",
-        "download": "baixe",
-        "app": "aplicativo",
-        "features": "recursos",
-        "function": "função",
-        "available": "disponível",
-        "easy": "fácil",
-        "simple": "simples",
-        "powerful": "poderoso",
-        "quick": "rápido",
-        "fast": "rápido",
-        "secure": "seguro",
-        "reliable": "confiável"
-    }
+    resultados = []
     
     for arquivo in arquivos:
         try:
@@ -209,90 +142,14 @@ def traduzir_artigos(arquivos):
             with open(arquivo_path, "r", encoding="utf-8") as f:
                 artigo = json.load(f)
             
-            # Simular tradução básica
-            titulo_original = artigo['title']
+            # Usar nosso módulo de tradução para traduzir o artigo completo
+            logger.info(f"Iniciando tradução do artigo: {artigo['title']}")
             
-            # Tradução manual do título para garantir que funcione
-            if "New LiteFinance Partner Application Launched" in titulo_original:
-                titulo_traduzido = "Novo Aplicativo de Parceiro LiteFinance Lançado"
-            elif "new" in titulo_original.lower():
-                titulo_traduzido = titulo_original.lower().replace("new", "Novo").title()
-            else:
-                titulo_traduzido = f"{titulo_original}"
-                
-            logger.info(f"Título traduzido: {titulo_traduzido}")
+            # Traduzir o artigo usando nossa função de tradução de alta qualidade
+            traduzido = translate_article(artigo)
             
-            # Simular tradução do resumo e conteúdo
-            resumo_original = artigo['summary']
-            # Vamos primeiro remover todas as tags HTML para facilitar a tradução
-            resumo_sem_tags = remover_todas_tags_html(resumo_original)
-            resumo_traduzido = resumo_sem_tags
-            
-            conteudo_original = artigo['content']
-            # Vamos primeiro remover todas as tags HTML para facilitar a tradução
-            conteudo_sem_tags = remover_todas_tags_html(conteudo_original)
-            conteudo_traduzido = conteudo_sem_tags
-            
-            # Aplicar algumas traduções básicas ao resumo e conteúdo
-            # (em um caso real, usaríamos um LLM para tradução completa)
-            try:
-                # Aplicar traduções usando expressões regulares para garantir a substituição de palavras completas
-                for eng, ptbr in traducoes.items():
-                    # Substituição no resumo
-                    resumo_traduzido = re.sub(r'\b' + re.escape(eng) + r'\b', ptbr, resumo_traduzido, flags=re.IGNORECASE)
-                    
-                    # Substituição no conteúdo
-                    conteudo_traduzido = re.sub(r'\b' + re.escape(eng) + r'\b', ptbr, conteudo_traduzido, flags=re.IGNORECASE)
-                    
-                # Substituições específicas para expressões comuns que não são capturadas por regex simples
-                # Antes de procurar e substituir "we're", vamos processar frases específicas
-                # Cuidado especial com a frase do exemplo
-                if "At LiteFinance, we're committed to" in resumo_traduzido:
-                    resumo_traduzido = resumo_traduzido.replace("At LiteFinance, we're committed to", "Na LiteFinance, estamos comprometidos em")
-                if "At LiteFinance, we're committed to" in conteudo_traduzido:
-                    conteudo_traduzido = conteudo_traduzido.replace("At LiteFinance, we're committed to", "Na LiteFinance, estamos comprometidos em")
-                
-                frases_especificas = {
-                    "At LiteFinance, we're": "Na LiteFinance, estamos",
-                    "At LiteFinance, we are": "Na LiteFinance, estamos",
-                    "At LiteFinance,": "Na LiteFinance,",
-                    "we're committed to": "estamos comprometidos em",
-                    "we're excited to": "estamos empolgados em",
-                    "we're focused on": "estamos focados em",
-                    "we're happy to": "estamos felizes em",
-                    "we're proud to": "estamos orgulhosos em",
-                    "we're pleased to": "estamos satisfeitos em",
-                    "we're equally focused": "estamos igualmente focados",
-                    "But we're equally": "Mas estamos igualmente",
-                    "we're": "estamos",
-                    "We're": "Estamos",
-                    "we are": "estamos",
-                    "We are": "Estamos"
-                }
-                
-                # Processar frases específicas em ordem de maior para menor
-                for eng, ptbr in sorted(frases_especificas.items(), key=lambda x: len(x[0]), reverse=True):
-                    # Usar string.replace para evitar problemas com caracteres regex
-                    resumo_traduzido = resumo_traduzido.replace(eng, ptbr)
-                    conteudo_traduzido = conteudo_traduzido.replace(eng, ptbr)
-                
-                # Já processamos as expressões comuns nas frases específicas acima
-            except Exception as e:
-                logger.warning(f"Erro ao aplicar traduções: {str(e)}")
-            
-            # Os links HTML já foram removidos anteriormente
-            
-            traduzido = {
-                "title": titulo_traduzido,
-                "link": artigo['link'],
-                "summary": resumo_traduzido,
-                "content": conteudo_traduzido,
-                "published": artigo['published'],
-                "source": artigo['source'],
-                "tags": artigo.get('tags', []),
-                "original_title": artigo['title'],
-                "translated_date": datetime.now().isoformat()
-            }
+            # Adicionar metadados extras
+            traduzido["translated_date"] = datetime.now().isoformat()
             
             # Gerar nome do arquivo traduzido
             nome_arquivo = arquivo_path.name
