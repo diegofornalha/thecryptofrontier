@@ -1,6 +1,6 @@
 #!/bin/bash
-# Script para remover todos os documentos do tipo post do Sanity CMS
-# Uso: ./delete_all_sanity_posts.sh
+# Versão automática do script para remover todos os documentos do tipo post do Sanity CMS
+# Não pede confirmação do usuário
 
 # Configurações do Sanity
 PROJECT_ID="brby2yrg"
@@ -30,16 +30,16 @@ OUTPUT=$(python list_sanity_documents.py post)
 # Extrair apenas as linhas com os IDs usando expressão regular
 IDS=$(echo "$OUTPUT" | grep -o "ID: [^ ]*" | sed 's/ID: //g')
 
-# Confirmar com o usuário
-echo "Os seguintes documentos serão removidos:"
-echo "$OUTPUT" | grep "ID:"
-echo ""
-read -p "Tem certeza que deseja remover TODOS estes documentos? (s/N): " CONFIRM
-
-if [ "$CONFIRM" != "s" ] && [ "$CONFIRM" != "S" ]; then
-  echo "Operação cancelada pelo usuário."
+# Verificar se há IDs para processar
+if [ -z "$IDS" ]; then
+  echo "Nenhum documento post encontrado para remover."
   exit 0
 fi
+
+# Mostrar documentos que serão removidos
+echo "Os seguintes documentos serão removidos automaticamente:"
+echo "$OUTPUT" | grep "ID:"
+echo ""
 
 # Contador para documentos processados
 COUNT=0
