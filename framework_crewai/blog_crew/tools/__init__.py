@@ -6,6 +6,7 @@ from .rss_tools import read_rss_feeds
 from .file_tools import save_to_file, read_from_file  
 from .sanity_tools import publish_to_sanity, publish_manual, verificar_e_criar_categoria, verificar_e_criar_tag
 from .formatter_tools import create_slug, format_content_for_sanity
+from .algolia_tools import index_to_algolia, search_algolia, delete_from_algolia
 
 # Lista de tools decoradas (instâncias de BaseTool)
 tools = [
@@ -17,7 +18,10 @@ tools = [
     verificar_e_criar_categoria,
     verificar_e_criar_tag,
     create_slug,
-    format_content_for_sanity
+    format_content_for_sanity,
+    index_to_algolia,
+    search_algolia,
+    delete_from_algolia
 ]
 
 def get_tool_by_name(name):
@@ -41,6 +45,9 @@ __all__ = [
     'verificar_e_criar_tag',
     'create_slug',
     'format_content_for_sanity',
+    'index_to_algolia',
+    'search_algolia',
+    'delete_from_algolia',
     'tools',
     'get_tool_by_name',
     'crewai_tool'

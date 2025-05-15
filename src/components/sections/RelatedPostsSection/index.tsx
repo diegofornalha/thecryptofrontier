@@ -174,7 +174,7 @@ export default function RelatedPostsSection(props) {
                             )}
                             {...(enableAnnotations && { 'data-sb-field-path': `.items.${index}` })}
                         >
-                            {showThumbnail && postItem.featuredImage?.url && (
+                            {showThumbnail && postItem.featuredImage?.url && postItem.slug && (
                                 <Link href={postItem.slug} className="block h-0 w-full pt-2/3 relative overflow-hidden">
                                     <img
                                         className="absolute top-0 left-0 h-full w-full object-cover transition-transform duration-500 hover:scale-105"
@@ -184,15 +184,31 @@ export default function RelatedPostsSection(props) {
                                     />
                                 </Link>
                             )}
+                            {showThumbnail && postItem.featuredImage?.url && !postItem.slug && (
+                                <div className="block h-0 w-full pt-2/3 relative overflow-hidden">
+                                    <img
+                                        className="absolute top-0 left-0 h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+                                        src={postItem.featuredImage.url}
+                                        alt={postItem.featuredImage.altText || ''}
+                                        data-sb-field-path=".featuredImage.url#@src .featuredImage.altText#@alt"
+                                    />
+                                </div>
+                            )}
                             <div className="flex flex-col flex-grow px-4 pt-4 pb-8 bg-gray-100 dark:bg-gray-800">
                                 <h3 className="text-lg font-medium leading-6 mb-2">
-                                    <Link
-                                        href={postItem.slug}
-                                        className="hover:text-primary"
-                                        data-sb-field-path=".title .slug#@href"
-                                    >
-                                        {postItem.title}
-                                    </Link>
+                                    {postItem.slug ? (
+                                        <Link
+                                            href={postItem.slug}
+                                            className="hover:text-primary"
+                                            data-sb-field-path=".title .slug#@href"
+                                        >
+                                            {postItem.title}
+                                        </Link>
+                                    ) : (
+                                        <span data-sb-field-path=".title">
+                                            {postItem.title}
+                                        </span>
+                                    )}
                                 </h3>
                                 <div className="flex-grow">
                                     {showExcerpt && postItem.excerpt && (
