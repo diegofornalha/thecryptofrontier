@@ -62,9 +62,18 @@ def gerar_chave():
     """Gera uma chave aleatória para o Sanity"""
     return ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(8))
 
+# Função para remover links HTML de um texto
+def remover_links_html(texto):
+    """Remove todos os links HTML (<a> tags) de um texto"""
+    # Padrão para capturar tags <a> completas com seu conteúdo
+    return re.sub(r'<a\s+[^>]*>(.*?)</a>', r'\1', texto)
+
 # Função para converter texto em formato Portable Text do Sanity
 def texto_para_portable_text(texto):
     """Converte texto em formato Portable Text do Sanity"""
+    # Remover links HTML do texto
+    texto = remover_links_html(texto)
+    
     # Dividir o texto em parágrafos
     paragrafos = [p.strip() for p in texto.split("\n\n") if p.strip()]
     
@@ -92,6 +101,9 @@ def texto_para_portable_text(texto):
 # Função para converter HTML em formato Portable Text do Sanity
 def html_para_portable_text(html):
     """Converte HTML em formato Portable Text do Sanity"""
+    # Primeiro remover links HTML
+    html = remover_links_html(html)
+    
     # Abordagem simplificada: remover tags HTML e converter para blocos de texto
     limpo = re.sub(r'<p>', '', html)
     limpo = re.sub(r'</p>', '\n\n', limpo)
@@ -425,13 +437,23 @@ def publish_to_sanity(post_data=None, file_path=None, **kwargs):
         if not post_schema:
             logger.warning("Schema de post não encontrado. Continuando sem validação.")
         
+        # Limitar o resumo a 299 caracteres e remover links HTML
+        resumo = post_data.get("excerpt", "")
+        
+        # Remover todos os links HTML (tags <a>)
+        resumo = remover_links_html(resumo)
+        
+        # Limitar tamanho a 299 caracteres
+        if len(resumo) > 299:
+            resumo = resumo[:296] + '...'
+            
         # Preparar a mutação
         create_doc = {
             "_type": "post",
             "title": post_data.get("title"),
             "slug": {"_type": "slug", "current": post_data.get("slug")},
             "publishedAt": datetime.now().isoformat(),
-            "excerpt": post_data.get("excerpt", ""),
+            "excerpt": resumo,
         }
         
         # Se post_data já contém "_type" (formatado pelo Pydantic), usar diretamente
