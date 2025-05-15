@@ -26,9 +26,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger("blog_crew")
 
-# Garantir que a API Key do Gemini está definida
-os.environ["GOOGLE_API_KEY"] = os.environ.get("GEMINI_API_KEY", "")
-
 def setup_directories():
     """Cria os diretórios necessários para o fluxo"""
     for dir_name in config['directories'].values():

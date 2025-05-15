@@ -19,24 +19,14 @@ if not api_key:
 
 # Criar o LLM usando a classe nativa do CrewAI com base na configuração
 llm_settings = app_config.get('llm', {})
-model_name_from_yaml = llm_settings.get('model', 'gemini-pro') 
+model_name_from_yaml = llm_settings.get('model', 'gpt-4.1-nano') 
 temperature_from_yaml = llm_settings.get('temperature', 0.7)
 
-prefixed_model_name = f"gemini/{model_name_from_yaml}"
-
-llm_crew_config_dict = {
-    'api_key': api_key, 
-    'temperature': temperature_from_yaml,
-}
-
+# Configura para usar OpenAI
 llm = LLM(
-    model=prefixed_model_name,
-    config=llm_crew_config_dict
+    model=model_name_from_yaml,
+    temperature=temperature_from_yaml
 )
-
-# Alternativamente, você pode usar Anthropic:
-# os.environ["ANTHROPIC_API_KEY"] = "sua-chave-anthropic"
-# llm = LLM(provider="anthropic", model="claude-3-sonnet-20240229", temperature=0.7)
 
 class MonitorAgent:
     """Agente monitor responsável por capturar artigos de feeds RSS"""

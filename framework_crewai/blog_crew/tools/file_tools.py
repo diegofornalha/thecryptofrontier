@@ -21,9 +21,9 @@ def save_to_file(data=None, file_path=None, **kwargs):
                 parsed_json = json.loads(data)
                 if isinstance(parsed_json, dict):
                     file_path = parsed_json.get("file_path", file_path)
-                    data = parsed_json.get("data", data) # data pode ser o próprio JSON parseado ou um campo dentro dele
-                    # Se 'data' dentro do JSON parseado ainda for uma string, pode ser um JSON aninhado.
-                    # Mas, por simplicidade, assumimos que 'data' agora é o conteúdo real.
+                    # Não substitua 'data' se não houver o campo 'data' ou se for None
+                    if "data" in parsed_json and parsed_json["data"] is not None:
+                        data = parsed_json["data"]
                     parsed_from_string = True
                     logger.info("Parâmetros extraídos de uma string JSON fornecida como primeiro argumento.")
             except json.JSONDecodeError:
@@ -91,10 +91,11 @@ def read_from_file(file_path=None, **kwargs):
             try:
                 # Verifica se a string é um JSON que contém 'file_path'
                 parsed_json = json.loads(file_path)
-                if isinstance(parsed_json, dict) and "file_path" in parsed_json:
-                    file_path = parsed_json.get("file_path")
-                    parsed_from_string = True
-                    logger.info("Parâmetro 'file_path' extraído de uma string JSON fornecida como primeiro argumento.")
+                if isinstance(parsed_json, dict):
+                    if "file_path" in parsed_json and parsed_json["file_path"] is not None:
+                        file_path = parsed_json["file_path"]
+                        parsed_from_string = True
+                        logger.info("Parâmetro 'file_path' extraído de uma string JSON fornecida como primeiro argumento.")
             except json.JSONDecodeError:
                 # Não era uma string JSON, então file_path é provavelmente o caminho do arquivo real.
                 pass

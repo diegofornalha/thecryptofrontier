@@ -14,28 +14,17 @@ except ImportError:
     PYDANTIC_AVAILABLE = False
     print("AVISO: Modelos Pydantic não encontrados!")
 
-# Obter a chave da API.
-api_key = os.getenv("GOOGLE_API_KEY") 
-if not api_key:
-    api_key = os.getenv("GEMINI_API_KEY")
-    if not api_key:
-        print("AVISO: GEMINI_API_KEY ou GOOGLE_API_KEY não encontradas no ambiente.")
+
 
 # Criar o LLM usando a classe nativa do CrewAI com base na configuração
 llm_settings = app_config.get('llm', {})
-model_name_from_yaml = llm_settings.get('model', 'gemini-pro') 
+model_name_from_yaml = llm_settings.get('model', 'gpt-4.1-nano') 
 temperature_from_yaml = llm_settings.get('temperature', 0.7)
 
-prefixed_model_name = f"gemini/{model_name_from_yaml}"
-
-llm_crew_config_dict = {
-    'api_key': api_key, 
-    'temperature': temperature_from_yaml,
-}
-
+# Configura o LLM
 llm = LLM(
-    model=prefixed_model_name,
-    config=llm_crew_config_dict
+    model=model_name_from_yaml,
+    temperature=temperature_from_yaml
 )
 
 class PublisherAgent:

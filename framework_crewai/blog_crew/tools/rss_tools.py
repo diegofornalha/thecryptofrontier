@@ -49,7 +49,12 @@ def read_rss_feeds(feeds_file=None):
     results = []
     
     # Processar cada feed
-    for feed in feeds_config:
+    feeds_list = feeds_config.get("feeds", [])
+    if not feeds_list:
+        # Compatibilidade: verificar se feeds_config é uma lista direta de feeds
+        feeds_list = feeds_config if isinstance(feeds_config, list) else []
+    
+    for feed in feeds_list:
         try:
             logger.info(f"Lendo feed: {feed['name']} ({feed['url']})")
             parsed_feed = feedparser.parse(feed["url"])

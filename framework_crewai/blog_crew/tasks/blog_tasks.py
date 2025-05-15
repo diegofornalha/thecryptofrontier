@@ -57,8 +57,7 @@ def create_monitoring_task(agent):
         """,
         agent=agent,
         expected_output="Lista de arquivos JSON salvos na pasta 'posts_para_traduzir'",
-        output_pydantic=MonitoringResult,
-        output_json=FeedArticle  # Define o formato JSON esperado para cada artigo
+        output_pydantic=MonitoringResult
     )
 
 def create_translation_task(agent):
@@ -93,8 +92,7 @@ def create_translation_task(agent):
         """,
         agent=agent,
         expected_output="Lista de arquivos JSON traduzidos salvos na pasta 'posts_traduzidos'",
-        output_pydantic=TranslationResult,
-        output_json=TranslatedArticle  # Define o formato JSON esperado para cada artigo traduzido
+        output_pydantic=TranslationResult
     )
 
 def create_formatting_task(agent):
@@ -148,8 +146,7 @@ def create_formatting_task(agent):
         """,
         agent=agent,
         expected_output="Lista de arquivos JSON formatados salvos na pasta 'posts_formatados'",
-        output_pydantic=FormattingResult,
-        output_json=FormattedArticle  # Define o formato JSON esperado para cada artigo formatado
+        output_pydantic=FormattingResult
     )
 
 def create_publishing_task(agent):
@@ -176,6 +173,5 @@ def create_publishing_task(agent):
         """,
         agent=agent,
         expected_output="Relatório de publicação dos artigos no Sanity CMS, incluindo uma lista dos arquivos que foram publicados e movidos.",
-        output_pydantic=PublishingResult,
-        output_json=Post  # Define o formato JSON esperado para cada post
+        output_pydantic=PublishingResult
     )

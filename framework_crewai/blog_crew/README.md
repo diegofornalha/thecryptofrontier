@@ -1,167 +1,134 @@
-# Blog Crew - Automação de blog com CrewAI
+# Blog Crew - Framework CrewAI com Sanity CMS
 
-Este projeto implementa um fluxo automatizado para blog usando o framework CrewAI. Ele gerencia todo o processo desde monitorar feeds RSS até publicar conteúdo no Sanity CMS.
+Este projeto implementa um sistema automatizado para monitoramento de feeds RSS, tradução, formatação e publicação de artigos no Sanity CMS, utilizando o framework CrewAI.
 
-## Estrutura
+## Visão Geral
 
-O projeto segue a estrutura padrão recomendada pela [documentação do CrewAI](https://docs.crewai.com/):
+O sistema utiliza agentes autônomos do CrewAI para executar diferentes etapas do processo de publicação de conteúdo:
+
+1. **Monitor de Feeds RSS** - Monitora fontes de notícias e seleciona artigos relevantes
+2. **Tradutor de Conteúdo** - Traduz os artigos para português brasileiro
+3. **Formatador de Conteúdo** - Formata os artigos para o schema do Sanity CMS
+4. **Publicador de Conteúdo** - Publica os artigos no Sanity CMS
+
+Todos os dados são validados usando modelos Pydantic para garantir compatibilidade completa com o Sanity CMS.
+
+## Estrutura do Projeto
 
 ```
 blog_crew/
-│
-├── agents/                # Definição dos agentes
-│   ├── monitor_agent.py   # Agente monitor de feeds RSS
-│   ├── translator_agent.py  # Agente tradutor
-│   ├── formatter_agent.py   # Agente formatador de conteúdo
-│   └── publisher_agent.py   # Agente publicador no Sanity
-│
-├── tools/                 # Ferramentas para os agentes
-│   ├── rss_tools.py       # Ferramentas de leitura de RSS
-│   ├── file_tools.py      # Ferramentas de manipulação de arquivos 
-│   ├── formatter_tools.py  # Ferramentas de formatação
-│   └── sanity_tools.py    # Ferramentas de publicação no Sanity
-│
-├── tasks/                 # Definição das tarefas
-│   └── blog_tasks.py      # Tarefas do fluxo de blog
-│
-├── models/                # Modelos Pydantic para estruturação de dados
-│   ├── post.py            # Modelo para posts no Sanity
-│   └── converters.py      # Conversores entre formatos
-│
-├── logic/                 # Lógica de negócios
-│   ├── feed_manager.py    # Gerenciador de feeds RSS
-│   └── sanity_client.py   # Cliente para Sanity CMS
-│
-├── config/                # Configurações do projeto
-│   ├── settings.yaml      # Configurações gerais
-│   └── sanity_config.py   # Configurações do Sanity
-│
-├── schemas/               # Schemas do Sanity CMS
-│   └── post_schema.py     # Schema de post
-│
-├── crew.py                # Definição do Crew para CLI
-├── crewai.yaml            # Configuração para o CLI da CrewAI
-├── main.py                # Script principal
-│
-├── pyproject.toml         # Configuração do projeto e dependências
-├── requirements.txt       # Dependências do projeto
-│
-└── README.md              # Esta documentação
+├── README.md               # Documentação principal
+├── agents/                 # Definição dos agentes CrewAI
+│   ├── formatter_agent.py  # Agente formatador
+│   ├── monitor_agent.py    # Agente monitor
+│   ├── publisher_agent.py  # Agente publicador
+│   └── translator_agent.py # Agente tradutor
+├── config/                 # Configurações
+│   ├── sanity_config.py    # Configurações do Sanity
+│   └── settings.yaml       # Configurações gerais
+├── crew.py                 # Definição da Crew do CrewAI
+├── crewai.yaml             # Configuração do CrewAI
+├── feeds.json              # Lista de feeds RSS
+├── logic/                  # Lógica de negócio
+│   ├── feed_manager.py     # Gerenciador de feeds RSS
+│   └── sanity_client.py    # Cliente para o Sanity
+├── main.py                 # Ponto de entrada da aplicação
+├── models/                 # Modelos Pydantic
+│   ├── converters.py       # Funções de conversão
+│   ├── feed.py             # Modelos para feeds e artigos
+│   └── post.py             # Modelo para posts do Sanity
+├── pyproject.toml          # Dependências do projeto
+├── run_test_flow.py        # Script para testar o fluxo completo
+├── schemas/                # Schemas do Sanity
+│   ├── post_schema.py      # Schema para posts
+│   └── ...                 # Outros schemas
+├── tasks/                  # Definição das tarefas CrewAI
+│   └── blog_tasks.py       # Tarefas de blog
+└── tools/                  # Ferramentas para os agentes
+    ├── file_tools.py       # Ferramentas para arquivos
+    ├── formatter_tools.py  # Ferramentas para formatação
+    ├── rss_tools.py        # Ferramentas para feeds RSS
+    └── sanity_tools.py     # Ferramentas para Sanity
 ```
-
-## Feeds RSS
-
-O sistema está configurado para monitorar os seguintes feeds RSS:
-
-```json
-[
-  {
-    "name": "thecryptobasic.com",
-    "url": "https://thecryptobasic.com/feed"
-  },
-  {
-    "name": "u.today",
-    "url": "https://u.today/rss"
-  }
-]
-```
-
-## Funcionalidades
-
-### Monitoramento de RSS
-- Lê feeds RSS de diversas fontes sobre criptomoedas
-- Seleciona artigos relevantes para o público brasileiro
-- Salva os artigos para tradução
-
-### Tradução
-- Traduz artigos do inglês para português brasileiro
-- Adapta termos técnicos e referências culturais
-- Mantém a fluência e naturalidade do texto
-
-### Formatação
-- Prepara o conteúdo traduzido para o Sanity CMS
-- Cria slugs, organiza metadados e estrutura o conteúdo
-- Otimiza para SEO
-- Utiliza modelos Pydantic para validar e estruturar dados
-- Converte conteúdo para o formato Portable Text do Sanity
-
-### Publicação
-- Publica o conteúdo formatado no Sanity CMS
-- Verifica e valida dados antes da publicação
-- Rastreia sucesso e falhas de publicação
-- Gera relatórios detalhados de resultados
-- Gerencia o ciclo de vida dos artigos publicados
 
 ## Requisitos
 
 - Python 3.10+
 - CrewAI 0.28.0+
-- Langchain
 - Pydantic 2.5.0+
-- API Key do Google Gemini
-- Credenciais do Sanity CMS
+- Sanity CMS (conta configurada)
 
 ## Instalação
 
-1. Instale o CLI da CrewAI:
+1. Clone o repositório
+2. Instale as dependências:
+
 ```bash
-pip install crewai --upgrade
+pip install -e .
 ```
 
-2. Instale o projeto blog_crew:
+ou
+
 ```bash
-cd blog_crew
-crewai install
+pip install -r requirements.txt
 ```
 
 3. Configure as variáveis de ambiente:
+
 ```bash
-export GEMINI_API_KEY="sua-chave-api-do-gemini"
-export SANITY_PROJECT_ID="seu-id-do-projeto-sanity"
-export SANITY_API_TOKEN="seu-token-do-sanity"
+export SANITY_PROJECT_ID=your-project-id
+export SANITY_API_TOKEN=your-api-token
+export SANITY_DATASET=production
 ```
+
+## Configuração
+
+1. Edite o arquivo `feeds.json` para adicionar ou remover fontes de conteúdo
+2. Ajuste as configurações em `config/settings.yaml` de acordo com suas necessidades
 
 ## Uso
 
-### Usando o CLI da CrewAI
-
-Execute o Crew diretamente usando o CLI:
+Execute o script principal:
 
 ```bash
-cd blog_crew
-crewai run
-```
-
-### Usando o script Python
-
-Alternativamente, você pode executar via script Python:
-
-```bash
-cd blog_crew
 python main.py
 ```
 
-O programa irá:
-1. Monitorar feeds RSS
-2. Traduzir artigos relevantes
-3. Formatar para o Sanity CMS
-4. Publicar no blog
+Para testar o fluxo completo de processamento sem executar os agentes:
 
-## Personalização
+```bash
+python run_test_flow.py
+```
 
-- Modifique `config/settings.yaml` para ajustar configurações globais
-- Altere os agentes em `agents/` para customizar habilidades e comportamentos
-- Adicione novas ferramentas em `tools/` para expandir capacidades
-- Edite os modelos Pydantic em `models/` para ajustar estrutura de dados
-- Customize as tarefas em `tasks/blog_tasks.py` para adaptar o fluxo
-- Edite `crewai.yaml` para configurar o comportamento do CLI
+## Modelos Pydantic
 
-## Modelos Pydantic e Saída Estruturada
+Este projeto utiliza modelos Pydantic para garantir a integridade dos dados em cada etapa do processo:
 
-O projeto utiliza modelos Pydantic para garantir que os dados retornados pelas tarefas estejam no formato correto:
+- `FeedArticle` - Modelo para artigos extraídos de feeds RSS
+- `TranslatedArticle` - Modelo para artigos traduzidos
+- `FormattedArticle` - Modelo para artigos formatados para o Sanity
+- `Post` - Modelo principal para artigos no formato Sanity
 
-- Cada tarefa define seu retorno utilizando o parâmetro `output_pydantic`
-- Os modelos estão definidos em `tasks/blog_tasks.py` e `models/post.py`
-- A conversão entre dicionários e objetos Pydantic é feita por `models/converters.py`
-- Isso garante validação de dados e tipagem forte em todo o fluxo
-- Os agentes `FormatterAgent` e `PublisherAgent` possuem métodos para validar e converter dados
+Para mais detalhes sobre a implementação dos modelos Pydantic, consulte o arquivo [README_PYDANTIC.md](./README_PYDANTIC.md).
+
+## Integração com MCP (Model Context Protocol)
+
+Este projeto pode ser integrado com o MCP para melhorar a interação com o Sanity CMS. Para demonstrar como isso funcionaria, execute:
+
+```bash
+python sanity_mcp_integration.py
+```
+
+Para implementar a integração real com MCP, você precisaria instalar:
+
+```bash
+pip install crewai-tools[mcp]
+```
+
+## Contribuição
+
+Contribuições são bem-vindas! Por favor, abra uma issue para discutir as mudanças antes de enviar um pull request.
+
+## Licença
+
+Este projeto está licenciado sob a licença MIT - veja o arquivo LICENSE para mais detalhes.

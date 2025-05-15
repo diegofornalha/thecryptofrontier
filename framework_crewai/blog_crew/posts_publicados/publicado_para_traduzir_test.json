@@ -1,0 +1,108 @@
+{
+  "title": "Bitcoin Atinge Nova Máxima Histórica Após Aprovação de ETFs",
+  "slug": {
+    "_type": "slug",
+    "current": "bitcoin-atinge-nova-maxima-historica-apos-aprovacao-de-etfs"
+  },
+  "publishedAt": "2025-05-14 23:32:02.630172",
+  "excerpt": "Bitcoin atingiu novo recorde após aprovação de ETFs de Bitcoin à vista",
+  "content": [
+    {
+      "_key": "-4672166",
+      "_type": "block",
+      "style": "normal",
+      "children": [
+        {
+          "_key": "11462483",
+          "_type": "span",
+          "text": "O Bitcoin atingiu um novo recorde de preço hoje, superando sua máxima histórica anterior. Analistas atribuem este movimento à recente aprovação dos ETFs de Bitcoin à vista pela SEC, que marca um momento histórico para a adoção institucional de criptomoedas."
+        }
+      ],
+      "markDefs": []
+    },
+    {
+      "_key": "-1608308",
+      "_type": "block",
+      "style": "normal",
+      "children": [
+        {
+          "_key": "60008086",
+          "_type": "span",
+          "text": "Os ETFs de Bitcoin à vista permitem que investidores institucionais e de varejo obtenham exposição ao Bitcoin sem precisar comprar e armazenar a criptomoeda diretamente. Isso remove uma barreira significativa para a entrada de novos investidores no mercado."
+        }
+      ],
+      "markDefs": []
+    },
+    {
+      "_key": "-8578290",
+      "_type": "block",
+      "style": "normal",
+      "children": [
+        {
+          "_key": "-4039400",
+          "_type": "span",
+          "text": "Desde o lançamento dos ETFs em janeiro, bilhões de dólares têm fluído para esses produtos financeiros, demonstrando forte demanda institucional pelo Bitcoin como classe de ativo."
+        }
+      ],
+      "markDefs": []
+    },
+    {
+      "_key": "62714320",
+      "_type": "block",
+      "style": "h1",
+      "children": [
+        {
+          "_key": "85937875",
+          "_type": "span",
+          "text": "Impacto no Mercado"
+        }
+      ],
+      "markDefs": []
+    },
+    {
+      "_key": "-6589186",
+      "_type": "block",
+      "style": "normal",
+      "children": [
+        {
+          "_key": "50756215",
+          "_type": "span",
+          "text": "De acordo com Sarah Johnson, analista de criptomoedas da BlockResearch, a aprovação \"representa um momento decisivo para toda a indústria cripto\"."
+        }
+      ],
+      "markDefs": []
+    },
+    {
+      "_key": "-4179653",
+      "_type": "block",
+      "style": "h2",
+      "children": [
+        {
+          "_key": "49448002",
+          "_type": "span",
+          "text": "Implicações de Longo Prazo"
+        }
+      ],
+      "markDefs": []
+    },
+    {
+      "_key": "-2352661",
+      "_type": "block",
+      "style": "normal",
+      "children": [
+        {
+          "_key": "-8211773",
+          "_type": "span",
+          "text": "Observadores do mercado acreditam que isso pode levar a uma maior adoção mainstream e potencialmente mais clareza regulatória nos próximos meses."
+        }
+      ],
+      "markDefs": []
+    }
+  ],
+  "originalSource": {
+    "url": "https://www.coindesk.com/markets/2025/05/14/bitcoin-hits-new-all-time-high-after-etf-approval/",
+    "title": "Bitcoin Reaches New All-Time High After ETF Approval",
+    "site": "CoinDesk"
+  },
+  "_type": "post"
+}

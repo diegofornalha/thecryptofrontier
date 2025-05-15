@@ -4,3 +4,4 @@ version: 1.0.0
 author: TheCryptoFrontier
 modules:
   - crew.py
+entrypoint: run_crew:main

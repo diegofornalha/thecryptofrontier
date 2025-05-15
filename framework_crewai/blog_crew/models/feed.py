@@ -27,6 +27,7 @@ class TranslatedArticle(BaseModel):
 
 class FormattedArticle(BaseModel):
     """Modelo para artigos formatados para o Sanity"""
+    type: str = Field("post", alias="_type")
     title: str
     slug: Dict[str, str]
     publishedAt: str
@@ -34,7 +35,13 @@ class FormattedArticle(BaseModel):
     content: List[Dict[str, Any]]
     originalSource: Optional[Dict[str, Any]] = None
     
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
+    model_config = {
+        "populate_by_name": True
+    }
+        
+    def model_dump(self, *args, **kwargs):
+        """Sobrescrever para renomear os campos para o formato Sanity"""
+        d = super().model_dump(*args, **kwargs)
+        if "type" in d:
+            d["_type"] = d.pop("type")
+        return d

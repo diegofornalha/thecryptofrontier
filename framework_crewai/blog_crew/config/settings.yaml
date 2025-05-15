@@ -9,7 +9,7 @@ directories:
 
 # Configurações LLM
 llm:
-  model: "gemini-1.5-flash"
+  model: "gpt-4.1-nano"  # Alterado para GPT-4.1 Nano (gpt-4.1-nano)
   temperature: 0.7
 
 # Configurações do processo
