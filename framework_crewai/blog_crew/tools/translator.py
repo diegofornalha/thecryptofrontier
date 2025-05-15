@@ -19,6 +19,41 @@ logger = logging.getLogger("translator")
 # Constantes
 MAX_CHARS_PER_REQUEST = 4900  # Limite do GoogleTranslator (deep-translator)
 RATE_LIMIT_DELAY = 1  # Delay em segundos para respeitar limites de API
+MAX_TITLE_LENGTH = 99  # Limite máximo de caracteres para títulos
+
+def truncate_title(title, max_length=MAX_TITLE_LENGTH):
+    """
+    Trunca um título para o número máximo de caracteres, 
+    preservando palavras completas e adicionando reticências se necessário.
+    
+    Args:
+        title (str): Título a ser truncado
+        max_length (int): Comprimento máximo (padrão: MAX_TITLE_LENGTH)
+        
+    Returns:
+        str: Título truncado
+    """
+    if not title or len(title) <= max_length:
+        return title
+        
+    # Truncar preservando palavras completas
+    truncated = title[:max_length]
+    
+    # Encontrar último espaço antes do limite
+    last_space = truncated.rfind(' ')
+    if last_space > 0:
+        truncated = truncated[:last_space]
+    
+    # Adicionar reticências se truncamos o título
+    if len(truncated) < len(title):
+        # Verifica se há espaço para reticências
+        if len(truncated) <= max_length - 3:
+            truncated += "..."
+        else:
+            # Se não há espaço, corta mais para adicionar reticências
+            truncated = truncated[:max_length - 3] + "..."
+    
+    return truncated
 
 def translate_text(text, source_lang="en", target_lang="pt"):
     """
@@ -145,7 +180,15 @@ def translate_article(article):
     # Traduzir o título
     if "title" in article and article["title"]:
         logger.info(f"Traduzindo título: {article['title']}")
-        translated["title"] = translate_text(article["title"])
+        translated_title = translate_text(article["title"])
+        
+        # Limitar o título traduzido a MAX_TITLE_LENGTH caracteres
+        if len(translated_title) > MAX_TITLE_LENGTH:
+            original_length = len(translated_title)
+            translated_title = truncate_title(translated_title)
+            logger.info(f"Título truncado de {original_length} para {len(translated_title)} caracteres")
+        
+        translated["title"] = translated_title
         logger.info(f"Título traduzido: {translated['title']}")
     
     # Traduzir o resumo
@@ -187,3 +230,9 @@ if __name__ == "__main__":
     translated = translate_text(sample_text)
     print(f"Original: {sample_text}")
     print(f"Traduzido: {translated}")
+    
+    # Testar truncamento de título
+    long_title = "Este é um título muito longo que certamente excederá o limite de 99 caracteres e precisará ser truncado de maneira adequada para caber no limite estabelecido"
+    truncated = truncate_title(long_title)
+    print(f"Título original ({len(long_title)} caracteres): {long_title}")
+    print(f"Título truncado ({len(truncated)} caracteres): {truncated}")

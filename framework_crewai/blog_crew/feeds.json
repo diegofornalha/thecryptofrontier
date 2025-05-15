@@ -6,11 +6,18 @@
       "language": "en",
       "category": "crypto",
       "priority": 1
+    },
+    {
+      "name": "U.Today",
+      "url": "https://u.today/rss",
+      "language": "en",
+      "category": "crypto",
+      "priority": 2
     }
   ],
   "settings": {
     "max_articles_per_day": 10,
-    "max_articles_per_feed": 3,
+    "max_articles_per_feed": 10,
     "min_article_length": 200,
     "max_article_age_days": 2,
     "blacklist_keywords": [
