@@ -4,6 +4,11 @@ Este arquivo contém as configurações necessárias para conexão com o Sanity
 """
 
 import os
+import logging
+import requests
+
+# Configurar logger
+logger = logging.getLogger(__name__)
 
 # Configurações do Sanity
 SANITY_CONFIG = {
@@ -22,3 +27,33 @@ def get_sanity_api_url(project_id=None, dataset=None, api_version=None):
     _api_version = api_version or SANITY_CONFIG["api_version"]
     
     return f"https://{_project_id}.api.sanity.io/v{_api_version}/data/mutate/{_dataset}"
+
+def verify_sanity_connection():
+    """Verifica se a conexão com o Sanity está funcionando"""
+    project_id = SANITY_CONFIG["project_id"]
+    api_token = os.environ.get("SANITY_API_TOKEN")
+    
+    if not project_id or not api_token:
+        logger.error("Credenciais do Sanity não configuradas")
+        return False, "Credenciais do Sanity não configuradas"
+    
+    try:
+        # URL para verificar se o projeto existe
+        url = f"https://{project_id}.api.sanity.io/v{SANITY_CONFIG['api_version']}/projects/{project_id}"
+        
+        headers = {
+            "Authorization": f"Bearer {api_token}"
+        }
+        
+        response = requests.get(url, headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            logger.info("Conexão com Sanity verificada com sucesso")
+            return True, "Conexão com Sanity OK"
+        else:
+            logger.error(f"Erro ao verificar conexão com Sanity: Status {response.status_code}")
+            return False, f"Erro ao acessar a API do Sanity: {response.status_code} - {response.text}"
+    
+    except Exception as e:
+        logger.error(f"Erro ao verificar conexão com Sanity: {str(e)}")
+        return False, f"Erro ao verificar conexão com Sanity: {str(e)}"

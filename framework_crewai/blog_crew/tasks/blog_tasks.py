@@ -160,14 +160,19 @@ def create_publishing_task(agent):
 
         Para cada arquivo na lista fornecida:
         1. Leia o arquivo JSON com o artigo formatado usando o nome do arquivo.
-        2. Prepare os dados do arquivo lido e publique o artigo no Sanity usando a ferramenta publish_to_sanity. Certifique-se de que os dados do post sejam passados como o argumento 'post_data' para a ferramenta.
-        3. Verifique se a publicação foi bem-sucedida.
-        4. Se publicado com sucesso, mova o arquivo original de 'posts_formatados' para a pasta 'posts_publicados'
-           com nome 'publicado_{nome_original_do_arquivo.json}'. (Ex: se o arquivo formatado era 'formatado_artigo_xyz.json', salve como 'publicado_artigo_xyz.json')
+        2. Prepare os dados do arquivo lido e publique o artigo no Sanity usando a ferramenta publish_to_sanity. 
+           Passe os seguintes parâmetros para a ferramenta:
+           - post_data: O conteúdo do arquivo JSON (dados do post)
+           - file_path: O caminho completo do arquivo que está sendo processado (para que a ferramenta possa movê-lo após a publicação)
+        3. Verifique se a publicação foi bem-sucedida. A ferramenta publish_to_sanity retornará um objeto com os campos:
+           - success: booleano indicando se a publicação foi bem-sucedida
+           - document_id: o ID do documento no Sanity (se sucesso=true)
+           - error: mensagem de erro (se sucesso=false)
+           - published_file: caminho do arquivo publicado (se movido com sucesso)
         
-        Cada arquivo formatado deve estar no formato esperado pelo Sanity (modelo Post).
+        Cada arquivo formatado deve estar no formato esperado pelo Sanity (modelo Post). 
+        A ferramenta publish_to_sanity cuidará de mover o arquivo para a pasta 'posts_publicados' com o prefixo correto.
         
-        Certifique-se de que o nome do arquivo salvo preserve o nome original após 'publicado_'.
         Retorne um relatório dos artigos publicados com sucesso (lista de nomes dos arquivos movidos para 'posts_publicados'),
         bem como o número total de artigos publicados com sucesso e falhas.
         """,

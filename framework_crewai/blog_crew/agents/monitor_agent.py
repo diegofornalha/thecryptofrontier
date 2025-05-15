@@ -10,12 +10,10 @@ from tools import get_tool_by_name, tools
 # Carregar configuração centralizada
 from config import config as app_config
 
-# Obter a chave da API.
-api_key = os.getenv("GOOGLE_API_KEY") 
+# Obter a chave da API OpenAI apenas
+api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
-    api_key = os.getenv("GEMINI_API_KEY")
-    if not api_key:
-        print("AVISO: GEMINI_API_KEY ou GOOGLE_API_KEY não encontradas no ambiente.")
+    print("AVISO: OPENAI_API_KEY não encontrada no ambiente.")
 
 # Criar o LLM usando a classe nativa do CrewAI com base na configuração
 llm_settings = app_config.get('llm', {})

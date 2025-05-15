@@ -64,12 +64,23 @@ def load_schema(schema_name):
         return None
 
 @tool
-def publish_to_sanity(post_data=None, **kwargs):
-    """Publica um post no Sanity CMS. Recebe um dicionário com dados do post (title, slug, content, etc.)."""
+def publish_to_sanity(post_data=None, file_path=None, **kwargs):
+    """Publica um post no Sanity CMS. Recebe um dicionário com dados do post (title, slug, content, etc.) 
+    e opcionalmente o caminho do arquivo original para movê-lo após a publicação."""
     try:
-        logger.info(f"publish_to_sanity: Recebido post_data={type(post_data)}, kwargs={list(kwargs.keys()) if kwargs else 'nenhum'}")
+        # Configurar log mais detalhado para debug
+        logger.setLevel(logging.DEBUG)
+        logging.getLogger().setLevel(logging.DEBUG)
         
-        # Processamento avançado para lidar com a forma como o Gemini envia os dados
+        logger.debug(f"publish_to_sanity: Iniciando publicação")
+        logger.info(f"publish_to_sanity: Recebido post_data={type(post_data)}, file_path={file_path}, kwargs={list(kwargs.keys()) if kwargs else 'nenhum'}")
+        
+        # Se o caminho do arquivo não foi fornecido, procurar em kwargs
+        if file_path is None and 'file_path' in kwargs:
+            file_path = kwargs['file_path']
+            logger.debug(f"publish_to_sanity: Encontrado file_path em kwargs: {file_path}")
+            
+        # Processamento avançado para lidar com a forma como o LLM envia os dados
         # 1. Se o argumento for uma string, tentar extrair um JSON dela
         parsed_from_string = False
         if isinstance(post_data, str):
@@ -164,17 +175,23 @@ def publish_to_sanity(post_data=None, **kwargs):
         dataset = SANITY_CONFIG.get("dataset", "production")
         api_token = os.environ.get("SANITY_API_TOKEN")
         
+        logger.debug(f"publish_to_sanity: Sanity project_id={project_id}, dataset={dataset}")
+        logger.debug(f"publish_to_sanity: API token disponível: {bool(api_token)}")
+        
         if not project_id or not api_token:
+            logger.error("Credenciais do Sanity não configuradas corretamente")
             return {"success": False, "error": "Credenciais do Sanity não configuradas"}
         
         # URL da API do Sanity
         url = get_sanity_api_url(project_id, dataset)
+        logger.debug(f"publish_to_sanity: URL da API do Sanity: {url}")
         
         # Configuração de autenticação
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {api_token}"
         }
+        logger.debug(f"publish_to_sanity: Headers configurados com token de autorização")
         
         # Carregar o schema de post para validação
         post_schema = load_schema("post")
@@ -254,24 +271,86 @@ def publish_to_sanity(post_data=None, **kwargs):
         }
         
         logger.info(f"Enviando post '{post_data.get('title')}' para o Sanity")
+        logger.debug(f"publish_to_sanity: Dados da mutação: {json.dumps(mutations, indent=2)}")
         
-        # Enviar a requisição
-        response = requests.post(url, headers=headers, json=mutations)
-        
-        if response.status_code == 200:
-            result = response.json()
-            document_id = result.get("results", [{}])[0].get("id")
-            logger.info(f"Post publicado com sucesso, ID: {document_id}")
+        try:
+            # Enviar a requisição
+            logger.debug(f"publish_to_sanity: Fazendo requisição POST para: {url}")
+            response = requests.post(url, headers=headers, json=mutations, timeout=30)
+            
+            logger.debug(f"publish_to_sanity: Resposta recebida - Status: {response.status_code}")
+            logger.debug(f"publish_to_sanity: Resposta: {response.text[:500]}")  # Limitado para evitar logs muito grandes
+            
+            if response.status_code == 200:
+                result = response.json()
+                logger.debug(f"publish_to_sanity: Resposta JSON completa: {json.dumps(result, indent=2)}")
+                
+                # Verificar se temos resultados na resposta
+                if not result.get("results") or len(result.get("results", [])) == 0:
+                    logger.error("Resposta sem resultados, possível falha ao criar documento")
+                    return {
+                        "success": False,
+                        "error": "Resposta do Sanity sem resultados, possível falha na criação do documento"
+                    }
+                
+                document_id = result.get("results", [{}])[0].get("id")
+                if not document_id:
+                    logger.error("ID do documento não encontrado na resposta")
+                    return {
+                        "success": False,
+                        "error": "ID do documento não encontrado na resposta do Sanity"
+                    }
+                
+                logger.info(f"Post publicado com sucesso no Sanity, ID: {document_id}")
+                
+                # Se temos um caminho de arquivo e ele existe, vamos movê-lo para a pasta de publicados
+                if file_path and os.path.exists(file_path):
+                    try:
+                        # Obter diretório base e nome do arquivo
+                        dir_path = os.path.dirname(file_path)
+                        file_name = os.path.basename(file_path)
+                        # É um arquivo formatado, então o nome deve começar com "formatado_"
+                        if file_name.startswith("formatado_"):
+                            # Substituir "formatado_" por "publicado_"
+                            new_file_name = file_name.replace("formatado_", "publicado_")
+                            # Obter o caminho para a pasta de publicados
+                            published_dir = os.path.join(os.path.dirname(dir_path), "posts_publicados")
+                            # Garantir que a pasta de publicados existe
+                            os.makedirs(published_dir, exist_ok=True)
+                            # Caminho completo do novo arquivo
+                            new_file_path = os.path.join(published_dir, new_file_name)
+                            
+                            # Copiar o arquivo para a pasta de publicados
+                            import shutil
+                            shutil.copy2(file_path, new_file_path)
+                            logger.info(f"Arquivo movido para: {new_file_path}")
+                            
+                            return {
+                                "success": True, 
+                                "document_id": document_id,
+                                "message": "Artigo publicado com sucesso no Sanity CMS",
+                                "published_file": new_file_path
+                            }
+                    except Exception as move_error:
+                        logger.error(f"Erro ao mover arquivo: {str(move_error)}")
+                        # Continuamos mesmo se falhar ao mover o arquivo
+                
+                return {
+                    "success": True, 
+                    "document_id": document_id,
+                    "message": "Artigo publicado com sucesso no Sanity CMS"
+                }
+            else:
+                logger.error(f"Erro ao publicar: {response.status_code} - {response.text}")
+                return {
+                    "success": False, 
+                    "error": f"Erro HTTP {response.status_code}: {response.text}"
+                }
+        except requests.RequestException as req_error:
+            logger.error(f"Erro na requisição para o Sanity: {str(req_error)}")
             return {
-                "success": True, 
-                "document_id": document_id,
-                "message": "Artigo publicado com sucesso no Sanity CMS"
-            }
-        else:
-            logger.error(f"Erro ao publicar: {response.status_code} - {response.text}")
-            return {
-                "success": False, 
-                "error": f"Erro HTTP {response.status_code}: {response.text}"
+                "success": False,
+                "error": f"Erro na requisição: {str(req_error)}"
             }
             
     except Exception as e:
