@@ -105,7 +105,7 @@ def monitorar_feeds(max_articles=3):
         except Exception as e:
             logger.error(f"Erro ao processar feed {feed['name']}: {str(e)}")
     
-    logger.info(f"Total de artigos selecionados para tradução: {len(results)}")
+    logger.info(f"Total de artigos selecionados para {len(results)}")
     return results
 
 # Função para remover links HTML de um texto
@@ -218,7 +218,7 @@ def traduzir_artigos(arquivos):
             elif "new" in titulo_original.lower():
                 titulo_traduzido = titulo_original.lower().replace("new", "Novo").title()
             else:
-                titulo_traduzido = f"Tradução: {titulo_original}"
+                titulo_traduzido = f"{titulo_original}"
                 
             logger.info(f"Título traduzido: {titulo_traduzido}")
             
