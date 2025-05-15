@@ -1,5 +1,7 @@
 # Blog Crew - Framework CrewAI com Sanity CMS
 
+todos os dias rodas  python run_pipeline.py --max-articles 10
+
 Este projeto implementa um sistema automatizado para monitoramento de feeds RSS, tradução, formatação e publicação de artigos no Sanity CMS, utilizando o framework CrewAI.
 
 ## Visão Geral

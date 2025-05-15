@@ -53,6 +53,12 @@ def monitorar_feeds(max_articles=3):
         return []
     
     results = []
+    processed_titles = set()  # Para evitar duplicatas por título
+    processed_urls = set()    # Para evitar duplicatas por URL
+    
+    # Obter a lista de palavras na blacklist
+    blacklist_keywords = feeds_config.get("settings", {}).get("blacklist_keywords", [])
+    logger.info(f"Palavras na blacklist: {blacklist_keywords}")
     
     # Processar cada feed
     feeds_list = feeds_config.get("feeds", [])
@@ -65,9 +71,37 @@ def monitorar_feeds(max_articles=3):
             if not hasattr(parsed_feed, "entries"):
                 logger.warning(f"Feed sem entradas: {feed['name']}")
                 continue
+            
+            articles_processed = 0
+            articles_skipped = 0
                 
             # Processar os últimos N artigos do feed
-            for i, entry in enumerate(parsed_feed.entries[:max_articles]):
+            for i, entry in enumerate(parsed_feed.entries):
+                if articles_processed >= max_articles:
+                    break
+                
+                # Extrair título e link para verificação de duplicatas
+                title = entry.get("title", "")
+                link = entry.get("link", "")
+                
+                # Verificar se o artigo já foi processado (duplicata)
+                if title.lower() in processed_titles or link in processed_urls:
+                    logger.warning(f"Artigo duplicado ignorado: {title}")
+                    articles_skipped += 1
+                    continue
+                
+                # Verificar se o artigo contém alguma palavra da blacklist no título
+                should_skip = False
+                for keyword in blacklist_keywords:
+                    if keyword.lower() in title.lower():
+                        logger.warning(f"Artigo com palavra na blacklist ignorado: {title} (palavra: {keyword})")
+                        articles_skipped += 1
+                        should_skip = True
+                        break
+                
+                if should_skip:
+                    continue
+                
                 # Extrair conteúdo do artigo
                 content = ""
                 if "content" in entry and entry.content:
@@ -77,9 +111,20 @@ def monitorar_feeds(max_articles=3):
                 elif "summary" in entry:
                     content = entry.summary
                 
+                # Também verificar conteúdo para palavras na blacklist
+                for keyword in blacklist_keywords:
+                    if keyword.lower() in content.lower():
+                        logger.warning(f"Artigo com palavra na blacklist no conteúdo ignorado: {title} (palavra: {keyword})")
+                        articles_skipped += 1
+                        should_skip = True
+                        break
+                
+                if should_skip:
+                    continue
+                
                 article = {
-                    "title": entry.get("title", ""),
-                    "link": entry.get("link", ""),
+                    "title": title,
+                    "link": link,
                     "summary": entry.get("summary", ""),
                     "content": content,
                     "published": entry.get("published", ""),
@@ -90,7 +135,7 @@ def monitorar_feeds(max_articles=3):
                 
                 # Salvar o artigo para tradução
                 timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-                filename = f"para_traduzir_{timestamp}_{i}.json"
+                filename = f"para_traduzir_{timestamp}_{articles_processed}.json"
                 filepath = POSTS_PARA_TRADUZIR_DIR / filename
                 
                 with open(filepath, "w", encoding="utf-8") as f:
@@ -98,14 +143,19 @@ def monitorar_feeds(max_articles=3):
                     
                 logger.info(f"Artigo salvo: {filepath}")
                 
-                results.append(filepath)
+                # Adicionar aos conjuntos de artigos processados
+                processed_titles.add(title.lower())
+                processed_urls.add(link)
                 
-            logger.info(f"Feed {feed['name']} processado com sucesso")
+                results.append(filepath)
+                articles_processed += 1
+                
+            logger.info(f"Feed {feed['name']} processado com sucesso: {articles_processed} artigos aceitos, {articles_skipped} artigos ignorados")
             
         except Exception as e:
             logger.error(f"Erro ao processar feed {feed['name']}: {str(e)}")
     
-    logger.info(f"Total de artigos selecionados para {len(results)}")
+    logger.info(f"Total de artigos selecionados: {len(results)}")
     return results
 
 # Função para remover links HTML de um texto
