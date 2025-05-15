@@ -20,9 +20,69 @@ const indexName = buildIndexName() || 'development_mcpx_content';
 
 // Componente que renderiza cada resultado de pesquisa
 const Hit = ({ hit }) => {
+  // Determinar o URL do post com fallbacks
+  const getPostUrl = () => {
+    if (hit.permalink) return hit.permalink;
+    if (hit.slug) return `/post/${hit.slug}`;
+    if (hit.url) return hit.url;
+    return null;
+  };
+  
+  const postUrl = getPostUrl();
+
   return (
     <article className="search-result-card">
-      <Link href={hit.permalink} passHref>
+      {postUrl ? (
+        <Link href={postUrl} passHref>
+          <div className="search-result-content">
+            {hit.featuredImage && (
+              <div className="search-result-image">
+                <img 
+                  src={hit.featuredImage} 
+                  alt={hit.title}
+                  className="w-full h-32 object-cover rounded-t"
+                />
+              </div>
+            )}
+            
+            <div className="search-result-text">
+              <h2 className="search-result-title">
+                <Highlight attribute="title" hit={hit} tagName="mark" />
+              </h2>
+              
+              <div className="search-result-meta">
+                {hit.date && (
+                  <span className="search-date">
+                    {/* Use a more consistent date formatter to prevent hydration errors */}
+                    <span suppressHydrationWarning>
+                      {dayjs(hit.date).format('DD [de] MMMM [de] YYYY')}
+                    </span>
+                  </span>
+                )}
+                {hit.timeToRead && (
+                  <span className="search-time-to-read">
+                    {hit.timeToRead} min de leitura
+                  </span>
+                )}
+              </div>
+              
+              {hit.categories && hit.categories.length > 0 && (
+                <div className="search-result-categories">
+                  {hit.categories.map((category, index) => (
+                    <span key={index} className="category-tag">
+                      {typeof category === 'object' && category._ref ? category.title || 'Categoria' : category}
+                    </span>
+                  ))}
+                </div>
+              )}
+              
+              <div className="search-result-excerpt">
+                <Highlight attribute="excerpt" hit={hit} tagName="mark" />
+              </div>
+            </div>
+          </div>
+        </Link>
+      ) : (
         <div className="search-result-content">
           {hit.featuredImage && (
             <div className="search-result-image">
@@ -70,7 +130,7 @@ const Hit = ({ hit }) => {
             </div>
           </div>
         </div>
-      </Link>
+      )}
     </article>
   );
 };
