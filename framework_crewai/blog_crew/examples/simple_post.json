@@ -1,0 +1,25 @@
+{
+  "_type": "post",
+  "title": "Post de Teste Simples",
+  "slug": {
+    "_type": "slug", 
+    "current": "post-teste-simples"
+  },
+  "content": [
+    {
+      "_type": "block",
+      "_key": "simple1",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "simple2",
+          "text": "Este é um post de teste muito simples para verificar a integração.",
+          "marks": []
+        }
+      ],
+      "markDefs": []
+    }
+  ],
+  "publishedAt": "2023-05-15T11:30:00Z"
+}

@@ -44,6 +44,65 @@ except ImportError:
         
         return f"https://{_project_id}.api.sanity.io/v{_api_version}/data/mutate/{_dataset}"
 
+# Função para criar um slug a partir de um título
+def criar_slug(titulo):
+    """Cria um slug a partir de um título"""
+    # Normalizar para remover acentos
+    slug = titulo.lower()
+    # Remover caracteres especiais
+    slug = unicodedata.normalize('NFKD', slug)
+    slug = ''.join([c for c in slug if not unicodedata.combining(c)])
+    # Substituir espaços por traços
+    slug = re.sub(r'[^\w\s-]', '', slug)
+    slug = re.sub(r'\s+', '-', slug)
+    return slug.strip('-')
+
+# Função para gerar uma chave aleatória para o Sanity
+def gerar_chave():
+    """Gera uma chave aleatória para o Sanity"""
+    return ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(8))
+
+# Função para converter texto em formato Portable Text do Sanity
+def texto_para_portable_text(texto):
+    """Converte texto em formato Portable Text do Sanity"""
+    # Dividir o texto em parágrafos
+    paragrafos = [p.strip() for p in texto.split("\n\n") if p.strip()]
+    
+    # Criar blocos no formato do Sanity
+    blocos = []
+    for paragrafo in paragrafos:
+        bloco = {
+            "_type": "block",
+            "_key": gerar_chave(),
+            "style": "normal",
+            "markDefs": [],
+            "children": [
+                {
+                    "_type": "span",
+                    "_key": gerar_chave(),
+                    "text": paragrafo,
+                    "marks": []
+                }
+            ]
+        }
+        blocos.append(bloco)
+    
+    return blocos
+
+# Função para converter HTML em formato Portable Text do Sanity
+def html_para_portable_text(html):
+    """Converte HTML em formato Portable Text do Sanity"""
+    # Abordagem simplificada: remover tags HTML e converter para blocos de texto
+    limpo = re.sub(r'<p>', '', html)
+    limpo = re.sub(r'</p>', '\n\n', limpo)
+    limpo = re.sub(r'<[^>]*>', '', limpo)
+    
+    # Dividir em parágrafos e filtrar vazios
+    paragrafos = [p.strip() for p in re.split(r'\n\n+', limpo) if p.strip()]
+    
+    # Criar blocos no formato do Sanity
+    return texto_para_portable_text('\n\n'.join(paragrafos))
+
 def load_schema(schema_name):
     """Carrega um schema do Sanity dinamicamente"""
     try:
@@ -68,6 +127,169 @@ def load_schema(schema_name):
     except Exception as e:
         logger.error(f"Erro ao carregar schema {schema_name}: {str(e)}")
         return None
+
+@tool
+def verificar_e_criar_categoria(categoria, projeto_id=None, dataset=None, api_version=None):
+    """Verifica se categoria existe e cria se necessário"""
+    # Normalizar categoria para criar slug
+    categoria_slug = criar_slug(categoria)
+    categoria_id = f"category-{categoria_slug}"
+    
+    # Configurações do Sanity
+    project_id = projeto_id or SANITY_CONFIG["project_id"]
+    dataset = dataset or SANITY_CONFIG["dataset"]
+    api_version = api_version or SANITY_CONFIG["api_version"]
+    api_token = os.environ.get("SANITY_API_TOKEN")
+    
+    if not project_id or not api_token:
+        logger.error("Credenciais do Sanity não configuradas corretamente")
+        return {"success": False, "error": "Credenciais do Sanity não configuradas"}
+    
+    # Configuração de autenticação
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_token}"
+    }
+    
+    # Verificar se categoria existe
+    query_url = f"https://{project_id}.api.sanity.io/v{api_version}/data/query/{dataset}?query=*[_type=='category'&&_id=='{categoria_id}'][0]"
+    
+    try:
+        response = requests.get(query_url, headers=headers)
+        
+        if response.status_code == 200:
+            result = response.json()
+            if result.get("result"):
+                logger.info(f"Categoria '{categoria}' já existe")
+                return {"success": True, "id": categoria_id, "message": f"Categoria '{categoria}' já existe"}
+        
+        # Criar categoria
+        logger.info(f"Criando categoria '{categoria}'...")
+        mutation_url = f"https://{project_id}.api.sanity.io/v{api_version}/data/mutate/{dataset}"
+        
+        documento = {
+            "_type": "category",
+            "_id": categoria_id,
+            "title": categoria,
+            "slug": {
+                "_type": "slug",
+                "current": categoria_slug
+            }
+        }
+        
+        mutations = {
+            "mutations": [
+                {
+                    "createIfNotExists": documento
+                }
+            ]
+        }
+        
+        response = requests.post(mutation_url, headers=headers, json=mutations)
+        
+        if response.status_code == 200:
+            logger.info(f"Categoria '{categoria}' criada com sucesso")
+            return {"success": True, "id": categoria_id, "message": f"Categoria '{categoria}' criada com sucesso"}
+        else:
+            logger.error(f"Erro ao criar categoria: {response.status_code}")
+            logger.error(response.text)
+            return {"success": False, "error": f"Erro ao criar categoria: {response.status_code} - {response.text}"}
+    
+    except Exception as e:
+        logger.error(f"Erro ao verificar/criar categoria: {str(e)}")
+        return {"success": False, "error": str(e), "id": categoria_id}
+
+@tool
+def verificar_e_criar_tag(tag, projeto_id=None, dataset=None, api_version=None):
+    """Verifica se tag existe e cria se necessário"""
+    # Normalizar tag para criar slug
+    tag_slug = criar_slug(tag)
+    tag_id = f"tag-{tag_slug}"
+    
+    # Configurações do Sanity
+    project_id = projeto_id or SANITY_CONFIG["project_id"]
+    dataset = dataset or SANITY_CONFIG["dataset"]
+    api_version = api_version or SANITY_CONFIG["api_version"]
+    api_token = os.environ.get("SANITY_API_TOKEN")
+    
+    if not project_id or not api_token:
+        logger.error("Credenciais do Sanity não configuradas corretamente")
+        return {"success": False, "error": "Credenciais do Sanity não configuradas"}
+    
+    # Configuração de autenticação
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_token}"
+    }
+    
+    # Verificar se tag existe
+    query_url = f"https://{project_id}.api.sanity.io/v{api_version}/data/query/{dataset}?query=*[_type=='tag'&&_id=='{tag_id}'][0]"
+    
+    try:
+        response = requests.get(query_url, headers=headers)
+        
+        if response.status_code == 200:
+            result = response.json()
+            if result.get("result"):
+                logger.info(f"Tag '{tag}' já existe")
+                return {"success": True, "id": tag_id, "message": f"Tag '{tag}' já existe"}
+        
+        # Criar tag
+        logger.info(f"Criando tag '{tag}'...")
+        mutation_url = f"https://{project_id}.api.sanity.io/v{api_version}/data/mutate/{dataset}"
+        
+        documento = {
+            "_type": "tag",
+            "_id": tag_id,
+            "name": tag,
+            "slug": {
+                "_type": "slug",
+                "current": tag_slug
+            }
+        }
+        
+        mutations = {
+            "mutations": [
+                {
+                    "createIfNotExists": documento
+                }
+            ]
+        }
+        
+        response = requests.post(mutation_url, headers=headers, json=mutations)
+        
+        if response.status_code == 200:
+            logger.info(f"Tag '{tag}' criada com sucesso")
+            return {"success": True, "id": tag_id, "message": f"Tag '{tag}' criada com sucesso"}
+        else:
+            logger.error(f"Erro ao criar tag: {response.status_code}")
+            logger.error(response.text)
+            return {"success": False, "error": f"Erro ao criar tag: {response.status_code} - {response.text}"}
+    
+    except Exception as e:
+        logger.error(f"Erro ao verificar/criar tag: {str(e)}")
+        return {"success": False, "error": str(e), "id": tag_id}
+
+@tool
+def publish_manual(file_path=None):
+    """Publica manualmente um post a partir de um arquivo JSON"""
+    if not file_path:
+        return {"success": False, "error": "Caminho do arquivo não fornecido"}
+    
+    # Verificar se o arquivo existe
+    if not os.path.exists(file_path):
+        return {"success": False, "error": f"Arquivo não encontrado: {file_path}"}
+    
+    # Ler o arquivo JSON
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            post_data = json.load(f)
+    except json.JSONDecodeError as e:
+        return {"success": False, "error": f"Erro ao decodificar o JSON: {str(e)}"}
+    
+    # Publicar o post usando a ferramenta publish_to_sanity
+    logger.info(f"Publicando o post do arquivo: {file_path}")
+    return publish_to_sanity(post_data=post_data, file_path=file_path)
 
 @tool
 def publish_to_sanity(post_data=None, file_path=None, **kwargs):
@@ -99,7 +321,6 @@ def publish_to_sanity(post_data=None, file_path=None, **kwargs):
                     
                     # a) Se o resultado for um dicionário, pode ser o próprio post_data ou conter o post_data
                     if isinstance(parsed_json, dict):
-                        # Procurar o post_data em campos comuns que o Gemini pode usar
                         for field in ["post_data", "post", "data", "article", "content"]:
                             if field in parsed_json and isinstance(parsed_json[field], dict):
                                 post_data = parsed_json[field]

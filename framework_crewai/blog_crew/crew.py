@@ -31,6 +31,7 @@ def setup_directories():
     for dir_name in config['directories'].values():
         os.makedirs(dir_name, exist_ok=True)
         logger.info(f"Diretório '{dir_name}' criado/verificado com sucesso")
+    logger.info("Diretórios configurados")
 
 def get_crew():
     """Cria e retorna o crew"""
@@ -64,3 +65,6 @@ def get_crew():
 
 # Crew para ser usado pelo CLI
 crew = get_crew()
+
+# Exportar a função para que ela possa ser importada
+__all__ = ['get_crew', 'crew']

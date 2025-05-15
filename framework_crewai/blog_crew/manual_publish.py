@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script para publicar manualmente um post de teste no Sanity
+Script para publicar manualmente um post no Sanity
 """
 
 import os

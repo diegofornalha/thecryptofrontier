@@ -24,24 +24,27 @@ blog_crew/
 │   ├── publisher_agent.py  # Agente publicador
 │   └── translator_agent.py # Agente tradutor
 ├── config/                 # Configurações
+│   ├── agents.yaml         # Configurações dos agentes
 │   ├── sanity_config.py    # Configurações do Sanity
-│   └── settings.yaml       # Configurações gerais
-├── crew.py                 # Definição da Crew do CrewAI
-├── crewai.yaml             # Configuração do CrewAI
+│   ├── settings.yaml       # Configurações gerais
+│   └── tasks.yaml          # Configurações das tarefas
+├── crew.py                 # Definição da Crew (decoradores modernos)
+├── crewai.yaml             # Configuração do CrewAI CLI
 ├── feeds.json              # Lista de feeds RSS
 ├── logic/                  # Lógica de negócio
 │   ├── feed_manager.py     # Gerenciador de feeds RSS
 │   └── sanity_client.py    # Cliente para o Sanity
-├── main.py                 # Ponto de entrada da aplicação
 ├── models/                 # Modelos Pydantic
 │   ├── converters.py       # Funções de conversão
 │   ├── feed.py             # Modelos para feeds e artigos
 │   └── post.py             # Modelo para posts do Sanity
 ├── pyproject.toml          # Dependências do projeto
-├── run_test_flow.py        # Script para testar o fluxo completo
+├── run_crew.py             # Ponto de entrada do CrewAI
 ├── schemas/                # Schemas do Sanity
 │   ├── post_schema.py      # Schema para posts
 │   └── ...                 # Outros schemas
+├── scripts/                # Scripts utilitários
+│   └── publish_manual_post.py # Publicação manual
 ├── tasks/                  # Definição das tarefas CrewAI
 │   └── blog_tasks.py       # Tarefas de blog
 └── tools/                  # Ferramentas para os agentes
@@ -88,16 +91,16 @@ export SANITY_DATASET=production
 
 ## Uso
 
-Execute o script principal:
+Execute o workflow completo usando o CrewAI CLI:
 
 ```bash
-python main.py
+python run_crew.py
 ```
 
-Para testar o fluxo completo de processamento sem executar os agentes:
+Para publicar um post manualmente:
 
 ```bash
-python run_test_flow.py
+python scripts/publish_manual_post.py caminho/para/arquivo.json
 ```
 
 ## Modelos Pydantic

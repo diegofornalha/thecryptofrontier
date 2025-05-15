@@ -4,7 +4,7 @@ from crewai.tools import tool as crewai_tool
 # Reimportar as ferramentas para garantir que elas sejam instâncias de BaseTool
 from .rss_tools import read_rss_feeds
 from .file_tools import save_to_file, read_from_file  
-from .sanity_tools import publish_to_sanity
+from .sanity_tools import publish_to_sanity, publish_manual, verificar_e_criar_categoria, verificar_e_criar_tag
 from .formatter_tools import create_slug, format_content_for_sanity
 
 # Lista de tools decoradas (instâncias de BaseTool)
@@ -13,6 +13,9 @@ tools = [
     save_to_file,
     read_from_file,
     publish_to_sanity,
+    publish_manual,
+    verificar_e_criar_categoria,
+    verificar_e_criar_tag,
     create_slug,
     format_content_for_sanity
 ]
@@ -33,6 +36,9 @@ __all__ = [
     'save_to_file',
     'read_from_file',
     'publish_to_sanity',
+    'publish_manual',
+    'verificar_e_criar_categoria',
+    'verificar_e_criar_tag',
     'create_slug',
     'format_content_for_sanity',
     'tools',
