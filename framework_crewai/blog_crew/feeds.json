@@ -1,39 +1,11 @@
 {
   "feeds": [
     {
-      "name": "CoinDesk",
-      "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+      "name": "The Crypto Basic",
+      "url": "https://thecryptobasic.com/feed/",
       "language": "en",
       "category": "crypto",
       "priority": 1
-    },
-    {
-      "name": "Cointelegraph",
-      "url": "https://cointelegraph.com/rss",
-      "language": "en",
-      "category": "crypto",
-      "priority": 1
-    },
-    {
-      "name": "Decrypt",
-      "url": "https://decrypt.co/feed",
-      "language": "en",
-      "category": "crypto",
-      "priority": 2
-    },
-    {
-      "name": "Bitcoin Magazine",
-      "url": "https://bitcoinmagazine.com/.rss/full/",
-      "language": "en",
-      "category": "crypto",
-      "priority": 2
-    },
-    {
-      "name": "The Block",
-      "url": "https://www.theblock.co/rss.xml",
-      "language": "en",
-      "category": "crypto",
-      "priority": 3
     }
   ],
   "settings": {

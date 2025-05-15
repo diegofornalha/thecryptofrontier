@@ -38,13 +38,14 @@ blog_crew/
 │   ├── converters.py       # Funções de conversão
 │   ├── feed.py             # Modelos para feeds e artigos
 │   └── post.py             # Modelo para posts do Sanity
+├── publish_single.py       # Publica um único post no Sanity
 ├── pyproject.toml          # Dependências do projeto
 ├── run_crew.py             # Ponto de entrada do CrewAI
+├── run_pipeline.py         # Pipeline sem dependência da OpenAI
 ├── schemas/                # Schemas do Sanity
 │   ├── post_schema.py      # Schema para posts
 │   └── ...                 # Outros schemas
 ├── scripts/                # Scripts utilitários
-│   └── publish_manual_post.py # Publicação manual
 ├── tasks/                  # Definição das tarefas CrewAI
 │   └── blog_tasks.py       # Tarefas de blog
 └── tools/                  # Ferramentas para os agentes
@@ -91,16 +92,32 @@ export SANITY_DATASET=production
 
 ## Uso
 
-Execute o workflow completo usando o CrewAI CLI:
+Execute o workflow completo usando o CrewAI (depende da API da OpenAI):
 
 ```bash
 python run_crew.py
 ```
 
+Ou execute o pipeline sem depender da API da OpenAI:
+
+```bash
+python run_pipeline.py
+```
+
+Opções disponíveis no pipeline:
+
+```
+--max-articles N     # Número máximo de artigos por feed (padrão: 3)
+--skip-steps etapas  # Etapas a pular (ex: monitorar,traduzir)
+--only-steps etapas  # Apenas executar estas etapas (ex: formatar,publicar)
+--input-files lista  # Arquivos específicos para processar
+--delay segundos     # Atraso entre etapas (padrão: 2)
+```
+
 Para publicar um post manualmente:
 
 ```bash
-python scripts/publish_manual_post.py caminho/para/arquivo.json
+python publish_single.py caminho/para/arquivo.json
 ```
 
 ## Modelos Pydantic
