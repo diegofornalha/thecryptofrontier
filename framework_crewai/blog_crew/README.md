@@ -1,6 +1,15 @@
 # Blog Crew - Framework CrewAI com Sanity CMS
 
-todos os dias rodas  python run_pipeline.py --max-articles 10
+todos os dias rodas:
+python run_pipeline.py --max-articles 10
+
+ Ele faz tudo automaticamente:
+  1. Busca artigos dos feeds RSS
+  2. Traduz para português
+  3. Formata para o Sanity
+  4. Publica no CMS
+  5. Sincroniza com Algolia
+
 
 Este projeto implementa um sistema automatizado para monitoramento de feeds RSS, tradução, formatação e publicação de artigos no Sanity CMS, utilizando o framework CrewAI.
 

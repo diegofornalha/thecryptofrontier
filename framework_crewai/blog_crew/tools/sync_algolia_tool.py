@@ -25,7 +25,7 @@ SANITY_API_VERSION = "2023-05-03"
 
 # Configurações do Algolia
 ALGOLIA_APP_ID = os.environ.get("ALGOLIA_APP_ID", "42TZWHW8UP")
-ALGOLIA_API_KEY = os.environ.get("ALGOLIA_API_KEY", "d0cb55ec8f07832bc5f57da0bd25c535")  # Admin API Key
+ALGOLIA_ADMIN_API_KEY = os.environ.get("ALGOLIA_ADMIN_API_KEY", "d0cb55ec8f07832bc5f57da0bd25c535")  # Admin API Key
 ALGOLIA_INDEX_NAME = os.environ.get("ALGOLIA_INDEX_NAME", "development_mcpx_content")
 
 class AlgoliaToolError(Exception):
@@ -81,7 +81,7 @@ def sync_sanity_to_algolia(document_type: str = 'post') -> str:
         for env_var, name in [
             ("SANITY_API_TOKEN", "token da API do Sanity"),
             ("ALGOLIA_APP_ID", "ID da aplicação Algolia"),
-            ("ALGOLIA_API_KEY", "chave da API do Algolia")
+            ("ALGOLIA_ADMIN_API_KEY", "chave da API do Algolia")
         ]:
             if not os.environ.get(env_var) and not (env_var == "ALGOLIA_APP_ID" and ALGOLIA_APP_ID):
                 raise AlgoliaToolError(f"{env_var} não está definido. Defina a variável de ambiente {env_var}.")
@@ -206,11 +206,11 @@ def get_indexed_documents():
         dict: Dicionário com IDs e slugs dos documentos indexados
     """
     # Verificar se as credenciais existem
-    if not ALGOLIA_APP_ID or not ALGOLIA_API_KEY:
+    if not ALGOLIA_APP_ID or not ALGOLIA_ADMIN_API_KEY:
         raise AlgoliaToolError("Credenciais do Algolia não configuradas")
     
     # Inicializar cliente Algolia
-    client = SearchClient.create(ALGOLIA_APP_ID, ALGOLIA_API_KEY)
+    client = SearchClient.create(ALGOLIA_APP_ID, ALGOLIA_ADMIN_API_KEY)
     index = client.init_index(ALGOLIA_INDEX_NAME)
     
     # Buscar todos os objetos usando a API de browse
@@ -297,11 +297,11 @@ def index_documents(documents):
         return True
     
     # Verificar se as credenciais existem
-    if not ALGOLIA_APP_ID or not ALGOLIA_API_KEY:
+    if not ALGOLIA_APP_ID or not ALGOLIA_ADMIN_API_KEY:
         raise AlgoliaToolError("Credenciais do Algolia não configuradas")
     
     # Inicializar cliente Algolia
-    client = SearchClient.create(ALGOLIA_APP_ID, ALGOLIA_API_KEY)
+    client = SearchClient.create(ALGOLIA_APP_ID, ALGOLIA_ADMIN_API_KEY)
     index = client.init_index(ALGOLIA_INDEX_NAME)
     
     # Indexar os documentos

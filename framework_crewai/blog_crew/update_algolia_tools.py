@@ -12,13 +12,13 @@ import glob
 # Definições das configurações do Algolia
 ALGOLIA_CONFIG = {
     'ALGOLIA_APP_ID': '42TZWHW8UP',
-    'ALGOLIA_API_KEY': 'd0cb55ec8f07832bc5f57da0bd25c535',  # Admin API Key
+    'ALGOLIA_ADMIN_API_KEY': 'd0cb55ec8f07832bc5f57da0bd25c535',  # Admin API Key
     'ALGOLIA_INDEX_NAME': 'development_mcpx_content',
     'ALGOLIA_SEARCH_API_KEY': 'b32edbeb383fc3d1279658e7c3661843',
 }
 
 # Padrões para localizar as configurações nos arquivos
-CONFIG_PATTERN = r'(?:# Configurações do Algolia\s+)?ALGOLIA_APP_ID\s*=\s*os\.environ\.get\([\'"]ALGOLIA_APP_ID[\'"](?:,\s*[\'"].*?[\'"]\s*)?\)[\r\n]+ALGOLIA_API_KEY\s*=\s*os\.environ\.get\([\'"]ALGOLIA_API_KEY[\'"](?:,\s*[\'"].*?[\'"]\s*)?\)[\r\n]+ALGOLIA_INDEX_NAME\s*=\s*os\.environ\.get\([\'"]ALGOLIA_INDEX_NAME[\'"](?:,\s*[\'"].*?[\'"]\s*)?\)'
+CONFIG_PATTERN = r'(?:# Configurações do Algolia\s+)?ALGOLIA_APP_ID\s*=\s*os\.environ\.get\([\'"]ALGOLIA_APP_ID[\'"](?:,\s*[\'"].*?[\'"]\s*)?\)[\r\n]+ALGOLIA_ADMIN_API_KEY\s*=\s*os\.environ\.get\([\'"]ALGOLIA_ADMIN_API_KEY[\'"](?:,\s*[\'"].*?[\'"]\s*)?\)[\r\n]+ALGOLIA_INDEX_NAME\s*=\s*os\.environ\.get\([\'"]ALGOLIA_INDEX_NAME[\'"](?:,\s*[\'"].*?[\'"]\s*)?\)'
 
 # Diretórios para procurar arquivos Python
 DIRS_TO_SEARCH = [
@@ -50,7 +50,7 @@ def update_algolia_config_in_file(file_path):
         # Texto de substituição
         replacement = f"""# Configurações do Algolia
 ALGOLIA_APP_ID = os.environ.get("ALGOLIA_APP_ID", "{ALGOLIA_CONFIG['ALGOLIA_APP_ID']}")
-ALGOLIA_API_KEY = os.environ.get("ALGOLIA_API_KEY", "{ALGOLIA_CONFIG['ALGOLIA_API_KEY']}")  # Admin API Key
+ALGOLIA_ADMIN_API_KEY = os.environ.get("ALGOLIA_ADMIN_API_KEY", "{ALGOLIA_CONFIG['ALGOLIA_ADMIN_API_KEY']}")  # Admin API Key
 ALGOLIA_INDEX_NAME = os.environ.get("ALGOLIA_INDEX_NAME", "{ALGOLIA_CONFIG['ALGOLIA_INDEX_NAME']}")"""
         
         # Substituir a configuração
@@ -83,7 +83,7 @@ def update_algolia_tool(file_path):
             content = file.read()
         
         # Padrão para configurações de credenciais dentro de funções
-        cred_pattern = r'app_id\s*=\s*os\.environ\.get\([\'"]ALGOLIA_APP_ID[\'"]\)[\r\n]\s+api_key\s*=\s*os\.environ\.get\([\'"]ALGOLIA_API_KEY[\'"]\)[\r\n]\s+index_name\s*=\s*os\.environ\.get\([\'"]ALGOLIA_INDEX_NAME[\'"]\)'
+        cred_pattern = r'app_id\s*=\s*os\.environ\.get\([\'"]ALGOLIA_APP_ID[\'"]\)[\r\n]\s+api_key\s*=\s*os\.environ\.get\([\'"]ALGOLIA_ADMIN_API_KEY[\'"]\)[\r\n]\s+index_name\s*=\s*os\.environ\.get\([\'"]ALGOLIA_INDEX_NAME[\'"]\)'
         
         # Verificar se encontrou o padrão
         matches = re.findall(cred_pattern, content)
@@ -93,7 +93,7 @@ def update_algolia_tool(file_path):
         
         # Texto de substituição para credenciais dentro de funções
         replacement = f"""app_id = os.environ.get('ALGOLIA_APP_ID', '{ALGOLIA_CONFIG['ALGOLIA_APP_ID']}')
-        api_key = os.environ.get('ALGOLIA_API_KEY', '{ALGOLIA_CONFIG['ALGOLIA_API_KEY']}')
+        api_key = os.environ.get('ALGOLIA_ADMIN_API_KEY', '{ALGOLIA_CONFIG['ALGOLIA_ADMIN_API_KEY']}')
         index_name = os.environ.get('ALGOLIA_INDEX_NAME', '{ALGOLIA_CONFIG['ALGOLIA_INDEX_NAME']}')"""
         
         # Substituir todas as ocorrências
