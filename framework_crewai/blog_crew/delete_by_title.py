@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """
-Script para deletar posts por título OU slug no Sanity CMS e Algolia.
-Busca inteligente que procura tanto no campo título quanto no slug.
+Script para deletar posts por título, slug OU ID no Sanity CMS e Algolia.
+Busca inteligente que procura por:
+- Título do post
+- Slug do post  
+- ID do documento (Sanity)
 """
 
 import os
@@ -31,12 +34,20 @@ def get_sanity_token():
     return token
 
 def search_posts_by_title_or_slug_sanity(search_term):
-    """Busca posts no Sanity pelo título OU slug."""
+    """Busca posts no Sanity pelo título, slug OU ID."""
     try:
         sanity_token = get_sanity_token()
         
-        # Query GROQ para buscar posts pelo título OU slug
-        query = f'*[_type == "post" && (title match "{search_term}*" || slug.current match "{search_term}*" || title match "*{search_term}*" || slug.current match "*{search_term}*")]{{_id, title, slug, source}}'
+        # Verificar se é um ID do Sanity (formato específico)
+        if len(search_term) > 15 and not "/" in search_term and not " " in search_term:
+            # Buscar diretamente por ID
+            query = f'*[_type == "post" && _id == "{search_term}"]{{_id, title, slug, source}}'
+            logger.info(f"Buscando posts no Sanity por ID: {search_term}")
+        else:
+            # Query GROQ para buscar posts pelo título OU slug
+            query = f'*[_type == "post" && (title match "{search_term}*" || slug.current match "{search_term}*" || title match "*{search_term}*" || slug.current match "*{search_term}*")]{{_id, title, slug, source}}'
+            logger.info(f"Buscando posts no Sanity com título/slug: {search_term}")
+        
         encoded_query = quote(query)
         
         url = f"https://{PROJECT_ID}.api.sanity.io/v{API_VERSION}/data/query/{DATASET}?query={encoded_query}"
@@ -45,7 +56,6 @@ def search_posts_by_title_or_slug_sanity(search_term):
             "Authorization": f"Bearer {sanity_token}"
         }
         
-        logger.info(f"Buscando posts no Sanity com título/slug: {search_term}")
         response = requests.get(url, headers=headers)
         response.raise_for_status()
         
@@ -95,7 +105,7 @@ def delete_sanity_document(document_id):
         return False, str(e)
 
 def search_posts_by_title_or_slug_algolia(search_term):
-    """Busca posts no Algolia pelo título OU slug."""
+    """Busca posts no Algolia pelo título, slug OU ID."""
     try:
         from algoliasearch.search_client import SearchClient
         
@@ -111,32 +121,44 @@ def search_posts_by_title_or_slug_algolia(search_term):
         client = SearchClient.create(app_id, api_key)
         index = client.init_index(index_name)
         
-        logger.info(f"Buscando posts no Algolia com título/slug: {search_term}")
-        
-        search_params = {
-            'query': search_term,
-            'hitsPerPage': 100,
-            'attributesToRetrieve': ['objectID', 'title', 'source', 'slug']
-        }
-        
-        results = index.search('', search_params)
-        hits = results.get('hits', [])
-        
-        # Filtrar por título OU slug similar
-        matching_hits = []
-        search_lower = search_term.lower()
-        
-        for hit in hits:
-            hit_title = hit.get('title', '').lower()
-            hit_slug = hit.get('slug', '').lower()
+        # Verificar se é um ID (formato específico)
+        if len(search_term) > 15 and not "/" in search_term and not " " in search_term:
+            logger.info(f"Buscando posts no Algolia por ID: {search_term}")
+            # Buscar diretamente por objectID
+            search_params = {
+                'filters': f'objectID:"{search_term}"',
+                'hitsPerPage': 100,
+                'attributesToRetrieve': ['objectID', 'title', 'source', 'slug']
+            }
+            results = index.search('', search_params)
+            return results.get('hits', [])
+        else:
+            logger.info(f"Buscando posts no Algolia com título/slug: {search_term}")
             
-            # Verificar se o termo está no título ou slug
-            if (search_lower in hit_title or hit_title in search_lower or 
-                search_lower in hit_slug or hit_slug in search_lower):
-                matching_hits.append(hit)
-        
-        logger.info(f"Encontrados {len(matching_hits)} posts no Algolia")
-        return matching_hits
+            search_params = {
+                'query': search_term,
+                'hitsPerPage': 100,
+                'attributesToRetrieve': ['objectID', 'title', 'source', 'slug']
+            }
+            
+            results = index.search('', search_params)
+            hits = results.get('hits', [])
+            
+            # Filtrar por título OU slug similar
+            matching_hits = []
+            search_lower = search_term.lower()
+            
+            for hit in hits:
+                hit_title = hit.get('title', '').lower()
+                hit_slug = hit.get('slug', '').lower()
+                
+                # Verificar se o termo está no título ou slug
+                if (search_lower in hit_title or hit_title in search_lower or 
+                    search_lower in hit_slug or hit_slug in search_lower):
+                    matching_hits.append(hit)
+            
+            logger.info(f"Encontrados {len(matching_hits)} posts no Algolia")
+            return matching_hits
         
     except ImportError:
         logger.error("Biblioteca algoliasearch não instalada")
@@ -168,16 +190,20 @@ def delete_algolia_object(object_id):
         return False, str(e)
 
 def delete_posts_by_search_term(search_term, confirm=False):
-    """Deleta posts pelo título OU slug em ambos os sistemas."""
+    """Deleta posts pelo título, slug OU ID em ambos os sistemas."""
     if not confirm:
-        print(f"ATENÇÃO: Esta operação irá deletar TODOS os posts com título/slug similar a:")
+        # Detectar se é um ID
+        search_type = "ID" if len(search_term) > 15 and not "/" in search_term and not " " in search_term else "título/slug"
+        print(f"ATENÇÃO: Esta operação irá deletar TODOS os posts com {search_type} similar a:")
         print(f"'{search_term}'")
         print("Isso NÃO pode ser desfeito!")
         print("\nPara confirmar, execute:")
         print(f"python delete_by_title.py \"{search_term}\" --confirm")
         return {"success": False, "message": "Operação cancelada"}
     
-    logger.info(f"=== INICIANDO DELEÇÃO DE POSTS COM TÍTULO/SLUG: {search_term} ===")
+    # Detectar tipo de busca
+    search_type = "ID" if len(search_term) > 15 and not "/" in search_term and not " " in search_term else "TÍTULO/SLUG"
+    logger.info(f"=== INICIANDO DELEÇÃO DE POSTS COM {search_type}: {search_term} ===")
     
     results = {
         "sanity": {"deleted": 0, "failed": 0, "posts": []},
@@ -267,10 +293,11 @@ def delete_posts_by_search_term(search_term, confirm=False):
 def main():
     """Função principal."""
     if len(sys.argv) < 2:
-        print("Uso: python delete_by_title.py \"Título ou Slug do Post\" [--confirm]")
+        print("Uso: python delete_by_title.py \"Título, Slug ou ID do Post\" [--confirm]")
         print("\nExemplos:")
         print('python delete_by_title.py "Bitcoin Price Analysis" --confirm')
         print('python delete_by_title.py "bitcoin-price-prediction-2024" --confirm')
+        print('python delete_by_title.py "yyI2iEG3EcZDDf0Q6thQG8" --confirm  # ID do Sanity')
         print('python delete_by_title.py "solana" --confirm  # Busca qualquer post com "solana" no título ou slug')
         return 1
     
