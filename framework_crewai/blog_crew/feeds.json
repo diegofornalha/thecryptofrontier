@@ -6,13 +6,6 @@
       "language": "en",
       "category": "crypto",
       "priority": 1
-    },
-    {
-      "name": "U.Today",
-      "url": "https://u.today/rss",
-      "language": "en",
-      "category": "crypto",
-      "priority": 2
     }
   ],
   "settings": {
