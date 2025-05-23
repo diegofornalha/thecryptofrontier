@@ -3,6 +3,7 @@
 import React from "react";
 import { client } from "../../../sanity/client";
 import Banner from "./Banner";
+import AdBanner from "./AdBanner";
 import { urlForImage } from "../../../sanity/lib/image";
 
 // Query para buscar o post principal do banner
@@ -29,23 +30,57 @@ interface FeaturedPost {
   };
 }
 
-export default function FeaturedBanner() {
+interface FeaturedBannerProps {
+  showAd?: boolean; // Prop para alternar entre conteúdo editorial e publicidade
+  adConfig?: {
+    imageUrl?: string;
+    title?: string;
+    subtitle?: string;
+    link?: string;
+  };
+}
+
+export default function FeaturedBanner({ 
+  showAd = true, // Por padrão, mostra publicidade
+  adConfig = {
+    imageUrl: '/ads.jpeg',
+    title: 'Sinais Cripto Expert',
+    subtitle: 'Lucre de R$ 500,00 a R$ 5.000 em média por dia no criptomercado, sem precisar olhar gráficos, notícias, nem fazer cursos enormes.',
+    link: 'https://eternityscale.com.br/sce-fb'
+  }
+}: FeaturedBannerProps) {
   const [featuredPost, setFeaturedPost] = React.useState<FeaturedPost | null>(null);
   
   React.useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        const post = await client.fetch(featuredPostQuery) as FeaturedPost | null;
-        setFeaturedPost(post);
-      } catch (error) {
-        console.error('Erro ao buscar post em destaque:', error);
-      }
-    };
-    
-    fetchPost();
-  }, []);
+    // Só busca post se não for para mostrar publicidade
+    if (!showAd) {
+      const fetchPost = async () => {
+        try {
+          const post = await client.fetch(featuredPostQuery) as FeaturedPost | null;
+          setFeaturedPost(post);
+        } catch (error) {
+          console.error('Erro ao buscar post em destaque:', error);
+        }
+      };
+      
+      fetchPost();
+    }
+  }, [showAd]);
 
-  // Fallback para quando não existem posts em destaque
+  // Se for para mostrar publicidade, retorna o AdBanner
+  if (showAd) {
+    return (
+      <AdBanner
+        imageUrl={adConfig.imageUrl}
+        title={adConfig.title}
+        subtitle={adConfig.subtitle}
+        link={adConfig.link}
+        targetBlank={true}
+      />
+    );
+  }
+
+  // Fallback para quando não existem posts em destaque (modo editorial)
   if (!featuredPost) {
     return (
       <Banner

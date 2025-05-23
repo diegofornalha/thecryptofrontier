@@ -91,10 +91,27 @@ module.exports = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: 0 },
         },
+        "pulse-slow": {
+          '0%, 100%': { opacity: '0.8', transform: 'scale(1)' },
+          '50%': { opacity: '1', transform: 'scale(1.05)' },
+        },
+        "float": {
+          '0%, 100%': { transform: 'translateY(0px) rotate(45deg)' },
+          '50%': { transform: 'translateY(-10px) rotate(45deg)' },
+        },
+        "flicker": {
+          '0%, 100%': { opacity: '0.9', transform: 'scale(1)' },
+          '25%': { opacity: '0.7', transform: 'scale(0.95)' },
+          '50%': { opacity: '1', transform: 'scale(1.1)' },
+          '75%': { opacity: '0.8', transform: 'scale(0.98)' },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "pulse-slow": "pulse-slow 3s ease-in-out infinite",
+        "float": "float 3s ease-in-out infinite",
+        "flicker": "flicker 1.5s ease-in-out infinite",
       },
     },
   },
