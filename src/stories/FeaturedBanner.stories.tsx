@@ -47,10 +47,9 @@ export const CustomAdvertisement: Story = {
   args: {
     showAd: true,
     adConfig: {
-      imageUrl: '/ads.jpeg',
       title: 'Aprenda a Investir em Cripto',
       subtitle: 'Curso completo de investimentos em criptomoedas para iniciantes',
-      link: 'https://example.com/curso',
+      link: 'https://eternityscale.com.br/sce-fb',
     },
   },
 };
@@ -67,7 +66,6 @@ export const AdImageOnly: Story = {
   args: {
     showAd: true,
     adConfig: {
-      imageUrl: '/ads.jpeg',
       link: 'https://wa.me/5511999999999',
     },
   },

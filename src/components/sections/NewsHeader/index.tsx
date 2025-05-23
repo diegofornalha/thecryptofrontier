@@ -17,7 +17,7 @@ export default function NewsHeader() {
               <div className="w-1/4 flex justify-start">
                 <Link 
                   href="/buscas"
-                  className="text-gray-700 hover:text-red-500"
+                  className="text-gray-700 hover:text-blue-500"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg"
                        viewBox="0 0 1200 1200"
@@ -54,7 +54,7 @@ export default function NewsHeader() {
               {/* Área direita - alinhada com "Em Destaque" (1/4) */}
               <div className="w-1/4 flex justify-end">
                 <button 
-                  className="text-gray-700 hover:text-red-500"
+                  className="text-gray-700 hover:text-blue-500"
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg"
@@ -88,16 +88,16 @@ export default function NewsHeader() {
           <nav className="bg-white border-b border-gray-100 shadow-lg">
             <div className="max-w-7xl mx-auto px-4 py-4">
               <div className="flex flex-col gap-3">
-                <Link href="/" className="py-2 hover:text-red-500" onClick={() => setMobileMenuOpen(false)}>
+                <Link href="/" className="py-2 hover:text-blue-500" onClick={() => setMobileMenuOpen(false)}>
                   Início
                 </Link>
-                <Link href="/blog" className="py-2 hover:text-red-500" onClick={() => setMobileMenuOpen(false)}>
+                <Link href="/blog" className="py-2 hover:text-blue-500" onClick={() => setMobileMenuOpen(false)}>
                   Notícias
                 </Link>
-                <Link href="/buscas" className="py-2 hover:text-red-500" onClick={() => setMobileMenuOpen(false)}>
+                <Link href="/buscas" className="py-2 hover:text-blue-500" onClick={() => setMobileMenuOpen(false)}>
                   Buscar
                 </Link>
-                <Link href="/studio" className="py-2 hover:text-red-500" onClick={() => setMobileMenuOpen(false)}>
+                <Link href="/studio" className="py-2 hover:text-blue-500" onClick={() => setMobileMenuOpen(false)}>
                   Admin
                 </Link>
               </div>
