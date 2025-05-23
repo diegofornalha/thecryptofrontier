@@ -11,48 +11,29 @@ const nextConfig = {
     trailingSlash: true,
     reactStrictMode: true,
 
-    // Adicionando webpack config para incluir o patch de preload e resolver problemas de compatibilidade
-    webpack: (config, { isServer }) => {
-        if (!isServer) {
-            // Adicionando nosso patch como entry point
-            const originalEntry = config.entry;
-            config.entry = async () => {
-                const entries = await originalEntry();
-                // Adicionando nosso patch antes de qualquer outro JavaScript
-                if (entries['main.js'] && !entries['main.js'].includes('./preload-patch.js')) {
-                    entries['main.js'].unshift('./preload-patch.js');
-                }
-                return entries;
-            };
-        }
+    // Configuração de imagens para o Sanity
+    images: {
+        domains: ['cdn.sanity.io'],
+    },
 
-        // Resolver problemas de compatibilidade com @sanity/visual-editing-csm
+    // Resolver problemas de compatibilidade com @sanity/visual-editing
+    webpack: (config, { isServer }) => {
         config.resolve.alias = {
             ...config.resolve.alias,
             '@sanity/visual-editing-csm': false,
             '@sanity/visual-editing': false
         };
-
         return config;
     },
-    // Forçar o uso do Pages Router, desativando o App Router
-    // useFileSystemPublicRoutes: true, // COMENTADO para permitir App Router
-    // Configuração de imagens para o Sanity
-    images: {
-        domains: ['cdn.sanity.io', 'images.cointelegraph.com', 's3.cointelegraph.com'],
-    },
-    // Configuração de redirecionamentos
-    async redirects() {
-        return [];
-    },
-    // Configuração de reescrita de URLs
-    async rewrites() {
-        return [];
-    },
-    // Ignorar erros de tipos durante o build
+
+    // Ignorar erros de tipos durante o build (temporário)
     typescript: {
         ignoreBuildErrors: true,
-    }
+    },
+
+    // Output standalone para melhor compatibilidade com Netlify
+    output: 'standalone'
 };
 
 module.exports = nextConfig;
+
