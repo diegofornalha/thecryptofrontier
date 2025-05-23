@@ -3,9 +3,11 @@
   "version": "0.1.0",
   "scripts": {
     "dev": "next dev",
-    "dev:3200": "next dev -p 3400",
+    "dev:3200": "next dev -p 3200",
+    "dev:3400": "next dev -p 3400",
     "build": "next build",
     "start": "next start",
+    "start:3200": "next start -p 3200",
     "start:alt": "next start -p 3300",
     "index-content": "node scripts/indexar-conteudo.js",
     "migrate-to-sanity": "node scripts/migrate-to-sanity.js",
