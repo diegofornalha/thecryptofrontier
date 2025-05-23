@@ -17,10 +17,6 @@ COPY . .
 # Set environment variables
 ENV NEXT_TELEMETRY_DISABLED 1
 ENV NODE_ENV production
-# Adicionar suporte para proxy reverso com detecção de cabeçalhos
-ENV NEXT_PUBLIC_PROXY_ENABLED true
-ENV NEXT_PUBLIC_ASSETS_PREFIX /frontend
-ENV PROXY_BASE_PATH /frontend
 ENV NEXT_PUBLIC_SANITY_PROJECT_ID brby2yrg
 ENV NEXT_PUBLIC_SANITY_DATASET production
 ENV NEXT_PUBLIC_SANITY_API_VERSION 2023-05-03
@@ -37,10 +33,6 @@ WORKDIR /app
 # Set environment variables
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
-# Configurações para proxy
-ENV NEXT_PUBLIC_PROXY_ENABLED true
-ENV NEXT_PUBLIC_ASSETS_PREFIX /frontend
-ENV PROXY_BASE_PATH /frontend
 ENV NEXT_PUBLIC_SANITY_PROJECT_ID brby2yrg
 ENV NEXT_PUBLIC_SANITY_DATASET production
 ENV NEXT_PUBLIC_SANITY_API_VERSION 2023-05-03
@@ -58,10 +50,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/next.config.js ./next.config.js
-COPY --from=builder --chown=nextjs:nodejs /app/preload-patch.js ./preload-patch.js
 
-# Expose the port
-EXPOSE 3000
+# Expose the port (3200 para compatibilidade com Caddy)
+EXPOSE 3200
 
-# Run the application
-CMD ["npm", "start"]
+# Run the application na porta 3200
+CMD ["npm", "run", "start:3200"]
