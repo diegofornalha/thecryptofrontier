@@ -5,9 +5,6 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-[[plugins]]
-  package = "./netlify-plugins/preload-patch"
-
 [build.environment]
   # Variável de ambiente para indicar ao Next.js que estamos no ambiente Netlify
   NETLIFY_BUILD = "true"
