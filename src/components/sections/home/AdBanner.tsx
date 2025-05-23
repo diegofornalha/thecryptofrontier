@@ -1,11 +1,8 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
 
 interface AdBannerProps {
-  imageUrl?: string;
   title?: string;
   subtitle?: string;
   link?: string;
@@ -15,7 +12,6 @@ interface AdBannerProps {
 }
 
 export default function AdBanner({ 
-  imageUrl = '/ads.jpeg',
   title = 'Sinais Cripto Expert',
   subtitle = 'Lucre de R$ 500,00 a R$ 5.000 em média por dia no criptomercado, sem precisar olhar gráficos, notícias, nem fazer cursos enormes.',
   link = 'https://eternityscale.com.br/sce-fb',
@@ -23,7 +19,6 @@ export default function AdBanner({
   className = '',
   showBitcoinAnimation = true
 }: AdBannerProps) {
-  const [imageError, setImageError] = useState(false);
 
   const content = (
     <div className={`relative w-full h-[400px] sm:h-[450px] md:h-[500px] lg:h-[550px] xl:h-[600px] rounded-xl overflow-hidden cursor-pointer group ${className}`}>
@@ -56,23 +51,6 @@ export default function AdBanner({
         )}
       </div>
 
-      {/* Imagem Publicitária sobreposta (se existir) */}
-      {!imageError && imageUrl && (
-        <div className="relative w-full h-full">
-          <Image
-            src={imageUrl}
-            alt={title || "Banner Publicitário"}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500 opacity-75 group-hover:opacity-85"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            priority
-            onError={() => setImageError(true)}
-          />
-          
-          {/* Overlay gradient para melhor legibilidade */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent group-hover:from-black/70 transition-all duration-300" />
-        </div>
-      )}
 
       {/* Texto sobreposto */}
       <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12 z-10">

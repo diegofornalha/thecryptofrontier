@@ -121,7 +121,6 @@ export const ImageOnlyClean: Story = {
 // Banner customizado com efeitos completos
 export const FullEffects: Story = {
   args: {
-    imageUrl: '/ads.jpeg',
     title: '🚀 Bitcoin Expert',
     subtitle: 'Maximize seus lucros com sinais profissionais de cripto',
     link: 'https://wa.me/5511999999999',

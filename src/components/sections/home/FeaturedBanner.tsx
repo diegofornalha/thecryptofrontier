@@ -33,7 +33,6 @@ interface FeaturedPost {
 interface FeaturedBannerProps {
   showAd?: boolean; // Prop para alternar entre conteúdo editorial e publicidade
   adConfig?: {
-    imageUrl?: string;
     title?: string;
     subtitle?: string;
     link?: string;
@@ -43,7 +42,6 @@ interface FeaturedBannerProps {
 export default function FeaturedBanner({ 
   showAd = true, // Por padrão, mostra publicidade
   adConfig = {
-    imageUrl: '/ads.jpeg',
     title: 'Sinais Cripto Expert',
     subtitle: 'Lucre de R$ 500,00 a R$ 5.000 em média por dia no criptomercado, sem precisar olhar gráficos, notícias, nem fazer cursos enormes.',
     link: 'https://eternityscale.com.br/sce-fb'
@@ -71,7 +69,6 @@ export default function FeaturedBanner({
   if (showAd) {
     return (
       <AdBanner
-        imageUrl={adConfig.imageUrl}
         title={adConfig.title}
         subtitle={adConfig.subtitle}
         link={adConfig.link}
