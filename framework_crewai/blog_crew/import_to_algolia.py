@@ -14,7 +14,7 @@ from datetime import datetime
 
 # Configurações do Algolia
 ALGOLIA_APP_ID = os.environ.get("ALGOLIA_APP_ID", "42TZWHW8UP")
-ALGOLIA_API_KEY = os.environ.get("ALGOLIA_API_KEY", "d0cb55ec8f07832bc5f57da0bd25c535")  # Admin API Key
+ALGOLIA_ADMIN_API_KEY = os.environ.get("ALGOLIA_ADMIN_API_KEY", "d0cb55ec8f07832bc5f57da0bd25c535")  # Admin API Key
 ALGOLIA_INDEX_NAME = os.environ.get("ALGOLIA_INDEX_NAME", "development_mcpx_content")
 SANITY_TOKEN = os.environ.get("SANITY_API_TOKEN")
 
@@ -68,7 +68,7 @@ def obter_documentos_ja_indexados():
         
         # Headers necessários
         headers = {
-            "X-Algolia-API-Key": ALGOLIA_API_KEY,
+            "X-Algolia-API-Key": ALGOLIA_ADMIN_API_KEY,
             "X-Algolia-Application-Id": ALGOLIA_APP_ID
         }
         
@@ -172,7 +172,7 @@ def indexar_no_algolia(documentos):
         
         # Headers necessários
         headers = {
-            "X-Algolia-API-Key": ALGOLIA_API_KEY,
+            "X-Algolia-API-Key": ALGOLIA_ADMIN_API_KEY,
             "X-Algolia-Application-Id": ALGOLIA_APP_ID,
             "Content-Type": "application/json"
         }

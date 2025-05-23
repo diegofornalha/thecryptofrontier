@@ -36,7 +36,7 @@ const nextConfig = {
         return config;
     },
     // Forçar o uso do Pages Router, desativando o App Router
-    useFileSystemPublicRoutes: true,
+    // useFileSystemPublicRoutes: true, // COMENTADO para permitir App Router
     // Configuração de imagens para o Sanity
     images: {
         domains: ['cdn.sanity.io', 'images.cointelegraph.com', 's3.cointelegraph.com'],

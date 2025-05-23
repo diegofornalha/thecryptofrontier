@@ -4,7 +4,15 @@ Este módulo fornece integração entre o Sanity CMS e o Algolia Search para ind
 
 ## Configuração
 
-### Variáveis de Ambiente
+### 1. Instalação da Biblioteca Algolia
+
+```bash
+# IMPORTANTE: Instale a versão 2.5.0 (não a versão mais recente)
+# Versões mais recentes têm incompatibilidades com o código existente
+pip install "algoliasearch==2.5.0"
+```
+
+### 2. Variáveis de Ambiente
 
 Configure as seguintes variáveis de ambiente:
 
@@ -97,7 +105,18 @@ python list_sanity_documents.py post --json
 # Definir token do Sanity (necessário)
 export SANITY_API_TOKEN=seu_token_api_sanity
 
-# Executar sincronização
+# Configurar todas as variáveis do Algolia em um só comando
+export ALGOLIA_APP_ID=42TZWHW8UP && \
+export ALGOLIA_SEARCH_API_KEY=b32edbeb383fc3d1279658e7c3661843 && \
+export ALGOLIA_ADMIN_API_KEY=d0cb55ec8f07832bc5f57da0bd25c535 && \
+export ALGOLIA_INDEX_NAME=development_mcpx_content && \
+export ALGOLIA_WRITE_API_KEY=197d9ad99abb5bb69b4703dfb4820d2c && \
+export ALGOLIA_API_KEY=$ALGOLIA_ADMIN_API_KEY
+
+# Executar sincronização pelo script principal
+python import_to_algolia.py
+
+# OU usar o script alternativo (menos recomendado)
 python sync_sanity_to_algolia.py post
 ```
 
@@ -107,3 +126,20 @@ python sync_sanity_to_algolia.py post
 # Executar script de teste
 python test_algolia.py
 ```
+
+## Solução de Problemas
+
+### Erros comuns
+
+1. **Erro: "cannot import name 'SearchClient' from 'algoliasearch.search_client'"**
+   - *Solução:* Instale a versão específica da biblioteca Algolia: `pip install "algoliasearch==2.5.0"`
+
+2. **Erro: "module 'asyncio' has no attribute 'coroutine'"**
+   - *Solução:* Verifique se está usando Python 3.7+ e instale a versão 2.5.0 do algoliasearch
+
+3. **Demora para indexar ou nenhum documento indexado**
+   - *Solução:* Execute o script `import_to_algolia.py` em vez de `sync_sanity_to_algolia.py`, pois ele tem uma abordagem mais robusta para lidar com a conexão ao Algolia
+   - Certifique-se de definir todas as variáveis de ambiente necessárias incluindo `ALGOLIA_API_KEY`
+
+4. **Documentos duplicados no Algolia**
+   - *Solução:* O sistema inclui verificação de duplicação por ID, slug e URL. Se ainda encontrar duplicatas, pode ser necessário limpar o índice Algolia e reindexar

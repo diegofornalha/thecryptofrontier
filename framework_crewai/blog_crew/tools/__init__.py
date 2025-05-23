@@ -7,6 +7,7 @@ from .file_tools import save_to_file, read_from_file
 from .sanity_tools import publish_to_sanity, publish_manual, verificar_e_criar_categoria, verificar_e_criar_tag
 from .formatter_tools import create_slug, format_content_for_sanity
 from .algolia_tools import index_to_algolia, search_algolia, delete_from_algolia
+from .dedupe_tools import check_for_duplicates
 
 # Lista de tools decoradas (instâncias de BaseTool)
 tools = [
@@ -21,7 +22,8 @@ tools = [
     format_content_for_sanity,
     index_to_algolia,
     search_algolia,
-    delete_from_algolia
+    delete_from_algolia,
+    check_for_duplicates
 ]
 
 def get_tool_by_name(name):
@@ -48,6 +50,7 @@ __all__ = [
     'index_to_algolia',
     'search_algolia',
     'delete_from_algolia',
+    'check_for_duplicates',
     'tools',
     'get_tool_by_name',
     'crewai_tool'

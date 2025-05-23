@@ -1,4 +1,5 @@
 import { Providers } from "./providers"
+import "../css/main.css"
 
 export const metadata = {
   title: 'The Crypto Frontier',

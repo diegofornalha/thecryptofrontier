@@ -27,7 +27,7 @@ from algoliasearch import search_client
 
 # Configurar as credenciais do Algolia como variáveis de ambiente
 os.environ["ALGOLIA_APP_ID"] = "42TZWHW8UP"
-os.environ["ALGOLIA_API_KEY"] = "d0cb55ec8f07832bc5f57da0bd25c535"  # Usando ADMIN_API_KEY que tem permissões completas
+os.environ["ALGOLIA_ADMIN_API_KEY"] = "d0cb55ec8f07832bc5f57da0bd25c535"  # Usando ADMIN_API_KEY que tem permissões completas
 os.environ["ALGOLIA_INDEX_NAME"] = "development_mcpx_content"
 
 def get_sanity_documents():
@@ -60,7 +60,7 @@ def check_indexed_documents():
     try:
         # Verificar se as credenciais existem
         app_id = os.environ.get('ALGOLIA_APP_ID')
-        api_key = os.environ.get('ALGOLIA_API_KEY')
+        api_key = os.environ.get('ALGOLIA_ADMIN_API_KEY')
         index_name = os.environ.get('ALGOLIA_INDEX_NAME')
         
         if not all([app_id, api_key, index_name]):
@@ -91,7 +91,7 @@ def check_for_duplicate_objectID(object_id):
     try:
         # Verificar se as credenciais existem
         app_id = os.environ.get('ALGOLIA_APP_ID')
-        api_key = os.environ.get('ALGOLIA_API_KEY')
+        api_key = os.environ.get('ALGOLIA_ADMIN_API_KEY')
         index_name = os.environ.get('ALGOLIA_INDEX_NAME')
         
         if not all([app_id, api_key, index_name]):

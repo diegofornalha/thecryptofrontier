@@ -33,7 +33,12 @@ def create_monitoring_task(agent):
     return Task(
         description="""
         Monitore os feeds RSS definidos no arquivo feeds.json e encontre os 3 artigos mais relevantes
-        e interessantes para o público brasileiro. 
+        e interessantes para o público brasileiro.
+        
+        IMPORTANTE: Verifique duplicatas e conteúdo inadequado
+        1. Use a ferramenta check_for_duplicates para remover artigos duplicados ou de propaganda
+        2. Rejeite artigos com as palavras-chave da blacklist (LiteFinance, Partner Application, etc.)
+        3. Nunca processe o mesmo artigo mais de uma vez (verifique título e URL)
         
         Para cada artigo:
         1. Avalie a relevância e interesse para o público brasileiro
@@ -53,7 +58,7 @@ def create_monitoring_task(agent):
             "source": "Nome do site de origem"
         }
         
-        Retorne a lista dos arquivos salvos.
+        Retorne a lista dos arquivos salvos, incluindo apenas artigos únicos e relevantes.
         """,
         agent=agent,
         expected_output="Lista de arquivos JSON salvos na pasta 'posts_para_traduzir'",

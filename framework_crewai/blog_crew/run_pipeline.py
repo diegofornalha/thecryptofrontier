@@ -17,6 +17,7 @@ import requests
 import shutil
 import time
 import argparse
+from urllib.parse import quote
 
 # Configuração de logging
 logging.basicConfig(
@@ -39,6 +40,52 @@ POSTS_TRADUZIDOS_DIR.mkdir(exist_ok=True)
 POSTS_FORMATADOS_DIR.mkdir(exist_ok=True)
 POSTS_PUBLICADOS_DIR.mkdir(exist_ok=True)
 
+# Função para obter artigos já publicados no Sanity
+def obter_artigos_publicados():
+    """Obtém lista de títulos de artigos já publicados no Sanity"""
+    try:
+        # Obter token do Sanity
+        sanity_token = os.environ.get("SANITY_API_TOKEN")
+        if not sanity_token:
+            logger.warning("Token do Sanity não encontrado, não será possível verificar artigos já publicados")
+            return set()
+        
+        # Configurações do Sanity
+        project_id = os.environ.get("SANITY_PROJECT_ID", "brby2yrg")
+        dataset = "production"
+        api_version = "2023-05-03"
+        
+        # Query para obter apenas títulos dos posts
+        query = '*[_type == "post"]{ title }'
+        encoded_query = quote(query)
+        
+        # URL da API do Sanity
+        url = f"https://{project_id}.api.sanity.io/v{api_version}/data/query/{dataset}?query={encoded_query}"
+        
+        # Headers
+        headers = {
+            "Authorization": f"Bearer {sanity_token}"
+        }
+        
+        # Fazer a requisição
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        
+        # Extrair títulos
+        result = response.json().get("result", [])
+        published_titles = set()
+        
+        for doc in result:
+            if doc.get("title"):
+                published_titles.add(doc["title"].lower())
+        
+        logger.info(f"Encontrados {len(published_titles)} artigos já publicados no Sanity")
+        return published_titles
+        
+    except Exception as e:
+        logger.error(f"Erro ao obter artigos publicados: {str(e)}")
+        return set()
+
 # 1. MONITORAR: Ler feeds RSS
 def monitorar_feeds(max_articles=3):
     """Lê os feeds RSS e seleciona artigos relevantes"""
@@ -53,6 +100,16 @@ def monitorar_feeds(max_articles=3):
         return []
     
     results = []
+    processed_titles = set()  # Para evitar duplicatas por título
+    processed_urls = set()    # Para evitar duplicatas por URL
+    
+    # Obter a lista de palavras na blacklist
+    blacklist_keywords = feeds_config.get("settings", {}).get("blacklist_keywords", [])
+    logger.info(f"Palavras na blacklist: {blacklist_keywords}")
+    
+    # Obter lista de artigos já publicados no Sanity
+    published_titles = obter_artigos_publicados()
+    logger.info(f"Artigos já publicados no Sanity: {len(published_titles)}")
     
     # Processar cada feed
     feeds_list = feeds_config.get("feeds", [])
@@ -65,9 +122,43 @@ def monitorar_feeds(max_articles=3):
             if not hasattr(parsed_feed, "entries"):
                 logger.warning(f"Feed sem entradas: {feed['name']}")
                 continue
+            
+            articles_processed = 0
+            articles_skipped = 0
                 
             # Processar os últimos N artigos do feed
-            for i, entry in enumerate(parsed_feed.entries[:max_articles]):
+            for i, entry in enumerate(parsed_feed.entries):
+                if articles_processed >= max_articles:
+                    break
+                
+                # Extrair título e link para verificação de duplicatas
+                title = entry.get("title", "")
+                link = entry.get("link", "")
+                
+                # Verificar se o artigo já foi publicado no Sanity
+                if title.lower() in published_titles:
+                    logger.warning(f"Artigo já publicado no Sanity ignorado: {title}")
+                    articles_skipped += 1
+                    continue
+                
+                # Verificar se o artigo já foi processado (duplicata na sessão atual)
+                if title.lower() in processed_titles or link in processed_urls:
+                    logger.warning(f"Artigo duplicado ignorado: {title}")
+                    articles_skipped += 1
+                    continue
+                
+                # Verificar se o artigo contém alguma palavra da blacklist no título
+                should_skip = False
+                for keyword in blacklist_keywords:
+                    if keyword.lower() in title.lower():
+                        logger.warning(f"Artigo com palavra na blacklist ignorado: {title} (palavra: {keyword})")
+                        articles_skipped += 1
+                        should_skip = True
+                        break
+                
+                if should_skip:
+                    continue
+                
                 # Extrair conteúdo do artigo
                 content = ""
                 if "content" in entry and entry.content:
@@ -77,9 +168,20 @@ def monitorar_feeds(max_articles=3):
                 elif "summary" in entry:
                     content = entry.summary
                 
+                # Também verificar conteúdo para palavras na blacklist
+                for keyword in blacklist_keywords:
+                    if keyword.lower() in content.lower():
+                        logger.warning(f"Artigo com palavra na blacklist no conteúdo ignorado: {title} (palavra: {keyword})")
+                        articles_skipped += 1
+                        should_skip = True
+                        break
+                
+                if should_skip:
+                    continue
+                
                 article = {
-                    "title": entry.get("title", ""),
-                    "link": entry.get("link", ""),
+                    "title": title,
+                    "link": link,
                     "summary": entry.get("summary", ""),
                     "content": content,
                     "published": entry.get("published", ""),
@@ -90,7 +192,7 @@ def monitorar_feeds(max_articles=3):
                 
                 # Salvar o artigo para tradução
                 timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-                filename = f"para_traduzir_{timestamp}_{i}.json"
+                filename = f"para_traduzir_{timestamp}_{articles_processed}.json"
                 filepath = POSTS_PARA_TRADUZIR_DIR / filename
                 
                 with open(filepath, "w", encoding="utf-8") as f:
@@ -98,14 +200,19 @@ def monitorar_feeds(max_articles=3):
                     
                 logger.info(f"Artigo salvo: {filepath}")
                 
-                results.append(filepath)
+                # Adicionar aos conjuntos de artigos processados
+                processed_titles.add(title.lower())
+                processed_urls.add(link)
                 
-            logger.info(f"Feed {feed['name']} processado com sucesso")
+                results.append(filepath)
+                articles_processed += 1
+                
+            logger.info(f"Feed {feed['name']} processado com sucesso: {articles_processed} artigos aceitos, {articles_skipped} artigos ignorados")
             
         except Exception as e:
             logger.error(f"Erro ao processar feed {feed['name']}: {str(e)}")
     
-    logger.info(f"Total de artigos selecionados para {len(results)}")
+    logger.info(f"Total de artigos selecionados: {len(results)}")
     return results
 
 # Função para remover links HTML de um texto
@@ -287,6 +394,40 @@ def formatar_artigos(arquivos):
     return resultados
 
 # 4. PUBLICAR: Enviar artigos para o Sanity CMS
+def verificar_titulo_existe(titulo, project_id, dataset, api_version, sanity_api_token):
+    """Verifica se já existe um post com o mesmo título no Sanity"""
+    if not titulo:
+        return False
+        
+    # Escapar título para GROQ
+    escaped_title = titulo.replace('"', '\\"')
+    
+    # Query para verificar se existe um post com o mesmo título
+    query = f'count(*[_type == "post" && title == "{escaped_title}"])'
+    encoded_query = quote(query)
+    
+    # URL da API do Sanity
+    url = f"https://{project_id}.api.sanity.io/v{api_version}/data/query/{dataset}?query={encoded_query}"
+    
+    # Headers
+    headers = {
+        "Authorization": f"Bearer {sanity_api_token}"
+    }
+    
+    try:
+        # Fazer a requisição
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        
+        # Extrair o resultado
+        result = response.json().get("result", 0)
+        
+        # Se encontrou algum post, retorna True
+        return result > 0
+    except Exception as e:
+        logger.warning(f"Erro ao verificar duplicatas: {str(e)}")
+        return False
+
 def publicar_artigos(arquivos):
     """Publica artigos no Sanity CMS"""
     logger.info("4. PUBLICANDO ARTIGOS NO SANITY...")
@@ -318,6 +459,9 @@ def publicar_artigos(arquivos):
         "Authorization": f"Bearer {sanity_api_token}"
     }
     
+    # Lista para rastrear títulos já publicados nesta execução
+    titulos_publicados = set()
+    
     for arquivo in arquivos:
         try:
             arquivo_path = Path(arquivo)
@@ -334,6 +478,32 @@ def publicar_artigos(arquivos):
             with open(arquivo_path, "r", encoding="utf-8") as f:
                 post_data = json.load(f)
             
+            # Obter o título do post
+            titulo = post_data.get('title')
+            
+            # Verificar se o título já existe no Sanity ou foi publicado nesta execução
+            if titulo in titulos_publicados:
+                logger.warning(f"Título já publicado nesta execução: {titulo}")
+                resultados["failed_count"] += 1
+                resultados["failed_files"].append({
+                    "file": str(arquivo),
+                    "error": "Título já publicado nesta execução"
+                })
+                continue
+                
+            # Verificar se o título já existe no Sanity
+            if verificar_titulo_existe(titulo, project_id, dataset, api_version, sanity_api_token):
+                logger.warning(f"Título já existe no Sanity: {titulo}")
+                resultados["failed_count"] += 1
+                resultados["failed_files"].append({
+                    "file": str(arquivo),
+                    "error": "Título já existe no Sanity"
+                })
+                continue
+            
+            # Adicionar à lista de títulos publicados nesta execução
+            titulos_publicados.add(titulo)
+            
             # Preparar a mutação
             mutations = {
                 "mutations": [
@@ -343,7 +513,7 @@ def publicar_artigos(arquivos):
                 ]
             }
             
-            logger.info(f"Enviando post '{post_data.get('title')}' para o Sanity")
+            logger.info(f"Enviando post '{titulo}' para o Sanity")
             
             # Enviar a requisição
             response = requests.post(url, headers=headers, json=mutations, timeout=30)
@@ -382,6 +552,248 @@ def publicar_artigos(arquivos):
     logger.info(f"Total de artigos publicados com sucesso: {resultados['success_count']}")
     logger.info(f"Total de falhas na publicação: {resultados['failed_count']}")
     
+    return resultados
+
+# Função para sincronização direta com Algolia via REST API (adicionada 2025-05-20)
+def sincronizar_diretamente(arquivos_publicados, app_id, api_key, index_name):
+    """Sincroniza com Algolia usando API REST diretamente, sem depender da biblioteca"""
+    logger.info("Iniciando sincronização direta com Algolia via API REST...")
+    
+    resultados = {
+        "success_count": 0,
+        "failed_count": 0,
+        "errors": []
+    }
+    
+    # Buscar detalhes dos artigos publicados
+    sanity_token = os.environ.get("SANITY_API_TOKEN")
+    if not sanity_token:
+        logger.error("Token do Sanity não encontrado para buscar detalhes dos posts")
+        return resultados
+    
+    # Configurações do Sanity
+    project_id = os.environ.get("SANITY_PROJECT_ID", "brby2yrg")
+    dataset = "production"
+    api_version = "2023-05-03"
+    
+    # Preparar dados para sincronização
+    documentos_para_sincronizar = []
+    
+    for arquivo in arquivos_publicados:
+        try:
+            # Ler o arquivo publicado
+            with open(arquivo, "r", encoding="utf-8") as f:
+                post_data = json.load(f)
+            
+            title = post_data.get('title')
+            
+            if not title:
+                logger.warning(f"Arquivo sem título: {arquivo}")
+                resultados["failed_count"] += 1
+                continue
+            
+            logger.info(f"Processando: {title}")
+            
+            # Escapar título para GROQ
+            escaped_title = title.replace('"', '\\"')
+            query = f'*[_type == "post" && title == "{escaped_title}"][0]{{ _id, title, slug {{ current }}, publishedAt, excerpt }}'
+            encoded_query = quote(query)
+            
+            url = f"https://{project_id}.api.sanity.io/v{api_version}/data/query/{dataset}?query={encoded_query}"
+            headers = {"Authorization": f"Bearer {sanity_token}"}
+            
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()
+            
+            result = response.json().get("result")
+            if not result:
+                logger.warning(f"Post não encontrado no Sanity: {title}")
+                resultados["failed_count"] += 1
+                continue
+            
+            # Preparar documento para Algolia
+            algolia_doc = {
+                "objectID": result.get('_id'),
+                "title": result.get('title'),
+                "slug": result.get('slug', {}).get('current') if isinstance(result.get('slug'), dict) else result.get('slug'),
+                "publishedAt": result.get('publishedAt'),
+                "excerpt": result.get('excerpt', ''),
+                "originalSource": post_data.get('originalSource', {})
+            }
+            
+            # Adicionar timestamp para ordenação
+            if algolia_doc['publishedAt']:
+                try:
+                    dt = datetime.fromisoformat(algolia_doc['publishedAt'].replace('Z', '+00:00'))
+                    algolia_doc['publishedAtTimestamp'] = int(dt.timestamp())
+                except Exception:
+                    pass
+            
+            documentos_para_sincronizar.append(algolia_doc)
+            
+        except Exception as e:
+            logger.error(f"Erro ao processar {arquivo}: {str(e)}")
+            resultados["failed_count"] += 1
+            resultados["errors"].append(str(e))
+    
+    # Sincronizar com Algolia
+    if documentos_para_sincronizar:
+        try:
+            # URL da API do Algolia
+            url = f"https://{app_id}-dsn.algolia.net/1/indexes/{index_name}/batch"
+            
+            headers = {
+                "X-Algolia-API-Key": api_key,
+                "X-Algolia-Application-Id": app_id,
+                "Content-Type": "application/json"
+            }
+            
+            # Preparar batch de objetos
+            requests_batch = []
+            for doc in documentos_para_sincronizar:
+                requests_batch.append({
+                    "action": "updateObject",
+                    "body": doc
+                })
+            
+            payload = {
+                "requests": requests_batch
+            }
+            
+            response = requests.post(url, headers=headers, json=payload)
+            response.raise_for_status()
+            
+            result = response.json()
+            logger.info(f"Sincronização direta com Algolia concluída: {len(documentos_para_sincronizar)} documentos")
+            logger.info(f"TaskID: {result.get('taskID')}")
+            
+            resultados["success_count"] = len(documentos_para_sincronizar)
+            
+        except Exception as e:
+            logger.error(f"Erro ao sincronizar com Algolia: {str(e)}")
+            resultados["failed_count"] += len(documentos_para_sincronizar)
+            resultados["errors"].append(str(e))
+    else:
+        logger.info("Nenhum documento para sincronizar")
+    
+    return resultados
+
+# 5. SINCRONIZAR: Enviar artigos publicados ao Algolia
+def sincronizar_com_algolia(arquivos_publicados):
+    """Sincroniza artigos publicados com o Algolia"""
+    logger.info("5. SINCRONIZANDO COM ALGOLIA...")
+    
+    # Verificar credenciais do Algolia (atualizado 2025-05-20)
+    app_id = os.environ.get('ALGOLIA_APP_ID', '42TZWHW8UP')
+    api_key = os.environ.get('ALGOLIA_ADMIN_API_KEY', 'd0cb55ec8f07832bc5f57da0bd25c535') or os.environ.get('ALGOLIA_API_KEY')
+    index_name = os.environ.get('ALGOLIA_INDEX_NAME', 'development_mcpx_content')
+    
+    if not api_key:
+        logger.warning("ALGOLIA_ADMIN_API_KEY ou ALGOLIA_API_KEY não definida, pulando sincronização")
+        return {
+            "success_count": 0,
+            "failed_count": len(arquivos_publicados),
+            "error": "ALGOLIA_ADMIN_API_KEY ou ALGOLIA_API_KEY não definida"
+        }
+    
+    # Método alternativo para importar algoliasearch (atualizado 2025-05-20)
+    try:
+        # Primeira tentativa: importação direta
+        try:
+            from algoliasearch.search_client import SearchClient
+            logger.info("Biblioteca algoliasearch carregada com sucesso")
+        except ImportError:
+            # Segunda tentativa: instalação dinâmica e importação
+            logger.warning("Tentando instalar algoliasearch...")
+            import subprocess
+            subprocess.check_call(["pip", "install", "--quiet", "algoliasearch>=4.0.0"])
+            from algoliasearch.search_client import SearchClient
+            logger.info("Biblioteca algoliasearch instalada e carregada com sucesso")
+    except Exception as e:
+        logger.error(f"Não foi possível usar algoliasearch: {str(e)}")
+        # Usar função alternativa para sincronização direta
+        logger.info("Usando sincronização direta via API REST")
+        return sincronizar_diretamente(arquivos_publicados, app_id, api_key, index_name)
+    
+    resultados = {
+        "success_count": 0,
+        "failed_count": 0,
+        "errors": []
+    }
+    
+    # Conectar ao Algolia
+    client = SearchClient.create(app_id, api_key)
+    index = client.init_index(index_name)
+    
+    # Buscar detalhes dos artigos publicados
+    sanity_token = os.environ.get("SANITY_API_TOKEN")
+    if not sanity_token:
+        logger.error("Token do Sanity não encontrado para buscar detalhes dos posts")
+        return resultados
+    
+    # Configurações do Sanity
+    project_id = os.environ.get("SANITY_PROJECT_ID", "brby2yrg")
+    dataset = "production"
+    api_version = "2023-05-03"
+    
+    for arquivo in arquivos_publicados:
+        try:
+            # Ler o arquivo publicado para obter o título e slug
+            with open(arquivo, "r", encoding="utf-8") as f:
+                post_data = json.load(f)
+            
+            title = post_data.get('title')
+            slug = post_data.get('slug', {}).get('current') if isinstance(post_data.get('slug'), dict) else post_data.get('slug')
+            
+            if not title:
+                logger.warning(f"Arquivo sem título: {arquivo}")
+                continue
+            
+            # Buscar o post no Sanity para obter o _id e outros detalhes
+            query = f'*[_type == "post" && title == "{title}"][0]{{ _id, title, slug {{ current }}, publishedAt, excerpt }}'
+            encoded_query = quote(query)
+            
+            url = f"https://{project_id}.api.sanity.io/v{api_version}/data/query/{dataset}?query={encoded_query}"
+            headers = {"Authorization": f"Bearer {sanity_token}"}
+            
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()
+            
+            result = response.json().get("result")
+            if not result:
+                logger.warning(f"Post não encontrado no Sanity: {title}")
+                resultados["failed_count"] += 1
+                continue
+            
+            # Preparar documento para Algolia
+            algolia_doc = {
+                "objectID": result.get('_id'),
+                "title": result.get('title'),
+                "slug": result.get('slug', {}).get('current') if isinstance(result.get('slug'), dict) else result.get('slug'),
+                "publishedAt": result.get('publishedAt'),
+                "excerpt": result.get('excerpt', ''),
+                "originalSource": post_data.get('originalSource', {})
+            }
+            
+            # Adicionar timestamp para ordenação
+            if algolia_doc['publishedAt']:
+                try:
+                    dt = datetime.fromisoformat(algolia_doc['publishedAt'].replace('Z', '+00:00'))
+                    algolia_doc['publishedAtTimestamp'] = int(dt.timestamp())
+                except Exception:
+                    pass
+            
+            # Indexar no Algolia
+            index.save_object(algolia_doc)
+            logger.info(f"Artigo sincronizado com Algolia: {title}")
+            resultados["success_count"] += 1
+            
+        except Exception as e:
+            logger.error(f"Erro ao sincronizar {arquivo}: {str(e)}")
+            resultados["failed_count"] += 1
+            resultados["errors"].append(str(e))
+    
+    logger.info(f"Sincronização com Algolia concluída: {resultados['success_count']} sucesso, {resultados['failed_count']} falhas")
     return resultados
 
 # Execução principal
@@ -445,6 +857,11 @@ def main():
         arquivos_para_publicar = arquivos_formatados if arquivos_formatados else arquivos_selecionados
         resultados_publicacao = publicar_artigos(arquivos_para_publicar)
     
+    # 5. Sincronizar com Algolia (apenas se teve publicação bem-sucedida)
+    resultados_algolia = None
+    if resultados_publicacao and resultados_publicacao.get('published_files'):
+        resultados_algolia = sincronizar_com_algolia(resultados_publicacao['published_files'])
+    
     logger.info("=== PIPELINE DE BLOG CONCLUÍDO ===")
     
     # Mostrar estatísticas finais
@@ -454,6 +871,9 @@ def main():
     if resultados_publicacao:
         logger.info(f"Artigos publicados: {resultados_publicacao['success_count']}")
         logger.info(f"Falhas na publicação: {resultados_publicacao['failed_count']}")
+    if resultados_algolia:
+        logger.info(f"Artigos sincronizados com Algolia: {resultados_algolia['success_count']}")
+        logger.info(f"Falhas na sincronização com Algolia: {resultados_algolia['failed_count']}")
 
 if __name__ == "__main__":
     main()

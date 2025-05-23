@@ -27,7 +27,7 @@ SANITY_API_VERSION = "2023-05-03"
 
 # Configurações do Algolia
 ALGOLIA_APP_ID = os.environ.get("ALGOLIA_APP_ID", "42TZWHW8UP")
-ALGOLIA_API_KEY = os.environ.get("ALGOLIA_API_KEY", "d0cb55ec8f07832bc5f57da0bd25c535")  # Admin API Key
+ALGOLIA_ADMIN_API_KEY = os.environ.get("ALGOLIA_ADMIN_API_KEY", "d0cb55ec8f07832bc5f57da0bd25c535")  # Admin API Key
 ALGOLIA_INDEX_NAME = os.environ.get("ALGOLIA_INDEX_NAME", "development_mcpx_content")
 
 def get_sanity_documents(document_type, fields=None):
@@ -100,14 +100,14 @@ def get_indexed_documents():
     """
     try:
         # Verificar se as credenciais existem
-        if not ALGOLIA_APP_ID or not ALGOLIA_API_KEY:
+        if not ALGOLIA_APP_ID or not ALGOLIA_ADMIN_API_KEY:
             logger.error("Credenciais do Algolia não configuradas")
             print("Erro: Credenciais do Algolia não configuradas", file=sys.stderr)
-            print("Configure ALGOLIA_APP_ID e ALGOLIA_API_KEY como variáveis de ambiente", file=sys.stderr)
+            print("Configure ALGOLIA_APP_ID e ALGOLIA_ADMIN_API_KEY como variáveis de ambiente", file=sys.stderr)
             sys.exit(1)
         
         # Inicializar cliente Algolia
-        client = SearchClient.create(ALGOLIA_APP_ID, ALGOLIA_API_KEY)
+        client = SearchClient.create(ALGOLIA_APP_ID, ALGOLIA_ADMIN_API_KEY)
         index = client.init_index(ALGOLIA_INDEX_NAME)
         
         # Buscar todos os objetos usando a API de browse
@@ -199,12 +199,12 @@ def index_documents(documents):
             return True
         
         # Verificar se as credenciais existem
-        if not ALGOLIA_APP_ID or not ALGOLIA_API_KEY:
+        if not ALGOLIA_APP_ID or not ALGOLIA_ADMIN_API_KEY:
             logger.error("Credenciais do Algolia não configuradas")
             return False
         
         # Inicializar cliente Algolia
-        client = SearchClient.create(ALGOLIA_APP_ID, ALGOLIA_API_KEY)
+        client = SearchClient.create(ALGOLIA_APP_ID, ALGOLIA_ADMIN_API_KEY)
         index = client.init_index(ALGOLIA_INDEX_NAME)
         
         # Indexar os documentos
@@ -262,7 +262,7 @@ def main():
     for env_var, name in [
         ("SANITY_API_TOKEN", "token da API do Sanity"),
         ("ALGOLIA_APP_ID", "ID da aplicação Algolia"),
-        ("ALGOLIA_API_KEY", "chave da API do Algolia")
+        ("ALGOLIA_ADMIN_API_KEY", "chave da API do Algolia")
     ]:
         if not os.environ.get(env_var) and not (env_var == "ALGOLIA_APP_ID" and ALGOLIA_APP_ID):
             print(f"Erro: {env_var} não está definido", file=sys.stderr)

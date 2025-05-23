@@ -42,7 +42,8 @@ class MonitorAgent:
             verbose=True,
             tools=[
                 get_tool_by_name("read_rss_feeds"),
-                get_tool_by_name("save_to_file")
+                get_tool_by_name("save_to_file"),
+                get_tool_by_name("check_for_duplicates")
             ],
             llm=llm
         )

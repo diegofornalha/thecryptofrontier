@@ -37,13 +37,13 @@ def index_to_algolia(content: str) -> str:
         
         # Verificar se as credenciais existem
         app_id = os.environ.get('ALGOLIA_APP_ID')
-        api_key = os.environ.get('ALGOLIA_API_KEY')
+        api_key = os.environ.get('ALGOLIA_ADMIN_API_KEY')
         index_name = os.environ.get('ALGOLIA_INDEX_NAME')
         
         if not all([app_id, api_key, index_name]):
             raise AlgoliaToolError(
                 "Credenciais do Algolia não configuradas. Configure ALGOLIA_APP_ID, "
-                "ALGOLIA_API_KEY e ALGOLIA_INDEX_NAME como variáveis de ambiente."
+                "ALGOLIA_ADMIN_API_KEY e ALGOLIA_INDEX_NAME como variáveis de ambiente."
             )
         
         # Carregar o conteúdo como JSON
@@ -105,13 +105,13 @@ def search_algolia(query: str, filters: Optional[str] = None) -> str:
         
         # Verificar se as credenciais existem
         app_id = os.environ.get('ALGOLIA_APP_ID')
-        api_key = os.environ.get('ALGOLIA_API_KEY')
+        api_key = os.environ.get('ALGOLIA_ADMIN_API_KEY')
         index_name = os.environ.get('ALGOLIA_INDEX_NAME')
         
         if not all([app_id, api_key, index_name]):
             raise AlgoliaToolError(
                 "Credenciais do Algolia não configuradas. Configure ALGOLIA_APP_ID, "
-                "ALGOLIA_API_KEY e ALGOLIA_INDEX_NAME como variáveis de ambiente."
+                "ALGOLIA_ADMIN_API_KEY e ALGOLIA_INDEX_NAME como variáveis de ambiente."
             )
         
         # Conectar ao Algolia
@@ -153,13 +153,13 @@ def delete_from_algolia(object_id: str) -> str:
         
         # Verificar se as credenciais existem
         app_id = os.environ.get('ALGOLIA_APP_ID')
-        api_key = os.environ.get('ALGOLIA_API_KEY')
+        api_key = os.environ.get('ALGOLIA_ADMIN_API_KEY')
         index_name = os.environ.get('ALGOLIA_INDEX_NAME')
         
         if not all([app_id, api_key, index_name]):
             raise AlgoliaToolError(
                 "Credenciais do Algolia não configuradas. Configure ALGOLIA_APP_ID, "
-                "ALGOLIA_API_KEY e ALGOLIA_INDEX_NAME como variáveis de ambiente."
+                "ALGOLIA_ADMIN_API_KEY e ALGOLIA_INDEX_NAME como variáveis de ambiente."
             )
         
         # Conectar ao Algolia
