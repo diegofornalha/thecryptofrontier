@@ -63,6 +63,9 @@ module.exports = {
       fontFamily: {
         sans: ['var(--font-sans)'],
         serif: ['var(--font-serif)'],
+        'playfair': ['Playfair Display', 'serif'],
+        'old-standard': ['Old Standard TT', 'serif'],
+        'unifraktur': ['UnifrakturMaguntia', 'cursive'],
       },
       fontSize: {
         xs: ['0.75rem', { lineHeight: '1rem' }],

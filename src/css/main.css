@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Roboto+Slab:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Roboto+Slab:wght@400;500;700;800;900&family=Playfair+Display:wght@400;700;900&family=Old+Standard+TT:wght@400;700&family=UnifrakturMaguntia&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -297,6 +297,62 @@
         -webkit-line-clamp: 1;
         -webkit-box-orient: vertical;
     }
+}
+
+/* 5. Animações do Banner */
+@layer utilities {
+    /* Animação de pulso lento para o Bitcoin */
+    .animate-pulse-slow {
+        animation: pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    @keyframes pulse-slow {
+        0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+    }
+    
+    /* Animação de flutuação para o foguete */
+    .animate-float {
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% {
+            transform: rotate(45deg) translateY(0px);
+        }
+        50% {
+            transform: rotate(45deg) translateY(-20px);
+        }
+    }
+    
+    /* Animação de chama tremulante */
+    .animate-flicker {
+        animation: flicker 0.5s ease-in-out infinite alternate;
+    }
+    
+    @keyframes flicker {
+        0% {
+            transform: scale(1) translateX(-50%);
+            opacity: 0.8;
+        }
+        100% {
+            transform: scale(1.2) translateX(-50%);
+            opacity: 1;
+        }
+    }
+    
+    /* Efeito de brilho para o texto */
+    .shadow-glow {
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.5), 
+                     0 0 30px rgba(255, 255, 255, 0.3),
+                     0 0 40px rgba(255, 255, 255, 0.1);
+    }
     .sb-carousel-tab-title-active {
         @apply opacity-100;
     }
@@ -417,4 +473,103 @@
             @apply border-dark text-dark;
         }
     }
+}
+
+/* Animações para o Banner da Home */
+@keyframes pulse-slow {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px) rotate(45deg);
+    }
+    50% {
+        transform: translateY(-10px) rotate(45deg);
+    }
+}
+
+@keyframes flicker {
+    0%, 100% {
+        opacity: 0.9;
+        transform: scale(1);
+    }
+    25% {
+        opacity: 0.7;
+        transform: scale(0.95);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    75% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+}
+
+.animate-pulse-slow {
+    animation: pulse-slow 3s ease-in-out infinite;
+}
+
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+.animate-flicker {
+    animation: flicker 1.5s ease-in-out infinite;
+}
+
+.shadow-glow {
+    text-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Estilos de jornal */
+.newspaper-texture {
+    background-image: 
+        repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            rgba(0, 0, 0, 0.03) 2px,
+            rgba(0, 0, 0, 0.03) 4px
+        );
+}
+
+.newspaper-shadow {
+    text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo vintage para o título principal */
+.font-playfair {
+    letter-spacing: -0.02em;
+    font-feature-settings: "liga" 1, "calt" 1;
+}
+
+/* Animação sutil para links do header */
+.news-link {
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.news-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: #dc2626;
+    transition: width 0.3s ease;
+}
+
+.news-link:hover::after {
+    width: 100%;
 }
