@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # Frontend Next.js
+  thecryptofrontier:
+    build:
+      context: .
+      dockerfile: Dockerfile.nextjs
+    container_name: thecryptofrontier-app
+    ports:
+      - "3200:3200"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_SANITY_PROJECT_ID=brby2yrg
+      - NEXT_PUBLIC_SANITY_DATASET=production
+      - NEXT_PUBLIC_SANITY_API_VERSION=2023-05-03
+      - TZ=America/Sao_Paulo
+      # Adicione aqui outras variáveis de ambiente necessárias
+      # - SANITY_API_TOKEN=${SANITY_API_TOKEN}
+      # - NEXT_PUBLIC_ALGOLIA_APP_ID=${NEXT_PUBLIC_ALGOLIA_APP_ID}
+      # - NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY=${NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY}
+    restart: unless-stopped
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3200"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  app-network:
+    driver: bridge
+
+# Para desenvolvimento (opcional)
+# Descomente as linhas abaixo se quiser rodar em modo desenvolvimento
+#  thecryptofrontier-dev:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile.nextjs
+#      target: builder
+#    container_name: thecryptofrontier-dev
+#    ports:
+#      - "3002:3000"
+#    environment:
+#      - NODE_ENV=development
+#    volumes:
+#      - ./src:/app/src
+#      - ./package.json:/app/package.json
+#    command: npm run dev
+#    networks:
+#      - app-network 
