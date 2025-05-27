@@ -11,7 +11,7 @@ import NewsHeader from '@/components/sections/NewsHeader';
 import BreakingNewsTicker from '@/components/sections/home/BreakingNewsTicker';
 import PopularPostsWidget from '@/components/widgets/PopularPostsWidget';
 import CategoriesWidget from '@/components/widgets/CategoriesWidget';
-import NewsletterWidget from '@/components/widgets/NewsletterWidget';
+import SimpleNewsletterWidget from '@/components/widgets/SimpleNewsletterWidget';
 import TagsWidget from '@/components/widgets/TagsWidget';
 import AuthorCard from '@/components/AuthorCard';
 import SocialShare from '@/components/SocialShare';
@@ -415,7 +415,7 @@ export default async function PostPage({ params }: PageProps) {
           <aside className="crypto-sidebar space-y-8">
             <PopularPostsWidget />
             <CategoriesWidget />
-            <NewsletterWidget />
+            <SimpleNewsletterWidget />
             <TagsWidget />
           </aside>
         </div>

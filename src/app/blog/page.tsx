@@ -9,7 +9,7 @@ import BreakingNewsTicker from '@/components/sections/home/BreakingNewsTicker';
 import CryptoNewsCard from '@/components/sections/CryptoNewsCard';
 import Pagination from '@/components/ui/pagination';
 import CategoriesWidget from '@/components/widgets/CategoriesWidget';
-import NewsletterWidget from '@/components/widgets/NewsletterWidget';
+import SimpleNewsletterWidget from '@/components/widgets/SimpleNewsletterWidget';
 import { POSTS_LIST_QUERY } from '@/lib/queries';
 import { Metadata } from 'next';
 
@@ -219,26 +219,8 @@ export default async function BlogPage({ searchParams }: PageProps) {
               </ul>
             </div>
 
-            {/* Widget newsletter */}
-            <div className="bg-[#4db2ec] rounded-lg p-6 text-white">
-              <h3 className="text-xl font-bold mb-2">Newsletter</h3>
-              <p className="text-sm mb-4 opacity-90">
-                Receba as últimas notícias cripto no seu e-mail
-              </p>
-              <form>
-                <input
-                  type="email"
-                  placeholder="Seu e-mail"
-                  className="w-full px-4 py-2 rounded text-gray-800 mb-3"
-                />
-                <button
-                  type="submit"
-                  className="w-full bg-white text-[#4db2ec] font-bold py-2 rounded hover:bg-gray-100 transition-colors"
-                >
-                  Inscrever
-                </button>
-              </form>
-            </div>
+            {/* Widget newsletter simplificado */}
+            <SimpleNewsletterWidget />
           </aside>
         </div>
       </main>

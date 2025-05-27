@@ -17,6 +17,20 @@ const preview = {
         date: /Date$/,
       },
     },
+    options: {
+      storySort: {
+        order: [
+          'Introduction',
+          'Component Overview',
+          'UI',
+          'Widgets',
+          'Post Components',
+          'Sections',
+          ['Home', 'News', '*'],
+          '*',
+        ],
+      },
+    },
   },
 
   // Adiciona um decorador global para envolver todas as histórias com um contexto do React

@@ -13,15 +13,15 @@ interface NewsItem {
     firstName?: string;
     lastName?: string;
   };
-  date: string;
+  publishedAt: string;
 }
 
 // Query responsiva - busca mais notícias para filtrar depois
-const latestNewsQuery = `*[_type == "post"] | order(date desc) [0...15] {
+const latestNewsQuery = `*[_type == "post"] | order(publishedAt desc) [0...15] {
   _id,
   title,
   "slug": slug.current,
-  date,
+  publishedAt,
   author-> {
     firstName,
     lastName
@@ -101,7 +101,7 @@ export default function LatestNews() {
             </Link>
             <div className="text-sm text-gray-500">
               <span suppressHydrationWarning>
-                {formatDate(item.date).toUpperCase()}
+                {formatDate(item.publishedAt).toUpperCase()}
               </span>
             </div>
           </article>
