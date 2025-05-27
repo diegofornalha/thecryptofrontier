@@ -18,6 +18,7 @@ export default function NewsHeader() {
                 <Link 
                   href="/buscas"
                   className="text-gray-700 hover:text-blue-500 p-2 transition-colors"
+                  aria-label="Buscar"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg"
                        viewBox="0 0 1200 1200"
@@ -56,6 +57,7 @@ export default function NewsHeader() {
                 <button 
                   className="text-gray-700 hover:text-blue-500 p-2 transition-colors"
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  aria-label="Menu"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg"
                        viewBox="0 0 900 900"
@@ -82,12 +84,49 @@ export default function NewsHeader() {
         </div>
       </header>
 
-      {/* Menu Mobile */}
+      {/* Menu Grid - Desktop e Mobile */}
       {mobileMenuOpen && (
-        <div className="fixed top-[70px] left-0 right-0 lg:hidden" style={{ zIndex: 9998 }}>
+        <div className="fixed top-[70px] left-0 right-0" style={{ zIndex: 9998 }}>
           <nav className="bg-white border-b border-gray-100 shadow-lg">
-            <div className="max-w-7xl mx-auto px-4 py-4">
-              <div className="flex flex-col gap-3">
+            <div className="max-w-7xl mx-auto px-4 py-6">
+              {/* Grid Layout para Desktop */}
+              <div className="hidden lg:grid lg:grid-cols-4 lg:gap-6">
+                <Link 
+                  href="/" 
+                  className="group p-4 rounded-lg hover:bg-gray-50 transition-colors text-center"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <div className="text-lg font-semibold text-gray-900 group-hover:text-[#4db2ec]">Início</div>
+                  <div className="text-sm text-gray-600 mt-1">Página principal</div>
+                </Link>
+                <Link 
+                  href="/blog" 
+                  className="group p-4 rounded-lg hover:bg-gray-50 transition-colors text-center"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <div className="text-lg font-semibold text-gray-900 group-hover:text-[#4db2ec]">Blog</div>
+                  <div className="text-sm text-gray-600 mt-1">Últimas notícias</div>
+                </Link>
+                <Link 
+                  href="/buscas" 
+                  className="group p-4 rounded-lg hover:bg-gray-50 transition-colors text-center"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <div className="text-lg font-semibold text-gray-900 group-hover:text-[#4db2ec]">Buscar</div>
+                  <div className="text-sm text-gray-600 mt-1">Pesquisar artigos</div>
+                </Link>
+                <Link 
+                  href="/studio" 
+                  className="group p-4 rounded-lg hover:bg-gray-50 transition-colors text-center"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <div className="text-lg font-semibold text-gray-900 group-hover:text-[#4db2ec]">Studio</div>
+                  <div className="text-sm text-gray-600 mt-1">Gerenciar conteúdo</div>
+                </Link>
+              </div>
+              
+              {/* Layout Mobile */}
+              <div className="flex flex-col gap-3 lg:hidden">
                 <Link href="/" className="py-2 hover:text-blue-500 font-medium" onClick={() => setMobileMenuOpen(false)}>
                   Início
                 </Link>

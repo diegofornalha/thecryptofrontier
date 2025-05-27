@@ -7,6 +7,13 @@ import { PortableText } from '@portabletext/react';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import CryptoBasicFooter from '@/components/sections/CryptoBasicFooter';
+import NewsHeader from '@/components/sections/NewsHeader';
+import BreakingNewsTicker from '@/components/sections/home/BreakingNewsTicker';
+import PopularPostsWidget from '@/components/widgets/PopularPostsWidget';
+import CategoriesWidget from '@/components/widgets/CategoriesWidget';
+import NewsletterWidget from '@/components/widgets/NewsletterWidget';
+import TagsWidget from '@/components/widgets/TagsWidget';
+import AuthorCard from '@/components/AuthorCard';
 import './crypto-basic-layout.css';
 
 // GROQ atualizado para o novo schema
@@ -311,82 +318,15 @@ export default async function PostPage({ params }: PageProps) {
   ];
 
   return (
-    <div className="crypto-post-page">
-      {/* Header Simples */}
-      <header style={{ 
-        background: '#fff', 
-        borderBottom: '1px solid #e0e0e0', 
-        padding: '15px 0',
-        position: 'relative',
-        zIndex: 100
-      }}>
-        <div className="crypto-container">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
-              <h1 style={{ 
-                fontSize: '28px', 
-                fontWeight: '700', 
-                color: '#4db2ec',
-                fontFamily: 'Roboto, sans-serif',
-                margin: 0,
-                cursor: 'pointer'
-              }}>The Crypto Basic</h1>
-            </Link>
-            <nav style={{ display: 'flex', gap: '25px', alignItems: 'center' }}>
-              <Link 
-                href="/" 
-                style={{ 
-                  color: '#111', 
-                  textDecoration: 'none', 
-                  fontSize: '15px', 
-                  fontWeight: '500',
-                  padding: '5px 10px',
-                  transition: 'color 0.3s ease',
-                  cursor: 'pointer'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.color = '#4db2ec'}
-                onMouseLeave={(e) => e.currentTarget.style.color = '#111'}
-              >
-                Crypto News
-              </Link>
-              <Link 
-                href="/blog" 
-                style={{ 
-                  color: '#111', 
-                  textDecoration: 'none', 
-                  fontSize: '15px', 
-                  fontWeight: '500',
-                  padding: '5px 10px',
-                  transition: 'color 0.3s ease',
-                  cursor: 'pointer'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.color = '#4db2ec'}
-                onMouseLeave={(e) => e.currentTarget.style.color = '#111'}
-              >
-                Price Prediction
-              </Link>
-              <Link 
-                href="/buscas" 
-                style={{ 
-                  color: '#111', 
-                  textDecoration: 'none', 
-                  fontSize: '15px', 
-                  fontWeight: '500',
-                  padding: '5px 10px',
-                  transition: 'color 0.3s ease',
-                  cursor: 'pointer'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.color = '#4db2ec'}
-                onMouseLeave={(e) => e.currentTarget.style.color = '#111'}
-              >
-                Guides
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
-
-      <div className="crypto-container" style={{ marginTop: '30px' }}>
+    <div className="min-h-screen bg-white">
+      <NewsHeader />
+      
+      {/* Layout padrão The Crypto Basic */}
+      <div className="pt-[70px]">
+        {/* Breaking News Ticker */}
+        <BreakingNewsTicker />
+        
+        <div className="crypto-container" style={{ marginTop: '30px' }}>
         <div className="crypto-content-wrapper">
           <article className="crypto-main-content">
             {/* Breadcrumb */}
@@ -448,28 +388,23 @@ export default async function PostPage({ params }: PageProps) {
               )}
             </div>
 
+            {/* Author Card */}
+            {post.author && (
+              <div className="mt-8">
+                <AuthorCard author={post.author} />
+              </div>
+            )}
+
           </article>
 
           {/* Sidebar */}
-          <aside className="crypto-sidebar">
-            <div style={{ 
-              background: '#f5f5f5', 
-              padding: '20px', 
-              marginBottom: '30px',
-              borderRadius: '5px' 
-            }}>
-              <h3 style={{ 
-                fontSize: '18px', 
-                fontWeight: '700', 
-                marginBottom: '15px',
-                fontFamily: 'Roboto, sans-serif',
-                color: '#111'
-              }}>Latest News</h3>
-              <div style={{ fontSize: '14px', color: '#666' }}>
-                <p>More crypto news coming soon...</p>
-              </div>
-            </div>
+          <aside className="crypto-sidebar space-y-8">
+            <PopularPostsWidget />
+            <CategoriesWidget />
+            <NewsletterWidget />
+            <TagsWidget />
           </aside>
+        </div>
         </div>
       </div>
 

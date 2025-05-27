@@ -7,6 +7,7 @@ import CryptoBasicFooter from '@/components/sections/CryptoBasicFooter';
 import NewsHeader from '../../components/sections/NewsHeader';
 import BreakingNewsTicker from '@/components/sections/home/BreakingNewsTicker';
 import CryptoNewsCard from '@/components/sections/CryptoNewsCard';
+import Pagination from '@/components/ui/pagination';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -18,39 +19,45 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-// Consulta GROQ atualizada para o novo schema
-const POSTS_QUERY = `*[_type == "post"] | order(publishedAt desc) {
-  _id,
-  title,
-  slug,
-  mainImage {
-    ...,
-    "alt": alt
-  },
-  publishedAt,
-  excerpt,
-  "author": author->{
-    name,
-    image,
-    role
-  },
-  "categories": categories[]->{ 
+// Constants for pagination
+const POSTS_PER_PAGE = 12;
+
+// Consulta GROQ atualizada para o novo schema com paginação
+const POSTS_QUERY = `{
+  "posts": *[_type == "post"] | order(publishedAt desc) [$start...$end] {
     _id,
     title,
-    slug
+    slug,
+    mainImage {
+      ...,
+      "alt": alt
+    },
+    publishedAt,
+    excerpt,
+    "author": author->{
+      name,
+      image,
+      role
+    },
+    "categories": categories[]->{ 
+      _id,
+      title,
+      slug
+    },
+    "tags": tags[]->{ 
+      _id,
+      title,
+      slug
+    },
+    "cryptoData": cryptoMeta {
+      coinName,
+      coinSymbol,
+      currentPrice,
+      priceChange24h
+    },
+    "estimatedReadingTime": round(length(pt::text(content)) / 5 / 180)
   },
-  "tags": tags[]->{ 
-    _id,
-    title,
-    slug
-  },
-  "cryptoData": cryptoMeta {
-    coinName,
-    coinSymbol,
-    currentPrice,
-    priceChange24h
-  },
-  "estimatedReadingTime": round(length(pt::text(content)) / 5 / 180)
+  "total": count(*[_type == "post"])
 }`;
 
 // Interface para os posts
@@ -108,20 +115,33 @@ const formatPrice = (price?: number) => {
   }).format(price);
 };
 
-// Função para buscar os posts
-async function getPosts(): Promise<Post[]> {
+// Função para buscar os posts com paginação
+async function getPosts(page: number = 1): Promise<{ posts: Post[], total: number }> {
   try {
-    const posts = await client.fetch(POSTS_QUERY);
-    return posts || [];
+    const start = (page - 1) * POSTS_PER_PAGE;
+    const end = start + POSTS_PER_PAGE;
+    const result = await client.fetch(POSTS_QUERY, { start, end });
+    return {
+      posts: result.posts || [],
+      total: result.total || 0
+    };
   } catch (error) {
     console.error('Erro ao buscar posts:', error);
-    return [];
+    return { posts: [], total: 0 };
   }
 }
 
+// Interface para searchParams
+interface PageProps {
+  searchParams: Promise<{ page?: string }>;
+}
+
 // Componente da página do blog (Server Component)
-export default async function BlogPage() {
-  const posts = await getPosts();
+export default async function BlogPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const currentPage = params.page ? parseInt(params.page) : 1;
+  const { posts, total } = await getPosts(currentPage);
+  const totalPages = Math.ceil(total / POSTS_PER_PAGE);
   
   // Links de navegação
   const navLinks = [
@@ -197,6 +217,15 @@ export default async function BlogPage() {
                   </Link>
                 </Button>
               </div>
+            )}
+            
+            {/* Pagination */}
+            {posts.length > 0 && totalPages > 1 && (
+              <Pagination 
+                currentPage={currentPage}
+                totalPages={totalPages}
+                baseUrl="/blog"
+              />
             )}
           </div>
 

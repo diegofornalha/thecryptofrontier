@@ -24,6 +24,32 @@ import Vimeo from './vimeo';
 import YouTube from './youtube';
 import WhatsApp from './whatsapp';
 
+export { default as ArrowDown } from './arrow-down';
+export { default as ArrowLeft } from './arrow-left';
+export { default as ArrowRight } from './arrow-right';
+export { default as ArrowUp } from './arrow-up';
+export { default as ChevronDown } from './chevron-down';
+export { default as ChevronLeft } from './chevron-left';
+export { default as ChevronBigLeft } from './chevron-big-left';
+export { default as ChevronRight } from './chevron-right';
+export { default as ChevronBigRight } from './chevron-big-right';
+export { default as ChevronUp } from './chevron-up';
+export { default as Close } from './close';
+export { default as Facebook } from './facebook';
+export { default as GitHub } from './github';
+export { default as Instagram } from './instagram';
+export { default as LinkedIn } from './linkedin';
+export { default as Mail } from './mail';
+export { default as Menu } from './menu';
+export { default as Play } from './play';
+export { default as Reddit } from './reddit';
+export { default as Send } from './send';
+export { default as ShoppingBag } from './shopping-bag';
+export { default as Twitter } from './twitter';
+export { default as Vimeo } from './vimeo';
+export { default as YouTube } from './youtube';
+export { default as WhatsApp } from './whatsapp';
+
 export const iconMap = {
     arrowDown: ArrowDown,
     arrowLeft: ArrowLeft,

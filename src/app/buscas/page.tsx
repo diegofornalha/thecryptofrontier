@@ -5,11 +5,20 @@ import dynamic from 'next/dynamic';
 import NewsHeader from '@/components/sections/NewsHeader';
 import CryptoBasicFooter from '@/components/sections/CryptoBasicFooter';
 import BreakingNewsTicker from '@/components/sections/home/BreakingNewsTicker';
+import CategoriesWidget from '@/components/widgets/CategoriesWidget';
+import TagsWidget from '@/components/widgets/TagsWidget';
 
 // Importação dinâmica do SearchComponent para evitar erros de SSR
-const SearchComponent = dynamic(
-  () => import('../../components/SearchComponent'),
-  { ssr: false }
+const CryptoSearchComponent = dynamic(
+  () => import('../../components/CryptoSearchComponent'),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="flex justify-center items-center h-32">
+        <div className="text-[#666]">Carregando busca...</div>
+      </div>
+    )
+  }
 );
 
 export default function BuscasPage() {
@@ -49,7 +58,7 @@ export default function BuscasPage() {
           <div className="lg:col-span-8">
             {/* Campo de busca limpo */}
             <div className="bg-white mb-8">
-              <SearchComponent />
+              <CryptoSearchComponent />
             </div>
             
             {/* Resultados de busca */}
@@ -61,43 +70,9 @@ export default function BuscasPage() {
           </div>
 
           {/* Sidebar (4 cols) */}
-          <aside className="lg:col-span-4">
-            {/* Widget de categorias populares */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
-              <h3 className="text-xl font-bold text-[#111] mb-4 pb-2 border-b border-gray-200">
-                Categorias Populares
-              </h3>
-              <ul className="space-y-2">
-                {['Bitcoin', 'Ethereum', 'Altcoins', 'DeFi', 'NFTs', 'Trading', 'Análises', 'Tutoriais'].map((cat) => (
-                  <li key={cat}>
-                    <a
-                      href={`/categoria/${cat.toLowerCase()}`}
-                      className="flex justify-between items-center py-2 px-3 hover:bg-gray-50 rounded transition-colors"
-                    >
-                      <span className="text-[#666] hover:text-[#4db2ec]">{cat}</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Widget de tags populares */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-xl font-bold text-[#111] mb-4 pb-2 border-b border-gray-200">
-                Tags Populares
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {['Bitcoin', 'Ethereum', 'DeFi', 'NFT', 'Web3', 'Metaverso', 'Trading', 'Staking', 'DAO', 'Smart Contracts'].map((tag) => (
-                  <a
-                    key={tag}
-                    href={`/tag/${tag.toLowerCase()}`}
-                    className="inline-block bg-gray-100 hover:bg-[#4db2ec] hover:text-white text-gray-700 text-sm px-3 py-1 rounded transition-colors"
-                  >
-                    {tag}
-                  </a>
-                ))}
-              </div>
-            </div>
+          <aside className="lg:col-span-4 space-y-8">
+            <CategoriesWidget />
+            <TagsWidget />
           </aside>
         </div>
       </main>
