@@ -48,7 +48,7 @@ export default function NewsHeader() {
               {/* Logo (centro) */}
               <div className="w-1/2 flex justify-center">
                 <Link href="/" className="block">
-                  <div className="text-lg sm:text-xl lg:text-2xl font-serif font-extrabold whitespace-nowrap hover:text-blue-500 transition-colors" style={{ fontFamily: 'Roboto Slab', fontWeight: 800 }}>The Crypto Frontier</div>
+                  <div className="text-lg sm:text-xl lg:text-2xl font-serif font-extrabold whitespace-nowrap text-black hover:text-blue-500 transition-colors" style={{ fontFamily: 'Roboto Slab', fontWeight: 800 }}>The Crypto Frontier</div>
                 </Link>
               </div>
 

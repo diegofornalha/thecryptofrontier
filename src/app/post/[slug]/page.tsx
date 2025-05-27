@@ -14,6 +14,9 @@ import CategoriesWidget from '@/components/widgets/CategoriesWidget';
 import NewsletterWidget from '@/components/widgets/NewsletterWidget';
 import TagsWidget from '@/components/widgets/TagsWidget';
 import AuthorCard from '@/components/AuthorCard';
+import SocialShare from '@/components/SocialShare';
+import PostTags from '@/components/PostTags';
+import RelatedPosts from '@/components/RelatedPosts';
 import './crypto-basic-layout.css';
 
 // GROQ atualizado para o novo schema
@@ -381,6 +384,14 @@ export default async function PostPage({ params }: PageProps) {
               </div>
             )}
 
+            {/* Social Share */}
+            <div className="my-6 pb-6 border-b border-gray-200">
+              <SocialShare 
+                url={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://thecryptofrontier.com'}/post/${post.slug.current}`}
+                title={post.title}
+              />
+            </div>
+
             {/* Conteúdo do post */}
             <div className="crypto-post-content">
               {post.content && (
@@ -388,12 +399,23 @@ export default async function PostPage({ params }: PageProps) {
               )}
             </div>
 
+            {/* Tags */}
+            {post.tags && post.tags.length > 0 && (
+              <PostTags tags={post.tags} className="mt-6 mb-8" />
+            )}
+
             {/* Author Card */}
             {post.author && (
               <div className="mt-8">
                 <AuthorCard author={post.author} />
               </div>
             )}
+
+            {/* Related Posts */}
+            <RelatedPosts 
+              currentPostId={post._id}
+              categories={post.categories?.map(cat => cat._id) || []}
+            />
 
           </article>
 

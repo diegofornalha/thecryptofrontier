@@ -43,7 +43,7 @@ export default function NewsletterWidget({
 
   return (
     <div className="bg-[#4db2ec] rounded-lg p-6 text-white">
-      <h3 className="text-xl font-bold mb-2">{title}</h3>
+      <h3 className="text-xl font-bold mb-2 text-white">{title}</h3>
       <p className="text-sm mb-4 opacity-90">{description}</p>
       
       <form onSubmit={handleSubmit}>
