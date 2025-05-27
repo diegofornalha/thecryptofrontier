@@ -6,6 +6,7 @@ import { urlForImage } from '../../../sanity/lib/image';
 import { PortableText } from '@portabletext/react';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import CryptoBasicFooter from '@/components/sections/CryptoBasicFooter';
 import './crypto-basic-layout.css';
 
 // GROQ atualizado para o novo schema
@@ -472,27 +473,7 @@ export default async function PostPage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* Footer estilo Crypto Basic */}
-      <footer style={{ 
-        background: '#222', 
-        color: '#fff', 
-        padding: '40px 0', 
-        marginTop: '60px' 
-      }}>
-        <div className="crypto-container">
-          <div style={{ textAlign: 'center' }}>
-            <h2 style={{ 
-              fontSize: '24px', 
-              fontWeight: '700', 
-              marginBottom: '10px',
-              color: '#4db2ec' 
-            }}>The Crypto Basic</h2>
-            <p style={{ fontSize: '14px', opacity: '0.8' }}>
-              © {new Date().getFullYear()} The Crypto Basic. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <CryptoBasicFooter />
     </div>
   );
 }

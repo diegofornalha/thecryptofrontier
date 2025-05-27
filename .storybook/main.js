@@ -10,14 +10,20 @@ const config = {
     '../src/stories/design-system/migracao.mdx',
     '../src/stories/*Migration.stories.@(js|jsx|ts|tsx)'
   ],
-  addons: ['@storybook/addon-essentials'],
+
+  addons: [
+    '@storybook/addon-essentials',
+    '@storybook/addon-mdx-gfm',
+    '@chromatic-com/storybook'
+  ],
+
   framework: {
     name: '@storybook/react-vite',
     options: {},
   },
-  docs: {
-    autodocs: true,
-  },
+
+  docs: {},
+
   viteFinal: async (config) => {
     // Configuração direta do alias sem importar arquivo externo
     return {
@@ -59,5 +65,9 @@ const config = {
       },
     };
   },
+
+  typescript: {
+    reactDocgen: 'react-docgen-typescript'
+  }
 };
 export default config; 

@@ -18,6 +18,7 @@ const preview = {
       },
     },
   },
+
   // Adiciona um decorador global para envolver todas as histórias com um contexto do React
   decorators: [
     (Story) => (
@@ -28,6 +29,8 @@ const preview = {
       </React.StrictMode>
     ),
   ],
+
+  tags: ['autodocs']
 };
 
 export default preview; 

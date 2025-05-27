@@ -1,130 +1,142 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import AdBanner from '../components/sections/home/AdBanner';
+import AdBanner from '@/components/sections/home/AdBanner';
 
-const meta: Meta<typeof AdBanner> = {
+const meta = {
   title: 'Components/AdBanner',
   component: AdBanner,
   parameters: {
-    layout: 'centered',
+    layout: 'padded',
     docs: {
       description: {
-        component: 'Componente de banner publicitário para ser usado na home e outras páginas do site. Suporta imagem, texto sobreposto, links e animações de Bitcoin.',
+        component: 'Banner publicitário com animações de Bitcoin e foguete. Usado para promover ofertas e serviços relacionados a criptomoedas.',
       },
     },
   },
   tags: ['autodocs'],
   argTypes: {
-    imageUrl: {
-      control: 'text',
-      description: 'URL da imagem do banner',
-    },
     title: {
       control: 'text',
-      description: 'Título opcional sobreposto à imagem',
+      description: 'Título principal do banner',
     },
     subtitle: {
       control: 'text',
-      description: 'Subtítulo opcional sobreposto à imagem',
+      description: 'Subtítulo ou descrição da oferta',
     },
     link: {
       control: 'text',
-      description: 'URL para onde o banner deve direcionar quando clicado',
+      description: 'URL de destino ao clicar no banner',
     },
     targetBlank: {
       control: 'boolean',
-      description: 'Se true, abre o link em nova aba',
-    },
-    className: {
-      control: 'text',
-      description: 'Classes CSS adicionais',
+      description: 'Se deve abrir o link em nova aba',
     },
     showBitcoinAnimation: {
       control: 'boolean',
-      description: 'Se true, mostra animações de Bitcoin, estrelas e foguete no fundo',
+      description: 'Se deve mostrar as animações de Bitcoin e foguete',
     },
   },
-  decorators: [
-    (Story) => (
-      <div style={{ width: '600px', height: '400px' }}>
-        <Story />
-      </div>
-    ),
-  ],
-};
+} satisfies Meta<typeof AdBanner>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Story padrão - com animações Bitcoin
 export const Default: Story = {
   args: {
-    showBitcoinAnimation: true,
-  },
-};
-
-// Banner com texto e animações Bitcoin
-export const WithTextAndAnimations: Story = {
-  args: {
     title: 'Sinais Cripto Expert',
-    subtitle: 'Lucre de R$ 500,00 a R$ 5.000 em média por dia no criptomercado',
-    showBitcoinAnimation: true,
-  },
-};
-
-// Banner sem animações - apenas imagem
-export const WithoutAnimations: Story = {
-  args: {
-    title: 'Banner Sem Animações',
-    subtitle: 'Versão simples sem Bitcoin animado',
-    showBitcoinAnimation: false,
-  },
-};
-
-// Banner com link externo e animações
-export const WithExternalLink: Story = {
-  args: {
-    title: 'Sinais Cripto Expert',
-    subtitle: 'Copie e cole recomendações de moedas promissoras',
-    link: 'https://example.com',
+    subtitle: 'Lucre de R$ 500,00 a R$ 5.000 em média por dia no criptomercado, sem precisar olhar gráficos, notícias, nem fazer cursos enormes.',
+    link: 'https://eternityscale.com.br/sce-fb',
     targetBlank: true,
     showBitcoinAnimation: true,
   },
 };
 
-// Banner com link interno
-export const WithInternalLink: Story = {
+export const SemAnimacao: Story = {
   args: {
-    title: 'Últimas Notícias Cripto',
-    subtitle: 'Fique por dentro das tendências do mercado',
-    link: '/blog',
+    title: 'Aprenda sobre Criptomoedas',
+    subtitle: 'Curso completo para iniciantes no mundo das criptomoedas.',
+    link: '/cursos/cripto-iniciantes',
+    targetBlank: false,
+    showBitcoinAnimation: false,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Banner sem as animações de Bitcoin e foguete, apenas com fundo gradiente.',
+      },
+    },
+  },
+};
+
+export const LinkInterno: Story = {
+  args: {
+    title: 'Newsletter Crypto Insights',
+    subtitle: 'Receba análises diárias do mercado cripto diretamente no seu email.',
+    link: '/newsletter',
     targetBlank: false,
     showBitcoinAnimation: true,
   },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Banner com link interno (usa Next.js Link ao invés de tag <a>).',
+      },
+    },
+  },
 };
 
-// Banner apenas imagem com animações
-export const ImageOnlyWithAnimations: Story = {
+export const SemLink: Story = {
   args: {
-    link: 'https://example.com',
+    title: 'Em Breve: Nova Plataforma',
+    subtitle: 'Estamos preparando algo incrível para você. Aguarde novidades!',
+    link: undefined,
+    targetBlank: false,
     showBitcoinAnimation: true,
   },
-};
-
-// Banner apenas imagem sem animações
-export const ImageOnlyClean: Story = {
-  args: {
-    link: 'https://example.com',
-    showBitcoinAnimation: false,
+  parameters: {
+    docs: {
+      description: {
+        story: 'Banner sem link - apenas visual, não clicável.',
+      },
+    },
   },
 };
 
-// Banner customizado com efeitos completos
-export const FullEffects: Story = {
+export const Mobile: Story = {
   args: {
-    title: '🚀 Bitcoin Expert',
-    subtitle: 'Maximize seus lucros com sinais profissionais de cripto',
-    link: 'https://wa.me/5511999999999',
-    className: 'shadow-2xl',
+    title: 'Oferta Mobile',
+    subtitle: 'Texto otimizado para visualização em dispositivos móveis.',
+    link: 'https://example.com',
+    targetBlank: true,
     showBitcoinAnimation: true,
   },
-}; 
+  parameters: {
+    viewport: {
+      defaultViewport: 'mobile1',
+    },
+    docs: {
+      description: {
+        story: 'Visualização do banner em dispositivo móvel.',
+      },
+    },
+  },
+};
+
+export const Tablet: Story = {
+  args: {
+    title: 'Visualização Tablet',
+    subtitle: 'Banner responsivo adaptado para tablets.',
+    link: 'https://example.com',
+    targetBlank: true,
+    showBitcoinAnimation: true,
+  },
+  parameters: {
+    viewport: {
+      defaultViewport: 'tablet',
+    },
+    docs: {
+      description: {
+        story: 'Visualização do banner em tablet.',
+      },
+    },
+  },
+};
