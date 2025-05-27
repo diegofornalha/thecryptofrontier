@@ -8,16 +8,16 @@ export default function NewsHeader() {
 
   return (
     <>
-      <header className="fixed z-50 w-full bg-white border-b border-gray-100">
+      <header className="fixed w-full bg-white border-b border-gray-100" style={{ zIndex: 9999 }}>
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-[70px]">
             {/* Layout que replica a estrutura das colunas da home */}
             <div className="flex items-center justify-between w-full">
-              {/* Área esquerda - alinhada com "Últimas Notícias" (1/4) */}
+              {/* Área esquerda - Lupa */}
               <div className="w-1/4 flex justify-start">
                 <Link 
                   href="/buscas"
-                  className="text-gray-700 hover:text-blue-500"
+                  className="text-gray-700 hover:text-blue-500 p-2 transition-colors"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg"
                        viewBox="0 0 1200 1200"
@@ -44,17 +44,17 @@ export default function NewsHeader() {
                 </Link>
               </div>
 
-              {/* Logo (centro) - área central (1/2) */}
+              {/* Logo (centro) */}
               <div className="w-1/2 flex justify-center">
-                <Link href="/">
-                  <div className="text-lg sm:text-xl lg:text-2xl font-serif font-extrabold whitespace-nowrap" style={{ fontFamily: 'Roboto Slab', fontWeight: 800 }}>The Crypto Frontier</div>
+                <Link href="/" className="block">
+                  <div className="text-lg sm:text-xl lg:text-2xl font-serif font-extrabold whitespace-nowrap hover:text-blue-500 transition-colors" style={{ fontFamily: 'Roboto Slab', fontWeight: 800 }}>The Crypto Frontier</div>
                 </Link>
               </div>
 
-              {/* Área direita - alinhada com "Em Destaque" (1/4) */}
+              {/* Área direita - Menu Grid */}
               <div className="w-1/4 flex justify-end">
                 <button 
-                  className="text-gray-700 hover:text-blue-500"
+                  className="text-gray-700 hover:text-blue-500 p-2 transition-colors"
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg"
@@ -73,7 +73,7 @@ export default function NewsHeader() {
                              M426.455 725.574h171.069v171.039h-171.069v-171.039z
                              M716.452 435.598h171.039v171.059h-171.039v-171.059z
                              M716.452 725.574h171.039v171.039h-171.039v-171.039z"
-                          fill="currentColor"/>
+                         fill="currentColor"/>
                   </svg>
                 </button>
               </div>
@@ -84,21 +84,21 @@ export default function NewsHeader() {
 
       {/* Menu Mobile */}
       {mobileMenuOpen && (
-        <div className="fixed top-[70px] left-0 right-0 lg:hidden z-40">
+        <div className="fixed top-[70px] left-0 right-0 lg:hidden" style={{ zIndex: 9998 }}>
           <nav className="bg-white border-b border-gray-100 shadow-lg">
             <div className="max-w-7xl mx-auto px-4 py-4">
               <div className="flex flex-col gap-3">
-                <Link href="/" className="py-2 hover:text-blue-500" onClick={() => setMobileMenuOpen(false)}>
+                <Link href="/" className="py-2 hover:text-blue-500 font-medium" onClick={() => setMobileMenuOpen(false)}>
                   Início
                 </Link>
-                <Link href="/blog" className="py-2 hover:text-blue-500" onClick={() => setMobileMenuOpen(false)}>
-                  Notícias
+                <Link href="/blog" className="py-2 hover:text-blue-500 font-medium" onClick={() => setMobileMenuOpen(false)}>
+                  Blog
                 </Link>
-                <Link href="/buscas" className="py-2 hover:text-blue-500" onClick={() => setMobileMenuOpen(false)}>
+                <Link href="/buscas" className="py-2 hover:text-blue-500 font-medium" onClick={() => setMobileMenuOpen(false)}>
                   Buscar
                 </Link>
-                <Link href="/studio" className="py-2 hover:text-blue-500" onClick={() => setMobileMenuOpen(false)}>
-                  Admin
+                <Link href="/studio" className="py-2 hover:text-blue-500 font-medium" onClick={() => setMobileMenuOpen(false)}>
+                  Studio
                 </Link>
               </div>
             </div>

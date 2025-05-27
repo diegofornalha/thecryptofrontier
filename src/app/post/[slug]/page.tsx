@@ -4,14 +4,9 @@ import Link from 'next/link';
 import { client } from '../../../sanity/lib/client';
 import { urlForImage } from '../../../sanity/lib/image';
 import { PortableText } from '@portabletext/react';
-import ModernFooter from '../../../components/sections/ModernFooter';
-import ModernHeader from '../../../components/sections/ModernHeader';
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import './crypto-basic-layout.css';
 
 // GROQ atualizado para o novo schema
 const POST_QUERY = `*[_type == "post" && slug.current == $slug][0]{
@@ -19,10 +14,7 @@ const POST_QUERY = `*[_type == "post" && slug.current == $slug][0]{
   title,
   slug,
   mainImage{
-    asset->{
-      _id,
-      url
-    },
+    asset,
     caption,
     alt,
     attribution
@@ -159,25 +151,113 @@ const formatDate = (dateString: string) => {
   });
 };
 
-// Componentes para PortableText
+// Componentes para PortableText - Estilo Crypto Basic
+const cryptoBasicComponents = {
+  types: {
+    image: ({ value }: any) => {
+      if (!value || !value.asset) {
+        return null;
+      }
+      
+      const imageUrl = urlForImage(value).url();
+      if (!imageUrl) {
+        return null;
+      }
+      
+      return (
+        <div style={{ margin: '25px 0' }}>
+          <Image
+            src={imageUrl}
+            alt={value.alt || 'Imagem do artigo'}
+            width={770}
+            height={433}
+            style={{ width: '100%', height: 'auto', display: 'block' }}
+          />
+          {value.caption && (
+            <p style={{ 
+              fontSize: '12px', 
+              color: '#666', 
+              textAlign: 'center', 
+              marginTop: '10px',
+              fontStyle: 'italic' 
+            }}>
+              {value.caption}
+            </p>
+          )}
+        </div>
+      );
+    },
+  },
+  block: {
+    normal: ({ children }: any) => <p style={{ marginBottom: '20px', lineHeight: '1.8' }}>{children}</p>,
+    h1: ({ children }: any) => <h1 style={{ fontSize: '28px', fontWeight: '700', margin: '35px 0 20px', fontFamily: 'Roboto, sans-serif' }}>{children}</h1>,
+    h2: ({ children }: any) => <h2 style={{ fontSize: '24px', fontWeight: '700', margin: '30px 0 20px', fontFamily: 'Roboto, sans-serif' }}>{children}</h2>,
+    h3: ({ children }: any) => <h3 style={{ fontSize: '20px', fontWeight: '600', margin: '25px 0 15px', fontFamily: 'Roboto, sans-serif' }}>{children}</h3>,
+    blockquote: ({ children }: any) => (
+      <blockquote style={{ 
+        borderLeft: '4px solid #4db2ec', 
+        paddingLeft: '20px', 
+        margin: '25px 0',
+        fontStyle: 'italic',
+        color: '#555'
+      }}>
+        {children}
+      </blockquote>
+    ),
+  },
+  marks: {
+    link: ({ children, value }: any) => (
+      <a href={value.href} style={{ color: '#4db2ec', textDecoration: 'none' }} target="_blank" rel="noopener">
+        {children}
+      </a>
+    ),
+    internalLink: ({ children, value }: any) => (
+      <Link href={`/post/${value.slug}`} style={{ color: '#4db2ec', textDecoration: 'none' }}>
+        {children}
+      </Link>
+    ),
+  },
+  list: {
+    bullet: ({ children }: any) => <ul style={{ marginBottom: '20px', paddingLeft: '25px' }}>{children}</ul>,
+    number: ({ children }: any) => <ol style={{ marginBottom: '20px', paddingLeft: '25px' }}>{children}</ol>,
+  },
+  listItem: {
+    bullet: ({ children }: any) => <li style={{ marginBottom: '8px', lineHeight: '1.8' }}>{children}</li>,
+    number: ({ children }: any) => <li style={{ marginBottom: '8px', lineHeight: '1.8' }}>{children}</li>,
+  },
+};
+
+// Componentes para PortableText - Original (mantido para referência)
 const portableTextComponents = {
   types: {
-    image: ({ value }: any) => (
-      <div className="my-8">
-        <Image
-          src={urlForImage(value).url()}
-          alt={value.alt || 'Imagem do artigo'}
-          width={800}
-          height={400}
-          className="rounded-lg object-cover w-full"
-        />
-        {value.caption && (
-          <p className="text-sm text-muted-foreground mt-2 text-center italic">
-            {value.caption}
-          </p>
-        )}
-      </div>
-    ),
+    image: ({ value }: any) => {
+      // Validar se há uma imagem válida
+      if (!value || !value.asset) {
+        return null;
+      }
+      
+      const imageUrl = urlForImage(value).url();
+      if (!imageUrl) {
+        return null;
+      }
+      
+      return (
+        <div className="my-8 flex flex-col items-center">
+          <Image
+            src={imageUrl}
+            alt={value.alt || 'Imagem do artigo'}
+            width={800}
+            height={800}
+            className="rounded-lg object-contain max-w-full h-auto"
+          />
+          {value.caption && (
+            <p className="text-sm text-muted-foreground mt-2 text-center italic">
+              {value.caption}
+            </p>
+          )}
+        </div>
+      );
+    },
   },
   block: {
     normal: ({ children }: any) => <p className="mb-4 leading-relaxed">{children}</p>,
@@ -222,7 +302,7 @@ export default async function PostPage({ params }: PageProps) {
   }
 
   // Links de navegação
-  const navLinks = [
+  const navLinks: any = [
     { label: "Home", url: "/" },
     { label: "Buscar", url: "/buscas" },
     { label: "Blog", url: "/blog" },
@@ -230,148 +310,189 @@ export default async function PostPage({ params }: PageProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <ModernHeader 
-        title="The Crypto Frontier" 
-        navLinks={navLinks} 
-      />
-      
-      <article className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Breadcrumb */}
-        <nav className="mb-8">
-          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-            <Link href="/" className="hover:text-primary">Home</Link>
-            <span>/</span>
-            <Link href="/blog" className="hover:text-primary">Blog</Link>
-            <span>/</span>
-            <span className="text-foreground">{post.title}</span>
+    <div className="crypto-post-page">
+      {/* Header Simples */}
+      <header style={{ 
+        background: '#fff', 
+        borderBottom: '1px solid #e0e0e0', 
+        padding: '15px 0',
+        position: 'relative',
+        zIndex: 100
+      }}>
+        <div className="crypto-container">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
+              <h1 style={{ 
+                fontSize: '28px', 
+                fontWeight: '700', 
+                color: '#4db2ec',
+                fontFamily: 'Roboto, sans-serif',
+                margin: 0,
+                cursor: 'pointer'
+              }}>The Crypto Basic</h1>
+            </Link>
+            <nav style={{ display: 'flex', gap: '25px', alignItems: 'center' }}>
+              <Link 
+                href="/" 
+                style={{ 
+                  color: '#111', 
+                  textDecoration: 'none', 
+                  fontSize: '15px', 
+                  fontWeight: '500',
+                  padding: '5px 10px',
+                  transition: 'color 0.3s ease',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.color = '#4db2ec'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#111'}
+              >
+                Crypto News
+              </Link>
+              <Link 
+                href="/blog" 
+                style={{ 
+                  color: '#111', 
+                  textDecoration: 'none', 
+                  fontSize: '15px', 
+                  fontWeight: '500',
+                  padding: '5px 10px',
+                  transition: 'color 0.3s ease',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.color = '#4db2ec'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#111'}
+              >
+                Price Prediction
+              </Link>
+              <Link 
+                href="/buscas" 
+                style={{ 
+                  color: '#111', 
+                  textDecoration: 'none', 
+                  fontSize: '15px', 
+                  fontWeight: '500',
+                  padding: '5px 10px',
+                  transition: 'color 0.3s ease',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.color = '#4db2ec'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#111'}
+              >
+                Guides
+              </Link>
+            </nav>
           </div>
-        </nav>
+        </div>
+      </header>
 
-        {/* Header do post */}
-        <header className="mb-8">
-          {/* Categorias */}
-          {post.categories && post.categories.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-4">
-              {post.categories.map((category) => (
-                <Badge key={category._id} variant="secondary">
-                  {category.title}
-                </Badge>
-              ))}
-            </div>
-          )}
+      <div className="crypto-container" style={{ marginTop: '30px' }}>
+        <div className="crypto-content-wrapper">
+          <article className="crypto-main-content">
+            {/* Breadcrumb */}
+            <nav className="crypto-breadcrumb">
+              <Link href="/">Home</Link>
+              <span style={{ margin: '0 8px', color: '#999' }}>›</span>
+              <Link href="/blog">Crypto News</Link>
+              <span style={{ margin: '0 8px', color: '#999' }}>›</span>
+              <span>{post.title}</span>
+            </nav>
 
-          {/* Título */}
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-            {post.title}
-          </h1>
+            {/* Header do post */}
+            <header className="crypto-post-header">
+              {/* Título */}
+              <h1 className="crypto-post-title">{post.title}</h1>
 
-          {/* Excerpt */}
-          {post.excerpt && (
-            <p className="text-xl text-muted-foreground mb-6 leading-relaxed">
-              {post.excerpt}
-            </p>
-          )}
+              {/* Meta informações */}
+              <div className="crypto-post-meta">
+                <span style={{ textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.5px' }}>
+                  WRITTEN BY: {post.author?.name ? (
+                    <strong style={{ color: '#4db2ec' }}>{post.author.name.toUpperCase()}</strong>
+                  ) : 'ADMIN'}
+                </span>
+                <span style={{ textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.5px' }}>
+                  DATE: <strong>{formatDate(post.publishedAt).toUpperCase()}</strong>
+                </span>
+              </div>
+            </header>
 
-          {/* Meta informações */}
-          <div className="flex flex-wrap items-center gap-4 mb-8 text-sm text-muted-foreground">
-            {post.author && (
-              <div className="flex items-center gap-2">
-                {post.author.image && (
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={urlForImage(post.author.image).url()} alt={post.author.name} />
-                    <AvatarFallback>{post.author.name?.charAt(0)}</AvatarFallback>
-                  </Avatar>
+            {/* Imagem principal */}
+            {post.mainImage && post.mainImage.asset && (
+              <div className="crypto-post-image">
+                <Image
+                  src={urlForImage(post.mainImage).url()}
+                  alt={post.mainImage.alt || post.title}
+                  width={770}
+                  height={433}
+                  style={{ width: '100%', height: 'auto', display: 'block' }}
+                  priority
+                />
+                {post.mainImage.caption && (
+                  <p style={{ 
+                    fontSize: '12px', 
+                    color: '#666', 
+                    textAlign: 'center', 
+                    marginTop: '10px',
+                    fontStyle: 'italic' 
+                  }}>
+                    {post.mainImage.caption}
+                  </p>
                 )}
-                <span>{post.author.name}</span>
               </div>
             )}
-            <span>•</span>
-            <time dateTime={post.publishedAt}>
-              {formatDate(post.publishedAt)}
-            </time>
-          </div>
 
-          {/* Imagem principal */}
-          {post.mainImage && (
-            <div className="mb-8">
-              <Image
-                src={urlForImage(post.mainImage).url()}
-                alt={post.mainImage.alt || post.title}
-                width={1200}
-                height={600}
-                className="rounded-lg object-cover w-full"
-                priority
-              />
-              {post.mainImage.caption && (
-                <p className="text-sm text-muted-foreground mt-2 text-center italic">
-                  {post.mainImage.caption}
-                </p>
+            {/* Conteúdo do post */}
+            <div className="crypto-post-content">
+              {post.content && (
+                <PortableText value={post.content} components={cryptoBasicComponents} />
               )}
             </div>
-          )}
-        </header>
 
-        {/* Conteúdo do post */}
-        <div className="prose prose-lg max-w-none">
-          {post.content && (
-            <PortableText value={post.content} components={portableTextComponents} />
-          )}
-        </div>
+          </article>
 
-        {/* Tags */}
-        {post.tags && post.tags.length > 0 && (
-          <div className="mt-12 pt-8 border-t">
-            <h3 className="text-lg font-semibold mb-4">Tags:</h3>
-            <div className="flex flex-wrap gap-2">
-              {post.tags.map((tag) => (
-                <Badge key={tag._id} variant="outline">
-                  {tag.title}
-                </Badge>
-              ))}
+          {/* Sidebar */}
+          <aside className="crypto-sidebar">
+            <div style={{ 
+              background: '#f5f5f5', 
+              padding: '20px', 
+              marginBottom: '30px',
+              borderRadius: '5px' 
+            }}>
+              <h3 style={{ 
+                fontSize: '18px', 
+                fontWeight: '700', 
+                marginBottom: '15px',
+                fontFamily: 'Roboto, sans-serif',
+                color: '#111'
+              }}>Latest News</h3>
+              <div style={{ fontSize: '14px', color: '#666' }}>
+                <p>More crypto news coming soon...</p>
+              </div>
             </div>
-          </div>
-        )}
+          </aside>
+        </div>
+      </div>
 
-        {/* Navegação */}
-        <div className="mt-12 pt-8 border-t">
-          <div className="flex justify-between">
-            <Button asChild variant="outline">
-              <Link href="/blog">← Voltar ao Blog</Link>
-            </Button>
-            <Button asChild>
-              <Link href="/buscas">🔍 Buscar mais artigos</Link>
-            </Button>
+      {/* Footer estilo Crypto Basic */}
+      <footer style={{ 
+        background: '#222', 
+        color: '#fff', 
+        padding: '40px 0', 
+        marginTop: '60px' 
+      }}>
+        <div className="crypto-container">
+          <div style={{ textAlign: 'center' }}>
+            <h2 style={{ 
+              fontSize: '24px', 
+              fontWeight: '700', 
+              marginBottom: '10px',
+              color: '#4db2ec' 
+            }}>The Crypto Basic</h2>
+            <p style={{ fontSize: '14px', opacity: '0.8' }}>
+              © {new Date().getFullYear()} The Crypto Basic. All rights reserved.
+            </p>
           </div>
         </div>
-      </article>
-      
-      <ModernFooter 
-        title="The Crypto Frontier"
-        description="Seu portal de conteúdo sobre criptomoedas e blockchain"
-        socialLinks={[
-          { label: 'Twitter', icon: 'twitter', url: 'https://twitter.com/' },
-          { label: 'Facebook', icon: 'facebook', url: 'https://facebook.com/' },
-          { label: 'Instagram', icon: 'instagram', url: 'https://instagram.com/' }
-        ]}
-        primaryLinks={{
-          title: "Navegação",
-          links: navLinks
-        }}
-        secondaryLinks={{
-          title: "Recursos",
-          links: [
-            { label: "Buscar", url: "/buscas" },
-            { label: "Artigos", url: "/blog" },
-            { label: "Tutoriais", url: "/blog" }
-          ]
-        }}
-        legalLinks={[
-          { label: "Termos de Uso", url: "#" },
-          { label: "Política de Privacidade", url: "#" }
-        ]}
-        copyrightText={`© ${new Date().getFullYear()} The Crypto Frontier. Todos os direitos reservados.`}
-      />
+      </footer>
     </div>
   );
 }

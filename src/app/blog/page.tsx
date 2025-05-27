@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { client } from '../../sanity/lib/client';
 import { urlForImage } from '../../sanity/lib/image';
 import ModernFooter from '../../components/sections/ModernFooter';
-import ModernHeader from '../../components/sections/ModernHeader';
+import NewsHeader from '../../components/sections/NewsHeader';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -131,12 +131,9 @@ export default async function BlogPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <ModernHeader 
-        title="The Crypto Frontier" 
-        navLinks={navLinks} 
-      />
+      <NewsHeader />
       
-      <div className="bg-gradient-to-r from-indigo-600 to-blue-500 text-white py-16">
+      <div className="bg-gradient-to-r from-indigo-600 to-blue-500 text-white py-16 pt-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl font-extrabold mb-4">Blog</h1>
