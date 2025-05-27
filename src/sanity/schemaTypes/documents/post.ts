@@ -137,6 +137,36 @@ export default defineType({
       ],
     }),
   ],
+  orderings: [
+    {
+      title: 'Data de Publicação (Mais Recente)',
+      name: 'publishedAtDesc',
+      by: [
+        {field: 'publishedAt', direction: 'desc'}
+      ]
+    },
+    {
+      title: 'Data de Publicação (Mais Antiga)',
+      name: 'publishedAtAsc',
+      by: [
+        {field: 'publishedAt', direction: 'asc'}
+      ]
+    },
+    {
+      title: 'Título (A-Z)',
+      name: 'titleAsc',
+      by: [
+        {field: 'title', direction: 'asc'}
+      ]
+    },
+    {
+      title: 'Título (Z-A)',
+      name: 'titleDesc',
+      by: [
+        {field: 'title', direction: 'desc'}
+      ]
+    }
+  ],
   preview: {
     select: {
       title: 'title',
