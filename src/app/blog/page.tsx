@@ -8,6 +8,9 @@ import NewsHeader from '../../components/sections/NewsHeader';
 import BreakingNewsTicker from '@/components/sections/home/BreakingNewsTicker';
 import CryptoNewsCard from '@/components/sections/CryptoNewsCard';
 import Pagination from '@/components/ui/pagination';
+import CategoriesWidget from '@/components/widgets/CategoriesWidget';
+import NewsletterWidget from '@/components/widgets/NewsletterWidget';
+import { POSTS_LIST_QUERY } from '@/lib/queries';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -21,44 +24,6 @@ import { Badge } from "@/components/ui/badge";
 
 // Constants for pagination
 const POSTS_PER_PAGE = 12;
-
-// Consulta GROQ atualizada para o novo schema com paginação
-const POSTS_QUERY = `{
-  "posts": *[_type == "post"] | order(publishedAt desc) [$start...$end] {
-    _id,
-    title,
-    slug,
-    mainImage {
-      ...,
-      "alt": alt
-    },
-    publishedAt,
-    excerpt,
-    "author": author->{
-      name,
-      image,
-      role
-    },
-    "categories": categories[]->{ 
-      _id,
-      title,
-      slug
-    },
-    "tags": tags[]->{ 
-      _id,
-      title,
-      slug
-    },
-    "cryptoData": cryptoMeta {
-      coinName,
-      coinSymbol,
-      currentPrice,
-      priceChange24h
-    },
-    "estimatedReadingTime": round(length(pt::text(content)) / 5 / 180)
-  },
-  "total": count(*[_type == "post"])
-}`;
 
 // Interface para os posts
 interface Post {
@@ -120,7 +85,10 @@ async function getPosts(page: number = 1): Promise<{ posts: Post[], total: numbe
   try {
     const start = (page - 1) * POSTS_PER_PAGE;
     const end = start + POSTS_PER_PAGE;
-    const result = await client.fetch(POSTS_QUERY, { start, end });
+    const result = await client.fetch(POSTS_LIST_QUERY, { start, end }, {
+      // Cache por 5 minutos
+      next: { revalidate: 300 }
+    });
     return {
       posts: result.posts || [],
       total: result.total || 0

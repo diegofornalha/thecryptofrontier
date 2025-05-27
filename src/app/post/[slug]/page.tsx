@@ -17,54 +17,9 @@ import AuthorCard from '@/components/AuthorCard';
 import SocialShare from '@/components/SocialShare';
 import PostTags from '@/components/PostTags';
 import RelatedPosts from '@/components/RelatedPosts';
+import { POST_QUERY } from '@/lib/queries';
 import './crypto-basic-layout.css';
 
-// GROQ atualizado para o novo schema
-const POST_QUERY = `*[_type == "post" && slug.current == $slug][0]{
-  _id,
-  title,
-  slug,
-  mainImage{
-    asset,
-    caption,
-    alt,
-    attribution
-  },
-  body[]{
-    ...,
-    markDefs[]{
-      ...,
-      _type == "internalLink" => {
-        "slug": @.reference->slug.current
-      }
-    }
-  },
-  content,
-  publishedAt,
-  excerpt,
-  author->{
-    _id,
-    name,
-    image{asset->{_id, url}},
-    role,
-    slug,
-    bio,
-  },
-  categories[]->{
-    _id,
-    title,
-    slug,
-    description
-  },
-  tags[]->{
-    _id,
-    title,
-    slug
-  },
-  seo,
-  cryptoMeta,
-  originalSource
-}`;
 
 // GROQ para pegar todos os slugs para geração estática
 const SLUGS_QUERY = `*[_type == "post" && defined(slug.current)][].slug.current`;
@@ -109,7 +64,10 @@ interface PageProps {
 // Função para buscar o post
 async function getPost(slug: string): Promise<Post | null> {
   try {
-    const post = await client.fetch(POST_QUERY, { slug });
+    const post = await client.fetch(POST_QUERY, { slug }, {
+      // Cache por 1 hora
+      next: { revalidate: 3600 }
+    });
     return post || null;
   } catch (error) {
     console.error('Erro ao buscar post:', error);
@@ -126,16 +84,43 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return {
       title: 'Post não encontrado - The Crypto Frontier',
       description: 'O post que você está procurando não foi encontrado.',
+      robots: {
+        index: false,
+        follow: false,
+      },
     };
   }
+
+  const ogImage = post.mainImage ? urlForImage(post.mainImage).width(1200).height(630).url() : undefined;
 
   return {
     title: `${post.title} - The Crypto Frontier`,
     description: post.excerpt || post.seo?.metaDescription || 'Artigo sobre criptomoedas e blockchain',
+    keywords: post.tags?.map(tag => tag.title).join(', '),
+    authors: post.author ? [{ name: post.author.name || 'The Crypto Frontier' }] : undefined,
     openGraph: {
       title: post.title,
       description: post.excerpt || 'Artigo sobre criptomoedas e blockchain',
-      images: post.mainImage ? [urlForImage(post.mainImage).url()] : [],
+      type: 'article',
+      publishedTime: post.publishedAt,
+      authors: post.author?.name ? [post.author.name] : undefined,
+      images: ogImage ? [{
+        url: ogImage,
+        width: 1200,
+        height: 630,
+        alt: post.title,
+      }] : [],
+      locale: 'pt_BR',
+      siteName: 'The Crypto Frontier',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description: post.excerpt || 'Artigo sobre criptomoedas e blockchain',
+      images: ogImage ? [ogImage] : undefined,
+    },
+    alternates: {
+      canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://thecryptofrontier.com'}/post/${slug}`,
     },
   };
 }
@@ -200,7 +185,10 @@ const cryptoBasicComponents = {
     },
   },
   block: {
-    normal: ({ children }: any) => <p style={{ marginBottom: '20px', lineHeight: '1.8' }}>{children}</p>,
+    normal: ({ children, isFirst }: any) => {
+      // O isFirst não é fornecido pelo PortableText, então vamos usar uma classe CSS
+      return <p style={{ marginBottom: '20px', lineHeight: '1.8' }}>{children}</p>;
+    },
     h1: ({ children }: any) => <h1 style={{ fontSize: '28px', fontWeight: '700', margin: '35px 0 20px', fontFamily: 'Roboto, sans-serif' }}>{children}</h1>,
     h2: ({ children }: any) => <h2 style={{ fontSize: '24px', fontWeight: '700', margin: '30px 0 20px', fontFamily: 'Roboto, sans-serif' }}>{children}</h2>,
     h3: ({ children }: any) => <h3 style={{ fontSize: '20px', fontWeight: '600', margin: '25px 0 15px', fontFamily: 'Roboto, sans-serif' }}>{children}</h3>,
@@ -227,6 +215,8 @@ const cryptoBasicComponents = {
         {children}
       </Link>
     ),
+    strong: ({ children }: any) => <strong>{children}</strong>,
+    em: ({ children }: any) => <em>{children}</em>,
   },
   list: {
     bullet: ({ children }: any) => <ul style={{ marginBottom: '20px', paddingLeft: '25px' }}>{children}</ul>,
@@ -369,6 +359,8 @@ export default async function PostPage({ params }: PageProps) {
                   height={433}
                   style={{ width: '100%', height: 'auto', display: 'block' }}
                   priority
+                  placeholder="blur"
+                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAf/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWEREiMxUf/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
                 />
                 {post.mainImage.caption && (
                   <p style={{ 

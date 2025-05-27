@@ -51,6 +51,32 @@
   margin-bottom: 20px;
 }
 
+/* Primeiro parágrafo em destaque - estilo The Crypto Basic */
+.crypto-post-content > p:first-child {
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.7;
+  margin-bottom: 25px;
+  color: #111;
+  font-family: 'Open Sans', sans-serif;
+}
+
+/* Texto em negrito no meio do conteúdo */
+.crypto-post-content strong,
+.crypto-post-content b {
+  font-weight: 700;
+  color: #111;
+}
+
+/* Parágrafos que começam com negrito (para destaques) */
+.crypto-post-content p > strong:first-child,
+.crypto-post-content p > b:first-child {
+  font-size: 17px;
+  line-height: 1.6;
+  display: block;
+  margin-bottom: 10px;
+}
+
 .crypto-post-content h2 {
   font-family: 'Roboto', sans-serif;
   font-size: 24px;

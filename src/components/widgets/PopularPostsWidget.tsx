@@ -1,41 +1,23 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import CryptoNewsCard from '@/components/sections/CryptoNewsCard';
+import PopularPostItem from './PopularPostItem';
 import { client } from '@/sanity/client';
 
 const popularPostsQuery = `*[_type == "post"] | order(views desc, publishedAt desc) [0...5] {
   _id,
   title,
   "slug": slug.current,
-  excerpt,
-  coverImage,
   publishedAt,
-  author-> {
-    firstName,
-    lastName
-  },
-  category-> {
-    title,
-    "slug": slug.current
-  }
+  "estimatedReadingTime": round(length(pt::text(content)) / 5 / 180)
 }`;
 
 interface Post {
   _id: string;
   title: string;
   slug: string;
-  excerpt?: string;
-  coverImage?: any;
   publishedAt?: string;
-  author?: {
-    firstName?: string;
-    lastName?: string;
-  };
-  category?: {
-    title: string;
-    slug: string;
-  };
+  estimatedReadingTime?: number;
 }
 
 export default function PopularPostsWidget() {
@@ -65,16 +47,18 @@ export default function PopularPostsWidget() {
       <div className="space-y-4">
         {loading ? (
           <>
-            <div className="h-20 bg-gray-100 animate-pulse rounded" />
-            <div className="h-20 bg-gray-100 animate-pulse rounded" />
-            <div className="h-20 bg-gray-100 animate-pulse rounded" />
+            <div className="h-16 bg-gray-100 animate-pulse rounded mb-4" />
+            <div className="h-16 bg-gray-100 animate-pulse rounded mb-4" />
+            <div className="h-16 bg-gray-100 animate-pulse rounded" />
           </>
         ) : posts.length > 0 ? (
           posts.map((post) => (
-            <CryptoNewsCard
+            <PopularPostItem
               key={post._id}
-              {...post}
-              horizontal
+              title={post.title}
+              slug={post.slug}
+              publishedAt={post.publishedAt}
+              readTime={post.estimatedReadingTime}
             />
           ))
         ) : (
