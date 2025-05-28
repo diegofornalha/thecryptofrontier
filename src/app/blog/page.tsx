@@ -9,7 +9,6 @@ import BreakingNewsTicker from '@/components/sections/home/BreakingNewsTicker';
 import CryptoNewsCard from '@/components/sections/CryptoNewsCard';
 import Pagination from '@/components/ui/pagination';
 import CategoriesWidget from '@/components/widgets/CategoriesWidget';
-import SimpleNewsletterWidget from '@/components/widgets/SimpleNewsletterWidget';
 import { POSTS_LIST_QUERY } from '@/lib/queries';
 import { Metadata } from 'next';
 
@@ -219,8 +218,6 @@ export default async function BlogPage({ searchParams }: PageProps) {
               </ul>
             </div>
 
-            {/* Widget newsletter simplificado */}
-            <SimpleNewsletterWidget />
           </aside>
         </div>
       </main>

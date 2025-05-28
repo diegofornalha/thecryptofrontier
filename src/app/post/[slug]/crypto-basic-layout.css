@@ -135,3 +135,31 @@
   top: 100px;
   height: fit-content;
 }
+
+/* Media Queries */
+@media (max-width: 768px) {
+  .crypto-content-wrapper {
+    flex-direction: column;
+  }
+  
+  .crypto-main-content {
+    max-width: 100%;
+  }
+  
+  /* Ocultar sidebar no mobile */
+  .crypto-sidebar {
+    display: none;
+  }
+  
+  .crypto-post-title {
+    font-size: 24px;
+  }
+  
+  .crypto-post-content {
+    font-size: 14px;
+  }
+  
+  .crypto-container {
+    padding: 0 15px;
+  }
+}

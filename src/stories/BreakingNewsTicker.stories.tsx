@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import BreakingNewsTicker from '@/components/sections/home/BreakingNewsTicker';
 
 const meta = {
-  title: 'Components/BreakingNewsTicker',
+  title: 'Sections/Home/BreakingNewsTicker',
   component: BreakingNewsTicker,
   parameters: {
     layout: 'fullscreen',

@@ -7,8 +7,8 @@ const __dirname = path.dirname(__filename);
 /** @type { import('@storybook/react-vite').StorybookConfig } */
 const config = {
   stories: [
-    '../src/stories/design-system/migracao.mdx',
-    '../src/stories/*Migration.stories.@(js|jsx|ts|tsx)'
+    '../src/stories/**/*.mdx',
+    '../src/stories/**/*.stories.@(js|jsx|ts|tsx)'
   ],
 
   addons: [

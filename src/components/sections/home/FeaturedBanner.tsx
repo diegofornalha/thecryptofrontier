@@ -44,7 +44,7 @@ export default function FeaturedBanner({
   adConfig = {
     title: 'Sinais Cripto Expert',
     subtitle: 'Lucre de R$ 500,00 a R$ 5.000 em média por dia no criptomercado, sem precisar olhar gráficos, notícias, nem fazer cursos enormes.',
-    link: 'https://eternityscale.com.br/sce-fb'
+    link: 'https://eternityscale.com.br/sce'
   }
 }: FeaturedBannerProps) {
   const [featuredPost, setFeaturedPost] = React.useState<FeaturedPost | null>(null);

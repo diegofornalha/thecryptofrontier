@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import FeaturedBanner from '@/components/sections/home/FeaturedBanner';
 
 const meta = {
-  title: 'Components/FeaturedBanner',
+  title: 'Sections/Home/FeaturedBanner',
   component: FeaturedBanner,
   parameters: {
     layout: 'fullscreen',
@@ -34,7 +34,7 @@ export const ModoPublicitario: Story = {
     adConfig: {
       title: 'Sinais Cripto Expert',
       subtitle: 'Lucre de R$ 500,00 a R$ 5.000 em média por dia no criptomercado, sem precisar olhar gráficos, notícias, nem fazer cursos enormes.',
-      link: 'https://eternityscale.com.br/sce-fb',
+      link: 'https://eternityscale.com.br/sce',
     },
   },
   parameters: {

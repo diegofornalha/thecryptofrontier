@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import CryptoNewsCard from '@/components/sections/CryptoNewsCard';
 
 const meta = {
-  title: 'Components/CryptoNewsCard',
+  title: 'Sections/CryptoNewsCard',
   component: CryptoNewsCard,
   parameters: {
     layout: 'padded',

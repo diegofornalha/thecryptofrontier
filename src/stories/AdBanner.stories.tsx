@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import AdBanner from '@/components/sections/home/AdBanner';
 
 const meta = {
-  title: 'Components/AdBanner',
+  title: 'Sections/Home/AdBanner',
   component: AdBanner,
   parameters: {
     layout: 'padded',
@@ -44,7 +44,7 @@ export const Default: Story = {
   args: {
     title: 'Sinais Cripto Expert',
     subtitle: 'Lucre de R$ 500,00 a R$ 5.000 em média por dia no criptomercado, sem precisar olhar gráficos, notícias, nem fazer cursos enormes.',
-    link: 'https://eternityscale.com.br/sce-fb',
+    link: 'https://eternityscale.com.br/sce',
     targetBlank: true,
     showBitcoinAnimation: true,
   },

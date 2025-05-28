@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import NewsHeader from '@/components/sections/NewsHeader';
 
 const meta = {
-  title: 'Components/NewsHeader',
+  title: 'Sections/NewsHeader',
   component: NewsHeader,
   parameters: {
     layout: 'fullscreen',

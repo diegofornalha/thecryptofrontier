@@ -6,7 +6,6 @@ import CryptoNewsCard from '@/components/sections/CryptoNewsCard';
 import { 
   PopularPostsWidget, 
   CategoriesWidget, 
-  NewsletterWidget,
   TagsWidget 
 } from '@/components/widgets';
 import { Metadata } from 'next';
@@ -124,9 +123,6 @@ export default async function CategoryPage({ params }: PageProps) {
       </div>
       <div className="mt-8">
         <TagsWidget />
-      </div>
-      <div className="mt-8">
-        <NewsletterWidget />
       </div>
     </>
   );

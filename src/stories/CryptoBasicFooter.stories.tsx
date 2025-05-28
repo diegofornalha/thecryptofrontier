@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import CryptoBasicFooter from '@/components/sections/CryptoBasicFooter';
 
 const meta = {
-  title: 'Components/CryptoBasicFooter',
+  title: 'Sections/CryptoBasicFooter',
   component: CryptoBasicFooter,
   parameters: {
     layout: 'fullscreen',
