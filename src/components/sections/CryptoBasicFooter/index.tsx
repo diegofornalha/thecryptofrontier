@@ -147,28 +147,6 @@ export default function CryptoBasicFooter() {
           ))}
         </div>
 
-        {/* Newsletter Section */}
-        <div className="mt-12 pt-8 border-t border-gray-800">
-          <div className="max-w-md mx-auto text-center lg:text-left lg:mx-0">
-            <h4 className="text-white font-bold mb-2">Newsletter</h4>
-            <p className="text-gray-400 text-sm mb-4">
-              Receba as últimas notícias do mundo cripto diretamente no seu e-mail.
-            </p>
-            <form className="flex flex-col sm:flex-row gap-2">
-              <input
-                type="email"
-                placeholder="Seu e-mail"
-                className="flex-1 px-4 py-2 bg-[#222] border border-gray-700 rounded text-white placeholder-gray-500 focus:outline-none focus:border-[#4db2ec] transition-colors"
-              />
-              <button
-                type="submit"
-                className="px-6 py-2 bg-[#4db2ec] hover:bg-[#3a8fc7] text-white font-semibold rounded transition-colors duration-200"
-              >
-                Inscrever
-              </button>
-            </form>
-          </div>
-        </div>
       </div>
 
       {/* Bottom Bar */}

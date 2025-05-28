@@ -28,7 +28,7 @@ const POSTS_PER_PAGE = 12;
 interface Post {
   _id: string;
   title: string;
-  slug: { current: string };
+  slug: string;
   mainImage?: {
     alt?: string;
     asset?: {
@@ -45,7 +45,7 @@ interface Post {
   categories?: Array<{
     _id: string;
     title: string;
-    slug: { current: string };
+    slug: string;
   }>;
   tags?: Array<{
     _id: string;
@@ -158,7 +158,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
                   <CryptoNewsCard
                     key={post._id}
                     title={post.title}
-                    slug={post.slug.current}
+                    slug={post.slug}
                     excerpt={post.excerpt}
                     coverImage={post.mainImage}
                     author={{
@@ -168,7 +168,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
                     publishedAt={post.publishedAt}
                     category={post.categories?.[0] ? {
                       title: post.categories[0].title,
-                      slug: post.categories[0].slug.current
+                      slug: post.categories[0].slug
                     } : undefined}
                     readTime={post.estimatedReadingTime}
                   />

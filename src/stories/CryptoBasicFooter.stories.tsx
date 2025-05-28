@@ -8,7 +8,7 @@ const meta = {
     layout: 'fullscreen',
     docs: {
       description: {
-        component: 'Footer inspirado no design do The Crypto Basic. Inclui links organizados por categorias, redes sociais, newsletter e informações de copyright.',
+        component: 'Footer inspirado no design do The Crypto Basic. Inclui links organizados por categorias, redes sociais e informações de copyright.',
       },
     },
   },
