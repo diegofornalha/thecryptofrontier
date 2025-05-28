@@ -13,7 +13,6 @@ export default defineType({
       title: 'Texto Alternativo',
       type: 'string',
       description: 'Importante para SEO e acessibilidade.',
-      validation: Rule => Rule.required(),
     }),
     defineField({
       name: 'caption',

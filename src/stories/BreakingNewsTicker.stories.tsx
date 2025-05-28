@@ -1,86 +1,135 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import BreakingNewsTicker from '../components/sections/home/BreakingNewsTicker';
+import BreakingNewsTicker from '@/components/sections/home/BreakingNewsTicker';
 
-const meta: Meta<typeof BreakingNewsTicker> = {
-  title: 'Components/Home/BreakingNewsTicker',
+const meta = {
+  title: 'Sections/Home/BreakingNewsTicker',
   component: BreakingNewsTicker,
   parameters: {
     layout: 'fullscreen',
+    docs: {
+      description: {
+        component: 'Ticker de últimas notícias com rotação automática. Exibe as últimas publicações do blog com navegação manual e links para os posts.',
+      },
+    },
   },
   tags: ['autodocs'],
-};
+  argTypes: {
+    news: {
+      control: 'object',
+      description: 'Array de notícias para exibir. Se não fornecido, busca do Sanity CMS.',
+    },
+  },
+} satisfies Meta<typeof BreakingNewsTicker>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Story com dados mockados
+const mockNews = [
+  { title: "Bitcoin atinge nova máxima histórica de $75.000", slug: "bitcoin-nova-maxima-75000" },
+  { title: "Ethereum 2.0: Tudo que você precisa saber sobre a atualização", slug: "ethereum-2-0-atualizacao" },
+  { title: "SEC aprova primeiro ETF de Bitcoin spot nos EUA", slug: "sec-aprova-etf-bitcoin-spot" },
+  { title: "Solana supera Cardano em capitalização de mercado", slug: "solana-supera-cardano" },
+  { title: "MicroStrategy compra mais 3.000 bitcoins", slug: "microstrategy-compra-bitcoins" },
+];
+
 export const Default: Story = {
   args: {
-    news: [
-      { title: "Bitcoin atinge nova máxima histórica de $75.000 em meio a aprovação de ETF", slug: "bitcoin-75k" },
-      { title: "Ethereum ultrapassa $4.000 após atualização Dencun ser confirmada", slug: "eth-4k" },
-      { title: "SEC aprova primeiro ETF de Bitcoin spot nos Estados Unidos", slug: "sec-etf" },
-      { title: "MicroStrategy compra mais 10.000 BTC aumentando reservas para 189.000", slug: "microstrategy-btc" },
-      { title: "Binance anuncia nova parceria com governo de Dubai para hub cripto", slug: "binance-dubai" }
-    ]
+    news: mockNews,
   },
 };
 
-// Story com apenas uma notícia
-export const SingleNews: Story = {
-  args: {
-    news: [{ title: "Breaking: Bitcoin ultrapassa marca histórica de $100.000", slug: "bitcoin-100k" }]
-  },
-};
-
-// Story com notícias em português
-export const PortugueseNews: Story = {
+export const ComUmaNoticia: Story = {
   args: {
     news: [
-      { title: "Bitcoin atinge nova máxima histórica: O que esperar do mercado cripto", slug: "bitcoin-maxima" },
-      { title: "Banco Central do Brasil anuncia novas regras para criptomoedas", slug: "bcb-regras" },
-      { title: "Ethereum se prepara para próxima grande atualização", slug: "eth-update" },
-      { title: "Analistas preveem alta volatilidade nos próximos dias", slug: "volatilidade" },
-      { title: "DeFi ultrapassa $100 bilhões em valor total bloqueado", slug: "defi-100b" }
-    ]
+      { title: "Notícia única sem rotação automática", slug: "noticia-unica" }
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Quando há apenas uma notícia, os botões de navegação ficam desabilitados.',
+      },
+    },
   },
 };
 
-// Story sem props (usa dados do Sanity)
-export const LiveData: Story = {
+export const SemSlug: Story = {
+  args: {
+    news: [
+      { title: "Notícia sem link - apenas texto informativo" },
+      { title: "Outra notícia sem link de redirecionamento" },
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Notícias sem slug não são clicáveis, apenas exibem o texto.',
+      },
+    },
+  },
+};
+
+export const BuscandoDados: Story = {
   args: {},
-};
-
-// Story com notícias longas
-export const LongNews: Story = {
-  args: {
-    news: [
-      { title: "URGENTE: Federal Reserve mantém taxas de juros inalteradas, mercado de criptomoedas reage positivamente com Bitcoin subindo 5% nas últimas 24 horas", slug: "fed-taxas" },
-      { title: "Vitalik Buterin anuncia roadmap completo para Ethereum 3.0: Sharding, zkEVM e outras inovações prometem revolucionar a rede", slug: "eth-3" },
-      { title: "Relatório da JPMorgan indica que investidores institucionais estão aumentando exposição a Bitcoin como proteção contra inflação", slug: "jpmorgan-btc" }
-    ]
+  parameters: {
+    docs: {
+      description: {
+        story: 'Quando não há propriedade news, o componente busca automaticamente do Sanity CMS.',
+      },
+    },
   },
 };
 
-// Story com visualização mobile
-export const MobileView: Story = {
+export const TitulosLongos: Story = {
   args: {
     news: [
-      { title: "Bitcoin ultrapassa $50,000", slug: "bitcoin-50k" },
-      { title: "Ethereum 2.0 lançado com sucesso", slug: "eth-2" },
-      { title: "Solana atinge novo recorde de velocidade", slug: "solana-speed" }
-    ]
+      { 
+        title: "Análise completa: Como as novas regulamentações europeias podem impactar o mercado de criptomoedas nos próximos anos", 
+        slug: "analise-regulamentacoes-europeias" 
+      },
+      { 
+        title: "Guia definitivo para iniciantes: Entendendo blockchain, criptomoedas e o futuro das finanças descentralizadas", 
+        slug: "guia-iniciantes-blockchain" 
+      },
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Títulos longos são truncados com ellipsis devido ao whitespace-nowrap.',
+      },
+    },
+  },
+};
+
+export const Mobile: Story = {
+  args: {
+    news: mockNews,
   },
   parameters: {
     viewport: {
       defaultViewport: 'mobile1',
     },
+    docs: {
+      description: {
+        story: 'Visualização mobile do ticker de notícias.',
+      },
+    },
   },
-  decorators: [
-    (Story) => (
-      <div className="max-w-sm mx-auto">
-        <Story />
-      </div>
-    ),
-  ],
+};
+
+export const Tablet: Story = {
+  args: {
+    news: mockNews,
+  },
+  parameters: {
+    viewport: {
+      defaultViewport: 'tablet',
+    },
+    docs: {
+      description: {
+        story: 'Visualização tablet do ticker de notícias.',
+      },
+    },
+  },
 };

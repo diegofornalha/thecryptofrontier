@@ -160,7 +160,7 @@ def create_publishing_task(agent):
     
     return Task(
         description="""
-        Usando a lista de nomes de arquivos JSON formatados fornecida pela tarefa anterior (localizados na pasta 'posts_formatados'),
+        Usando a lista de nomes de arquivos JSON com imagens fornecida pela tarefa anterior (localizados na pasta 'posts_com_imagem'),
         processe cada arquivo da lista.
 
         Para cada arquivo na lista fornecida:

@@ -20,7 +20,8 @@ O sistema utiliza agentes autônomos do CrewAI para executar diferentes etapas d
 1. **Monitor de Feeds RSS** - Monitora fontes de notícias e seleciona artigos relevantes
 2. **Tradutor de Conteúdo** - Traduz os artigos para português brasileiro
 3. **Formatador de Conteúdo** - Formata os artigos para o schema do Sanity CMS
-4. **Publicador de Conteúdo** - Publica os artigos no Sanity CMS
+4. **Gerador de Imagens** - Gera imagens profissionais com DALL-E 3 *(NOVO)*
+5. **Publicador de Conteúdo** - Publica os artigos com imagens no Sanity CMS
 
 Todos os dados são validados usando modelos Pydantic para garantir compatibilidade completa com o Sanity CMS.
 
@@ -31,6 +32,7 @@ blog_crew/
 ├── README.md               # Documentação principal
 ├── agents/                 # Definição dos agentes CrewAI
 │   ├── formatter_agent.py  # Agente formatador
+│   ├── image_generator_agent.py # Agente gerador de imagens *(NOVO)*
 │   ├── monitor_agent.py    # Agente monitor
 │   ├── publisher_agent.py  # Agente publicador
 │   └── translator_agent.py # Agente tradutor
@@ -98,8 +100,20 @@ export SANITY_DATASET=production
 
 ## Configuração
 
-1. Edite o arquivo `feeds.json` para adicionar ou remover fontes de conteúdo
-2. Ajuste as configurações em `config/settings.yaml` de acordo com suas necessidades
+1. **Variáveis de Ambiente**: Copie `.env.example` para `.env` e configure:
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Preencha as seguintes variáveis:
+   - `OPENAI_API_KEY` - Para geração de imagens com DALL-E 3
+   - `SANITY_PROJECT_ID` - ID do seu projeto Sanity
+   - `SANITY_API_TOKEN` - Token com permissão de escrita
+   - `GOOGLE_API_KEY` - Para os agentes CrewAI
+
+2. **Feeds RSS**: Edite o arquivo `feeds.json` para adicionar ou remover fontes de conteúdo
+
+3. **Configurações**: Ajuste as configurações em `config/settings.yaml` de acordo com suas necessidades
 
 ## Uso
 
@@ -130,6 +144,25 @@ Para publicar um post manualmente:
 ```bash
 python publish_single.py caminho/para/arquivo.json
 ```
+
+## Geração de Imagens com DALL-E 3
+
+O sistema agora inclui geração automática de imagens profissionais para cada artigo:
+
+### Características:
+- **Detecção Automática**: Identifica criptomoedas mencionadas no texto
+- **Identidade Visual Consistente**: 
+  - Fundo preto com grid azul sutil
+  - Logos 3D volumétricos
+  - Ondas de energia cyan
+  - Resolução 1792x1024 (16:9)
+- **Alt Text para SEO**: Gerado automaticamente
+- **Fallback Inteligente**: Se a geração falhar, o artigo é publicado sem imagem
+
+### Criptomoedas Suportadas:
+Bitcoin, Ethereum, XRP, BNB, Dogecoin, Solana, Chainlink, Shiba Inu, Sui, USDT, Tron, Pepe, Kraken, Airdrop, MasterCard
+
+Para mais detalhes sobre a integração DALL-E, consulte [INTEGRACAO_DALLE.md](./INTEGRACAO_DALLE.md).
 
 ## Modelos Pydantic
 

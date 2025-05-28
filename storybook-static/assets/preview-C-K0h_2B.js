@@ -1,1 +1,0 @@
-import{R as r}from"./index-D4H_InIO.js";try{require("../src/css/main.css")}catch{console.warn("CSS não encontrado, continuando sem ele...")}const t={parameters:{controls:{matchers:{color:/(background|color)$/i,date:/Date$/}}},decorators:[e=>r.createElement("div",{style:{margin:"2em"}},r.createElement(e,null))]};export{t as default};

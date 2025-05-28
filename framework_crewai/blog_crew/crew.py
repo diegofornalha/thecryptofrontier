@@ -9,13 +9,14 @@ import logging
 from crewai import Crew, Process
 
 # Importações locais
-from agents import MonitorAgent, TranslatorAgent, FormatterAgent, PublisherAgent
+from agents import MonitorAgent, TranslatorAgent, FormatterAgent, PublisherAgent, ImageGeneratorAgent
 from tools import tools
 from tasks import (
     create_monitoring_task,
     create_translation_task, 
     create_formatting_task,
-    create_publishing_task
+    create_publishing_task,
+    create_image_generation_task
 )
 from config import config
 
@@ -43,6 +44,7 @@ def get_crew():
     monitor = MonitorAgent.create(tools)
     translator = TranslatorAgent.create(tools)
     formatter = FormatterAgent.create(tools)
+    image_generator = ImageGeneratorAgent.create(tools)
     publisher = PublisherAgent.create(tools)
     
     # Criar tarefas
@@ -51,13 +53,14 @@ def get_crew():
         create_monitoring_task(monitor),
         create_translation_task(translator),
         create_formatting_task(formatter),
+        create_image_generation_task(image_generator),
         create_publishing_task(publisher)
     ]
     
     # Criar a crew
     logger.info("Montando a equipe de agentes...")
     return Crew(
-        agents=[monitor, translator, formatter, publisher],
+        agents=[monitor, translator, formatter, image_generator, publisher],
         tasks=tasks,
         verbose=config['process']['verbose'],
         process=Process.sequential if config['process']['type'] == 'sequential' else Process.hierarchical

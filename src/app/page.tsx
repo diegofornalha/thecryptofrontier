@@ -1,52 +1,56 @@
 import NewsHeader from '@/components/sections/NewsHeader';
 import Home from '@/components/sections/home/Home';
-import ModernFooter from '@/components/sections/ModernFooter';
+import CryptoBasicFooter from '@/components/sections/CryptoBasicFooter';
+import { Metadata } from 'next';
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'The Crypto Frontier - Últimas Notícias sobre Criptomoedas',
-  description: 'Fique por dentro das últimas notícias sobre criptomoedas, análises de mercado e insights do mundo da tecnologia blockchain.',
+  description: 'Fique por dentro das últimas notícias sobre criptomoedas, Bitcoin, Ethereum, análises de mercado e insights do mundo da tecnologia blockchain.',
+  keywords: 'criptomoedas, bitcoin, ethereum, blockchain, crypto news, notícias cripto, análise de mercado, DeFi, NFT, Web3',
+  authors: [{ name: 'The Crypto Frontier' }],
+  openGraph: {
+    title: 'The Crypto Frontier - Últimas Notícias sobre Criptomoedas',
+    description: 'Fique por dentro das últimas notícias sobre criptomoedas, análises de mercado e insights do mundo da tecnologia blockchain.',
+    type: 'website',
+    locale: 'pt_BR',
+    siteName: 'The Crypto Frontier',
+    images: [{
+      url: '/og-image.jpg',
+      width: 1200,
+      height: 630,
+      alt: 'The Crypto Frontier',
+    }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'The Crypto Frontier - Últimas Notícias sobre Criptomoedas',
+    description: 'Fique por dentro das últimas notícias sobre criptomoedas e blockchain.',
+    images: ['/og-image.jpg'],
+  },
+  alternates: {
+    canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://thecryptofrontier.com',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
 
 export default function IndexPage() {
-  const navLinks = [
-    { label: "Início", url: "/" },
-    { label: "Buscar", url: "/buscas" },
-    { label: "Blog", url: "/blog" },
-    { label: "Studio", url: "/studio" }
-  ];
-
   return (
     <>
       <NewsHeader />
       <div className="pt-[70px]">
         <Home />
       </div>
-      <ModernFooter 
-        title="The Crypto Frontier"
-        description="Seu portal de conteúdo sobre criptomoedas e blockchain"
-        socialLinks={[
-          { label: 'Twitter', icon: 'twitter', url: 'https://twitter.com/' },
-          { label: 'Facebook', icon: 'facebook', url: 'https://facebook.com/' },
-          { label: 'Instagram', icon: 'instagram', url: 'https://instagram.com/' }
-        ]}
-        primaryLinks={{
-          title: "Navegação",
-          links: navLinks
-        }}
-        secondaryLinks={{
-          title: "Recursos",
-          links: [
-            { label: "Buscar", url: "/buscas" },
-            { label: "Artigos", url: "/blog" },
-            { label: "Tutoriais", url: "/blog" }
-          ]
-        }}
-        legalLinks={[
-          { label: "Termos de Uso", url: "#" },
-          { label: "Política de Privacidade", url: "#" }
-        ]}
-        copyrightText={`© ${new Date().getFullYear()} The Crypto Frontier. Todos os direitos reservados.`}
-      />
+      <CryptoBasicFooter />
     </>
   );
 }

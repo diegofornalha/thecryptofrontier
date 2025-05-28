@@ -41,8 +41,12 @@ POSTS_FORMATADOS_DIR.mkdir(exist_ok=True)
 POSTS_PUBLICADOS_DIR.mkdir(exist_ok=True)
 
 # Função para obter artigos já publicados no Sanity
-def obter_artigos_publicados():
-    """Obtém lista de títulos de artigos já publicados no Sanity"""
+def obter_artigos_publicados(limite=10):
+    """Obtém lista de títulos dos últimos artigos publicados no Sanity
+    
+    Args:
+        limite: Número de artigos recentes a verificar (padrão: 10)
+    """
     try:
         # Obter token do Sanity
         sanity_token = os.environ.get("SANITY_API_TOKEN")
@@ -55,8 +59,9 @@ def obter_artigos_publicados():
         dataset = "production"
         api_version = "2023-05-03"
         
-        # Query para obter apenas títulos dos posts
-        query = '*[_type == "post"]{ title }'
+        # Query otimizada: buscar posts dos últimos 7 dias, limitado aos N mais recentes
+        # Isso garante que mesmo com muitos posts, só verificamos os mais relevantes
+        query = f'*[_type == "post" && publishedAt > now() - 86400*7] | order(publishedAt desc)[0...{limite}]{{ title }}'
         encoded_query = quote(query)
         
         # URL da API do Sanity
@@ -79,7 +84,7 @@ def obter_artigos_publicados():
             if doc.get("title"):
                 published_titles.add(doc["title"].lower())
         
-        logger.info(f"Encontrados {len(published_titles)} artigos já publicados no Sanity")
+        logger.info(f"Verificados últimos {len(published_titles)} artigos publicados no Sanity")
         return published_titles
         
     except Exception as e:

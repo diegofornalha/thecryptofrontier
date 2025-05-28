@@ -46,7 +46,7 @@
       window.FRAMEWORK_OPTIONS = {};
       window.CHANNEL_OPTIONS = {};
       window.FEATURES = {"argTypeTargetsV7":true,"legacyDecoratorFileOrder":false,"disallowImplicitActionsInRenderV8":true};
-      window.STORIES = [{"titlePrefix":"","directory":"./src","files":"**/*.mdx","importPathMatcher":"^\\.[\\\\/](?:src(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)\\/|\\/|$)(?!\\.)(?=.)[^/]*?\\.mdx)$"},{"titlePrefix":"","directory":"./src","files":"**/*.stories.@(js|jsx|mjs|ts|tsx)","importPathMatcher":"^\\.[\\\\/](?:src(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)\\/|\\/|$)(?!\\.)(?=.)[^/]*?\\.stories\\.(js|jsx|mjs|ts|tsx))$"}];
+      window.STORIES = [{"titlePrefix":"","directory":"./src/stories/design-system","files":"migracao.mdx","importPathMatcher":"^\\.[\\\\/](?:src\\/stories\\/design-system\\/migracao\\.mdx)$"},{"titlePrefix":"","directory":"./src/stories","files":"*Migration.stories.@(js|jsx|ts|tsx)","importPathMatcher":"^\\.[\\\\/](?:src\\/stories\\/(?!\\.)(?=.)[^/]*?Migration\\.stories\\.(js|jsx|ts|tsx))$"}];
       window.DOCS_OPTIONS = {"defaultName":"Docs","autodocs":true};
       window.TAGS_OPTIONS = {"dev-only":{"excludeFromDocsStories":true},"docs-only":{"excludeFromSidebar":true},"test-only":{"excludeFromSidebar":true,"excludeFromDocsStories":true}};
 
@@ -508,23 +508,8 @@
     console.warn('unable to connect to top frame for connecting dev tools');
   }
 </script>
-<script>
-  // Mock do objeto process para Next.js
-  window.process = {
-    env: {
-      NODE_ENV: 'development',
-      __NEXT_IMAGE_OPTS: {
-        deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-        imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-        domains: [],
-        path: '/',
-        loader: 'default',
-      }
-    },
-    browser: true,
-  };
-</script> 
-    <script type="module" crossorigin src="./assets/iframe-CdqFSCl8.js"></script>
+
+    <script type="module" crossorigin src="./assets/iframe-CI3gRPmt.js"></script>
   </head>
 
   <body>

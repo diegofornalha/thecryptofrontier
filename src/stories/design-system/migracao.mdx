@@ -1,1 +1,132 @@
-# Plano de Migração para shadcn/UI
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Design System/Migração" />
+
+# Plano de Migração para The Crypto Basic Design
+
+Este documento descreve o plano de migração do design atual para o padrão The Crypto Basic.
+
+## 🎯 Objetivo
+
+Transformar o The Crypto Frontier em uma plataforma visualmente idêntica ao The Crypto Basic, mantendo nossa identidade de marca.
+
+## ✅ Componentes Migrados
+
+### 1. Header e Navegação
+- **NewsHeader** - Header principal com logo azul e menu responsivo
+- **BreakingNewsTicker** - Ticker de notícias animado
+- Menu grid com categorias organizadas
+
+### 2. Componentes de Conteúdo
+- **CryptoNewsCard** - Cards de notícias com design limpo
+- **Pagination** - Paginação idêntica ao The Crypto Basic
+- **LatestNews** - Lista de últimas notícias (corrigido para mostrar posts mais recentes)
+
+### 3. Widgets da Sidebar
+- **PopularPostsWidget** - Posts populares sem imagens
+- **CategoriesWidget** - Categorias com contagem
+- **TagsWidget** - Tags populares
+
+### 4. Componentes de Post
+- **AuthorCard** - Informações do autor
+- **SocialShare** - Botões de compartilhamento
+- **PostTags** - Tags do post
+- Estilo de primeiro parágrafo em negrito (19px, font-weight: 600)
+
+### 5. Layout e Estrutura
+- **CryptoBasicFooter** - Footer completo
+- Breadcrumbs em todas as páginas
+- Grid de 8/4 colunas para conteúdo/sidebar
+
+## 🎨 Padrões de Design Implementados
+
+### Cores
+- **Azul Principal**: #4db2ec
+- **Texto Principal**: #111111
+- **Texto Secundário**: #666666
+- **Backgrounds**: #f9fafb
+- **Bordas**: #e5e7eb
+
+### Tipografia
+- **Títulos**: Roboto Slab (weight: 800)
+- **Corpo**: Open Sans
+- **Tamanhos responsivos**
+- **Espaçamento consistente**
+
+### Interações
+- Hover states em links (azul)
+- Transições suaves
+- Estados disabled apropriados
+
+## 📋 Checklist de Migração
+
+### ✅ Concluído
+- [x] Header responsivo com logo azul
+- [x] Breaking News ticker
+- [x] Layout de blog com paginação
+- [x] Página de busca limpa
+- [x] Widgets da sidebar
+- [x] Componentes de post
+- [x] Footer padronizado
+- [x] Correção de Latest News (ordenação por publishedAt)
+- [x] Organização no Storybook
+
+### 🚧 Pendente
+- [ ] Implementar sistema de comentários (quando necessário)
+- [ ] Adicionar mais animações e transições
+- [ ] Otimizar performance de imagens
+- [ ] Testes visuais com Chromatic
+
+## 🔧 Componentes Removidos/Substituídos
+
+1. **Headers antigos** - Consolidado em NewsHeader
+3. **Estilos dark mode** - Forçado light theme apenas
+
+## 📦 Estrutura de Arquivos
+
+```
+src/
+├── components/
+│   ├── sections/
+│   │   ├── NewsHeader/
+│   │   ├── CryptoBasicFooter/
+│   │   ├── CryptoNewsCard/
+│   │   └── home/
+│   │       ├── BreakingNewsTicker.tsx
+│   │       ├── LatestNews.tsx
+│   │       └── ...
+│   ├── widgets/
+│   │   ├── PopularPostsWidget.tsx
+│   │   ├── CategoriesWidget.tsx
+│   │   └── TagsWidget.tsx
+│   ├── ui/
+│   │   ├── pagination.tsx
+│   │   └── ...
+│   └── ...
+├── stories/
+│   ├── Introduction.mdx
+│   ├── ComponentOverview.mdx
+│   └── [Component].stories.tsx
+└── app/
+    ├── blog/
+    ├── post/
+    └── buscas/
+```
+
+## 🚀 Próximos Passos
+
+1. **Testes de Acessibilidade** - Garantir WCAG compliance
+2. **Otimização de Performance** - Lazy loading, code splitting
+3. **SEO Avançado** - Schema markup, meta tags dinâmicas
+4. **Analytics** - Implementar tracking de eventos
+
+## 📝 Notas Importantes
+
+- Manter sempre o padrão visual do The Crypto Basic
+- Priorizar performance e experiência do usuário
+- Documentar todas as mudanças no Storybook
+- Testar em múltiplos dispositivos e navegadores
+
+---
+
+*Última atualização: 27 de Maio de 2025*

@@ -15,18 +15,25 @@ services:
       - NEXT_PUBLIC_SANITY_DATASET=production
       - NEXT_PUBLIC_SANITY_API_VERSION=2023-05-03
       - TZ=America/Sao_Paulo
-      # Adicione aqui outras variáveis de ambiente necessárias
-      # - SANITY_API_TOKEN=${SANITY_API_TOKEN}
-      # - NEXT_PUBLIC_ALGOLIA_APP_ID=${NEXT_PUBLIC_ALGOLIA_APP_ID}
-      # - NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY=${NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY}
-    restart: unless-stopped
+      # Algolia
+      - NEXT_PUBLIC_ALGOLIA_APP_ID=42TZWHW8UP
+      - NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY=b32edbeb383fc3d1279658e7c3661843
+      - NEXT_PUBLIC_ALGOLIA_INDEX_NAME=development_mcpx_content
+    restart: always
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3200"]
+      test: ["CMD", "node", "healthcheck.js"]
       interval: 30s
-      timeout: 10s
-      retries: 3
+      timeout: 15s
+      retries: 5
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
 
 networks:
   app-network:
