@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  # Frontend Next.js - Produção
+  thecryptofrontier:
+    build:
+      context: .
+      dockerfile: Dockerfile.nextjs
+      args:
+        - NODE_ENV=production
+    image: thecryptofrontier:latest
+    container_name: thecryptofrontier-prod
+    ports:
+      - "3200:3200"
+    environment:
+      # Next.js
+      - NODE_ENV=production
+      - NODE_OPTIONS=--max-old-space-size=2048
+      
+      # Sanity
+      - NEXT_PUBLIC_SANITY_PROJECT_ID=xyx45wfp
+      - NEXT_PUBLIC_SANITY_DATASET=production
+      - NEXT_PUBLIC_SANITY_API_VERSION=2023-05-03
+      - SANITY_API_TOKEN=${SANITY_API_TOKEN}
+      
+      # Algolia
+      - NEXT_PUBLIC_ALGOLIA_APP_ID=42TZWHW8UP
+      - NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY=b32edbeb383fc3d1279658e7c3661843
+      - NEXT_PUBLIC_ALGOLIA_INDEX_NAME=crypto_frontier_production
+      - ALGOLIA_ADMIN_API_KEY=${ALGOLIA_ADMIN_API_KEY}
+      
+      # Analytics
+      - NEXT_PUBLIC_GA_MEASUREMENT_ID=${GA_MEASUREMENT_ID}
+      
+      # Timezone
+      - TZ=America/Sao_Paulo
+    
+    restart: always
+    
+    networks:
+      - crypto-network
+    
+    # Healthcheck mais robusto
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3200/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 45s
+    
+    # Recursos otimizados para produção
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 3G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+    
+    # Logs
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+    
+    # Volumes para persistência
+    volumes:
+      - nextjs-cache:/app/.next/cache
+      - public-files:/app/public
+
+  # Nginx Reverse Proxy (opcional - se não estiver usando Caddy)
+  nginx:
+    image: nginx:alpine
+    container_name: crypto-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - nginx-cache:/var/cache/nginx
+    depends_on:
+      - thecryptofrontier
+    networks:
+      - crypto-network
+    restart: always
+
+networks:
+  crypto-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  nextjs-cache:
+    driver: local
+  public-files:
+    driver: local
+  nginx-cache:
+    driver: local

@@ -286,7 +286,16 @@ def upload_image_to_sanity(image_path: str, alt_text: str) -> dict:
         
         # Fazer upload
         with open(image_path, 'rb') as f:
-            files = {'file': (Path(image_path).name, f, 'image/png')}
+            # Detectar tipo de arquivo
+            filename = Path(image_path).name
+            if filename.lower().endswith('.png'):
+                content_type = 'image/png'
+            elif filename.lower().endswith('.jpg') or filename.lower().endswith('.jpeg'):
+                content_type = 'image/jpeg'
+            else:
+                content_type = 'application/octet-stream'
+            
+            files = {'file': (filename, f, content_type)}
             
             logger.info("Fazendo upload da imagem para Sanity...")
             logger.info(f"URL: {upload_url}")
