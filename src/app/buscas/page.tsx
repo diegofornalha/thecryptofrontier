@@ -5,8 +5,7 @@ import dynamic from 'next/dynamic';
 import NewsHeader from '@/components/sections/NewsHeader';
 import CryptoBasicFooter from '@/components/sections/CryptoBasicFooter';
 import BreakingNewsTicker from '@/components/sections/home/BreakingNewsTicker';
-import CategoriesWidget from '@/components/widgets/CategoriesWidget';
-import TagsWidget from '@/components/widgets/TagsWidget';
+import PopularPostsWidget from '@/components/widgets/PopularPostsWidget';
 
 // Importação dinâmica do SearchComponent para evitar erros de SSR
 const CryptoSearchComponent = dynamic(
@@ -69,10 +68,11 @@ export default function BuscasPage() {
             </div>
           </div>
 
-          {/* Sidebar (4 cols) */}
-          <aside className="lg:col-span-4 space-y-8">
-            <CategoriesWidget />
-            <TagsWidget />
+          {/* Sidebar sticky */}
+          <aside className="lg:col-span-4 hidden lg:block">
+            <div className="sticky top-24 space-y-8">
+              <PopularPostsWidget />
+            </div>
           </aside>
         </div>
       </main>

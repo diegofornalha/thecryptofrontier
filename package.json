@@ -11,7 +11,7 @@
     "start:alt": "next start -p 3300",
     "index-content": "node scripts/indexar-conteudo.js",
     "migrate-to-sanity": "node scripts/migrate-to-sanity.js",
-    "sanity-alt": "node sanity-workaround.js",
+    "sanity-alt": "node scripts/patches/sanity-workaround.js",
     "sanity-deploy": "npx sanity deploy",
     "sanity-to-algolia": "node scripts/indexar-sanity-para-algolia.js",
     "test": "jest",

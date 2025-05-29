@@ -44,7 +44,7 @@ export const Default: Story = {
   args: {
     title: 'Sinais Cripto Expert',
     subtitle: 'Lucre de R$ 500,00 a R$ 5.000 em média por dia no criptomercado, sem precisar olhar gráficos, notícias, nem fazer cursos enormes.',
-    link: 'https://eternityscale.com.br/sce',
+    link: 'https://eternityscale.com.br/sce-blog/',
     targetBlank: true,
     showBitcoinAnimation: true,
   },
