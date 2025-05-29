@@ -36,7 +36,7 @@ export const Default: Story = {
           children: [
             {
               _type: 'span',
-              text: 'Trader e investidor profissional, com mais de 5 anos de experiência no mercado financeiro, especializado em criptomoedas. Ele é o criador de treinamentos como "Trader Crypto Expert", que ensina desde iniciantes até investidores avançados a operar no mercado de criptoativos de forma segura e lucrativa.'
+              text: 'Trader e investidor profissional, com mais de 10 de experiência no mercado financeiro, especializado em criptomoedas. Ele é o criador de treinamentos como "Trader Crypto Expert", que ensina desde iniciantes até investidores avançados a operar no mercado de criptoativos de forma segura e lucrativa.'
             }
           ]
         }
@@ -59,7 +59,7 @@ export const WithImage: Story = {
           children: [
             {
               _type: 'span',
-              text: 'Trader e investidor profissional, com mais de 5 anos de experiência no mercado financeiro, especializado em criptomoedas. Ele é o criador de treinamentos como "Trader Crypto Expert", que ensina desde iniciantes até investidores avançados a operar no mercado de criptoativos de forma segura e lucrativa.'
+              text: 'Trader e investidor profissional, com mais de 10 anos de experiência no mercado financeiro, especializado em criptomoedas. Ele é o criador de treinamentos como "Trader Crypto Expert", que ensina desde iniciantes até investidores avançados a operar no mercado de criptoativos de forma segura e lucrativa.'
             }
           ]
         }
