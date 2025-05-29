@@ -4,9 +4,7 @@ import { notFound } from 'next/navigation';
 import ThreeColumnLayout from '@/components/layouts/ThreeColumnLayout';
 import CryptoNewsCard from '@/components/sections/CryptoNewsCard';
 import { 
-  PopularPostsWidget, 
-  CategoriesWidget, 
-  TagsWidget 
+  PopularPostsWidget
 } from '@/components/widgets';
 import { Metadata } from 'next';
 
@@ -118,12 +116,6 @@ export default async function CategoryPage({ params }: PageProps) {
   const sidebar = (
     <>
       <PopularPostsWidget />
-      <div className="mt-8">
-        <CategoriesWidget />
-      </div>
-      <div className="mt-8">
-        <TagsWidget />
-      </div>
     </>
   );
 
