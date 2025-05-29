@@ -8,7 +8,9 @@ from .sanity_tools import publish_to_sanity, publish_manual, verificar_e_criar_c
 from .formatter_tools import create_slug, format_content_for_sanity
 from .algolia_tools import index_to_algolia, search_algolia, delete_from_algolia
 from .dedupe_tools import check_for_duplicates
-from .image_generation_tools import generate_crypto_image, upload_image_to_sanity, generate_and_upload_image
+from .image_generation_tools import generate_crypto_image, upload_image_to_sanity
+from .image_generation_tools_fixed import generate_and_upload_image, process_all_formatted_posts
+from .list_files_tool import list_directory_files
 
 # Lista de tools decoradas (instâncias de BaseTool)
 tools = [
@@ -27,7 +29,9 @@ tools = [
     check_for_duplicates,
     generate_crypto_image,
     upload_image_to_sanity,
-    generate_and_upload_image
+    generate_and_upload_image,
+    process_all_formatted_posts,
+    list_directory_files
 ]
 
 def get_tool_by_name(name):
@@ -58,6 +62,8 @@ __all__ = [
     'generate_crypto_image',
     'upload_image_to_sanity',
     'generate_and_upload_image',
+    'process_all_formatted_posts',
+    'list_directory_files',
     'tools',
     'get_tool_by_name',
     'crewai_tool'
