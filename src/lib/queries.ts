@@ -16,7 +16,8 @@ const authorFields = `
   image,
   role,
   "slug": slug.current,
-  bio
+  bio,
+  social
 `;
 
 const categoryFields = `
@@ -31,10 +32,11 @@ const tagFields = `
   "slug": slug.current
 `;
 
-// Query para lista de posts com paginação
+// Query para lista de posts com paginação (inclui posts normais e do agente)
 export const POSTS_LIST_QUERY = `{
-  "posts": *[_type == "post"] | order(publishedAt desc) [$start...$end] {
+  "posts": *[_type in ["post", "agentPost"]] | order(publishedAt desc) [$start...$end] {
     ${postFields},
+    _type,
     "author": author->{
       name
     },
@@ -43,11 +45,11 @@ export const POSTS_LIST_QUERY = `{
     },
     "estimatedReadingTime": round(length(pt::text(content)) / 5 / 180)
   },
-  "total": count(*[_type == "post"])
+  "total": count(*[_type in ["post", "agentPost"]])
 }`;
 
-// Query para post único
-export const POST_QUERY = `*[_type == "post" && slug.current == $slug][0]{
+// Query para post único (busca em ambos os tipos)
+export const POST_QUERY = `*[_type in ["post", "agentPost"] && slug.current == $slug][0]{
   _id,
   title,
   slug,
