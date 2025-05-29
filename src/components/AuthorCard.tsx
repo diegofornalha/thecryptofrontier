@@ -64,82 +64,41 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, showBio = true }) => {
   return (
     <div className="my-16 max-w-[1200px] mx-auto">
       {/* Seção do Autor */}
-      <div className="flex flex-col lg:flex-row gap-12 mb-16">
+      <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 mb-16">
         {/* Coluna da esquerda - Author */}
-        <div className="lg:w-[200px] flex-shrink-0">
+        <div className="lg:w-[200px] flex-shrink-0 text-center lg:text-left">
           <h2 className="text-3xl font-bold mb-8 text-[#111]">Autor</h2>
-          {authorImage ? (
-            <Image
-              src={authorImage}
-              alt={authorName}
-              width={150}
-              height={150}
-              className="rounded-full object-cover shadow-lg"
-              style={{ border: '4px solid #f0f0f0' }}
-            />
-          ) : (
-            <div className="w-[150px] h-[150px] bg-gradient-to-br from-gray-300 to-gray-400 rounded-full flex items-center justify-center shadow-lg" style={{ border: '4px solid #f0f0f0' }}>
-              <span className="text-4xl font-bold text-white">
-                {authorName.charAt(0).toUpperCase()}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Coluna da direita - Bio */}
-        <div className="flex-1">
-          <div className="bg-[#f5f5f5] p-10 rounded-xl shadow-sm">
-            <h3 className="text-3xl font-bold mb-6 text-[#111]">
-              {author.slug ? (
-                <Link 
-                  href={`/autor/${author.slug.current}`}
-                  className="hover:text-[#4db2ec] transition-colors"
-                >
-                  {authorName}
-                </Link>
-              ) : (
-                authorName
-              )}
-            </h3>
-            
-            {showBio && author.bio && (
-              <div className="text-lg text-[#333] leading-relaxed">
-                <PortableText 
-                  value={author.bio}
-                  components={{
-                    block: {
-                      normal: ({ children }) => <p className="mb-4">{children}</p>,
-                    },
-                    marks: {
-                      link: ({ children, value }) => (
-                        <a 
-                          href={value.href} 
-                          className="text-[#4db2ec] hover:underline font-medium"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {children}
-                        </a>
-                      ),
-                    },
-                  }}
-                />
+          <div className="inline-block">
+            {authorImage ? (
+              <Image
+                src={authorImage}
+                alt={authorName}
+                width={150}
+                height={150}
+                className="rounded-full object-cover shadow-lg mx-auto"
+                style={{ border: '4px solid #f0f0f0' }}
+              />
+            ) : (
+              <div className="w-[150px] h-[150px] bg-gradient-to-br from-gray-300 to-gray-400 rounded-full flex items-center justify-center shadow-lg mx-auto" style={{ border: '4px solid #f0f0f0' }}>
+                <span className="text-4xl font-bold text-white">
+                  {authorName.charAt(0).toUpperCase()}
+                </span>
               </div>
             )}
             
-            {/* Redes Sociais */}
+            {/* Redes Sociais - Movidas para baixo da foto */}
             {author.social && (author.social.twitter || author.social.linkedin || author.social.github) && (
-              <div className="mt-6 flex gap-4">
+              <div className="mt-4 flex gap-3 justify-center">
                 {author.social.twitter && (
                   <a
                     href={author.social.twitter}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-gray-600 hover:text-[#1DA1F2] transition-colors"
-                    aria-label="Twitter"
+                    className="text-gray-600 hover:text-[#4db2ec] transition-colors"
+                    aria-label="Instagram"
                   >
                     <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM5.838 12a6.162 6.162 0 1112.324 0 6.162 6.162 0 01-12.324 0zM12 16a4 4 0 110-8 4 4 0 010 8zm4.965-10.405a1.44 1.44 0 112.881.001 1.44 1.44 0 01-2.881-.001z"/>
                     </svg>
                   </a>
                 )}
@@ -161,14 +120,64 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, showBio = true }) => {
                     href={author.social.github}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-gray-600 hover:text-[#333] transition-colors"
-                    aria-label="GitHub"
+                    className="bg-gradient-to-r from-[#4db2ec] to-[#3a9bd4] text-white px-3 py-1.5 rounded-md text-sm font-semibold hover:from-[#1e3a8a] hover:to-[#1e40af] hover:text-white transition-all duration-300 shadow-md hover:shadow-lg"
+                    aria-label="Oferta"
                   >
-                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                    </svg>
+                    OFERTA
                   </a>
                 )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Coluna da direita - Bio */}
+        <div className="flex-1">
+          <div className="bg-[#f5f5f5] p-8 lg:p-10 rounded-xl">
+            <h3 className="text-[28px] lg:text-[32px] font-bold mb-4 text-[#4db2ec] text-center">
+              {author.slug ? (
+                <Link 
+                  href={`/autor/${author.slug.current}`}
+                  className="hover:underline hover:text-[#3a9bd4] transition-colors"
+                >
+                  {authorName}
+                </Link>
+              ) : (
+                authorName
+              )}
+            </h3>
+            
+            {showBio && author.bio && (
+              <div className="text-[16px] lg:text-[18px] text-[#111] leading-[1.6] font-normal text-left">
+                <PortableText 
+                  value={author.bio}
+                  components={{
+                    block: {
+                      normal: ({ children, index }) => {
+                        // Renderiza todos os blocos como um texto contínuo
+                        const isLastBlock = index === author.bio.length - 1;
+                        return (
+                          <span>
+                            {children}
+                            {!isLastBlock && ' '}
+                          </span>
+                        );
+                      },
+                    },
+                    marks: {
+                      link: ({ children, value }) => (
+                        <a 
+                          href={value.href} 
+                          className="text-[#4db2ec] hover:underline font-medium"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {children}
+                        </a>
+                      ),
+                    },
+                  }}
+                />
               </div>
             )}
           </div>

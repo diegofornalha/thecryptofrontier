@@ -336,12 +336,12 @@ export default async function PostPage({ params }: PageProps) {
               {/* Meta informações */}
               <div className="crypto-post-meta">
                 <span style={{ textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.5px' }}>
-                  WRITTEN BY: {post.author?.name ? (
+                  ESCRITO POR: {post.author?.name ? (
                     <strong style={{ color: '#4db2ec' }}>{post.author.name.toUpperCase()}</strong>
                   ) : 'ADMIN'}
                 </span>
                 <span style={{ textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.5px' }}>
-                  DATE: <strong>{formatDate(post.publishedAt).toUpperCase()}</strong>
+                  DATA: <strong>{formatDate(post.publishedAt).toUpperCase()}</strong>
                 </span>
               </div>
             </header>
