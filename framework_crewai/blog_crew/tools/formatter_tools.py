@@ -236,3 +236,24 @@ def format_content_for_sanity(content_text=None, **kwargs):
             }]
         }]
         return {"success": True, "blocks": fallback_blocks, "warning": "Usou método simplificado devido a erro"}
+
+def create_slug_simple(title: str) -> str:
+    """Cria slug simples a partir do título"""
+    import re
+    import unicodedata
+    
+    # Normalizar unicode
+    title = unicodedata.normalize('NFKD', title)
+    title = ''.join([c for c in title if not unicodedata.combining(c)])
+    
+    # Converter para lowercase e remover caracteres especiais
+    slug = title.lower()
+    slug = re.sub(r'[^a-z0-9\s-]', '', slug)
+    slug = re.sub(r'[\s-]+', '-', slug)
+    slug = slug.strip('-')
+    
+    # Limitar tamanho
+    if len(slug) > 50:
+        slug = slug[:50].rsplit('-', 1)[0]
+    
+    return slug

@@ -1,6 +1,10 @@
 {
   "name": "content-ops-starter",
   "version": "0.1.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
   "scripts": {
     "dev": "next dev",
     "dev:3200": "next dev -p 3200",

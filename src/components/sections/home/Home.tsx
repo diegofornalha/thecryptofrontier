@@ -5,6 +5,7 @@ import LatestNews from './LatestNews';
 import Featured from './Featured';
 import FeaturedBanner from './FeaturedBanner';
 import BreakingNewsTicker from './BreakingNewsTicker';
+import AuthorSection from './AuthorSection';
 
 export default function Home() {
   return (
@@ -26,6 +27,11 @@ export default function Home() {
           {/* Coluna central - Banner destacado (1/2) */}
           <div className="w-full lg:w-1/2 lg:px-6">
             <FeaturedBanner />
+            
+            {/* Author Section - Logo abaixo do banner */}
+            <div className="mt-8">
+              <AuthorSection />
+            </div>
           </div>
           
           {/* Coluna direita - Em Destaque (1/4) - Alinhada com menu */}

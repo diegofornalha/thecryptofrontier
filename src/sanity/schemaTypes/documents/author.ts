@@ -51,18 +51,21 @@ export default defineType({
       fields: [
         {
           name: 'twitter',
-          title: 'Twitter',
+          title: 'Instagram',
           type: 'url',
+          description: 'URL do perfil do Instagram',
         },
         {
           name: 'linkedin',
           title: 'LinkedIn',
           type: 'url',
+          description: 'URL do perfil do LinkedIn',
         },
         {
           name: 'github',
-          title: 'GitHub',
+          title: 'Link da Oferta',
           type: 'url',
+          description: 'URL para página de oferta/produto',
         },
       ],
     }),

@@ -14,6 +14,10 @@ import subprocess
 import sys
 import shutil
 from typing import Dict, Set, List
+from dotenv import load_dotenv
+
+# Carregar variáveis de ambiente
+load_dotenv()
 
 # Configurar logging
 logging.basicConfig(
@@ -271,13 +275,14 @@ class RSSMonitor:
         logger.info(f"Processando {len(articles)} novos artigos...")
         
         try:
-            # Executar o pipeline do CrewAI
-            logger.info("Iniciando pipeline do CrewAI...")
+            # Executar o pipeline completo atualizado
+            logger.info("Iniciando pipeline completo (RSS → Tradução → Imagens → Publicação)...")
             result = subprocess.run(
-                ["python", "run_pipeline.py"],
+                ["python", "pipeline_completo.py", str(len(articles))],
                 capture_output=True,
                 text=True,
-                check=True
+                check=True,
+                timeout=900  # 15 minutos de timeout
             )
             
             logger.info("Pipeline executado com sucesso")

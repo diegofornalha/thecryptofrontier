@@ -4,6 +4,7 @@ import { SchemaTypeDefinition } from 'sanity';
 // Tipos de documentos principais
 import page from './documents/page';
 import post from './documents/post';
+import agentPost from './documents/agentPost';
 import category from './documents/category';
 import author from './documents/author';
 import tag from './documents/tag';
@@ -23,6 +24,7 @@ import cryptoMeta from './objects/cryptoMeta';
 export const schemaTypes = [
   // Documentos
   post,
+  agentPost,
   page,
   category,
   author,

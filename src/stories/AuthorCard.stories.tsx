@@ -10,7 +10,7 @@ const meta: Meta<typeof AuthorCard> = {
   },
   decorators: [
     (Story) => (
-      <div style={{ width: '400px', padding: '20px' }}>
+      <div style={{ width: '800px', padding: '20px' }}>
         <Story />
       </div>
     ),
@@ -28,9 +28,22 @@ type Story = StoryObj<typeof AuthorCard>;
 export const Default: Story = {
   args: {
     author: {
-      name: 'João Silva',
-      bio: 'Especialista em criptomoedas e blockchain com mais de 5 anos de experiência no mercado. Escreve sobre Bitcoin, Ethereum e as últimas tendências do setor.',
+      _id: '1',
+      name: 'Alexandre Bianchi',
+      bio: [
+        {
+          _type: 'block',
+          children: [
+            {
+              _type: 'span',
+              text: 'Trader e investidor profissional, com mais de 10 de experiência no mercado financeiro, especializado em criptomoedas. Ele é o criador de treinamentos como "Trader Crypto Expert", que ensina desde iniciantes até investidores avançados a operar no mercado de criptoativos de forma segura e lucrativa.'
+            }
+          ]
+        }
+      ],
       image: null,
+      role: 'CEO The Crypto Frontier',
+      slug: { current: 'alexandre-bianchi' }
     },
   },
 };
@@ -38,8 +51,21 @@ export const Default: Story = {
 export const WithImage: Story = {
   args: {
     author: {
-      name: 'Maria Santos',
-      bio: 'Analista de mercado cripto e educadora financeira. Ajuda investidores a entender o potencial das moedas digitais.',
+      _id: '2',
+      name: 'Alexandre Bianchi',
+      bio: [
+        {
+          _type: 'block',
+          children: [
+            {
+              _type: 'span',
+              text: 'Trader e investidor profissional, com mais de 10 anos de experiência no mercado financeiro, especializado em criptomoedas. Ele é o criador de treinamentos como "Trader Crypto Expert", que ensina desde iniciantes até investidores avançados a operar no mercado de criptoativos de forma segura e lucrativa.'
+            }
+          ]
+        }
+      ],
+      role: 'CEO The Crypto Frontier',
+      slug: { current: 'alexandre-bianchi' },
       image: {
         _type: 'image',
         asset: {

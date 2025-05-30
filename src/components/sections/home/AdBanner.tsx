@@ -21,7 +21,7 @@ export default function AdBanner({
 }: AdBannerProps) {
 
   const content = (
-    <div className={`relative w-full h-[400px] sm:h-[450px] md:h-[500px] lg:h-[550px] xl:h-[600px] rounded-xl overflow-hidden cursor-pointer group ${className}`}>
+    <div className={`relative w-full h-[250px] sm:h-[280px] md:h-[300px] lg:h-[320px] xl:h-[350px] rounded-xl overflow-hidden cursor-pointer group ${className}`}>
       
       {/* Background com Bitcoin e Animações */}
       <div className="absolute inset-0">
