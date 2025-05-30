@@ -8,7 +8,7 @@ import NewsHeader from '../../components/sections/NewsHeader';
 import BreakingNewsTicker from '@/components/sections/home/BreakingNewsTicker';
 import CryptoNewsCard from '@/components/sections/CryptoNewsCard';
 import Pagination from '@/components/ui/pagination';
-import CategoriesWidget from '@/components/widgets/CategoriesWidget';
+import PopularPostsWidget from '@/components/widgets/PopularPostsWidget';
 import { POSTS_LIST_QUERY } from '@/lib/queries';
 import { Metadata } from 'next';
 
@@ -196,28 +196,11 @@ export default async function BlogPage({ searchParams }: PageProps) {
             )}
           </div>
 
-          {/* Sidebar (4 cols) */}
-          <aside className="lg:col-span-4">
-            {/* Widget de categorias */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
-              <h3 className="text-xl font-bold text-[#111] mb-4 pb-2 border-b border-gray-200">
-                Categorias
-              </h3>
-              <ul className="space-y-2">
-                {['Bitcoin', 'Ethereum', 'Altcoins', 'DeFi', 'NFTs', 'Blockchain', 'Trading', 'Análises'].map((cat) => (
-                  <li key={cat}>
-                    <a
-                      href={`/categoria/${cat.toLowerCase()}`}
-                      className="flex justify-between items-center py-2 px-3 hover:bg-gray-50 rounded transition-colors"
-                    >
-                      <span className="text-[#666] hover:text-[#4db2ec]">{cat}</span>
-                      <span className="text-sm text-gray-400">(0)</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
+          {/* Sidebar sticky */}
+          <aside className="lg:col-span-4 hidden lg:block">
+            <div className="sticky top-24 space-y-8">
+              <PopularPostsWidget />
             </div>
-
           </aside>
         </div>
       </main>

@@ -14,14 +14,14 @@ interface AdBannerProps {
 export default function AdBanner({ 
   title = 'Sinais Cripto Expert',
   subtitle = 'Lucre de R$ 500,00 a R$ 5.000 em média por dia no criptomercado, sem precisar olhar gráficos, notícias, nem fazer cursos enormes.',
-  link = 'https://eternityscale.com.br/sce',
+  link = 'https://eternityscale.com.br/sce-blog/',
   targetBlank = true,
   className = '',
   showBitcoinAnimation = true
 }: AdBannerProps) {
 
   const content = (
-    <div className={`relative w-full h-[400px] sm:h-[450px] md:h-[500px] lg:h-[550px] xl:h-[600px] rounded-xl overflow-hidden cursor-pointer group ${className}`}>
+    <div className={`relative w-full h-[250px] sm:h-[280px] md:h-[300px] lg:h-[320px] xl:h-[350px] rounded-xl overflow-hidden cursor-pointer group ${className}`}>
       
       {/* Background com Bitcoin e Animações */}
       <div className="absolute inset-0">

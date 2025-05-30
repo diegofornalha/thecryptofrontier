@@ -3,7 +3,6 @@
 import React from "react";
 import Link from "next/link";
 import { client } from "../../../sanity/client";
-import { formatDate } from "../../../utils/date-utils";
 
 interface NewsItem {
   _id: string;
@@ -46,7 +45,7 @@ export default function LatestNews() {
                           window.innerWidth < 1280 ? 550 : 600;
       
       const availableHeight = viewportHeight - headerHeight - tickerHeight - bannerHeight - footerMargin;
-      const itemHeight = 80; // altura aproximada de cada item de notícia
+      const itemHeight = 60; // altura aproximada de cada item de notícia sem data
       
       const possibleItems = Math.floor(availableHeight / itemHeight);
       const items = Math.max(6, Math.min(possibleItems, 12)); // Entre 6 e 12 itens
@@ -95,15 +94,10 @@ export default function LatestNews() {
         {newsItems.slice(0, itemsToShow).map((item) => (
           <article key={item._id} className="border-b border-gray-200 pb-4 last:border-b-0">
             <Link href={`/post/${item.slug}`}>
-              <h2 className="text-base font-semibold mb-1 text-gray-900 hover:text-blue-600 cursor-pointer">
+              <h2 className="text-base font-semibold text-gray-900 hover:text-blue-600 cursor-pointer">
                 {item.title}
               </h2>
             </Link>
-            <div className="text-sm text-gray-500">
-              <span suppressHydrationWarning>
-                {formatDate(item.publishedAt).toUpperCase()}
-              </span>
-            </div>
           </article>
         ))}
       </div>

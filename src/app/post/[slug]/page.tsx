@@ -10,8 +10,6 @@ import CryptoBasicFooter from '@/components/sections/CryptoBasicFooter';
 import NewsHeader from '@/components/sections/NewsHeader';
 import BreakingNewsTicker from '@/components/sections/home/BreakingNewsTicker';
 import PopularPostsWidget from '@/components/widgets/PopularPostsWidget';
-import CategoriesWidget from '@/components/widgets/CategoriesWidget';
-import TagsWidget from '@/components/widgets/TagsWidget';
 import AuthorCard from '@/components/AuthorCard';
 import SocialShare from '@/components/SocialShare';
 import PostTags from '@/components/PostTags';
@@ -338,12 +336,12 @@ export default async function PostPage({ params }: PageProps) {
               {/* Meta informações */}
               <div className="crypto-post-meta">
                 <span style={{ textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.5px' }}>
-                  WRITTEN BY: {post.author?.name ? (
+                  ESCRITO POR: {post.author?.name ? (
                     <strong style={{ color: '#4db2ec' }}>{post.author.name.toUpperCase()}</strong>
                   ) : 'ADMIN'}
                 </span>
                 <span style={{ textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.5px' }}>
-                  DATE: <strong>{formatDate(post.publishedAt).toUpperCase()}</strong>
+                  DATA: <strong>{formatDate(post.publishedAt).toUpperCase()}</strong>
                 </span>
               </div>
             </header>
@@ -417,8 +415,6 @@ export default async function PostPage({ params }: PageProps) {
           {/* Sidebar */}
           <aside className="crypto-sidebar space-y-8">
             <PopularPostsWidget />
-            <CategoriesWidget />
-            <TagsWidget />
           </aside>
         </div>
         </div>
