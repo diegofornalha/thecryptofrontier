@@ -16,6 +16,9 @@ import PostTags from '@/components/PostTags';
 import RelatedPosts from '@/components/RelatedPosts';
 import { POST_QUERY } from '@/lib/queries';
 import './crypto-basic-layout.css';
+import '@/css/post-enhancements.css';
+import { ReadingProgress } from '@/components/PostEnhancements';
+import { TwitterEmbed } from '@/components/TwitterEmbed';
 
 
 // GROQ para pegar todos os slugs para geração estática
@@ -144,8 +147,11 @@ const formatDate = (dateString: string) => {
   });
 };
 
-// Componentes para PortableText - Estilo Crypto Basic
-const cryptoBasicComponents = {
+// Componentes para PortableText - Estilo Crypto Basic Melhorado
+const createCryptoBasicComponents = () => {
+  let paragraphCount = 0;
+  
+  return {
   types: {
     image: ({ value }: any) => {
       if (!value || !value.asset) {
@@ -158,20 +164,21 @@ const cryptoBasicComponents = {
       }
       
       return (
-        <div style={{ margin: '25px 0' }}>
+        <div className="crypto-post-image">
           <Image
             src={imageUrl}
             alt={value.alt || 'Imagem do artigo'}
             width={770}
             height={433}
             style={{ width: '100%', height: 'auto', display: 'block' }}
+            className="rounded-lg"
           />
           {value.caption && (
             <p style={{ 
-              fontSize: '12px', 
+              fontSize: '14px', 
               color: '#666', 
               textAlign: 'center', 
-              marginTop: '10px',
+              marginTop: '12px',
               fontStyle: 'italic' 
             }}>
               {value.caption}
@@ -182,47 +189,61 @@ const cryptoBasicComponents = {
     },
   },
   block: {
-    normal: ({ children, isFirst }: any) => {
-      // O isFirst não é fornecido pelo PortableText, então vamos usar uma classe CSS
-      return <p style={{ marginBottom: '20px', lineHeight: '1.8' }}>{children}</p>;
+    normal: ({ children }: any) => {
+      // Incrementa o contador e verifica se é o primeiro parágrafo
+      const currentCount = paragraphCount++;
+      const isFirstParagraph = currentCount === 0;
+      
+      return (
+        <p className={`crypto-post-paragraph ${isFirstParagraph ? 'first-paragraph' : ''}`}
+           style={isFirstParagraph ? { fontWeight: 600, fontSize: '20px', lineHeight: '1.6', color: '#1a1a1a' } : {}}>
+          {children}
+        </p>
+      );
     },
-    h1: ({ children }: any) => <h1 style={{ fontSize: '28px', fontWeight: '700', margin: '35px 0 20px', fontFamily: 'Roboto, sans-serif' }}>{children}</h1>,
-    h2: ({ children }: any) => <h2 style={{ fontSize: '24px', fontWeight: '700', margin: '30px 0 20px', fontFamily: 'Roboto, sans-serif' }}>{children}</h2>,
-    h3: ({ children }: any) => <h3 style={{ fontSize: '20px', fontWeight: '600', margin: '25px 0 15px', fontFamily: 'Roboto, sans-serif' }}>{children}</h3>,
+    h1: ({ children }: any) => <h1 className="crypto-heading-1">{children}</h1>,
+    h2: ({ children }: any) => <h2 className="crypto-heading-2">{children}</h2>,
+    h3: ({ children }: any) => <h3 className="crypto-heading-3">{children}</h3>,
     blockquote: ({ children }: any) => (
-      <blockquote style={{ 
-        borderLeft: '4px solid #4db2ec', 
-        paddingLeft: '20px', 
-        margin: '25px 0',
-        fontStyle: 'italic',
-        color: '#555'
-      }}>
+      <blockquote className="crypto-blockquote">
         {children}
       </blockquote>
     ),
   },
   marks: {
-    link: ({ children, value }: any) => (
-      <a href={value.href} style={{ color: '#4db2ec', textDecoration: 'none' }} target="_blank" rel="noopener">
-        {children}
-      </a>
-    ),
+    link: ({ children, value }: any) => {
+      const url = value.href;
+      
+      // Detecta links do Twitter/X
+      if (url && (url.includes('twitter.com/') || url.includes('x.com/')) && url.includes('/status/')) {
+        return <TwitterEmbed url={url} />;
+      }
+      
+      // Links normais
+      return (
+        <a href={url} className="crypto-link" target="_blank" rel="noopener">
+          {children}
+        </a>
+      );
+    },
     internalLink: ({ children, value }: any) => (
-      <Link href={`/post/${value.slug}`} style={{ color: '#4db2ec', textDecoration: 'none' }}>
+      <Link href={`/post/${value.slug}`} className="crypto-link">
         {children}
       </Link>
     ),
-    strong: ({ children }: any) => <strong>{children}</strong>,
-    em: ({ children }: any) => <em>{children}</em>,
+    strong: ({ children }: any) => <strong className="font-bold text-gray-900">{children}</strong>,
+    em: ({ children }: any) => <em className="italic">{children}</em>,
+    code: ({ children }: any) => <code className="crypto-inline-code">{children}</code>,
   },
   list: {
-    bullet: ({ children }: any) => <ul style={{ marginBottom: '20px', paddingLeft: '25px' }}>{children}</ul>,
-    number: ({ children }: any) => <ol style={{ marginBottom: '20px', paddingLeft: '25px' }}>{children}</ol>,
+    bullet: ({ children }: any) => <ul className="crypto-list crypto-list-bullet">{children}</ul>,
+    number: ({ children }: any) => <ol className="crypto-list crypto-list-number">{children}</ol>,
   },
   listItem: {
-    bullet: ({ children }: any) => <li style={{ marginBottom: '8px', lineHeight: '1.8' }}>{children}</li>,
-    number: ({ children }: any) => <li style={{ marginBottom: '8px', lineHeight: '1.8' }}>{children}</li>,
+    bullet: ({ children }: any) => <li className="crypto-list-item">{children}</li>,
+    number: ({ children }: any) => <li className="crypto-list-item">{children}</li>,
   },
+  };
 };
 
 // Componentes para PortableText - Original (mantido para referência)
@@ -310,6 +331,7 @@ export default async function PostPage({ params }: PageProps) {
   return (
     <div className="min-h-screen bg-white">
       <NewsHeader />
+      <ReadingProgress />
       
       {/* Layout padrão The Crypto Basic */}
       <div className="pt-[70px]">
@@ -388,7 +410,7 @@ export default async function PostPage({ params }: PageProps) {
             {/* Conteúdo do post */}
             <div className="crypto-post-content">
               {post.content && (
-                <PortableText value={post.content} components={cryptoBasicComponents} />
+                <PortableText value={post.content} components={createCryptoBasicComponents()} />
               )}
             </div>
 

@@ -14,7 +14,7 @@ const featuredPostQuery = `*[_type == "post"] | order(date desc) [0] {
   excerpt,
   coverImage,
   author-> {
-    firstName
+    name
   }
 }`;
 
@@ -26,7 +26,7 @@ interface FeaturedPost {
   excerpt?: string;
   coverImage?: any;
   author?: {
-    firstName?: string;
+    name?: string;
   };
 }
 
@@ -98,7 +98,7 @@ export default function FeaturedBanner({
   return (
     <Banner
       title={featuredPost.title}
-      category={featuredPost.author?.firstName || 'DESTAQUE'}
+      category={featuredPost.author?.name || 'DESTAQUE'}
       subtitle={subtitle}
       imageUrl={imageUrl}
       slug={featuredPost.slug}

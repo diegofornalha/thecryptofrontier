@@ -1,0 +1,98 @@
+services:
+  # Redis para cache do CrewAI
+  redis:
+    image: redis:alpine
+    container_name: blog-crew-redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - blog-crew-network
+    restart: unless-stopped
+
+  # Blog Crew - Pipeline de Automação
+  blog-crew:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: blog-crew-app
+    environment:
+      # API Keys (pegue do .env)
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - SANITY_PROJECT_ID=${SANITY_PROJECT_ID}
+      - SANITY_API_TOKEN=${SANITY_API_TOKEN}
+      - SANITY_DATASET=${SANITY_DATASET:-production}
+      - ALGOLIA_APP_ID=${ALGOLIA_APP_ID}
+      - ALGOLIA_API_KEY=${ALGOLIA_API_KEY}
+      - ALGOLIA_INDEX_NAME=${ALGOLIA_INDEX_NAME}
+      # Redis
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      # Timezone
+      - TZ=America/Sao_Paulo
+    volumes:
+      # Persistir dados processados
+      - ./posts_para_traduzir:/app/posts_para_traduzir
+      - ./posts_traduzidos:/app/posts_traduzidos
+      - ./posts_formatados:/app/posts_formatados
+      - ./posts_com_imagem:/app/posts_com_imagem
+      - ./posts_publicados:/app/posts_publicados
+      - ./posts_imagens:/app/posts_imagens
+      - ./logs:/app/logs
+      # Configurações
+      - ./feeds.json:/app/feeds.json
+      - ./processed_articles.json:/app/processed_articles.json
+    depends_on:
+      - redis
+    networks:
+      - blog-crew-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
+
+  # Monitor RSS (executar periodicamente)
+  blog-crew-monitor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: blog-crew-monitor
+    command: ["python", "rss_monitor.py"]
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - SANITY_PROJECT_ID=${SANITY_PROJECT_ID}
+      - SANITY_API_TOKEN=${SANITY_API_TOKEN}
+      - SANITY_DATASET=${SANITY_DATASET:-production}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - TZ=America/Sao_Paulo
+    volumes:
+      - ./posts_para_traduzir:/app/posts_para_traduzir
+      - ./posts_traduzidos:/app/posts_traduzidos
+      - ./posts_formatados:/app/posts_formatados
+      - ./posts_com_imagem:/app/posts_com_imagem
+      - ./posts_publicados:/app/posts_publicados
+      - ./posts_imagens:/app/posts_imagens
+      - ./logs:/app/logs
+      - ./feeds.json:/app/feeds.json
+      - ./processed_articles.json:/app/processed_articles.json
+    depends_on:
+      - redis
+    networks:
+      - blog-crew-network
+    restart: unless-stopped
+    profiles:
+      - monitor
+
+networks:
+  blog-crew-network:
+    driver: bridge
+
+volumes:
+  redis-data:

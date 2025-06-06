@@ -46,7 +46,7 @@ def create_monitoring_task(agent):
         3. Colete título, link, resumo e data de publicação
         
         Salve cada artigo selecionado em um arquivo separado na pasta 'posts_para_traduzir'
-        com nome 'para_traduzir_{timestamp}_{index}.json'
+        com nome 'para_traduzir_TIMESTAMP_INDEX.json' (onde TIMESTAMP é a data/hora atual e INDEX é o número do artigo)
         
         O formato do JSON deve seguir a estrutura:
         {
@@ -79,7 +79,7 @@ def create_translation_task(agent):
         2. Traduza o título, resumo e conteúdo para português brasileiro.
         3. Adapte o texto para o público brasileiro, mantendo os termos técnicos conforme necessário.
         4. Salve o artigo traduzido em um arquivo na pasta 'posts_traduzidos'
-           com nome 'traduzido_{nome_original_do_arquivo.json}'. (Ex: se o arquivo original era 'artigo_xyz.json', salve como 'traduzido_artigo_xyz.json')
+           com nome 'traduzido_NOME_ORIGINAL_DO_ARQUIVO.json'. (Ex: se o arquivo original era 'artigo_xyz.json', salve como 'traduzido_artigo_xyz.json')
         
         O formato do JSON deve seguir a estrutura:
         {
@@ -164,22 +164,28 @@ def create_publishing_task(agent):
         processe cada arquivo da lista.
 
         Para cada arquivo na lista fornecida:
-        1. Leia o arquivo JSON com o artigo formatado usando o nome do arquivo.
-        2. Prepare os dados do arquivo lido e publique o artigo no Sanity usando a ferramenta publish_to_sanity. 
-           Passe os seguintes parâmetros para a ferramenta:
-           - post_data: O conteúdo do arquivo JSON (dados do post)
-           - file_path: O caminho completo do arquivo que está sendo processado (para que a ferramenta possa movê-lo após a publicação)
-        3. Verifique se a publicação foi bem-sucedida. A ferramenta publish_to_sanity retornará um objeto com os campos:
-           - success: booleano indicando se a publicação foi bem-sucedida
-           - document_id: o ID do documento no Sanity (se sucesso=true)
-           - error: mensagem de erro (se sucesso=false)
-           - published_file: caminho do arquivo publicado (se movido com sucesso)
+        1. Leia o arquivo JSON com o artigo formatado e com imagem usando o nome do arquivo da pasta 'posts_com_imagem'.
+        2. Use a ferramenta 'publish_to_sanity_enhanced' para publicar com metadados completos.
+           Esta ferramenta:
+           - Detecta automaticamente categorias baseadas no conteúdo
+           - Extrai tags relevantes de criptomoedas mencionadas
+           - Adiciona autor padrão "Crypto Frontier"
+           - Cria categorias e tags automaticamente se necessário
+        3. Passe apenas o conteúdo JSON do arquivo como parâmetro 'post_data'.
+        4. Verifique se a publicação foi bem-sucedida através do retorno:
+           - success: booleano indicando sucesso
+           - document_id: ID do documento no Sanity
+           - categories: lista de categorias detectadas
+           - tags: lista de tags extraídas
+           - error: mensagem de erro (se falhar)
         
-        Cada arquivo formatado deve estar no formato esperado pelo Sanity (modelo Post). 
-        A ferramenta publish_to_sanity cuidará de mover o arquivo para a pasta 'posts_publicados' com o prefixo correto.
+        IMPORTANTE: Os arquivos devem ser lidos da pasta 'posts_com_imagem' que já contém as imagens processadas.
+        Após publicação bem-sucedida, mova o arquivo para 'posts_publicados' com prefixo 'publicado_'.
         
-        Retorne um relatório dos artigos publicados com sucesso (lista de nomes dos arquivos movidos para 'posts_publicados'),
-        bem como o número total de artigos publicados com sucesso e falhas.
+        Retorne um relatório completo com:
+        - Lista de arquivos publicados com sucesso
+        - Total de sucessos e falhas
+        - Categorias e tags detectadas para cada post
         """,
         agent=agent,
         expected_output="Relatório de publicação dos artigos no Sanity CMS, incluindo uma lista dos arquivos que foram publicados e movidos.",

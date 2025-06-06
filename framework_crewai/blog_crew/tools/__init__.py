@@ -1,15 +1,15 @@
 from crewai.tools import BaseTool
 from crewai.tools import tool as crewai_tool
 
-# Reimportar as ferramentas para garantir que elas sejam instâncias de BaseTool
+# Importar apenas as ferramentas necessárias e ativas
 from .rss_tools import read_rss_feeds
 from .file_tools import save_to_file, read_from_file  
 from .sanity_tools import publish_to_sanity, publish_manual, verificar_e_criar_categoria, verificar_e_criar_tag
+from .sanity_tools_enhanced import publish_to_sanity_enhanced
 from .formatter_tools import create_slug, format_content_for_sanity
 from .algolia_tools import index_to_algolia, search_algolia, delete_from_algolia
 from .dedupe_tools import check_for_duplicates
-from .image_generation_tools import generate_crypto_image, upload_image_to_sanity
-from .image_generation_tools_fixed import generate_and_upload_image, process_all_formatted_posts
+from .image_generation_tools_unified import generate_image_for_post, process_all_posts_with_images
 from .list_files_tool import list_directory_files
 
 # Lista de tools decoradas (instâncias de BaseTool)
@@ -18,6 +18,7 @@ tools = [
     save_to_file,
     read_from_file,
     publish_to_sanity,
+    publish_to_sanity_enhanced,
     publish_manual,
     verificar_e_criar_categoria,
     verificar_e_criar_tag,
@@ -27,10 +28,8 @@ tools = [
     search_algolia,
     delete_from_algolia,
     check_for_duplicates,
-    generate_crypto_image,
-    upload_image_to_sanity,
-    generate_and_upload_image,
-    process_all_formatted_posts,
+    generate_image_for_post,
+    process_all_posts_with_images,
     list_directory_files
 ]
 
@@ -50,6 +49,7 @@ __all__ = [
     'save_to_file',
     'read_from_file',
     'publish_to_sanity',
+    'publish_to_sanity_enhanced',
     'publish_manual',
     'verificar_e_criar_categoria',
     'verificar_e_criar_tag',
@@ -59,10 +59,8 @@ __all__ = [
     'search_algolia',
     'delete_from_algolia',
     'check_for_duplicates',
-    'generate_crypto_image',
-    'upload_image_to_sanity',
-    'generate_and_upload_image',
-    'process_all_formatted_posts',
+    'generate_image_for_post',
+    'process_all_posts_with_images',
     'list_directory_files',
     'tools',
     'get_tool_by_name',
