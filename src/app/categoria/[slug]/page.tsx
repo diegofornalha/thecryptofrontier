@@ -31,8 +31,7 @@ const POSTS_BY_CATEGORY_QUERY = `*[_type == "post" && references($categoryId)] |
   coverImage,
   publishedAt,
   author-> {
-    firstName,
-    lastName
+    name
   },
   category-> {
     title,
@@ -137,7 +136,11 @@ export default async function CategoryPage({ params }: PageProps) {
       {posts.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {posts.map((post) => (
-            <CryptoNewsCard key={post._id} {...post} />
+            <CryptoNewsCard 
+              key={post._id} 
+              {...post}
+              authorName={post.author?.name}
+            />
           ))}
         </div>
       ) : (

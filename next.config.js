@@ -1,6 +1,10 @@
 /**
  * @type {import('next').NextConfig}
  */
+
+// Detectar se estamos usando Turbopack
+const isTurbopack = process.argv.includes('--turbo');
+
 const nextConfig = {
     env: {
         sanityPreview: process.env.SANITY_PREVIEW || 'false',
@@ -10,14 +14,36 @@ const nextConfig = {
     },
     trailingSlash: true,
     reactStrictMode: true,
+    
+    // Otimizações para desenvolvimento
+    swcMinify: true,
+    modularizeImports: {
+        '@sanity/ui': {
+            transform: '@sanity/ui/{{member}}',
+        },
+        'lucide-react': {
+            transform: 'lucide-react/dist/esm/icons/{{member}}',
+        },
+    },
 
     // Configuração de imagens para o Sanity
     images: {
         domains: ['cdn.sanity.io'],
     },
 
+    // Configuração experimental para Turbopack
+    experimental: isTurbopack ? {
+        turbo: {
+            resolveAlias: {
+                '@sanity/visual-editing-csm': false,
+                '@sanity/visual-editing': false
+            }
+        }
+    } : {},
+
     // Resolver problemas de compatibilidade com @sanity/visual-editing
-    webpack: (config, { isServer }) => {
+    // Apenas aplicar configurações do webpack se NÃO estivermos usando Turbopack
+    webpack: isTurbopack ? undefined : (config, { isServer }) => {
         config.resolve.alias = {
             ...config.resolve.alias,
             '@sanity/visual-editing-csm': false,

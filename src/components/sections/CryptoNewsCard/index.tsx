@@ -9,10 +9,7 @@ interface CryptoNewsCardProps {
   slug: string;
   excerpt?: string;
   coverImage?: any;
-  author?: {
-    firstName?: string;
-    lastName?: string;
-  };
+  authorName?: string;
   publishedAt?: string;
   category?: {
     title: string;
@@ -28,7 +25,7 @@ export default function CryptoNewsCard({
   slug,
   excerpt,
   coverImage,
-  author,
+  authorName,
   publishedAt,
   category,
   readTime = 3,
@@ -36,7 +33,7 @@ export default function CryptoNewsCard({
   horizontal = false,
 }: CryptoNewsCardProps) {
   const imageUrl = coverImage ? urlForImage(coverImage)?.url() : '/placeholder-news.jpg';
-  const authorName = author ? `${author.firstName || ''} ${author.lastName || ''}`.trim() : 'Redação';
+  const displayAuthorName = authorName || 'Redação';
   const formattedDate = publishedAt ? new Date(publishedAt).toLocaleDateString('pt-BR', {
     day: '2-digit',
     month: 'short',
@@ -85,7 +82,7 @@ export default function CryptoNewsCard({
 
           {/* Meta */}
           <div className="flex items-center gap-3 text-xs text-[#666]">
-            <span className="font-medium">{authorName}</span>
+            <span className="font-medium">{displayAuthorName}</span>
             <span>•</span>
             <time>{formattedDate}</time>
             <span>•</span>
@@ -137,7 +134,7 @@ export default function CryptoNewsCard({
 
           {/* Meta */}
           <div className="flex items-center gap-3 text-xs text-[#666]">
-            <span className="font-medium">{authorName}</span>
+            <span className="font-medium">{displayAuthorName}</span>
             <span>•</span>
             <time>{formattedDate}</time>
             {!featured && (

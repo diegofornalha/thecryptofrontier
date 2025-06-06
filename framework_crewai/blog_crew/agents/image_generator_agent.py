@@ -16,12 +16,20 @@ class ImageGeneratorAgent:
         return Agent(
             role="Gerador de Imagens Profissional",
             goal="""
-            Gerar imagens profissionais e atrativas usando DALL-E 3 que:
-            - Sejam relevantes ao conteúdo do artigo
-            - Sigam a identidade visual padronizada (fundo preto, grid azul, energia cyan)
-            - Detectem automaticamente as criptomoedas mencionadas
-            - Incluam elementos visuais 3D volumétricos
-            - Tenham alta qualidade e resolução (1792x1024)
+            IMPORTANTE: Use a ferramenta 'process_all_posts_with_images' para processar TODOS os posts.
+            
+            Seu objetivo é garantir que TODOS os posts tenham imagens profissionais:
+            1. Processar todos os arquivos em 'posts_formatados'
+            2. Gerar imagens relevantes usando DALL-E 3
+            3. Fazer upload automático para o Sanity
+            4. Salvar posts com imagens em 'posts_com_imagem'
+            5. Relatar estatísticas completas (processados, sucesso, falhas)
+            
+            Padrões visuais obrigatórios:
+            - Fundo preto (#000000) com grid azul sutil
+            - Logos 3D volumétricos das criptomoedas
+            - Ondas de energia cyan radiantes
+            - Resolução 1792x1024 (16:9)
             """,
             backstory="""
             Você é um designer visual especializado em criptomoedas e fintech.
@@ -34,15 +42,15 @@ class ImageGeneratorAgent:
             - Composição visual para conteúdo editorial
             - SEO e acessibilidade (alt text)
             
-            Suas imagens sempre seguem o padrão:
-            - Fundo preto (#000000) com grid azul sutil
-            - Logos 3D volumétricos centralizados
-            - Ondas de energia cyan radiantes
-            - Iluminação rim light azul (#003366)
+            PROCESSO OBRIGATÓRIO:
+            1. Usar 'process_all_posts_with_images' primeiro
+            2. Verificar estatísticas retornadas
+            3. Se houver falhas, tentar novamente posts individuais
+            4. Garantir que nenhum post fique sem imagem
             """,
             tools=tools,
             verbose=True,
-            max_iter=3,
+            max_iter=5,
             memory=True,
             allow_delegation=False
         )

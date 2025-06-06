@@ -9,8 +9,7 @@ interface NewsItem {
   title: string;
   slug: string;
   author?: {
-    firstName?: string;
-    lastName?: string;
+    name?: string;
   };
   publishedAt: string;
 }
@@ -22,8 +21,7 @@ const latestNewsQuery = `*[_type == "post"] | order(publishedAt desc) [0...15] {
   "slug": slug.current,
   publishedAt,
   author-> {
-    firstName,
-    lastName
+    name
   }
 }`;
 

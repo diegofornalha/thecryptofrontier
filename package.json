@@ -7,6 +7,8 @@
   },
   "scripts": {
     "dev": "next dev",
+    "dev:fast": "NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS='--max-old-space-size=4096' next dev",
+    "dev:turbo": "NEXT_TELEMETRY_DISABLED=1 next dev --turbo",
     "dev:3200": "next dev -p 3200",
     "dev:3400": "next dev -p 3400",
     "build": "next build",

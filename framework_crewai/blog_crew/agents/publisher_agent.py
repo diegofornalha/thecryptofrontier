@@ -37,7 +37,8 @@ class PublisherAgent:
         publisher_tools = [tool for tool in tools if tool.name in [
             "read_from_file", 
             "save_to_file",
-            "publish_to_sanity"
+            "publish_to_sanity",
+            "publish_to_sanity_enhanced"
         ]]
         
         return Agent(
@@ -48,13 +49,15 @@ class PublisherAgent:
             garantindo que todos os campos obrigatórios estejam presentes e 
             que o conteúdo seja publicado corretamente.
             
+            IMPORTANTE: Use preferencialmente 'publish_to_sanity_enhanced' que:
+            - Detecta automaticamente categorias e tags baseadas no conteúdo
+            - Cria categorias e tags automaticamente se não existirem
+            - Adiciona autor padrão "Crypto Frontier"
+            - Garante publicação completa com todos os metadados
+            
             Você verifica cada artigo antes de publicá-lo, certificando-se de que
             ele está no formato esperado pelo Sanity CMS. Você sabe como lidar com
             erros de API e resolver problemas de publicação.
-            
-            Você mantém um registro detalhado de todas as publicações realizadas e
-            dos erros encontrados, para que seja possível acompanhar o status de
-            cada artigo.
             
             O formato esperado para publicação é:
             {
@@ -62,11 +65,14 @@ class PublisherAgent:
                 "title": "Título do artigo",
                 "slug": {"_type": "slug", "current": "slug-do-artigo"},
                 "publishedAt": "Data ISO formatada",
-                "content": [...blocos de conteúdo...]
+                "content": [...blocos de conteúdo...],
+                "mainImage": {...referência da imagem se disponível...}
             }
             
-            Você utiliza o modelo Pydantic Post para garantir que os dados estejam no formato correto
-            antes de enviar para publicação.""",
+            A ferramenta 'publish_to_sanity_enhanced' adiciona automaticamente:
+            - Categorias relevantes (Bitcoin, Ethereum, DeFi, etc)
+            - Tags baseadas em criptomoedas mencionadas
+            - Autor padrão do blog""",
             verbose=True,
             tools=publisher_tools,
             llm=llm

@@ -1,23 +1,11 @@
 import { StructureBuilder } from 'sanity/structure';
-import { BiEdit, BiCog, BiCategory, BiBookContent, BiUser, BiTag, BiBot } from 'react-icons/bi';
+import { BiEdit, BiCog, BiBookContent, BiUser } from 'react-icons/bi';
 
 // Definição da estrutura customizada para o Sanity Studio
 export const structure = (S: StructureBuilder) => 
   S.list()
     .title('Conteúdo')
     .items([
-      // Seção para Posts do Agente (Simplificado)
-      S.listItem()
-        .title('Posts do Agente')
-        .icon(BiBot)
-        .child(
-          S.documentTypeList('agentPost')
-            .title('Posts do Agente (Simplificado)')
-            .defaultOrdering([{field: 'publishedAt', direction: 'desc'}])
-        ),
-      
-      // Divider
-      S.divider(),
       
       // Seção para Posts de Blog (Completo)
       S.listItem()
@@ -29,25 +17,6 @@ export const structure = (S: StructureBuilder) =>
             .defaultOrdering([{field: 'publishedAt', direction: 'desc'}])
         ),
       
-      // Seção para Categorias
-      S.listItem()
-        .title('Categorias')
-        .icon(BiCategory)
-        .child(
-          S.documentTypeList('category')
-            .title('Categorias')
-            .defaultOrdering([{field: 'order', direction: 'asc'}])
-        ),
-      
-      // Seção para Tags
-      S.listItem()
-        .title('Tags')
-        .icon(BiTag)
-        .child(
-          S.documentTypeList('tag')
-            .title('Tags')
-            .defaultOrdering([{field: 'title', direction: 'asc'}])
-        ),
       
       // Seção para Autores
       S.listItem()

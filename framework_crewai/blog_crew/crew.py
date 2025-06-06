@@ -15,8 +15,8 @@ from tasks import (
     create_monitoring_task,
     create_translation_task, 
     create_formatting_task,
-    create_publishing_task,
-    create_image_generation_task
+    create_image_generation_task,
+    create_publishing_task
 )
 from config import config
 

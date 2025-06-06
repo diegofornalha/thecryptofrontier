@@ -1,0 +1,9 @@
+[
+  {
+    "file": "posts_formatados/test_post_queue.json",
+    "priority": 10,
+    "added_at": "2025-06-06T08:32:04.914452",
+    "attempts": 0,
+    "status": "pending"
+  }
+]

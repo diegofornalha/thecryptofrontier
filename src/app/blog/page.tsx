@@ -161,10 +161,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
                     slug={post.slug}
                     excerpt={post.excerpt}
                     coverImage={post.mainImage}
-                    author={{
-                      firstName: post.author?.name?.split(' ')[0],
-                      lastName: post.author?.name?.split(' ').slice(1).join(' ')
-                    }}
+                    authorName={post.author?.name}
                     publishedAt={post.publishedAt}
                     category={post.categories?.[0] ? {
                       title: post.categories[0].title,

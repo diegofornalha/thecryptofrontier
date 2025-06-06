@@ -1,9 +1,12 @@
 import { Providers } from "./providers"
+import GoogleAnalytics from "@/components/GoogleAnalytics"
+import GoogleTagManager, { GoogleTagManagerNoscript } from "@/components/GoogleTagManager"
 import "../css/main.css"
 
 export const metadata = {
   title: 'The Crypto Frontier',
   description: 'Notícias e conteúdo sobre criptomoedas e blockchain',
+  metadataBase: new URL('https://thecryptofrontier.com'),
 }
 
 export default function RootLayout({
@@ -11,6 +14,9 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const gaId = 'G-SFGD9XKTLD'
+  const gtmId = process.env.NEXT_PUBLIC_GTM_ID || ''
+
   return (
     <html lang="pt-br" suppressHydrationWarning className="light">
       <head>
@@ -22,7 +28,10 @@ export default function RootLayout({
         />
       </head>
       <body className="light">
+        <GoogleTagManagerNoscript gtmId={gtmId} />
         <Providers>{children}</Providers>
+        <GoogleAnalytics measurementId={gaId} />
+        <GoogleTagManager gtmId={gtmId} />
       </body>
     </html>
   )
