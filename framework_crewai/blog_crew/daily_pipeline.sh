@@ -23,8 +23,10 @@ export ALGOLIA_INDEX_NAME="development_mcpx_content"
 echo "=== Pipeline de blog iniciado em $(date) ===" >> /home/sanity/thecryptofrontier/framework_crewai/blog_crew/pipeline.log
 
 # Executar pipeline com sistema de fila
-# Usando main_auto_with_queue.py que tem rate limiting para imagens
-python main_auto_with_queue.py >> /home/sanity/thecryptofrontier/framework_crewai/blog_crew/pipeline.log 2>&1
+# ATUALIZADO: Usando simple_pipeline.py - pipeline simplificado e confiável
+# Configura limite de artigos via variável de ambiente
+export ARTICLE_LIMIT=10
+python simple_pipeline.py >> /home/sanity/thecryptofrontier/framework_crewai/blog_crew/pipeline.log 2>&1
 
 # Processar fila de imagens em background (opcional)
 # Se quiser processar todas as imagens após o pipeline principal

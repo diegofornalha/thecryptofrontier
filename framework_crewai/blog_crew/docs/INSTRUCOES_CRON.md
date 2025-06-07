@@ -1,60 +1,115 @@
-# Instruções para Configurar o Cron do Pipeline de Blog
+# 📅 Instruções de Configuração do Cron
 
-## Horário de Execução
+## Estado Atual
 
-O pipeline está configurado para rodar **todos os dias às 21:00 (9 PM) no horário de São Paulo**.
+### Pipeline em Execução
+- **Script**: `run_pipeline.py` (pipeline unificado com imagens)
+- **Horário**: 21:00 (9 PM) São Paulo
+- **Frequência**: Diário
+- **Artigos**: 10 por execução
 
-## Como Instalar o Cron
+### Como Mudar o Pipeline
 
-1. No seu servidor, execute o comando:
-   ```bash
-   crontab -e
-   ```
+#### Opção 1: Pipeline Padrão (Atual)
+```bash
+# Em daily_pipeline.sh
+python run_pipeline.py --limit 10
+```
+- ✅ Imagens integradas
+- ✅ CrewAI completo
+- ✅ Publicação automática
 
-2. Adicione a seguinte linha ao final do arquivo:
-   ```
-   0 21 * * * export TZ="America/Sao_Paulo" && /home/sanity/thecryptofrontier/framework_crewai/blog_crew/daily_pipeline.sh
-   ```
+#### Opção 2: Pipeline Otimizado (Recomendado)
+```bash
+# Em daily_pipeline.sh
+python run_pipeline_enhanced.py --limit 10
+```
+- ✅ Todas funcionalidades do padrão
+- ✅ Health checks automáticos
+- ✅ Retry com backoff
+- ✅ Processamento paralelo
+- ✅ Dashboard de métricas
+- ✅ Logging estruturado
 
-3. Salve e feche o editor.
+#### Opção 3: Pipeline Legado (Anterior)
+```bash
+# Em daily_pipeline.sh
+python main_auto_with_queue.py
+```
+- ⚠️ Sistema antigo
+- ⚠️ Processamento sequencial
 
-4. Para verificar se o cron foi instalado corretamente:
-   ```bash
-   crontab -l
-   ```
+## 🔧 Como Atualizar o Cron
 
-## Observações Importantes
+### 1. Editar Script
+```bash
+cd /home/sanity/thecryptofrontier/framework_crewai/blog_crew
+nano daily_pipeline.sh
+```
 
-- A variável `TZ="America/Sao_Paulo"` garante que o job seja executado considerando o horário de Brasília.
-- O pipeline gera logs detalhados em `/home/sanity/thecryptofrontier/framework_crewai/blog_crew/pipeline.log`.
-- Aos domingos, o script também executa limpeza de duplicatas e sincronização completa com o Algolia.
+### 2. Mudar para Pipeline Otimizado
+Altere linha 28 para:
+```bash
+python run_pipeline_enhanced.py --limit 10
+```
 
-## Ajustes de Horário (se necessário)
+### 3. Recarregar Cron
+```bash
+# Instalar nova configuração
+crontab crontab_config
 
-Se desejar alterar o horário posteriormente:
+# Verificar
+crontab -l
+```
 
-- Para executar em outro horário, altere os primeiros números (minuto e hora):
-  ```
-  0 21 * * *  # 21:00 (9 PM)
-  0 9 * * *   # 09:00 (9 AM)
-  30 13 * * * # 13:30 (1:30 PM)
-  ```
+## 📊 Monitoramento
 
-- Para executar múltiplas vezes ao dia:
-  ```
-  0 9,15,21 * * * # Executa às 9 AM, 3 PM e 9 PM
-  ```
+### Logs do Pipeline
+```bash
+# Ver execução em tempo real
+tail -f pipeline.log
 
-## Solução de Problemas
+# Ver últimas execuções
+tail -n 100 pipeline.log
+```
 
-Se o cron não estiver executando como esperado, verifique:
+### Verificar Última Execução
+```bash
+# Ver quando rodou
+grep "Pipeline de blog iniciado" pipeline.log | tail -5
 
-1. Se o script tem permissão de execução:
-   ```bash
-   chmod +x /home/sanity/thecryptofrontier/framework_crewai/blog_crew/daily_pipeline.sh
-   ```
+# Ver resultados
+grep "artigos processados com sucesso" pipeline.log | tail -5
+```
 
-2. O arquivo de log para mensagens de erro:
-   ```bash
-   tail -100 /home/sanity/thecryptofrontier/framework_crewai/blog_crew/pipeline.log
-   ```
+## 🚀 Recomendações
+
+### Para Produção
+1. **Use `run_pipeline_enhanced.py`** - Mais robusto e confiável
+2. **Configure alertas** - Adicione notificações de falha
+3. **Monitore métricas** - Verifique dashboard diariamente
+
+### Ajustar Horário
+```bash
+# Editar crontab_config
+# Mudar de 21:00 para 08:00
+0 8 * * * export TZ="America/Sao_Paulo" && /home/sanity/thecryptofrontier/framework_crewai/blog_crew/daily_pipeline.sh
+```
+
+### Ajustar Quantidade
+```bash
+# Em daily_pipeline.sh
+# Processar 20 artigos ao invés de 10
+python run_pipeline_enhanced.py --limit 20
+```
+
+## ⚠️ Importante
+
+- O cron roda com usuário `sanity`
+- Certifique-se que `.env` tem todas as chaves
+- Pipeline otimizado requer mais memória (~2GB)
+- Logs são rotacionados automaticamente
+
+---
+
+**Status**: Pipeline atualizado de `main_auto_with_queue.py` → `run_pipeline.py` ✅

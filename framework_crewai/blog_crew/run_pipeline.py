@@ -6,6 +6,7 @@ Substitui a necessidade de executar múltiplos scripts separados
 
 import os
 import sys
+import json
 import logging
 import argparse
 from pathlib import Path
@@ -48,6 +49,92 @@ def clear_old_files():
                     logger.debug(f"Removido: {file}")
                 except Exception as e:
                     logger.warning(f"Erro ao remover {file}: {e}")
+
+def save_crew_results(result) -> int:
+    """
+    Salva os resultados do CrewAI em arquivos
+    
+    CORREÇÃO: O CrewAI não salva arquivos automaticamente,
+    precisamos extrair os dados e salvar manualmente
+    """
+    saved_count = 0
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    
+    try:
+        # Verificar se o resultado contém dados
+        if hasattr(result, 'tasks_output'):
+            # Processar cada tarefa
+            for i, task_output in enumerate(result.tasks_output):
+                if hasattr(task_output, 'raw') and task_output.raw:
+                    # Salvar conteúdo baseado no tipo de tarefa
+                    content = task_output.raw
+                    
+                    # Tentar parsear como JSON
+                    try:
+                        data = json.loads(content) if isinstance(content, str) else content
+                        
+                        # Determinar diretório baseado no conteúdo
+                        if 'translated_content' in str(data):
+                            save_dir = Path("posts_traduzidos")
+                        elif 'formatted_content' in str(data):
+                            save_dir = Path("posts_formatados")
+                        elif 'image_url' in str(data) or 'main_image' in str(data):
+                            save_dir = Path("posts_com_imagem")
+                        elif 'published' in str(data) or 'sanity_id' in str(data):
+                            save_dir = Path("posts_publicados")
+                        else:
+                            save_dir = Path("posts_para_traduzir")
+                        
+                        # Criar diretório se não existir
+                        save_dir.mkdir(exist_ok=True)
+                        
+                        # Salvar arquivo
+                        filename = f"post_{timestamp}_{i}.json"
+                        filepath = save_dir / filename
+                        
+                        with open(filepath, 'w', encoding='utf-8') as f:
+                            json.dump(data, f, ensure_ascii=False, indent=2)
+                        
+                        logger.info(f"✅ Arquivo salvo: {filepath}")
+                        saved_count += 1
+                        
+                    except json.JSONDecodeError:
+                        # Se não for JSON, salvar como texto
+                        save_dir = Path("posts_para_traduzir")
+                        save_dir.mkdir(exist_ok=True)
+                        
+                        filename = f"post_{timestamp}_{i}.txt"
+                        filepath = save_dir / filename
+                        
+                        with open(filepath, 'w', encoding='utf-8') as f:
+                            f.write(str(content))
+                        
+                        logger.info(f"✅ Arquivo texto salvo: {filepath}")
+                        saved_count += 1
+        
+        # Se não houver tasks_output, tentar salvar o resultado direto
+        elif result:
+            save_dir = Path("posts_publicados")
+            save_dir.mkdir(exist_ok=True)
+            
+            filename = f"result_{timestamp}.json"
+            filepath = save_dir / filename
+            
+            # Tentar salvar como JSON
+            try:
+                data = result if isinstance(result, dict) else {"result": str(result)}
+                with open(filepath, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, ensure_ascii=False, indent=2)
+                
+                logger.info(f"✅ Resultado salvo: {filepath}")
+                saved_count = 1
+            except Exception as e:
+                logger.error(f"Erro ao salvar resultado: {e}")
+    
+    except Exception as e:
+        logger.error(f"Erro ao processar resultados do CrewAI: {e}")
+    
+    return saved_count
 
 def verify_environment():
     """Verifica se todas as variáveis de ambiente necessárias estão configuradas"""
@@ -121,13 +208,18 @@ def run_pipeline(limit: int = 3, clean: bool = False):
         end_time = datetime.now()
         duration = end_time - start_time
         
-        # Verificar resultados
+        # CORREÇÃO: Forçar salvamento dos arquivos após execução
+        # O CrewAI não salva automaticamente, precisamos fazer isso
+        logger.info("💾 Salvando resultados em arquivos...")
+        success_count = save_crew_results(result)
+        
+        # Verificar resultados salvos
         published_dir = Path("posts_publicados")
         if published_dir.exists():
             published_files = list(published_dir.glob("*.json"))
-            success_count = len(published_files)
-        else:
-            success_count = 0
+            actual_count = len(published_files)
+            if actual_count > success_count:
+                success_count = actual_count
         
         # Exibir resumo
         logger.info(f"""
