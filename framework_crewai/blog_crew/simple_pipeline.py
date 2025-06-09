@@ -207,6 +207,24 @@ def create_slug(title: str) -> str:
     slug = re.sub(r'^-+|-+$', '', slug)
     return slug[:80]  # Limita tamanho
 
+def convert_markdown_to_html(text: str) -> str:
+    """
+    Converte sintaxe Markdown básica para HTML
+    Suporta: negrito (**texto**), itálico (*texto*), código (`código`)
+    """
+    # Processar código inline primeiro para proteger de outras conversões
+    text = re.sub(r'`([^`]+)`', r'<code>\1</code>', text)
+    
+    # Negrito: **texto** ou __texto__
+    text = re.sub(r'\*\*([^\*]+)\*\*', r'<strong>\1</strong>', text)
+    text = re.sub(r'__([^_]+)__', r'<strong>\1</strong>', text)
+    
+    # Itálico: *texto* ou _texto_ (evitar conflito com negrito)
+    text = re.sub(r'(?<!\*)\*([^\*]+)\*(?!\*)', r'<em>\1</em>', text)
+    text = re.sub(r'(?<!_)_([^_]+)_(?!_)', r'<em>\1</em>', text)
+    
+    return text
+
 def process_paragraph_with_links(element) -> Dict:
     """Processa um parágrafo preservando links no formato Sanity"""
     import uuid
@@ -293,6 +311,9 @@ def process_paragraph_with_links(element) -> Dict:
 
 def format_content_blocks(content: str) -> List[Dict]:
     """Formata conteúdo em blocos para o Sanity, preservando imagens e links"""
+    # Converter Markdown para HTML primeiro
+    content = convert_markdown_to_html(content)
+    
     soup = BeautifulSoup(content, 'html.parser')
     
     blocks = []
