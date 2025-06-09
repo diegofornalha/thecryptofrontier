@@ -24,8 +24,7 @@ AGENT_POST_FIELDS = {
     "removed_fields": [
         "categories",
         "tags", 
-        "seo",
-        "cryptoMeta"
+        "seo"
     ]
 }
 
@@ -59,5 +58,4 @@ NÃO PREENCHA estes campos (foram temporariamente removidos):
 - categories
 - tags
 - seo
-- cryptoMeta
 """

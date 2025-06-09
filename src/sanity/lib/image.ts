@@ -10,12 +10,7 @@ const imageBuilder = createImageUrlBuilder({
 
 export const urlForImage = (source: Image | undefined) => {
   if (!source || !source.asset?._ref) {
-    return {
-      url: () => '',
-      width: () => 0,
-      height: () => 0,
-      format: () => ''
-    }
+    return null;
   }
   
   return imageBuilder.image(source)

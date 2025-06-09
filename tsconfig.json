@@ -2,7 +2,13 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@/types": ["src/types/index"],
+      "@/sanity": ["src/sanity/*"],
+      "@/components": ["src/components/*"],
+      "@/lib": ["src/lib/*"],
+      "@/utils": ["src/utils/*"],
+      "@/hooks": ["src/hooks/*"]
     },
     "target": "es2018",
     "lib": [
@@ -27,7 +33,21 @@
         "name": "next"
       }
     ],
-    "strictNullChecks": true
+    // Habilitando strict mode gradualmente
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    // Opções adicionais de qualidade
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": false
   },
   "include": [
     "next-env.d.ts",

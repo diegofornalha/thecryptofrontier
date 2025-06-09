@@ -24,37 +24,30 @@ import { TwitterEmbed } from '@/components/TwitterEmbed';
 // GROQ para pegar todos os slugs para geração estática
 const SLUGS_QUERY = `*[_type == "post" && defined(slug.current)][].slug.current`;
 
-// Interfaces
-interface Post {
+// Interface que reflete nossa query atual
+interface PostData {
   _id: string;
   title: string;
-  slug: { current: string };
-  mainImage?: any;
+  slug: string;
+  mainImage?: {
+    asset: any;
+    alt?: string;
+    caption?: string;
+  };
   content: any[];
   publishedAt: string;
   excerpt?: string;
-  author?: { 
+  author?: {
     _id: string;
-    name?: string;
+    name: string;
     image?: any;
     role?: string;
-    slug?: { current: string };
-    bio?: any[];
+    slug: string;
   };
-  categories?: Array<{
-    _id: string;
-    title: string;
-    slug: { current: string };
-    description?: string;
-  }>;
-  tags?: Array<{
-    _id: string;
-    title: string;
-    slug: { current: string };
-  }>;
-  seo?: any;
-  cryptoMeta?: any;
-  originalSource?: string;
+  seo?: {
+    metaTitle?: string;
+    metaDescription?: string;
+  };
 }
 
 interface PageProps {
@@ -62,12 +55,9 @@ interface PageProps {
 }
 
 // Função para buscar o post
-async function getPost(slug: string): Promise<Post | null> {
+async function getPost(slug: string): Promise<PostData | null> {
   try {
-    const post = await client.fetch(POST_QUERY, { slug }, {
-      // Cache por 1 hora
-      next: { revalidate: 3600 }
-    });
+    const post = await client.fetch(POST_QUERY, { slug });
     return post || null;
   } catch (error) {
     console.error('Erro ao buscar post:', error);
@@ -75,7 +65,59 @@ async function getPost(slug: string): Promise<Post | null> {
   }
 }
 
-// Função para gerar metadata dinâmica
+// Componentes do PortableText
+const portableTextComponents = {
+  types: {
+    image: ({ value }: any) => {
+      if (!value?.asset) return null;
+      
+      const imageBuilder = urlForImage(value);
+      if (!imageBuilder) return null;
+      
+      const imageUrl = imageBuilder.width(800).url();
+      
+      return (
+        <div className="my-6">
+          <Image
+            src={imageUrl}
+            alt={value.alt || 'Imagem do post'}
+            width={800}
+            height={450}
+            style={{ width: '100%', height: 'auto' }}
+            className="rounded-lg"
+          />
+          {value.caption && (
+            <p className="text-sm text-gray-600 text-center mt-2 italic">
+              {value.caption}
+            </p>
+          )}
+        </div>
+      );
+    },
+  },
+  block: {
+    normal: ({ children }: any) => <p className="mb-4">{children}</p>,
+    h1: ({ children }: any) => <h1 className="text-3xl font-bold mb-4 mt-6">{children}</h1>,
+    h2: ({ children }: any) => <h2 className="text-2xl font-bold mb-3 mt-5">{children}</h2>,
+    h3: ({ children }: any) => <h3 className="text-xl font-bold mb-2 mt-4">{children}</h3>,
+  },
+  marks: {
+    link: ({ children, value }: any) => (
+      <a 
+        href={value.href} 
+        className="text-blue-600 hover:underline" 
+        target="_blank" 
+        rel="noopener noreferrer"
+      >
+        {children}
+      </a>
+    ),
+    strong: ({ children }: any) => <strong className="font-bold">{children}</strong>,
+    em: ({ children }: any) => <em className="italic">{children}</em>,
+  },
+};
+
+// Metadata
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const post = await getPost(slug);
@@ -83,235 +125,39 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!post) {
     return {
       title: 'Post não encontrado - The Crypto Frontier',
-      description: 'O post que você está procurando não foi encontrado.',
-      robots: {
-        index: false,
-        follow: false,
-      },
     };
   }
 
-  const ogImage = post.mainImage ? urlForImage(post.mainImage).width(1200).height(630).url() : undefined;
+  let ogImage: string | undefined;
+  if (post.mainImage?.asset) {
+    const imageBuilder = urlForImage(post.mainImage as any);
+    if (imageBuilder) {
+      ogImage = imageBuilder.width(1200).height(630).url();
+    }
+  }
 
   return {
     title: `${post.title} - The Crypto Frontier`,
-    description: post.excerpt || post.seo?.metaDescription || 'Artigo sobre criptomoedas e blockchain',
-    keywords: post.tags?.map(tag => tag.title).join(', '),
-    authors: post.author ? [{ name: post.author.name || 'The Crypto Frontier' }] : undefined,
+    description: post.excerpt || post.seo?.metaDescription || 'Artigo sobre criptomoedas',
     openGraph: {
       title: post.title,
-      description: post.excerpt || 'Artigo sobre criptomoedas e blockchain',
-      type: 'article',
-      publishedTime: post.publishedAt,
-      authors: post.author?.name ? [post.author.name] : undefined,
-      images: ogImage ? [{
-        url: ogImage,
-        width: 1200,
-        height: 630,
-        alt: post.title,
-      }] : [],
-      locale: 'pt_BR',
-      siteName: 'The Crypto Frontier',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: post.title,
-      description: post.excerpt || 'Artigo sobre criptomoedas e blockchain',
-      images: ogImage ? [ogImage] : undefined,
-    },
-    alternates: {
-      canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://thecryptofrontier.com'}/post/${slug}`,
+      description: post.excerpt || 'Artigo sobre criptomoedas',
+      images: ogImage ? [{ url: ogImage }] : [],
     },
   };
 }
 
-// Função para gerar paths estáticos
+// Static params
 export async function generateStaticParams() {
   try {
     const slugs = await client.fetch(SLUGS_QUERY);
-    return slugs.map((slug: string) => ({
-      slug,
-    }));
+    return slugs.map((slug: string) => ({ slug }));
   } catch (error) {
-    console.error('Erro ao buscar slugs:', error);
     return [];
   }
 }
 
-// Função para formatar data
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('pt-BR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
-};
-
-// Componentes para PortableText - Estilo Crypto Basic Melhorado
-const createCryptoBasicComponents = () => {
-  let paragraphCount = 0;
-  
-  return {
-  types: {
-    image: ({ value }: any) => {
-      if (!value || !value.asset) {
-        return null;
-      }
-      
-      const imageUrl = urlForImage(value).url();
-      if (!imageUrl) {
-        return null;
-      }
-      
-      return (
-        <div className="crypto-post-image">
-          <Image
-            src={imageUrl}
-            alt={value.alt || 'Imagem do artigo'}
-            width={770}
-            height={433}
-            style={{ width: '100%', height: 'auto', display: 'block' }}
-            className="rounded-lg"
-          />
-          {value.caption && (
-            <p style={{ 
-              fontSize: '14px', 
-              color: '#666', 
-              textAlign: 'center', 
-              marginTop: '12px',
-              fontStyle: 'italic' 
-            }}>
-              {value.caption}
-            </p>
-          )}
-        </div>
-      );
-    },
-  },
-  block: {
-    normal: ({ children }: any) => {
-      // Incrementa o contador e verifica se é o primeiro parágrafo
-      const currentCount = paragraphCount++;
-      const isFirstParagraph = currentCount === 0;
-      
-      return (
-        <p className={`crypto-post-paragraph ${isFirstParagraph ? 'first-paragraph' : ''}`}
-           style={isFirstParagraph ? { fontWeight: 600, fontSize: '20px', lineHeight: '1.6', color: '#1a1a1a' } : {}}>
-          {children}
-        </p>
-      );
-    },
-    h1: ({ children }: any) => <h1 className="crypto-heading-1">{children}</h1>,
-    h2: ({ children }: any) => <h2 className="crypto-heading-2">{children}</h2>,
-    h3: ({ children }: any) => <h3 className="crypto-heading-3">{children}</h3>,
-    blockquote: ({ children }: any) => (
-      <blockquote className="crypto-blockquote">
-        {children}
-      </blockquote>
-    ),
-  },
-  marks: {
-    link: ({ children, value }: any) => {
-      const url = value.href;
-      
-      // Detecta links do Twitter/X
-      if (url && (url.includes('twitter.com/') || url.includes('x.com/')) && url.includes('/status/')) {
-        return <TwitterEmbed url={url} />;
-      }
-      
-      // Links normais
-      return (
-        <a href={url} className="crypto-link" target="_blank" rel="noopener">
-          {children}
-        </a>
-      );
-    },
-    internalLink: ({ children, value }: any) => (
-      <Link href={`/post/${value.slug}`} className="crypto-link">
-        {children}
-      </Link>
-    ),
-    strong: ({ children }: any) => <strong className="font-bold text-gray-900">{children}</strong>,
-    em: ({ children }: any) => <em className="italic">{children}</em>,
-    code: ({ children }: any) => <code className="crypto-inline-code">{children}</code>,
-  },
-  list: {
-    bullet: ({ children }: any) => <ul className="crypto-list crypto-list-bullet">{children}</ul>,
-    number: ({ children }: any) => <ol className="crypto-list crypto-list-number">{children}</ol>,
-  },
-  listItem: {
-    bullet: ({ children }: any) => <li className="crypto-list-item">{children}</li>,
-    number: ({ children }: any) => <li className="crypto-list-item">{children}</li>,
-  },
-  };
-};
-
-// Componentes para PortableText - Original (mantido para referência)
-const portableTextComponents = {
-  types: {
-    image: ({ value }: any) => {
-      // Validar se há uma imagem válida
-      if (!value || !value.asset) {
-        return null;
-      }
-      
-      const imageUrl = urlForImage(value).url();
-      if (!imageUrl) {
-        return null;
-      }
-      
-      return (
-        <div className="my-8 flex flex-col items-center">
-          <Image
-            src={imageUrl}
-            alt={value.alt || 'Imagem do artigo'}
-            width={800}
-            height={800}
-            className="rounded-lg object-contain max-w-full h-auto"
-          />
-          {value.caption && (
-            <p className="text-sm text-muted-foreground mt-2 text-center italic">
-              {value.caption}
-            </p>
-          )}
-        </div>
-      );
-    },
-  },
-  block: {
-    normal: ({ children }: any) => <p className="mb-4 leading-relaxed">{children}</p>,
-    h1: ({ children }: any) => <h1 className="text-3xl font-bold mb-6 mt-8">{children}</h1>,
-    h2: ({ children }: any) => <h2 className="text-2xl font-bold mb-4 mt-6">{children}</h2>,
-    h3: ({ children }: any) => <h3 className="text-xl font-bold mb-3 mt-5">{children}</h3>,
-    blockquote: ({ children }: any) => (
-      <blockquote className="border-l-4 border-primary pl-4 italic my-6 text-muted-foreground">
-        {children}
-      </blockquote>
-    ),
-  },
-  marks: {
-    link: ({ children, value }: any) => (
-      <a href={value.href} className="text-primary hover:underline" target="_blank" rel="noopener">
-        {children}
-      </a>
-    ),
-    internalLink: ({ children, value }: any) => (
-      <Link href={`/post/${value.slug}`} className="text-primary hover:underline">
-        {children}
-      </Link>
-    ),
-  },
-  list: {
-    bullet: ({ children }: any) => <ul className="list-disc list-inside mb-4 space-y-2">{children}</ul>,
-    number: ({ children }: any) => <ol className="list-decimal list-inside mb-4 space-y-2">{children}</ol>,
-  },
-  listItem: {
-    bullet: ({ children }: any) => <li className="leading-relaxed">{children}</li>,
-    number: ({ children }: any) => <li className="leading-relaxed">{children}</li>,
-  },
-};
-
-// Componente da página do post
+// Componente principal
 export default async function PostPage({ params }: PageProps) {
   const { slug } = await params;
   const post = await getPost(slug);
@@ -320,129 +166,106 @@ export default async function PostPage({ params }: PageProps) {
     notFound();
   }
 
-  // Links de navegação
-  const navLinks: any = [
-    { label: "Home", url: "/" },
-    { label: "Buscar", url: "/buscas" },
-    { label: "Blog", url: "/blog" },
-    { label: "Studio", url: "/studio" }
-  ];
+     // URL da imagem principal
+   let mainImageUrl = '';
+   if (post.mainImage?.asset) {
+     const imageBuilder = urlForImage(post.mainImage as any);
+     if (imageBuilder) {
+       mainImageUrl = imageBuilder.width(1200).url();
+     }
+   }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
 
   return (
-    <div className="min-h-screen bg-white">
-      <NewsHeader />
-      <ReadingProgress />
-      
-      {/* Layout padrão The Crypto Basic */}
-      <div className="pt-[70px]">
-        {/* Breaking News Ticker */}
-        <BreakingNewsTicker />
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      {/* Breadcrumb */}
+      <nav className="mb-6 text-sm">
+        <Link href="/" className="text-blue-600 hover:underline">Home</Link>
+        <span className="mx-2">›</span>
+        <Link href="/blog" className="text-blue-600 hover:underline">Blog</Link>
+        <span className="mx-2">›</span>
+        <span className="text-gray-600">{post.title}</span>
+      </nav>
+
+      <article>
+        {/* Título */}
+        <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
         
-        <div className="crypto-container" style={{ marginTop: '30px' }}>
-        <div className="crypto-content-wrapper">
-          <article className="crypto-main-content">
-            {/* Breadcrumb */}
-            <nav className="crypto-breadcrumb">
-              <Link href="/">Home</Link>
-              <span style={{ margin: '0 8px', color: '#999' }}>›</span>
-              <Link href="/blog">Crypto News</Link>
-              <span style={{ margin: '0 8px', color: '#999' }}>›</span>
-              <span>{post.title}</span>
-            </nav>
+        {/* Meta */}
+        <div className="flex items-center gap-4 text-gray-600 mb-6">
+          {post.author?.name && <span>Por {post.author.name}</span>}
+          <span>{formatDate(post.publishedAt)}</span>
+        </div>
 
-            {/* Header do post */}
-            <header className="crypto-post-header">
-              {/* Título */}
-              <h1 className="crypto-post-title">{post.title}</h1>
+        {/* Resumo */}
+        {post.excerpt && (
+          <div className="text-lg text-gray-700 mb-8 p-4 bg-gray-50 rounded-lg">
+            {post.excerpt}
+          </div>
+        )}
 
-              {/* Meta informações */}
-              <div className="crypto-post-meta">
-                <span style={{ textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.5px' }}>
-                  ESCRITO POR: {post.author?.name ? (
-                    <strong style={{ color: '#4db2ec' }}>{post.author.name.toUpperCase()}</strong>
-                  ) : 'ADMIN'}
-                </span>
-                <span style={{ textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.5px' }}>
-                  DATA: <strong>{formatDate(post.publishedAt).toUpperCase()}</strong>
-                </span>
-              </div>
-            </header>
-
-            {/* Imagem principal */}
-            {post.mainImage && post.mainImage.asset && (
-              <div className="crypto-post-image">
-                <Image
-                  src={urlForImage(post.mainImage).url()}
-                  alt={post.mainImage.alt || post.title}
-                  width={770}
-                  height={433}
-                  style={{ 
-                    width: '100%', 
-                    height: 'auto', 
-                    display: 'block',
-                    backgroundColor: '#f0f0f0' // Cinza claro como placeholder
-                  }}
-                  priority
-                  placeholder="empty"
-                />
-                {post.mainImage.caption && (
-                  <p style={{ 
-                    fontSize: '12px', 
-                    color: '#666', 
-                    textAlign: 'center', 
-                    marginTop: '10px',
-                    fontStyle: 'italic' 
-                  }}>
-                    {post.mainImage.caption}
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* Social Share */}
-            <div className="my-6 pb-6 border-b border-gray-200">
-              <SocialShare 
-                url={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://thecryptofrontier.com'}/post/${post.slug.current}`}
-                title={post.title}
-              />
-            </div>
-
-            {/* Conteúdo do post */}
-            <div className="crypto-post-content">
-              {post.content && (
-                <PortableText value={post.content} components={createCryptoBasicComponents()} />
-              )}
-            </div>
-
-            {/* Tags */}
-            {post.tags && post.tags.length > 0 && (
-              <PostTags tags={post.tags} className="mt-6 mb-8" />
-            )}
-
-            {/* Author Card */}
-            {post.author && (
-              <div className="mt-8">
-                <AuthorCard author={post.author} />
-              </div>
-            )}
-
-            {/* Related Posts */}
-            <RelatedPosts 
-              currentPostId={post._id}
-              categories={post.categories?.map(cat => cat._id) || []}
+        {/* Imagem principal */}
+        {mainImageUrl && (
+          <div className="mb-8">
+            <Image
+              src={mainImageUrl}
+              alt={post.mainImage?.alt || post.title}
+              width={1200}
+              height={675}
+              style={{ width: '100%', height: 'auto' }}
+              className="rounded-lg"
+              priority
             />
+            {post.mainImage?.caption && (
+              <p className="text-sm text-gray-600 text-center mt-2 italic">
+                {post.mainImage.caption}
+              </p>
+            )}
+          </div>
+        )}
 
-          </article>
-
-          {/* Sidebar */}
-          <aside className="crypto-sidebar space-y-8">
-            <PopularPostsWidget />
-          </aside>
+        {/* Conteúdo */}
+        <div className="prose prose-lg max-w-none">
+          <PortableText value={post.content} components={portableTextComponents} />
         </div>
-        </div>
-      </div>
 
-      <CryptoBasicFooter />
+                 {/* Autor */}
+         {post.author && (
+           <div className="mt-12 p-6 bg-gray-50 rounded-lg">
+             <h3 className="text-lg font-bold mb-4">Sobre o autor</h3>
+             <div className="flex items-start gap-4">
+               {post.author.image && (() => {
+                 const imageBuilder = urlForImage(post.author.image);
+                 if (imageBuilder) {
+                   return (
+                     <Image
+                       src={imageBuilder.width(80).height(80).url()}
+                       alt={post.author.name}
+                       width={80}
+                       height={80}
+                       className="rounded-full"
+                     />
+                   );
+                 }
+                 return null;
+               })()}
+               <div>
+                 <h4 className="font-bold">{post.author.name}</h4>
+                 {post.author.role && (
+                   <p className="text-gray-600">{post.author.role}</p>
+                 )}
+               </div>
+             </div>
+           </div>
+         )}
+      </article>
     </div>
   );
 }

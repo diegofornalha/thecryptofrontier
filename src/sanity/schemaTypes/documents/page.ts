@@ -1,9 +1,11 @@
 import { defineField, defineType } from 'sanity';
+import { FiLayout } from 'react-icons/fi';
 
 export default defineType({
   name: 'page',
   title: 'Página',
   type: 'document',
+  icon: FiLayout,
   fields: [
     defineField({
       name: 'title',

@@ -233,13 +233,6 @@ class AuthorReference(BaseModel):
             d["_ref"] = d.pop("ref")
         return d
 
-class CryptoMeta(BaseModel):
-    """Modelo para metadados de criptomoeda"""
-    symbol: Optional[str] = None
-    current_price: Optional[float] = None
-    market_cap: Optional[float] = None
-    price_change_24h: Optional[float] = None
-
 class Post(BaseModel):
     """Modelo principal para posts"""
     type: Literal["post"] = Field("post", alias="_type")
@@ -251,7 +244,6 @@ class Post(BaseModel):
     tags: Optional[List[TagReference]] = None
     author: Optional[AuthorReference] = None
     excerpt: Optional[str] = Field(None, max_length=300)
-    cryptoMeta: Optional[CryptoMeta] = None
     content: List[Union[Block, Dict[str, Any]]]
     seo: Optional[SEO] = None
     originalSource: Optional[OriginalSource] = None

@@ -1,9 +1,11 @@
 import { defineField, defineType } from 'sanity';
+import { FiCreditCard } from 'react-icons/fi';
 
 export default defineType({
   name: 'footer',
   title: 'Rodapé',
   type: 'document',
+  icon: FiCreditCard,
   fields: [
     defineField({
       name: 'copyrightText',

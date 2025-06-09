@@ -4,10 +4,10 @@ import { SchemaTypeDefinition } from 'sanity';
 // Tipos de documentos principais
 import page from './documents/page';
 import post from './documents/post';
-import agentPost from './documents/agentPost';
-import category from './documents/category';
+// agentPost removido - consolidado com post usando campo 'source'
+// category removido - não está sendo usado
 import author from './documents/author';
-import tag from './documents/tag';
+// tag removido - não está sendo usado
 
 // Tipos de configuração
 import siteConfig from './settings/siteConfig';
@@ -18,17 +18,19 @@ import footer from './settings/footer';
 import mainImage from './objects/mainImage';
 import seo from './objects/seo';
 import navLink from './objects/navLink';
-import cryptoMeta from './objects/cryptoMeta';
+import highlightBox from './objects/highlightBox';
+import cryptoWidget from './objects/cryptoWidget';
+import embedBlock from './objects/embedBlock';
 
 // Exportando todos os schemas
 export const schemaTypes = [
   // Documentos
   post,
-  agentPost,
+  // agentPost removido - consolidado com post
   page,
-  category,
+  // category removido - não está sendo usado
   author,
-  tag,
+  // tag removido - não está sendo usado
   
   // Configurações
   siteConfig,
@@ -39,7 +41,9 @@ export const schemaTypes = [
   mainImage,
   seo,
   navLink,
-  cryptoMeta,
+  highlightBox,
+  cryptoWidget,
+  embedBlock,
 ];
 
 // O schema exportado para o Sanity Studio

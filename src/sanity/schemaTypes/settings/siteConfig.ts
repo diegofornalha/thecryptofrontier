@@ -1,9 +1,11 @@
 import { defineField, defineType } from 'sanity';
+import { FiSettings } from 'react-icons/fi';
 
 export default defineType({
   name: 'siteConfig',
   title: 'Configuração do Site',
   type: 'document',
+  icon: FiSettings,
   fields: [
     defineField({
       name: 'title',
