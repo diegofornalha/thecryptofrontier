@@ -37,8 +37,8 @@ ALGOLIA_INDEX_NAME = os.environ.get("ALGOLIA_INDEX_NAME", "development_mcpx_cont
 def get_sanity_documents():
     """Obtém todos os documentos do tipo post do Sanity"""
     # Obter token do Sanity
-    sanity_token = os.environ.get("SANITY_API_TOKEN")
-    if not sanity_token:
+    SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN")
+    if not SANITY_API_TOKEN:
         logger.error("SANITY_API_TOKEN não está definido")
         sys.exit(1)
     
@@ -51,7 +51,7 @@ def get_sanity_documents():
     
     # Headers
     headers = {
-        "Authorization": f"Bearer {sanity_token}"
+        "Authorization": f"Bearer {SANITY_API_TOKEN}"
     }
     
     try:

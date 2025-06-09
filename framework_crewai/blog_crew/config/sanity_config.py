@@ -21,21 +21,21 @@ SANITY_CONFIG = {
 
 # Token padrão do Sanity com permissões corretas (usado apenas se não houver variável de ambiente)
 # Note: É preferível usar variáveis de ambiente para tokens
-DEFAULT_SANITY_TOKEN = os.environ.get("SANITY_API_TOKEN", "")
+DEFAULT_SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN", "")
 
 # Se o token estiver vazio, verificar se existe arquivo .env e carregá-lo
 def load_env_token():
     """Carrega o token do arquivo .env se existir"""
-    global DEFAULT_SANITY_TOKEN
-    if not DEFAULT_SANITY_TOKEN:
+    global DEFAULT_SANITY_API_TOKEN
+    if not DEFAULT_SANITY_API_TOKEN:
         env_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
         if os.path.exists(env_file):
             with open(env_file, "r") as f:
                 for line in f:
                     if line.startswith("SANITY_API_TOKEN="):
-                        DEFAULT_SANITY_TOKEN = line.split("=", 1)[1].strip()
+                        DEFAULT_SANITY_API_TOKEN = line.split("=", 1)[1].strip()
                         break
-    return DEFAULT_SANITY_TOKEN
+    return DEFAULT_SANITY_API_TOKEN
 
 # Endpoint da API do Sanity
 def get_sanity_api_url(project_id=None, dataset=None, api_version=None):

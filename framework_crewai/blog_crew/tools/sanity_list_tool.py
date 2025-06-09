@@ -45,7 +45,7 @@ class SanityListDocumentsTool(BaseTool):
     description: str = "Lista documentos no Sanity CMS de um tipo específico"
     args_schema: Type[BaseModel] = ListDocumentsInput
     
-    def _get_sanity_token(self) -> str:
+    def _get_SANITY_API_TOKEN(self) -> str:
         """
         Obtém o token de API do Sanity das variáveis de ambiente.
         
@@ -64,7 +64,7 @@ class SanityListDocumentsTool(BaseTool):
         """Executa a listagem de documentos."""
         try:
             # Obter token do Sanity
-            sanity_token = self._get_sanity_token()
+            SANITY_API_TOKEN = self._get_SANITY_API_TOKEN()
             
             # Construir a query GROQ
             query = f'*[_type == "{document_type}"][0...{limit}]{{{return_fields}}}'
@@ -75,7 +75,7 @@ class SanityListDocumentsTool(BaseTool):
             
             # Headers
             headers = {
-                "Authorization": f"Bearer {sanity_token}"
+                "Authorization": f"Bearer {SANITY_API_TOKEN}"
             }
             
             # Fazer a requisição

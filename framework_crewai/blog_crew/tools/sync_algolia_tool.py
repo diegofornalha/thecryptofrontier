@@ -171,8 +171,8 @@ def get_sanity_documents(document_type, fields=None):
         }"""
     
     # Obter o token do Sanity
-    sanity_token = os.environ.get("SANITY_API_TOKEN")
-    if not sanity_token:
+    SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN")
+    if not SANITY_API_TOKEN:
         raise AlgoliaToolError("SANITY_API_TOKEN não está definido")
     
     # Construir a query GROQ
@@ -184,7 +184,7 @@ def get_sanity_documents(document_type, fields=None):
     
     # Headers
     headers = {
-        "Authorization": f"Bearer {sanity_token}"
+        "Authorization": f"Bearer {SANITY_API_TOKEN}"
     }
     
     # Fazer a requisição

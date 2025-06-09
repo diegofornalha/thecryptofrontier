@@ -36,7 +36,7 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 # Configurações Sanity
 SANITY_PROJECT_ID = os.getenv("SANITY_PROJECT_ID", "xyx45wfp")
 SANITY_DATASET = os.getenv("SANITY_DATASET", "production")
-SANITY_TOKEN = os.getenv("SANITY_API_TOKEN")
+SANITY_API_TOKEN = os.getenv("SANITY_API_TOKEN")
 
 def test_image_generation():
     """Testa geração de imagem diretamente"""
@@ -99,7 +99,7 @@ def test_image_generation():
         
         upload_url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v2021-03-25/assets/images/{SANITY_DATASET}"
         headers = {
-            "Authorization": f"Bearer {SANITY_TOKEN}",
+            "Authorization": f"Bearer {SANITY_API_TOKEN}",
             "Content-Type": "image/png"
         }
         

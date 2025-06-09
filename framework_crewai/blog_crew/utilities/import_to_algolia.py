@@ -16,7 +16,7 @@ from datetime import datetime
 ALGOLIA_APP_ID = os.environ.get("ALGOLIA_APP_ID", "42TZWHW8UP")
 ALGOLIA_ADMIN_API_KEY = os.environ.get("ALGOLIA_ADMIN_API_KEY", "d0cb55ec8f07832bc5f57da0bd25c535")  # Admin API Key
 ALGOLIA_INDEX_NAME = os.environ.get("ALGOLIA_INDEX_NAME", "development_mcpx_content")
-SANITY_TOKEN = os.environ.get("SANITY_API_TOKEN")
+SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN")
 
 def obter_documentos_do_sanity(tipo_documento="post"):
     """
@@ -29,7 +29,7 @@ def obter_documentos_do_sanity(tipo_documento="post"):
         list: Lista de documentos preparados para o Algolia
     """
     # Verificar token do Sanity
-    if not SANITY_TOKEN:
+    if not SANITY_API_TOKEN:
         print("Erro: SANITY_API_TOKEN não está definido", file=sys.stderr)
         sys.exit(1)
     
