@@ -53,7 +53,6 @@ interface Post {
     slug: { current: string };
   }>;
   seo?: any;
-  cryptoMeta?: any;
   originalSource?: string;
 }
 

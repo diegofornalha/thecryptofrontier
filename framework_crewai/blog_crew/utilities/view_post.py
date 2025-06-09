@@ -44,8 +44,7 @@ def view_post(post_id):
         tags[]->{{title, slug}},
         author->{{name, role}},
         originalSource,
-        seo,
-        cryptoMeta
+        seo
     }}'''
     
     url = f"{get_api_url()}?query={query}"
@@ -101,16 +100,6 @@ def view_post(post_id):
                 print(f"Site: {source.get('site', 'N/A')}")
                 print(f"Título: {source.get('title', 'N/A')}")
                 print(f"URL: {source.get('url', 'N/A')}")
-            
-            # Crypto Meta
-            crypto = post.get('cryptoMeta')
-            if crypto:
-                print(f"\n💰 INFORMAÇÕES CRYPTO")
-                print("-"*40)
-                print(f"Moeda: {crypto.get('coinName', 'N/A')} ({crypto.get('coinSymbol', 'N/A')})")
-                print(f"Preço atual: ${crypto.get('currentPrice', 'N/A')}")
-                print(f"Variação 24h: {crypto.get('priceChange24h', 'N/A')}%")
-                print(f"Market Cap: ${crypto.get('marketCap', 'N/A')}")
             
             # SEO
             seo = post.get('seo')

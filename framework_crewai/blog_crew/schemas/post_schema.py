@@ -70,11 +70,6 @@ schema = {
         'validation': 'Rule => Rule.max(300)'
     },
         {
-        'name': 'cryptoMeta',
-        'title': 'Informações da Criptomoeda',
-        'type': 'cryptoMeta'
-    },
-        {
         'name': 'content',
         'title': 'Conteúdo',
         'type': 'array',

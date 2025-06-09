@@ -1,5 +1,6 @@
 import { StructureBuilder } from 'sanity/structure';
 import { BiEdit, BiCog, BiBookContent, BiUser } from 'react-icons/bi';
+import { PostPreview } from '../components/PostPreview';
 
 // Definição da estrutura customizada para o Sanity Studio
 export const structure = (S: StructureBuilder) => 
@@ -15,6 +16,17 @@ export const structure = (S: StructureBuilder) =>
           S.documentTypeList('post')
             .title('Posts do Blog')
             .defaultOrdering([{field: 'publishedAt', direction: 'desc'}])
+            .child(documentId =>
+              S.document()
+                .documentId(documentId)
+                .schemaType('post')
+                .views([
+                  S.view.form(),
+                  S.view
+                    .component(PostPreview)
+                    .title('Preview')
+                ])
+            )
         ),
       
       
@@ -35,6 +47,17 @@ export const structure = (S: StructureBuilder) =>
         .child(
           S.documentTypeList('page')
             .title('Páginas')
+            .child(documentId =>
+              S.document()
+                .documentId(documentId)
+                .schemaType('page')
+                .views([
+                  S.view.form(),
+                  S.view
+                    .component(PostPreview)
+                    .title('Preview')
+                ])
+            )
         ),
       
       // Divider

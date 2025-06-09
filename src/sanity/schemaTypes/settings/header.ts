@@ -1,9 +1,11 @@
 import { defineField, defineType } from 'sanity';
+import { FiNavigation } from 'react-icons/fi';
 
 export default defineType({
   name: 'header',
   title: 'Cabeçalho',
   type: 'document',
+  icon: FiNavigation,
   fields: [
     defineField({
       name: 'title',

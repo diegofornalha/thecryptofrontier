@@ -135,12 +135,7 @@ headers = {
   author: { _ref: string },
   categories: [{ _ref: string }],
   tags: [{ _ref: string }],
-  publishedAt: datetime,
-  cryptoMeta: {
-    ticker: string,
-    exchange: string,
-    category: string
-  }
+  publishedAt: datetime
 }
 ```
 

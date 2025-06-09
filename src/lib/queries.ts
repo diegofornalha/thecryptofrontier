@@ -73,7 +73,6 @@ export const POST_QUERY = `*[_type in ["post", "agentPost"] && slug.current == $
     ${tagFields}
   },
   seo,
-  cryptoMeta,
   originalSource
 }`;
 
