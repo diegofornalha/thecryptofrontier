@@ -50,50 +50,69 @@ def convert_markdown_to_sanity_objects(content_text=None, **kwargs):
             paragraphs = [content_text.strip()]
         
         for paragraph in paragraphs:
-            # Verificar se é uma imagem markdown
-            image_match = re.search(r'\[([^\]]*)\]\((https?://[^\s)]+(?:\.jpg|\.jpeg|\.png|\.gif|\.webp|\.svg)[^\s)]*)\)', paragraph, re.IGNORECASE)
-            if image_match:
-                alt_text = image_match.group(1)
-                image_url = image_match.group(2)
-                
-                # Criar objeto de imagem para Sanity
-                image_block = {
-                    "_type": "image",
-                    "_key": str(uuid.uuid4())[:8],
-                    "asset": {
-                        "_type": "reference",
-                        "_ref": f"image-{str(uuid.uuid4())[:8]}-{image_url.split('/')[-1]}"
-                    },
-                    "alt": alt_text,
-                    "caption": alt_text,
-                    "url": image_url  # Incluindo URL para processamento posterior
-                }
-                processed_blocks.append(image_block)
-                continue
+            # Detectar qualquer link markdown primeiro
+            link_match = re.search(r'\[([^\]]*)\]\((https?://[^\s)]+)\)', paragraph)
             
-            # Verificar se é um link do Twitter/X
-            twitter_match = re.search(r'\[([^\]]*)\]\((https?://(?:twitter\.com|x\.com)/[^\s)]+/status/\d+[^\s)]*)\)', paragraph)
-            if twitter_match:
-                link_text = twitter_match.group(1)
-                twitter_url = twitter_match.group(2)
+            if link_match:
+                link_text = link_match.group(1)
+                link_url = link_match.group(2)
                 
-                # Criar objeto de embed do Twitter para Sanity
-                twitter_block = {
-                    "_type": "embedBlock",
-                    "_key": str(uuid.uuid4())[:8],
-                    "embedType": "twitter",
-                    "url": twitter_url,
-                    "caption": link_text
-                }
-                processed_blocks.append(twitter_block)
-                continue
-            
-            # Verificar se contém links markdown normais
-            if re.search(r'\[([^\]]*)\]\(([^)]+)\)', paragraph):
-                # Processar links normais como blocos de texto com anotações
-                text_block = process_paragraph_with_links(paragraph)
-                processed_blocks.append(text_block)
-                continue
+                # Verificar se é uma imagem (extensões tradicionais ou URLs de imagem conhecidas)
+                is_image = (
+                    # Extensões de arquivo tradicionais
+                    re.search(r'\.(jpg|jpeg|png|gif|webp|svg)(\?[^)]*)?$', link_url, re.IGNORECASE) or
+                    # URLs do Twitter media
+                    'pbs.twimg.com/media' in link_url or
+                    # Outros serviços de imagem conhecidos
+                    'imgur.com' in link_url or
+                    'i.redd.it' in link_url or
+                    'format=jpg' in link_url or 
+                    'format=png' in link_url or
+                    'format=jpeg' in link_url or
+                    'format=gif' in link_url or
+                    'format=webp' in link_url
+                )
+                
+                # Verificar se é um link do Twitter/X (posts, não imagens)
+                is_twitter = (
+                    ('twitter.com' in link_url or 'x.com' in link_url) and
+                    '/status/' in link_url and
+                    'pbs.twimg.com' not in link_url  # Excluir imagens do Twitter
+                )
+                
+                if is_image:
+                    # Criar objeto de imagem para Sanity
+                    image_block = {
+                        "_type": "image",
+                        "_key": str(uuid.uuid4())[:8],
+                        "asset": {
+                            "_type": "reference",
+                            "_ref": f"image-{str(uuid.uuid4())[:8]}-{link_url.split('/')[-1].split('?')[0]}"
+                        },
+                        "alt": link_text,
+                        "caption": link_text,
+                        "url": link_url  # Incluindo URL para processamento posterior
+                    }
+                    processed_blocks.append(image_block)
+                    continue
+                    
+                elif is_twitter:
+                    # Criar objeto de embed do Twitter para Sanity
+                    twitter_block = {
+                        "_type": "embedBlock",
+                        "_key": str(uuid.uuid4())[:8],
+                        "embedType": "twitter",
+                        "url": link_url,
+                        "caption": link_text
+                    }
+                    processed_blocks.append(twitter_block)
+                    continue
+                    
+                else:
+                    # Processar como link normal em um bloco de texto
+                    text_block = process_paragraph_with_links(paragraph)
+                    processed_blocks.append(text_block)
+                    continue
             
             # Processar como parágrafo normal
             if paragraph.startswith('# '):

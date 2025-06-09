@@ -9,7 +9,23 @@ const imageBuilder = createImageUrlBuilder({
 })
 
 export const urlForImage = (source: Image | undefined) => {
-  if (!source || !source.asset?._ref) {
+  // Verificar se source existe
+  if (!source) {
+    return null;
+  }
+  
+  // Verificar se tem asset (pode ser _ref ou objeto expandido)
+  if (!source.asset) {
+    return null;
+  }
+  
+  // Se asset é um objeto expandido com _id, criar a referência
+  if (source.asset._id && !source.asset._ref) {
+    source.asset._ref = source.asset._id;
+  }
+  
+  // Se ainda não tem _ref, retornar null
+  if (!source.asset._ref) {
     return null;
   }
   
