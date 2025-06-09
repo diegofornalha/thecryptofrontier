@@ -18,6 +18,7 @@ from openai import OpenAI
 from typing import List, Dict, Optional
 import hashlib
 from dotenv import load_dotenv
+from bs4 import BeautifulSoup, NavigableString
 
 # Carregar variáveis de ambiente
 load_dotenv()
@@ -206,17 +207,184 @@ def create_slug(title: str) -> str:
     slug = re.sub(r'^-+|-+$', '', slug)
     return slug[:80]  # Limita tamanho
 
-def format_content_blocks(content: str) -> List[Dict]:
-    """Formata conteúdo em blocos para o Sanity"""
-    # Remove tags HTML
-    content = re.sub(r'<[^>]+>', '', content)
+def process_paragraph_with_links(element) -> Dict:
+    """Processa um parágrafo preservando links no formato Sanity"""
+    import uuid
+    block_key = str(uuid.uuid4())[:8]
     
-    # Divide em parágrafos
-    paragraphs = [p.strip() for p in content.split('\n\n') if p.strip()]
+    block = {
+        "_type": "block",
+        "_key": block_key,
+        "style": "normal",
+        "markDefs": [],
+        "children": []
+    }
+    
+    span_count = 0
+    mark_count = 0
+    
+    def process_element(el, parent_marks=[]):
+        nonlocal span_count, mark_count
+        
+        if isinstance(el, NavigableString):
+            text = str(el)
+            if text.strip():
+                block["children"].append({
+                    "_type": "span",
+                    "_key": f"span{span_count}",
+                    "text": text,
+                    "marks": parent_marks.copy()
+                })
+                span_count += 1
+        
+        elif el.name == 'a':
+            # Criar markDef para o link
+            href = el.get('href', '')
+            if href:
+                mark_key = f"link{mark_count}"
+                mark_def = {
+                    "_type": "link",
+                    "_key": mark_key,
+                    "href": href
+                }
+                
+                # Adicionar target blank se presente
+                if el.get('target') == '_blank':
+                    mark_def["blank"] = True
+                
+                block["markDefs"].append(mark_def)
+                
+                # Processar conteúdo do link com a marca
+                new_marks = parent_marks + [mark_key]
+                for child in el.children:
+                    process_element(child, new_marks)
+                
+                mark_count += 1
+            else:
+                # Link sem href, processar como texto normal
+                for child in el.children:
+                    process_element(child, parent_marks)
+        
+        elif el.name in ['strong', 'b']:
+            new_marks = parent_marks + ['strong']
+            for child in el.children:
+                process_element(child, new_marks)
+        
+        elif el.name in ['em', 'i']:
+            new_marks = parent_marks + ['em']
+            for child in el.children:
+                process_element(child, new_marks)
+        
+        elif el.name == 'code':
+            new_marks = parent_marks + ['code']
+            for child in el.children:
+                process_element(child, new_marks)
+        
+        else:
+            # Outros elementos, processar filhos
+            for child in el.children:
+                process_element(child, parent_marks)
+    
+    # Processar todos os filhos do elemento
+    for child in element.children:
+        process_element(child)
+    
+    return block
+
+def format_content_blocks(content: str) -> List[Dict]:
+    """Formata conteúdo em blocos para o Sanity, preservando imagens e links"""
+    soup = BeautifulSoup(content, 'html.parser')
     
     blocks = []
-    for i, para in enumerate(paragraphs[:10]):  # Limita a 10 parágrafos
-        if len(para) > 50:  # Ignora parágrafos muito curtos
+    block_count = 0
+    processed_images = set()  # Para evitar duplicatas
+    
+    # Processar todos os elementos relevantes
+    elements = soup.find_all(['p', 'figure', 'img', 'h1', 'h2', 'h3', 'h4', 'blockquote'])
+    
+    for element in elements:
+        if element.name == 'p':
+            # Verificar se tem conteúdo significativo
+            if element.get_text(strip=True):
+                block = process_paragraph_with_links(element)
+                if block["children"]:  # Só adicionar se tiver conteúdo
+                    blocks.append(block)
+                    block_count += 1
+                
+        elif element.name in ['figure']:
+            # Processar figure com img
+            img_tag = element.find('img')
+            if img_tag and img_tag.get('src'):
+                img_url = img_tag.get('src')
+                
+                # Evitar duplicatas
+                if img_url not in processed_images:
+                    processed_images.add(img_url)
+                    
+                    img_alt = img_tag.get('alt', '')
+                    caption_elem = element.find('figcaption')
+                    caption = caption_elem.get_text(strip=True) if caption_elem else ''
+                    
+                    # Criar bloco de imagem do Sanity
+                    blocks.append({
+                        "_type": "image",
+                        "_key": f"image{block_count}",
+                        "url": img_url,
+                        "alt": img_alt or caption or "Imagem do artigo",
+                        "caption": caption if caption else None
+                    })
+                    block_count += 1
+                    
+        elif element.name == 'img':
+            # Processar img solta (não dentro de figure)
+            img_url = element.get('src')
+            if img_url and img_url not in processed_images:
+                processed_images.add(img_url)
+                
+                img_alt = element.get('alt', '')
+                
+                # Criar bloco de imagem do Sanity
+                blocks.append({
+                    "_type": "image",
+                    "_key": f"image{block_count}",
+                    "url": img_url,
+                    "alt": img_alt or "Imagem do artigo",
+                    "caption": None
+                })
+                block_count += 1
+                
+        elif element.name in ['h1', 'h2', 'h3', 'h4']:
+            text = element.get_text(strip=True)
+            if text:
+                blocks.append({
+                    "_type": "block",
+                    "_key": f"block{block_count}",
+                    "style": element.name,
+                    "markDefs": [],
+                    "children": [{
+                        "_type": "span",
+                        "_key": f"span{block_count}",
+                        "text": text,
+                        "marks": []
+                    }]
+                })
+                block_count += 1
+                
+        elif element.name == 'blockquote':
+            # Processar blockquote preservando formatação interna
+            if element.get_text(strip=True):
+                block = process_paragraph_with_links(element)
+                block["style"] = "blockquote"
+                if block["children"]:
+                    blocks.append(block)
+                    block_count += 1
+    
+    # Fallback se não conseguiu processar
+    if not blocks:
+        text_content = soup.get_text(separator='\n\n', strip=True)
+        paragraphs = [p.strip() for p in text_content.split('\n\n') if p.strip() and len(p.strip()) > 50]
+        
+        for i, para in enumerate(paragraphs[:15]):
             blocks.append({
                 "_type": "block",
                 "_key": f"block{i}",
