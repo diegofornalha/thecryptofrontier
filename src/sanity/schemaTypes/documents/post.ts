@@ -58,7 +58,6 @@ export default defineType({
       title: 'Autor',
       type: 'reference',
       to: { type: 'author' },
-      validation: Rule => Rule.required(),
       group: 'metadata',
     }),
     defineField({
