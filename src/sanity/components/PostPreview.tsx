@@ -1,5 +1,4 @@
 import React from 'react'
-import {Card, Flex, Text, Box} from '@sanity/ui'
 
 interface PostPreviewProps {
   document: {
@@ -18,24 +17,24 @@ export function PostPreview(props: PostPreviewProps) {
   
   if (!slug?.current) {
     return (
-      <Card padding={4} tone="caution">
-        <Text size={2}>
+      <div style={{ padding: '16px', backgroundColor: '#fef3c7', borderRadius: '4px' }}>
+        <p style={{ margin: 0, fontSize: '14px' }}>
           Por favor, adicione um slug para visualizar o preview
-        </Text>
-      </Card>
+        </p>
+      </div>
     )
   }
 
   const previewUrl = getPreviewUrl(_type, slug.current)
   
   return (
-    <Flex direction="column" height="fill">
-      <Card padding={2} borderBottom>
-        <Text size={1} muted>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={{ padding: '8px', borderBottom: '1px solid #e5e7eb', backgroundColor: '#f9fafb' }}>
+        <p style={{ margin: 0, fontSize: '12px', color: '#6b7280' }}>
           Preview: {previewUrl}
-        </Text>
-      </Card>
-      <Box flex={1} overflow="hidden">
+        </p>
+      </div>
+      <div style={{ flex: 1, overflow: 'hidden' }}>
         <iframe
           src={previewUrl}
           style={{
@@ -45,8 +44,8 @@ export function PostPreview(props: PostPreviewProps) {
           }}
           title="Preview"
         />
-      </Box>
-    </Flex>
+      </div>
+    </div>
   )
 }
 

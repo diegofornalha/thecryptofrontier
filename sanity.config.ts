@@ -7,7 +7,7 @@ import {codeInput} from '@sanity/code-input'
 import {dashboardTool} from '@sanity/dashboard'
 import {unsplashImageAsset} from 'sanity-plugin-asset-source-unsplash'
 import {SEOPane} from 'sanity-plugin-seo-pane'
-import {scheduledPublishing} from '@sanity/scheduled-publishing'
+// import {scheduledPublishing} from '@sanity/scheduled-publishing'
 import {productionUrl} from './src/sanity/plugins/productionUrl'
 
 import {apiVersion, dataset, projectId} from './src/sanity/env'
@@ -37,7 +37,9 @@ export default defineConfig({
         return S.document().views([S.view.form()])
       },
     }),
-    visionTool({defaultApiVersion: apiVersion}),
+    visionTool({
+      defaultApiVersion: apiVersion,
+    }),
     codeInput(),
     dashboardTool({
       widgets: [
@@ -62,8 +64,14 @@ export default defineConfig({
       ],
     }),
     unsplashImageAsset(),
-    scheduledPublishing(),
-    productionUrl(),
+    // scheduledPublishing(), // Temporariamente removido devido a incompatibilidades
+    productionUrl({
+      previewSecretId: 'preview.secret',
+      draftMode: {
+        enable: '/api/draft/enable',
+        disable: '/api/draft/disable',
+      },
+    }),
   ],
   title: 'The Crypto Frontier',
 }) 

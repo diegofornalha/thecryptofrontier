@@ -26,7 +26,8 @@ export const POSTS_LIST_QUERY = `{
     ${postFields},
     _type,
     "author": author->{
-      name
+      name,
+      "slug": slug.current
     },
     "estimatedReadingTime": round(length(pt::text(content)) / 5 / 180)
   },
@@ -37,11 +38,11 @@ export const POSTS_LIST_QUERY = `{
 export const POST_QUERY = `*[_type in ["post", "agentPost"] && slug.current == $slug][0]{
   _id,
   title,
-  slug,
+  "slug": slug.current,
   mainImage{
-    asset,
-    caption,
+    asset->,
     alt,
+    caption,
     attribution
   },
   content,
@@ -50,8 +51,18 @@ export const POST_QUERY = `*[_type in ["post", "agentPost"] && slug.current == $
   author->{
     ${authorFields}
   },
-  seo,
-  originalSource
+  seo{
+    metaTitle,
+    metaDescription,
+    openGraphImage,
+    keywords,
+    canonicalUrl
+  },
+  originalSource{
+    url,
+    title,
+    site
+  }
 }`;
 
 // Query para posts populares (sidebar)
