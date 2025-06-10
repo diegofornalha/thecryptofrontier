@@ -1,0 +1,130 @@
+{
+  "_type": "post",
+  "title": "XRP: Alta de 647x no Market Cap de apenas US$ 17 milhões? O que sabemos?",
+  "content": [
+    {
+      "_type": "block",
+      "_key": "66dacb1a",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "9c4b2c99",
+          "text": "À medida que o XRP se recupera da queda da semana passada, analistas estão examinando a significância do pequeno influxo que impulsionou o preço do XRP para cima."
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "1773ca8e",
+      "style": "h2",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "abdb0892",
+          "text": "XRP registra influxo líquido de US$ 18,6 milhões, preço salta"
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "d02e0d44",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "75061da4",
+          "text": "A figura da comunidade, Chad Steingraber, destacou a métrica de influxo em um tweet. Ele observou que o XRP subiu de US$ 2,08 para US$ 2,17 em 6 de junho após um influxo líquido de apenas US$ 18,6 milhões."
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "e802e1d0",
+      "style": "h2",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "fa1cf378",
+          "text": "Multiplicador de crescimento de 647x"
+        }
+      ]
+    },
+    {
+      "_type": "embedBlock",
+      "_key": "ecece3a1",
+      "embedType": "twitter",
+      "url": "https://x.com/ChadSteingraber/status/1931733903523381637",
+      "caption": "em 8 de junho"
+    },
+    {
+      "_type": "block",
+      "_key": "dc96b196",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "20bf9d54",
+          "text": "Aqui, o multiplicador é de aproximadamente 647x, o que significa que cada US$ 1 de influxo líquido aumentou a capitalização de mercado do XRP em cerca de US$ 647 durante esse movimento."
+        }
+      ]
+    },
+    {
+      "_type": "image",
+      "_key": "110b14a7",
+      "asset": {
+        "_type": "reference",
+        "_ref": "image-5dbd9d5d-Gs7ldW9WsAAnJLq"
+      },
+      "alt": "Imagem mostrando os multiplicadores",
+      "caption": "Imagem mostrando os multiplicadores",
+      "url": "https://pbs.twimg.com/media/Gs7ldW9WsAAnJLq?format=jpg&name=large"
+    },
+    {
+      "_type": "block",
+      "_key": "8cdec4f0",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "41aa0fbf",
+          "text": "No entanto, o XRP terminou o mesmo dia com um fluxo líquido negativo de US$ 5,88 milhões, indicando um efluxo."
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "dad6acb7",
+      "style": "h2",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "4283af35",
+          "text": "Olhos voltados para ETFs para impulsionar os preços"
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "69c9488d",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "77373028",
+          "text": "Vale ressaltar que, nos últimos meses, fluxos negativos maiores dominaram o mercado XRP. Isso pode ajudar a explicar o desempenho de preço relativamente plano do XRP nos últimos seis meses."
+        }
+      ]
+    }
+  ],
+  "processedAt": "2025-01-27T12:00:00Z",
+  "originalIssues": [
+    "Links markdown de imagem não convertidos",
+    "Links markdown do Twitter não convertidos"
+  ],
+  "fixedIssues": [
+    "✅ Imagens convertidas para objetos Sanity",
+    "✅ Embeds do Twitter convertidos para objetos Sanity",
+    "✅ Links normais mantidos como anotações"
+  ]
+}

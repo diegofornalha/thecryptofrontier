@@ -14,7 +14,7 @@ from sanity import Client
 client = Client(
     project_id=SANITY_PROJECT_ID,
     dataset=SANITY_DATASET,
-    token=SANITY_TOKEN,
+    token=SANITY_API_TOKEN,
     api_version="2024-01-01",
     use_cdn=False
 )
@@ -23,7 +23,7 @@ client = Client(
 ### Variáveis de Ambiente Necessárias
 - `SANITY_PROJECT_ID`: ID do projeto no Sanity
 - `SANITY_DATASET`: Dataset (geralmente "production")
-- `SANITY_TOKEN`: Token de autenticação com permissões de escrita
+- `SANITY_API_TOKEN`: Token de autenticação com permissões de escrita
 
 ## 📤 Métodos de Envio
 
@@ -112,7 +112,7 @@ class SanityPublishTool:
 A API do Sanity usa tokens Bearer para autenticação:
 ```python
 headers = {
-    "Authorization": f"Bearer {SANITY_TOKEN}",
+    "Authorization": f"Bearer {SANITY_API_TOKEN}",
     "Content-Type": "application/json"
 }
 ```

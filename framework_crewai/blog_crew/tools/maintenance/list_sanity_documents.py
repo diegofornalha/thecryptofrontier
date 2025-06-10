@@ -35,8 +35,8 @@ def main():
     output_algolia = "--algolia" in sys.argv
     
     # Obter o token do Sanity
-    sanity_token = os.environ.get("SANITY_API_TOKEN")
-    if not sanity_token:
+    SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN")
+    if not SANITY_API_TOKEN:
         print("Erro: SANITY_API_TOKEN não está definido", file=sys.stderr)
         print("Defina a variável de ambiente SANITY_API_TOKEN", file=sys.stderr)
         sys.exit(1)
@@ -69,7 +69,7 @@ def main():
     
     # Headers
     headers = {
-        "Authorization": f"Bearer {sanity_token}"
+        "Authorization": f"Bearer {SANITY_API_TOKEN}"
     }
     
     try:

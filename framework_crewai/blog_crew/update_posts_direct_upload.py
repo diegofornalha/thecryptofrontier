@@ -28,7 +28,7 @@ logging.basicConfig(
 logger = logging.getLogger("update_posts_images")
 
 # Sanity config
-SANITY_PROJECT_ID = os.environ.get("SANITY_PROJECT_ID", "xyx45wfp")
+SANITY_PROJECT_ID = os.environ.get("SANITY_PROJECT_ID", "brby2yrg")
 SANITY_DATASET = "production"
 SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN")
 SANITY_API_VERSION = "2021-03-25"  # Usando a versão do teste bem-sucedido

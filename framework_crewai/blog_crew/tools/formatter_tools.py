@@ -19,6 +19,229 @@ except ImportError:
 logger = logging.getLogger("formatter_tools")
 
 @tool
+def convert_markdown_to_sanity_objects(content_text=None, **kwargs):
+    """
+    Converte links markdown de imagens e Twitter para objetos estruturados do Sanity.
+    """
+    try:
+        # Processar parâmetros
+        if content_text is None:
+            if "content" in kwargs:
+                content_text = kwargs["content"]
+            elif "text" in kwargs:
+                content_text = kwargs["text"]
+            elif len(kwargs) > 0:
+                for k, v in kwargs.items():
+                    if isinstance(v, str) and len(v) > 50:
+                        content_text = v
+                        break
+        
+        if content_text is None or not isinstance(content_text, str):
+            return {"success": False, "error": "Conteúdo não fornecido"}
+        
+        # Lista para armazenar os blocos processados
+        processed_blocks = []
+        
+        # Dividir o conteúdo em parágrafos
+        paragraphs = [p.strip() for p in content_text.split('\n\n') if p.strip()]
+        if not paragraphs:
+            paragraphs = [p.strip() for p in content_text.split('\n') if p.strip()]
+        if not paragraphs:
+            paragraphs = [content_text.strip()]
+        
+        for paragraph in paragraphs:
+            # Detectar qualquer link markdown primeiro
+            link_match = re.search(r'\[([^\]]*)\]\((https?://[^\s)]+)\)', paragraph)
+            
+            if link_match:
+                link_text = link_match.group(1)
+                link_url = link_match.group(2)
+                
+                # Verificar se é uma imagem (extensões tradicionais ou URLs de imagem conhecidas)
+                is_image = (
+                    # Extensões de arquivo tradicionais
+                    re.search(r'\.(jpg|jpeg|png|gif|webp|svg)(\?[^)]*)?$', link_url, re.IGNORECASE) or
+                    # URLs do Twitter media
+                    'pbs.twimg.com/media' in link_url or
+                    # Outros serviços de imagem conhecidos
+                    'imgur.com' in link_url or
+                    'i.redd.it' in link_url or
+                    'format=jpg' in link_url or 
+                    'format=png' in link_url or
+                    'format=jpeg' in link_url or
+                    'format=gif' in link_url or
+                    'format=webp' in link_url
+                )
+                
+                # Verificar se é um link do Twitter/X (posts, não imagens)
+                is_twitter = (
+                    ('twitter.com' in link_url or 'x.com' in link_url) and
+                    '/status/' in link_url and
+                    'pbs.twimg.com' not in link_url  # Excluir imagens do Twitter
+                )
+                
+                if is_image:
+                    # Criar objeto de imagem para Sanity
+                    image_block = {
+                        "_type": "image",
+                        "_key": str(uuid.uuid4())[:8],
+                        "asset": {
+                            "_type": "reference",
+                            "_ref": f"image-{str(uuid.uuid4())[:8]}-{link_url.split('/')[-1].split('?')[0]}"
+                        },
+                        "alt": link_text,
+                        "caption": link_text,
+                        "url": link_url  # Incluindo URL para processamento posterior
+                    }
+                    processed_blocks.append(image_block)
+                    continue
+                    
+                elif is_twitter:
+                    # Criar objeto de embed do Twitter para Sanity
+                    twitter_block = {
+                        "_type": "embedBlock",
+                        "_key": str(uuid.uuid4())[:8],
+                        "embedType": "twitter",
+                        "url": link_url,
+                        "caption": link_text
+                    }
+                    processed_blocks.append(twitter_block)
+                    continue
+                    
+                else:
+                    # Processar como link normal em um bloco de texto
+                    text_block = process_paragraph_with_links(paragraph)
+                    processed_blocks.append(text_block)
+                    continue
+            
+            # Processar como parágrafo normal
+            if paragraph.startswith('# '):
+                text_block = {
+                    "_type": "block",
+                    "_key": str(uuid.uuid4())[:8],
+                    "style": "h1",
+                    "children": [{
+                        "_type": "span",
+                        "_key": str(uuid.uuid4())[:8],
+                        "text": paragraph[2:].strip()
+                    }]
+                }
+            elif paragraph.startswith('## '):
+                text_block = {
+                    "_type": "block",
+                    "_key": str(uuid.uuid4())[:8],
+                    "style": "h2",
+                    "children": [{
+                        "_type": "span",
+                        "_key": str(uuid.uuid4())[:8],
+                        "text": paragraph[3:].strip()
+                    }]
+                }
+            elif paragraph.startswith('### '):
+                text_block = {
+                    "_type": "block",
+                    "_key": str(uuid.uuid4())[:8],
+                    "style": "h3",
+                    "children": [{
+                        "_type": "span",
+                        "_key": str(uuid.uuid4())[:8],
+                        "text": paragraph[4:].strip()
+                    }]
+                }
+            elif paragraph.startswith('**') and paragraph.endswith('**'):
+                text_block = {
+                    "_type": "block",
+                    "_key": str(uuid.uuid4())[:8],
+                    "style": "h2",
+                    "children": [{
+                        "_type": "span",
+                        "_key": str(uuid.uuid4())[:8],
+                        "text": paragraph[2:-2].strip()
+                    }]
+                }
+            else:
+                text_block = {
+                    "_type": "block",
+                    "_key": str(uuid.uuid4())[:8],
+                    "style": "normal",
+                    "children": [{
+                        "_type": "span",
+                        "_key": str(uuid.uuid4())[:8],
+                        "text": paragraph
+                    }]
+                }
+            
+            processed_blocks.append(text_block)
+        
+        return {"success": True, "blocks": processed_blocks}
+        
+    except Exception as e:
+        logger.error(f"Erro ao converter markdown para objetos Sanity: {str(e)}")
+        return {"success": False, "error": str(e)}
+
+def process_paragraph_with_links(paragraph):
+    """
+    Processa um parágrafo que contém links markdown, convertendo para formato Sanity.
+    """
+    children = []
+    markDefs = []
+    
+    # Encontrar todos os links no parágrafo
+    link_pattern = r'\[([^\]]*)\]\(([^)]+)\)'
+    last_end = 0
+    
+    for match in re.finditer(link_pattern, paragraph):
+        # Adicionar texto antes do link
+        if match.start() > last_end:
+            text_before = paragraph[last_end:match.start()]
+            if text_before:
+                children.append({
+                    "_type": "span",
+                    "_key": str(uuid.uuid4())[:8],
+                    "text": text_before
+                })
+        
+        # Criar definição de link
+        link_key = str(uuid.uuid4())[:8]
+        link_text = match.group(1)
+        link_url = match.group(2)
+        
+        markDefs.append({
+            "_type": "link",
+            "_key": link_key,
+            "href": link_url,
+            "target": "_blank"
+        })
+        
+        # Adicionar span com link
+        children.append({
+            "_type": "span",
+            "_key": str(uuid.uuid4())[:8],
+            "text": link_text,
+            "marks": [link_key]
+        })
+        
+        last_end = match.end()
+    
+    # Adicionar texto após o último link
+    if last_end < len(paragraph):
+        text_after = paragraph[last_end:]
+        if text_after:
+            children.append({
+                "_type": "span",
+                "_key": str(uuid.uuid4())[:8],
+                "text": text_after
+            })
+    
+    return {
+        "_type": "block",
+        "_key": str(uuid.uuid4())[:8],
+        "style": "normal",
+        "markDefs": markDefs,
+        "children": children
+    }
+
+@tool
 def create_slug(title=None, **kwargs):
     """
     Cria um slug a partir de um título.

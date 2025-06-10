@@ -74,8 +74,8 @@ def main():
     logger.info(f"Encontrados {len(ultimos_10)} artigos publicados para sincronizar")
     
     # Buscar detalhes dos artigos publicados
-    sanity_token = os.environ.get("SANITY_API_TOKEN")
-    if not sanity_token:
+    SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN")
+    if not SANITY_API_TOKEN:
         logger.error("Token do Sanity não encontrado")
         return
     
@@ -102,7 +102,7 @@ def main():
             encoded_query = quote(query)
             
             url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v{SANITY_API_VERSION}/data/query/{SANITY_DATASET}?query={encoded_query}"
-            headers = {"Authorization": f"Bearer {sanity_token}"}
+            headers = {"Authorization": f"Bearer {SANITY_API_TOKEN}"}
             
             response = requests.get(url, headers=headers)
             response.raise_for_status()

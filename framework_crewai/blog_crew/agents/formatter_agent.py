@@ -40,7 +40,8 @@ class FormatterAgent:
             "read_from_file", 
             "save_to_file",
             "create_slug",
-            "format_content_for_sanity"
+            "format_content_for_sanity",
+            "convert_markdown_to_sanity_objects"
         ]]
         
         return Agent(

@@ -47,7 +47,7 @@ class SanityDeleteDocumentTool(BaseTool):
     description: str = "Exclui um documento no Sanity CMS pelo ID"
     args_schema: Type[BaseModel] = DeleteDocumentInput
     
-    def _get_sanity_token(self) -> str:
+    def _get_SANITY_API_TOKEN(self) -> str:
         """
         Obtém o token de API do Sanity das variáveis de ambiente.
         
@@ -66,7 +66,7 @@ class SanityDeleteDocumentTool(BaseTool):
         """Exclui um documento do Sanity CMS pelo ID."""
         try:
             # Obter token do Sanity
-            sanity_token = self._get_sanity_token()
+            SANITY_API_TOKEN = self._get_SANITY_API_TOKEN()
             
             # URL da API do Sanity
             url = f"https://{PROJECT_ID}.api.sanity.io/v{API_VERSION}/data/mutate/{DATASET}"
@@ -74,7 +74,7 @@ class SanityDeleteDocumentTool(BaseTool):
             # Headers
             headers = {
                 "Content-Type": "application/json",
-                "Authorization": f"Bearer {sanity_token}"
+                "Authorization": f"Bearer {SANITY_API_TOKEN}"
             }
             
             # Preparar a mutação
@@ -124,7 +124,7 @@ class SanityDeleteAllDocumentsTool(BaseTool):
     description: str = "Exclui todos os documentos de um tipo específico no Sanity CMS"
     args_schema: Type[BaseModel] = DeleteAllDocumentsInput
     
-    def _get_sanity_token(self) -> str:
+    def _get_SANITY_API_TOKEN(self) -> str:
         """
         Obtém o token de API do Sanity das variáveis de ambiente.
         
@@ -150,7 +150,7 @@ class SanityDeleteAllDocumentsTool(BaseTool):
         
         try:
             # Obter token do Sanity
-            sanity_token = self._get_sanity_token()
+            SANITY_API_TOKEN = self._get_SANITY_API_TOKEN()
             
             # Importar a ferramenta de listagem para obter os IDs
             try:
@@ -176,7 +176,7 @@ class SanityDeleteAllDocumentsTool(BaseTool):
                         encoded_query = quote(query)
                         url = f"https://{PROJECT_ID}.api.sanity.io/v{API_VERSION}/data/query/{DATASET}?query={encoded_query}"
                         headers = {
-                            "Authorization": f"Bearer {sanity_token}"
+                            "Authorization": f"Bearer {SANITY_API_TOKEN}"
                         }
                         response = requests.get(url, headers=headers)
                         response.raise_for_status()

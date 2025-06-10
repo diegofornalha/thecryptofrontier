@@ -58,6 +58,12 @@ interface PageProps {
 async function getPost(slug: string): Promise<PostData | null> {
   try {
     const post = await client.fetch(POST_QUERY, { slug });
+    console.log('=== POST DATA DEBUG ===');
+    console.log('Slug:', slug);
+    console.log('Post found:', !!post);
+    console.log('Post mainImage:', post?.mainImage);
+    console.log('Post mainImage asset:', post?.mainImage?.asset);
+    console.log('======================');
     return post || null;
   } catch (error) {
     console.error('Erro ao buscar post:', error);
@@ -168,10 +174,15 @@ export default async function PostPage({ params }: PageProps) {
 
      // URL da imagem principal
    let mainImageUrl = '';
+   console.log('Post mainImage:', post.mainImage);
+   console.log('Has asset?', post.mainImage?.asset);
+   
    if (post.mainImage?.asset) {
      const imageBuilder = urlForImage(post.mainImage as any);
+     console.log('Image builder result:', imageBuilder);
      if (imageBuilder) {
        mainImageUrl = imageBuilder.width(1200).url();
+       console.log('Final image URL:', mainImageUrl);
      }
    }
 

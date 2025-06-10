@@ -34,8 +34,8 @@ export const POSTS_LIST_QUERY = `{
   "total": count(*[_type in ["post", "agentPost"]])
 }`;
 
-// Query para post único (busca em ambos os tipos)
-export const POST_QUERY = `*[_type in ["post", "agentPost"] && slug.current == $slug][0]{
+// Query para post único
+export const POST_QUERY = `*[_type == "post" && slug.current == $slug][0]{
   _id,
   title,
   "slug": slug.current,

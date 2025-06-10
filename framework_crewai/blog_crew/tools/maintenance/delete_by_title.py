@@ -26,7 +26,7 @@ PROJECT_ID = "brby2yrg"
 DATASET = "production"
 API_VERSION = "2023-05-03"
 
-def get_sanity_token():
+def get_SANITY_API_TOKEN():
     """Obtém o token de API do Sanity das variáveis de ambiente."""
     token = os.environ.get("SANITY_API_TOKEN")
     if not token:
@@ -36,7 +36,7 @@ def get_sanity_token():
 def search_posts_by_title_or_slug_sanity(search_term):
     """Busca posts no Sanity pelo título, slug OU ID."""
     try:
-        sanity_token = get_sanity_token()
+        SANITY_API_TOKEN = get_SANITY_API_TOKEN()
         
         # Verificar se é um ID do Sanity (formato específico)
         if len(search_term) > 15 and not "/" in search_term and not " " in search_term:
@@ -53,7 +53,7 @@ def search_posts_by_title_or_slug_sanity(search_term):
         url = f"https://{PROJECT_ID}.api.sanity.io/v{API_VERSION}/data/query/{DATASET}?query={encoded_query}"
         
         headers = {
-            "Authorization": f"Bearer {sanity_token}"
+            "Authorization": f"Bearer {SANITY_API_TOKEN}"
         }
         
         response = requests.get(url, headers=headers)
@@ -71,13 +71,13 @@ def search_posts_by_title_or_slug_sanity(search_term):
 def delete_sanity_document(document_id):
     """Deleta um documento específico do Sanity."""
     try:
-        sanity_token = get_sanity_token()
+        SANITY_API_TOKEN = get_SANITY_API_TOKEN()
         
         url = f"https://{PROJECT_ID}.api.sanity.io/v{API_VERSION}/data/mutate/{DATASET}"
         
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {sanity_token}"
+            "Authorization": f"Bearer {SANITY_API_TOKEN}"
         }
         
         mutations = {

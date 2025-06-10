@@ -27,7 +27,7 @@ PROJECT_ID = os.environ.get("SANITY_PROJECT_ID", "brby2yrg")
 DATASET = "production"
 API_VERSION = "2023-05-03"
 
-def get_sanity_token():
+def get_SANITY_API_TOKEN():
     """Obtém o token de API do Sanity das variáveis de ambiente"""
     token = os.environ.get("SANITY_API_TOKEN")
     if not token:
@@ -38,7 +38,7 @@ def get_sanity_token():
 
 def fetch_all_posts():
     """Obtém todos os posts do Sanity CMS"""
-    token = get_sanity_token()
+    token = get_SANITY_API_TOKEN()
     
     # Query para obter todos os posts com _id, título e criatedAt
     query = '*[_type == "post"]{_id, title, _createdAt}'
@@ -82,7 +82,7 @@ def find_duplicates(posts):
 
 def delete_document(document_id):
     """Exclui um documento do Sanity CMS"""
-    token = get_sanity_token()
+    token = get_SANITY_API_TOKEN()
     
     # URL da API do Sanity
     url = f"https://{PROJECT_ID}.api.sanity.io/v{API_VERSION}/data/mutate/{DATASET}"

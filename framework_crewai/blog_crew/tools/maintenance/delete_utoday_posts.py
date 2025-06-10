@@ -23,7 +23,7 @@ PROJECT_ID = "brby2yrg"
 DATASET = "production"
 API_VERSION = "2023-05-03"
 
-def get_sanity_token():
+def get_SANITY_API_TOKEN():
     """Obtém o token de API do Sanity das variáveis de ambiente."""
     token = os.environ.get("SANITY_API_TOKEN")
     if not token:
@@ -33,7 +33,7 @@ def get_sanity_token():
 def list_utoday_posts():
     """Lista todas as postagens que vieram do U.Today."""
     try:
-        sanity_token = get_sanity_token()
+        SANITY_API_TOKEN = get_SANITY_API_TOKEN()
         
         # Query GROQ para encontrar posts do U.Today
         query = '*[_type == "post" && source == "U.Today"]{_id, title, source, slug}'
@@ -43,7 +43,7 @@ def list_utoday_posts():
         url = f"https://{PROJECT_ID}.api.sanity.io/v{API_VERSION}/data/query/{DATASET}?query={encoded_query}"
         
         headers = {
-            "Authorization": f"Bearer {sanity_token}"
+            "Authorization": f"Bearer {SANITY_API_TOKEN}"
         }
         
         logger.info("Buscando posts do U.Today no Sanity...")
@@ -62,14 +62,14 @@ def list_utoday_posts():
 def delete_document(document_id):
     """Deleta um documento específico do Sanity."""
     try:
-        sanity_token = get_sanity_token()
+        SANITY_API_TOKEN = get_SANITY_API_TOKEN()
         
         # URL da API do Sanity para mutações
         url = f"https://{PROJECT_ID}.api.sanity.io/v{API_VERSION}/data/mutate/{DATASET}"
         
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {sanity_token}"
+            "Authorization": f"Bearer {SANITY_API_TOKEN}"
         }
         
         # Mutação para deletar o documento
