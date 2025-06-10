@@ -397,6 +397,15 @@ def publish_to_sanity(post_data=None, file_path=None, **kwargs):
             logger.error(f"post_data deve ser um dicionário, recebido: {type(post_data)}")
             return {"success": False, "error": "O argumento post_data deve ser um dicionário válido"}
         
+        # Validar e garantir chaves _key antes de enviar ao Sanity
+        try:
+            from .sanity_key_validator import validate_post_data
+            logger.info("Validando chaves _key obrigatórias...")
+            post_data = validate_post_data(post_data)
+            logger.info("Chaves _key validadas com sucesso")
+        except ImportError:
+            logger.warning("Validador de chaves não encontrado, continuando sem validação")
+        
         # Tentar importar dinâmicamente os modelos Pydantic
         try:
             # Tentar importar os modelos e conversores
