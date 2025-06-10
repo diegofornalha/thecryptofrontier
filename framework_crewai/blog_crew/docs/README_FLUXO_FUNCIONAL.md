@@ -83,7 +83,7 @@ posts_imagens/         # Backup das imagens geradas
 ```
 OPENAI_API_KEY=sk-...          # Para DALL-E 3
 GOOGLE_API_KEY=...             # Para Gemini (tradução)
-SANITY_PROJECT_ID=brby2yrg
+SANITY_PROJECT_ID=uvuq2a47
 SANITY_DATASET=production
 SANITY_API_TOKEN=sk...
 ALGOLIA_APP_ID=...

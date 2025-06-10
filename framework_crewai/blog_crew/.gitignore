@@ -1,3 +1,54 @@
-venv
-# Arquivos com informações sensíveis
-README_ALGOLIA.md
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Logs
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Data
+posts_processados/
+posts_publicados/
+posts_traduzidos/
+posts_formatados/
+posts_imagens/
+posts_para_traduzir/
+
+# Temporary
+*.tmp
+*.temp
+*.bak
+backup/
+
+# Project specific
+processed_articles.json
+image_generation_queue.json
+crew_output.log.txt
+
+# Build
+dist/
+build/
+*.egg-info/

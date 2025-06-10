@@ -3,7 +3,7 @@ import requests
 import json
 
 # Configurações do Sanity
-project_id = os.environ.get('SANITY_PROJECT_ID', 'brby2yrg')
+project_id = os.environ.get('SANITY_PROJECT_ID', 'uvuq2a47')
 dataset = 'production'
 api_version = '2023-05-03'
 api_token = os.environ.get('SANITY_API_TOKEN')

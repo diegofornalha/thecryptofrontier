@@ -28,7 +28,7 @@ const client = createClient({
   dataset,
   apiVersion,
   useCdn: false,
-  token: process.env.SANITY_DEV_TOKEN,
+  token: process.env.SANITY_API_TOKEN,
 });
 
 // Servidor HTTP simples

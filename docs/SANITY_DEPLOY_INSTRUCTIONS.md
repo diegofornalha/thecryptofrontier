@@ -23,7 +23,7 @@ npx sanity deploy
 
 ## Informações do Projeto
 
-- **Project ID**: brby2yrg
+- **Project ID**: uvuq2a47
 - **Dataset**: production
 - **Studio Path**: /studio
 

@@ -2,155 +2,204 @@
 
 Sistema completo de automação para blog sobre criptomoedas, desde a captura de conteúdo até a publicação final com imagens e metadados.
 
+## 🚀 Nova Estrutura e Comandos
 
-## 🚀 Pipeline Oficial
+### Ponto de Entrada Único: `main.py`
 
-### Comando Único
 ```bash
-python run_pipeline.py --limit 10 --clean
+# Ver todos os comandos disponíveis
+python main.py --help
+
+# Pipeline simplificado (recomendado)
+python main.py simple-pipeline --limit 3 --with-images
+
+# Executar crew completo
+python main.py run-crew
+
+# Monitorar feeds RSS
+python main.py monitor-rss
+
+# Publicar posts pendentes
+python main.py publish-posts --with-images
+
+# Sincronizar com Algolia
+python main.py sync-algolia
 ```
 
-### Comando Único sem images
-```bash
-python3 run_pipeline_no_images.py --limit 10 --clean
-```
+## 📁 Estrutura do Projeto
 
-### Opções Disponíveis
-- `--limit N` : Número de artigos para processar (padrão: 3)
-- `--clean` : Limpa arquivos de execuções anteriores
-- `--verbose` : Modo verboso com logs detalhados
+```
+blog_crew/
+├── src/                      # Código-fonte principal
+│   ├── agents/              # Agentes do CrewAI
+│   ├── crews/               # Definições de equipes
+│   ├── tasks/               # Tarefas
+│   ├── tools/               # Ferramentas
+│   ├── pipelines/           # Pipelines de execução
+│   ├── utils/               # Utilitários
+│   └── config/              # Configurações
+├── scripts/                  # Scripts e utilitários
+├── data/                     # Dados (feeds.json)
+├── logs/                     # Logs centralizados
+├── tests/                    # Testes
+├── docs/                     # Documentação
+└── main.py                   # PONTO DE ENTRADA PRINCIPAL
+```
 
 ## 📋 Fluxo de Trabalho
 
 O sistema executa 5 agentes em sequência:
 
 1. **Monitor RSS** → Captura artigos de feeds configurados
-2. **Tradutor** → Traduz para português brasileiro (Gemini)
+2. **Tradutor** → Traduz para português brasileiro
 3. **Formatador** → Prepara conteúdo para Sanity CMS
-4. **Gerador de Imagens** → Cria imagens com DALL-E 3
+4. **Gerador de Imagens** → Cria imagens com DALL-E 3 (opcional)
 5. **Publicador** → Publica no Sanity com categorias e tags
 
 ### Fluxo de Dados
 ```
-posts_para_traduzir/ → posts_traduzidos/ → posts_formatados/ → posts_com_imagem/ → posts_publicados/
+RSS Feed → Tradução → Formatação → Geração de Imagens → Publicação
 ```
 
-## 🛠️ Configuração
+## 🛠️ Instalação
+
+### 1. Clonar o repositório
+```bash
+git clone <repo-url>
+cd framework_crewai/blog_crew
+```
+
+### 2. Criar ambiente virtual
+```bash
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# ou
+venv\Scripts\activate  # Windows
+```
+
+### 3. Instalar dependências
+```bash
+# Para desenvolvimento
+pip install -r requirements-dev.txt
+
+# Para produção
+pip install -r requirements-prod.txt
+```
+
+### 4. Configurar variáveis de ambiente
+```bash
+cp .env.example .env
+# Editar .env com suas credenciais
+```
+
+## 🔧 Configuração
 
 ### Variáveis de Ambiente Necessárias
 ```env
+# APIs de IA
 OPENAI_API_KEY=sk-...          # Para DALL-E 3
 GOOGLE_API_KEY=...             # Para Gemini (tradução)
-SANITY_PROJECT_ID=brby2yrg     # Projeto Sanity
-SANITY_API_TOKEN=sk...         # Token do Sanity
-ALGOLIA_APP_ID=...             # (Opcional) Para busca
-ALGOLIA_API_KEY=...            # (Opcional) Para busca
+
+# Sanity CMS
+SANITY_PROJECT_ID=uvuq2a47     # ID do projeto
+SANITY_API_TOKEN=sk...         # Token de API
+
+# Algolia (opcional)
+ALGOLIA_APP_ID=...             # Para busca
+ALGOLIA_API_KEY=...            # Para busca
 ```
 
 ### Configuração de Feeds RSS
-Edite `feeds.json` para adicionar/remover feeds:
+Editar `data/feeds.json`:
 ```json
 {
   "feeds": [
     {
       "name": "The Crypto Basic",
       "url": "https://thecryptobasic.com/feed/",
-      "language": "en",
-      "category": "crypto",
-      "priority": 1
+      "enabled": true
     }
   ]
 }
 ```
 
-### Geração de Imagens
-- Resolução: 1792x1024 (16:9)
-- Estilo: Fundo preto, grid azul, logos 3D volumétricos
-- Detecta automaticamente criptomoedas para visual apropriado
+## 🚀 Uso Rápido
 
-### Filtros e Blacklist
-- Remove conteúdo patrocinado automaticamente
-- Verifica duplicatas antes de processar
-- Palavras bloqueadas: "sponsored", "advertisement", etc.
-
-## 📁 Estrutura do Projeto
-
-```
-blog_crew/
-├── run_pipeline.py        # Pipeline principal (USE ESTE!)
-├── crew.py               # Configuração dos agentes
-├── agents/               # Implementação dos 5 agentes
-├── tasks/                # Definição das tarefas
-├── tools/                # Ferramentas disponíveis
-├── config/               # Configurações do sistema
-├── models/               # Modelos de dados (Pydantic)
-├── feeds.json            # Configuração dos feeds RSS
-└── legacy/               # Scripts antigos (não usar)
-```
-
-## 🔧 Comandos Úteis
-
-### Execução Básica
+### Pipeline Simplificado (Recomendado)
 ```bash
-# Processar 3 artigos (padrão)
-python run_pipeline.py
+# Processar 5 artigos com imagens
+python main.py simple-pipeline --limit 5 --with-images
 
-# Processar 10 artigos com limpeza
-python run_pipeline.py --limit 10 --clean
-
-# Modo debug
-python run_pipeline.py --verbose
+# Processar 3 artigos sem imagens (mais rápido)
+python main.py simple-pipeline --limit 3
 ```
 
-### Manutenção
+### Monitoramento Contínuo
 ```bash
-# Limpar duplicatas no Sanity
-python tools/maintenance/delete_sanity_duplicates.py
-
-# Listar posts publicados
-python tools/maintenance/list_sanity_documents.py
-
-# Sincronizar com Algolia
-python tools/maintenance/sync_last_10_articles.py
+# Iniciar monitor de RSS
+python main.py monitor-rss --continuous
 ```
 
-## ⚠️ Importante
+## 📊 Monitoramento
 
-- **NÃO USE** scripts da pasta `legacy/` - estão obsoletos
-- **SEMPRE USE** `run_pipeline.py` como ponto de entrada
-- O sistema detecta e cria categorias/tags automaticamente
-- Imagens são geradas e enviadas automaticamente
+### Logs
+Todos os logs são salvos em `logs/`:
+- `main.log` - Log principal
+- `pipeline.log` - Logs de pipeline
+- `monitor_YYYY-MM-DD.log` - Logs diários
 
-## 🐛 Solução de Problemas
+### Dashboard (Em desenvolvimento)
+```bash
+streamlit run scripts/monitoring/dashboard.py
+```
 
-### Erro de API Key
-Verifique se todas as variáveis de ambiente estão configuradas no `.env`
+## 🧪 Testes
 
-### Posts não publicando
-Verifique se o token do Sanity tem permissões de escrita
+```bash
+# Executar todos os testes
+pytest tests/
 
-### Imagens não gerando
-Confirme que OPENAI_API_KEY está válida e tem créditos
+# Teste específico
+pytest tests/test_simple_image.py
+```
 
-### Tradução falhando
-Verifique GOOGLE_API_KEY e quota da API Gemini
+## 🐳 Docker
 
-## 📈 Monitoramento
+```bash
+# Build
+docker-compose build
 
-Logs são salvos automaticamente:
-- `pipeline_YYYYMMDD_HHMMSS.log` - Log de cada execução
-- Console mostra progresso em tempo real
-- Estatísticas finais mostram taxa de sucesso
+# Executar
+docker-compose up
+
+# Executar comando específico
+docker-compose run app python main.py simple-pipeline
+```
+
+## 📚 Documentação
+
+- [Estrutura do Projeto](docs/NEW_STRUCTURE.md)
+- [Guia de Requirements](docs/REQUIREMENTS_GUIDE.md)
+- [Fluxo Funcional](docs/README_FLUXO_FUNCIONAL.md)
+- [Variáveis de Ambiente](docs/VARIAVEIS_AMBIENTE.md)
 
 ## 🤝 Contribuindo
 
-1. Sempre teste mudanças com `--limit 1` primeiro
-2. Mantenha o fluxo de dados consistente
-3. Não crie novos scripts de pipeline - melhore o existente
-4. Documente novas ferramentas em `tools/`
+1. Fork o projeto
+2. Crie uma branch (`git checkout -b feature/MinhaFeature`)
+3. Commit suas mudanças (`git commit -m 'Add MinhaFeature'`)
+4. Push para a branch (`git push origin feature/MinhaFeature`)
+5. Abra um Pull Request
+
+## 📝 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+## 🆘 Suporte
+
+- Issues: [GitHub Issues](https://github.com/seu-usuario/blog-crew/issues)
+- Email: seu-email@exemplo.com
 
 ---
 
-**Versão**: 2.0.0  
-**Última Atualização**: Junho 2025  
-**Mantido por**: The Crypto Frontier Team
+**Blog Crew v2.0** - Sistema de Automação de Blog com IA 🤖

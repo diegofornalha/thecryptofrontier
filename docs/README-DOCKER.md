@@ -52,7 +52,7 @@ As principais variáveis são configuradas no `docker-compose.yml`:
 ```yaml
 environment:
   - NODE_ENV=production
-  - NEXT_PUBLIC_SANITY_PROJECT_ID=brby2yrg
+  - NEXT_PUBLIC_SANITY_PROJECT_ID=uvuq2a47
   - NEXT_PUBLIC_SANITY_DATASET=production
   - NEXT_PUBLIC_SANITY_API_VERSION=2023-05-03
   - TZ=America/Sao_Paulo

@@ -34,7 +34,7 @@ for env_file in env_files:
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Configurações Sanity
-SANITY_PROJECT_ID = os.getenv("SANITY_PROJECT_ID", "brby2yrg")
+SANITY_PROJECT_ID = os.getenv("SANITY_PROJECT_ID", "uvuq2a47")
 SANITY_DATASET = os.getenv("SANITY_DATASET", "production")
 SANITY_API_TOKEN = os.getenv("SANITY_API_TOKEN")
 
