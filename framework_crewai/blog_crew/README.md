@@ -2,11 +2,17 @@
 
 Sistema completo de automação para blog sobre criptomoedas, desde a captura de conteúdo até a publicação final com imagens e metadados.
 
+
 ## 🚀 Pipeline Oficial
 
 ### Comando Único
 ```bash
-python run_pipeline.py --limit 3 --clean
+python run_pipeline.py --limit 10 --clean
+```
+
+### Comando Único sem images
+```bash
+python3 run_pipeline_no_images.py --limit 10 --clean
 ```
 
 ### Opções Disponíveis
@@ -56,13 +62,6 @@ Edite `feeds.json` para adicionar/remover feeds:
   ]
 }
 ```
-
-## 🎯 Recursos Principais
-
-### Detecção Automática
-- **Categorias**: Bitcoin, Ethereum, DeFi, NFT, Análise de Mercado, etc.
-- **Tags**: Baseadas em criptomoedas mencionadas no conteúdo
-- **Autor**: "Crypto Frontier" (padrão)
 
 ### Geração de Imagens
 - Resolução: 1792x1024 (16:9)
@@ -153,5 +152,5 @@ Logs são salvos automaticamente:
 ---
 
 **Versão**: 2.0.0  
-**Última Atualização**: Janeiro 2025  
+**Última Atualização**: Junho 2025  
 **Mantido por**: The Crypto Frontier Team
