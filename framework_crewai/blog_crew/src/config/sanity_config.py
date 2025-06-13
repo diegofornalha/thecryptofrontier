@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 SANITY_CONFIG = {
     "name": "crypto-frontier",
     "title": "The Crypto Frontier",
-    "project_id": os.environ.get("SANITY_PROJECT_ID", "uvuq2a47"),
+    "project_id": os.environ.get("SANITY_PROJECT_ID", "z4sx85c6"),
     "dataset": "production",
     "api_version": "2023-05-03"
 }

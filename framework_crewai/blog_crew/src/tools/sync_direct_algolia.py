@@ -23,7 +23,7 @@ ALGOLIA_APP_ID = os.environ.get('ALGOLIA_APP_ID', '42TZWHW8UP')
 ALGOLIA_ADMIN_API_KEY = os.environ.get('ALGOLIA_ADMIN_API_KEY', 'd0cb55ec8f07832bc5f57da0bd25c535')
 ALGOLIA_INDEX_NAME = os.environ.get('ALGOLIA_INDEX_NAME', 'development_mcpx_content')
 
-SANITY_PROJECT_ID = os.environ.get("SANITY_PROJECT_ID", "uvuq2a47")
+SANITY_PROJECT_ID = os.environ.get("SANITY_PROJECT_ID", "z4sx85c6")
 SANITY_DATASET = "production"
 SANITY_API_VERSION = "2023-05-03"
 

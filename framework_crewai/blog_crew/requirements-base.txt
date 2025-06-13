@@ -15,8 +15,8 @@ pydantic>=2.5.0
 # Image processing
 Pillow>=10.0.0
 
-# CMS integration
-sanity-client>=3.0.0
+# CMS integration (instalado via pip desde PyPI)
+# Nota: sanity-client não existe no PyPI, usar requests para API do Sanity
 
 # Environment and configuration
 python-dotenv>=1.0.0

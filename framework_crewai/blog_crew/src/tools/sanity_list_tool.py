@@ -22,12 +22,12 @@ logger = logging.getLogger("sanity_list_tool")
 # Configurações padrão do Sanity
 try:
     from ..config import SANITY_CONFIG  # Tenta importar das configurações do projeto
-    PROJECT_ID = SANITY_CONFIG.get("project_id", "uvuq2a47")
+    PROJECT_ID = SANITY_CONFIG.get("project_id", "z4sx85c6")
     DATASET = SANITY_CONFIG.get("dataset", "production")
     API_VERSION = SANITY_CONFIG.get("api_version", "2023-05-03")
 except ImportError:
     logger.warning("Não foi possível importar configurações do Sanity, usando valores padrão")
-    PROJECT_ID = "uvuq2a47"  # valor padrão
+    PROJECT_ID = "z4sx85c6"  # valor padrão
     DATASET = "production"
     API_VERSION = "2023-05-03"
 

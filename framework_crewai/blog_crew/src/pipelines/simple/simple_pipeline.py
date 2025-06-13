@@ -547,7 +547,10 @@ def main():
     """)
     
     # Verificar variáveis de ambiente
-    required_vars = ["GOOGLE_API_KEY", "OPENAI_API_KEY", "SANITY_PROJECT_ID", "SANITY_API_TOKEN"]
+    required_vars = ["GOOGLE_API_KEY", "SANITY_PROJECT_ID", "SANITY_API_TOKEN"]
+    if GENERATE_IMAGES:
+        required_vars.append("OPENAI_API_KEY")
+    
     missing = [var for var in required_vars if not os.environ.get(var)]
     
     if missing:

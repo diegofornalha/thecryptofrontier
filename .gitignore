@@ -48,13 +48,6 @@ logs/
 .netlify
 .netlify/
 
-# sanity
-.sanity
-.sanity-*
-.sanity-cache/
-.sanity-editor/
-.sanity-preview/
-
 # typescript
 *.tsbuildinfo
 next-env.d.ts

@@ -11776,7 +11776,6 @@ var DA = L((K4e, U1) => {
        * Highlights the code inside a single element.
        *
        * The following hooks will be run:
-       * 1. `before-sanity-check`
        * 2. `before-highlight`
        * 3. All hooks of {@link Prism.highlight}. These hooks will be run by an asynchronous worker if `async` is `true`.
        * 4. `before-insert`

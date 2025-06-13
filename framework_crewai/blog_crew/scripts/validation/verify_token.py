@@ -41,19 +41,19 @@ print(f"Token: {SANITY_API_TOKEN[:20]}...{SANITY_API_TOKEN[-10:]}")
 print(f"Token length: {len(SANITY_API_TOKEN)}")
 
 # Test with both projects
-print("\n1️⃣ Testing with OLD project (brby2yrg):")
-old_valid = test_token("brby2yrg")
+print("\n1️⃣ Testing with OLD project (z4sx85c6):")
+old_valid = test_token("z4sx85c6")
 
-print("\n2️⃣ Testing with NEW project (uvuq2a47):")
-new_valid = test_token("uvuq2a47")
+print("\n2️⃣ Testing with NEW project (z4sx85c6):")
+new_valid = test_token("z4sx85c6")
 
 print("\n" + "=" * 60)
 print("RESULTADO:")
 if old_valid and not new_valid:
-    print("⚠️  Este token pertence ao projeto ANTIGO (brby2yrg)")
-    print("❌ Não pode ser usado com o novo projeto (uvuq2a47)")
+    print("⚠️  Este token pertence ao projeto ANTIGO (z4sx85c6)")
+    print("❌ Não pode ser usado com o novo projeto (z4sx85c6)")
     print("\n📝 Você precisa criar um novo token em:")
-    print("   https://www.sanity.io/manage/project/uvuq2a47/api")
+    print("   https://www.sanity.io/manage/project/z4sx85c6/api")
 elif new_valid:
     print("✅ Token válido para o novo projeto!")
 else:

@@ -16,7 +16,7 @@ O sistema carrega automaticamente as variáveis do arquivo `.env` usando `python
 |----------|-----------|-------------|---------|
 | `OPENAI_API_KEY` | Chave da API OpenAI para DALL-E | ✅ | sk-... |
 | `GOOGLE_API_KEY` | Chave da API Google para Gemini | ✅ | AIza... |
-| `SANITY_PROJECT_ID` | ID do projeto Sanity | ✅ | uvuq2a47 |
+| `SANITY_PROJECT_ID` | ID do projeto Sanity | ✅ | z4sx85c6 |
 | `SANITY_API_TOKEN` | Token de escrita do Sanity | ✅ | sk... |
 | `SANITY_DATASET` | Dataset do Sanity | ✅ | production |
 | `ALGOLIA_APP_ID` | ID da aplicação Algolia | ⚠️ | 42TZW... |
@@ -100,7 +100,7 @@ OPENAI_API_KEY=sk-proj-abc123...
 GOOGLE_API_KEY=AIzaSyB...
 
 # Sanity
-SANITY_PROJECT_ID=uvuq2a47
+SANITY_PROJECT_ID=z4sx85c6
 SANITY_API_TOKEN=skRW...
 SANITY_DATASET=production
 

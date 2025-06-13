@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 logger = logging.getLogger("sync_algolia_tool")
 
 # Configurações do Sanity
-SANITY_PROJECT_ID = os.environ.get("SANITY_PROJECT_ID", "uvuq2a47")
+SANITY_PROJECT_ID = os.environ.get("SANITY_PROJECT_ID", "z4sx85c6")
 SANITY_DATASET = "production"
 SANITY_API_VERSION = "2023-05-03"
 

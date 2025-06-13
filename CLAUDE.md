@@ -1,3 +1,4 @@
+sempre reponda em pt br
 # CLAUDE.md - Diretrizes de Organização do Projeto
 
 ## 📁 Estrutura de Diretórios
@@ -36,7 +37,6 @@ Este projeto segue uma organização específica para manter os arquivos bem est
 
 #### Scripts de Patches
 **Localização:** `/scripts/patches/`
-- Workarounds (`sanity-workaround.js`)
 - Patches de dependências (`patch-nanoid.js`)
 - Scripts de correção (`apply-preload-patch.js`)
 
@@ -65,8 +65,6 @@ Estes arquivos são padrão e devem ficar na raiz:
 - `postcss.config.js`
 - `.env` files
 - `netlify.toml`
-- `sanity.config.ts`
-- `sanity.cli.ts`
 
 ### 🚫 O que NÃO Fazer
 
@@ -93,19 +91,3 @@ Antes de criar um arquivo, pergunte-se:
 - [ ] É parte do CrewAI? → `/framework_crewai/blog_crew/`
 - [ ] É código do Next.js? → `/src/`
 - [ ] É um arquivo de configuração padrão? → Raiz
-
-### 💡 Exemplos Práticos
-
-```bash
-# ❌ Errado
-/Users/agents/thecryptofrontier/deploy-instructions.md
-/Users/agents/thecryptofrontier/fix-sanity.js
-
-# ✅ Correto
-/Users/agents/thecryptofrontier/docs/deploy-instructions.md
-/Users/agents/thecryptofrontier/scripts/patches/fix-sanity.js
-```
-
----
-
-Este arquivo deve ser consultado sempre que for criar novos arquivos no projeto.

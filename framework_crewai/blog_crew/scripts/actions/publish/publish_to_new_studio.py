@@ -10,7 +10,7 @@ from pathlib import Path
 from datetime import datetime
 
 # Configuration for new project
-SANITY_PROJECT_ID = "uvuq2a47"
+SANITY_PROJECT_ID = "z4sx85c6"
 SANITY_DATASET = "production"
 SANITY_API_VERSION = "2023-05-03"
 
@@ -86,7 +86,7 @@ def main():
     if not SANITY_API_TOKEN:
         print("\n⚠️  IMPORTANTE: Você precisa criar um token de API no novo projeto!")
         print("\n📝 Passos:")
-        print("1. Acesse: https://www.sanity.io/manage/project/uvuq2a47/api")
+        print("1. Acesse: https://www.sanity.io/manage/project/z4sx85c6/api")
         print("2. Clique em 'Add API token'")
         print("3. Nome: 'Blog Pipeline Token'")
         print("4. Permissions: 'Editor'")

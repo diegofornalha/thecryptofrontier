@@ -101,7 +101,7 @@ OPENAI_API_KEY=sk-...          # Para DALL-E 3
 GOOGLE_API_KEY=...             # Para Gemini (tradução)
 
 # Sanity CMS
-SANITY_PROJECT_ID=uvuq2a47     # ID do projeto
+SANITY_PROJECT_ID=z4sx85c6     # ID do projeto
 SANITY_API_TOKEN=sk...         # Token de API
 
 # Algolia (opcional)

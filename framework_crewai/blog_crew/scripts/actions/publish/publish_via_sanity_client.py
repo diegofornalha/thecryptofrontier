@@ -17,7 +17,7 @@ const sanityClient = require('@sanity/client');
 const fs = require('fs');
 
 const client = sanityClient({
-    projectId: 'uvuq2a47',
+    projectId: 'z4sx85c6',
     dataset: 'production',
     apiVersion: '2023-05-03',
     useCdn: false,
