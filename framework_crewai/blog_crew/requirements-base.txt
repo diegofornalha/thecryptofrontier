@@ -1,0 +1,25 @@
+# Core dependencies - Essential packages for basic functionality
+# These are the minimum requirements needed to run the blog crew system
+
+# AI and ML frameworks
+crewai>=0.28.0
+openai>=1.0.0
+google-generativeai>=0.3.0
+
+# Data processing and web scraping
+feedparser>=6.0.10
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+pydantic>=2.5.0
+
+# Image processing
+Pillow>=10.0.0
+
+# CMS integration
+sanity-client>=3.0.0
+
+# Environment and configuration
+python-dotenv>=1.0.0
+
+# Translation
+deep-translator>=1.11.4

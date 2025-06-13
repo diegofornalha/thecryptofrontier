@@ -23,7 +23,7 @@ npx sanity deploy
 
 ## Informações do Projeto
 
-- **Project ID**: brby2yrg
+- **Project ID**: uvuq2a47
 - **Dataset**: production
 - **Studio Path**: /studio
 
@@ -31,7 +31,7 @@ npx sanity deploy
 
 O Sanity Studio estará disponível em:
 - **URL do Studio**: https://thecryptofrontier.sanity.studio
-- **URL Local**: http://localhost:3000/studio (quando rodando localmente)
+- **URL Local**: https://thecryptofrontier.com/studio (quando rodando localmente)
 
 ## Verificação
 

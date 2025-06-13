@@ -20,7 +20,7 @@ NEXT_PUBLIC_SANITY_DATASET=production
 NEXT_PUBLIC_SANITY_API_VERSION=2023-05-03
 
 # Tokens (nunca compartilhe em código público)
-SANITY_DEV_TOKEN=seu-token-de-desenvolvimento
+SANITY_API_TOKEN=seu-token-de-desenvolvimento
 SANITY_DEPLOY_TOKEN=seu-token-de-deploy
 SANITY_PREVIEW_SECRET=algum-valor-secreto-para-preview
 ```
@@ -34,7 +34,7 @@ Para gerar os tokens necessários:
 3. Vá para "API" na seção "Settings"
 4. Clique em "Add API Token"
 5. Crie dois tokens:
-   - Um com permissões "Developer" para `SANITY_DEV_TOKEN` (acesso total)
+   - Um com permissões "Developer" para `SANITY_API_TOKEN` (acesso total)
    - Um com permissões "Editor" para `SANITY_DEPLOY_TOKEN` (acesso limitado)
 
 ## Migração de Dados

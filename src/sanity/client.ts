@@ -29,7 +29,7 @@ export const devClient = createClient({
   dataset,
   apiVersion,
   useCdn: false,
-  token: process.env.SANITY_DEV_TOKEN,
+  token: process.env.SANITY_API_TOKEN,
 });
 
 // Utilitário para URLs de imagem

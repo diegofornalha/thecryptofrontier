@@ -1,5 +1,3 @@
-'use client';
-
 import React from "react";
 import { client } from "../../../sanity/client";
 import Banner from "./Banner";
@@ -39,7 +37,8 @@ interface FeaturedBannerProps {
   };
 }
 
-export default function FeaturedBanner({ 
+// Server Component
+export default async function FeaturedBanner({ 
   showAd = true, // Por padrão, mostra publicidade
   adConfig = {
     title: 'Sinais Cripto Expert',
@@ -47,63 +46,33 @@ export default function FeaturedBanner({
     link: 'https://eternityscale.com.br/sce-blog/'
   }
 }: FeaturedBannerProps) {
-  const [featuredPost, setFeaturedPost] = React.useState<FeaturedPost | null>(null);
-  
-  React.useEffect(() => {
-    // Só busca post se não for para mostrar publicidade
-    if (!showAd) {
-      const fetchPost = async () => {
-        try {
-          const post = await client.fetch(featuredPostQuery) as FeaturedPost | null;
-          setFeaturedPost(post);
-        } catch (error) {
-          console.error('Erro ao buscar post em destaque:', error);
-        }
-      };
-      
-      fetchPost();
-    }
-  }, [showAd]);
-
-  // Se for para mostrar publicidade, retorna o AdBanner
+  // Mostra banner de publicidade se habilitado
   if (showAd) {
-    return (
-      <AdBanner
-        title={adConfig.title}
-        subtitle={adConfig.subtitle}
-        link={adConfig.link}
-        targetBlank={true}
-      />
-    );
+    return <AdBanner {...adConfig} />;
   }
 
-  // Fallback para quando não existem posts em destaque (modo editorial)
-  if (!featuredPost) {
-    return (
-      <Banner
-        title="Bitcoin Atinge Nova Máxima Histórica: O Que Esperar do Mercado Cripto"
-        category="DESTAQUE"
-        subtitle="Analistas preveem alta volatilidade nos próximos dias"
-        showBitcoin={true}
-        showRocket={true}
-      />
-    );
-  }
-
-  const imageUrl = featuredPost.coverImage ? urlForImage(featuredPost.coverImage)?.url() : undefined;
+  // Busca post em destaque no servidor
+  let featuredPost: FeaturedPost | null = null;
   
-  // Extração do subtítulo do excerpt, quando disponível
-  const subtitle = featuredPost.excerpt;
+  try {
+    featuredPost = await client.fetch(featuredPostQuery);
+  } catch (error) {
+    console.error('Erro ao buscar post em destaque:', error);
+  }
 
-  return (
-    <Banner
-      title={featuredPost.title}
-      category={featuredPost.author?.name || 'DESTAQUE'}
-      subtitle={subtitle}
-      imageUrl={imageUrl}
-      slug={featuredPost.slug}
-      showBitcoin={!imageUrl} // Mostrar Bitcoin apenas quando não tiver imagem
-      showRocket={!imageUrl} // Mostrar foguete apenas quando não tiver imagem
-    />
-  );
+  // Se não houver post, mostra banner de publicidade como fallback
+  if (!featuredPost) {
+    return <AdBanner {...adConfig} />;
+  }
+
+  // Prepara dados do banner
+  const bannerData = {
+    title: featuredPost.title,
+    excerpt: featuredPost.excerpt,
+    link: `/post/${featuredPost.slug}`,
+    backgroundImage: featuredPost.coverImage ? urlForImage(featuredPost.coverImage)?.url() : undefined,
+    author: featuredPost.author?.name
+  };
+
+  return <Banner {...bannerData} />;
 }

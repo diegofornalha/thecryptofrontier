@@ -50,7 +50,7 @@ export function PostPreview(props: PostPreviewProps) {
 }
 
 function getPreviewUrl(type: string | undefined, slug: string): string {
-  const baseUrl = process.env.SANITY_STUDIO_PREVIEW_URL || 'http://localhost:3000'
+  const baseUrl = process.env.SANITY_STUDIO_PREVIEW_URL || 'https://thecryptofrontier.com'
   
   switch (type) {
     case 'post':

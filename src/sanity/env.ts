@@ -5,6 +5,6 @@ export const dataset =
   process.env.NEXT_PUBLIC_SANITY_DATASET || 'production'
 
 export const projectId = 
-  process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'brby2yrg'
+  process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'uvuq2a47'
 
 export const useCdn = process.env.NODE_ENV === 'production' 

@@ -1,5 +1,0 @@
-feedparser
-google-generativeai
-openai
-requests
-beautifulsoup4
