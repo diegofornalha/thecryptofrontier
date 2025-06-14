@@ -2,15 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import PopularPostItem from './PopularPostItem';
-import { client } from "@/lib/strapiClient";
-
-const popularPostsQuery = `*[_type == "post"] | order(views desc, publishedAt desc) [0...5] {
-  _id,
-  title,
-  "slug": slug.current,
-  publishedAt,
-  "estimatedReadingTime": round(length(pt::text(content)) / 5 / 180)
-}`;
+import strapiClient from "@/lib/strapiClient";
 
 interface Post {
   _id: string;
@@ -27,8 +19,17 @@ export default function PopularPostsWidget() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const data = await client.fetch(popularPostsQuery);
-        setPosts(data || []);
+        const response = await strapiClient.getPopularPosts(5);
+        if (response.data) {
+          const formattedPosts = response.data.map((post: any) => ({
+            _id: post.id,
+            title: post.attributes?.title || post.title,
+            slug: post.attributes?.slug || post.slug,
+            publishedAt: post.attributes?.publishedAt || post.publishedAt,
+            estimatedReadingTime: Math.ceil((post.attributes?.content || '').split(' ').length / 200)
+          }));
+          setPosts(formattedPosts);
+        }
       } catch (error) {
         console.error('Erro ao buscar posts populares:', error);
       } finally {

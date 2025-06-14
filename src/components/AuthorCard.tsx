@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { urlForImage } from '@/strapi/lib/image';
+import { urlForImage } from "@/lib/imageHelper"
 import { PortableText } from '@portabletext/react';
 import { client } from '@/strapi/lib/client';
 

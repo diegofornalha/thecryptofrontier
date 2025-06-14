@@ -5,7 +5,7 @@ import algoliasearch from 'algoliasearch/lite';
 import { InstantSearch, SearchBox, Hits, Highlight, Configure, Stats } from 'react-instantsearch-dom';
 import Link from 'next/link';
 import Image from 'next/image';
-import { urlForImage } from '@/strapi/lib/image';
+import { urlForImage } from "@/lib/imageHelper"
 import { buildIndexName } from '../utils/indexer/consts';
 
 // Inicializar cliente Algolia

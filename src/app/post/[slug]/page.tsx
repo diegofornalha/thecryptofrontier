@@ -2,7 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { client } from '../../../strapi/lib/client';
-import { urlForImage } from '../../../strapi/lib/image';
+import { urlForImage } from "@/lib/imageHelper"
 import { PortableText } from '@portabletext/react';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';

@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { client } from "@/lib/strapiClient";
+import strapiClient from "@/lib/strapiClient";
 import LatestNewsClient from "./LatestNewsClient";
 
 interface NewsItem {
@@ -13,24 +13,24 @@ interface NewsItem {
   publishedAt: string;
 }
 
-// Query responsiva - busca mais notícias para filtrar depois
-const latestNewsQuery = `*[_type == "post"] | order(publishedAt desc) [0...15] {
-  _id,
-  title,
-  "slug": slug.current,
-  publishedAt,
-  author-> {
-    name
-  }
-}`;
-
 // Server Component
 export default async function LatestNews() {
   let newsItems: NewsItem[] = [];
   let error = null;
 
   try {
-    newsItems = await client.fetch(latestNewsQuery);
+    const response = await strapiClient.getPosts({ limit: 15 });
+    if (response.data) {
+      newsItems = response.data.map((post: any) => ({
+        _id: post.id,
+        title: post.attributes?.title || post.title,
+        slug: post.attributes?.slug || post.slug,
+        publishedAt: post.attributes?.publishedAt || post.publishedAt,
+        author: {
+          name: post.attributes?.author?.data?.attributes?.name || 'Autor'
+        }
+      }));
+    }
   } catch (err) {
     console.error('Erro ao buscar últimas notícias:', err);
     error = err;

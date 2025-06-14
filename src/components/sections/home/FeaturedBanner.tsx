@@ -45,7 +45,20 @@ export default async function FeaturedBanner({
   let featuredPost: FeaturedPost | null = null;
   
   try {
-    featuredPost = await client.fetch(featuredPostQuery);
+    const response = await strapiClient.getPosts({ limit: 1 });
+    if (response.data && response.data[0]) {
+      const post = response.data[0];
+      featuredPost = {
+        _id: post.id,
+        title: post.attributes?.title || post.title,
+        slug: post.attributes?.slug || post.slug,
+        excerpt: post.attributes?.excerpt || post.excerpt,
+        coverImage: post.attributes?.featuredImage || post.featuredImage,
+        author: {
+          name: post.attributes?.author?.data?.attributes?.name || 'Autor'
+        }
+      };
+    }
   } catch (error) {
     console.error('Erro ao buscar post em destaque:', error);
   }
