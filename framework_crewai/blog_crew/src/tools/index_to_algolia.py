@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Script para indexar conteúdo do Sanity no Algolia usando o CrewAI
+Script para indexar conteúdo do Strapi no Algolia usando o CrewAI
 """
 
 import os
@@ -30,12 +30,12 @@ os.environ["ALGOLIA_APP_ID"] = "42TZWHW8UP"
 os.environ["ALGOLIA_ADMIN_API_KEY"] = "d0cb55ec8f07832bc5f57da0bd25c535"  # Usando ADMIN_API_KEY que tem permissões completas
 os.environ["ALGOLIA_INDEX_NAME"] = "development_mcpx_content"
 
-def get_sanity_documents():
-    """Obtém a lista de documentos do Sanity e retorna como um dicionário"""
+def get_strapi_documents():
+    """Obtém a lista de documentos do Strapi e retorna como um dicionário"""
     try:
-        # Chamar o script list_sanity_documents.py e capturar a saída
+        # Chamar o script list_strapi_documents.py e capturar a saída
         result = subprocess.run(
-            ["python", "list_sanity_documents.py", "post", "--json"],
+            ["python", "list_strapi_documents.py", "post", "--json"],
             capture_output=True,
             text=True,
             check=True
@@ -46,17 +46,17 @@ def get_sanity_documents():
             try:
                 return json.loads(result.stdout)
             except json.JSONDecodeError:
-                print(f"Erro ao decodificar JSON de list_sanity_documents.py: {result.stdout}")
+                print(f"Erro ao decodificar JSON de list_strapi_documents.py: {result.stdout}")
                 return []
         else:
-            print("Nenhum documento retornado pelo script list_sanity_documents.py")
+            print("Nenhum documento retornado pelo script list_strapi_documents.py")
             return []
     except subprocess.CalledProcessError as e:
-        print(f"Erro ao executar list_sanity_documents.py: {str(e)}")
+        print(f"Erro ao executar list_strapi_documents.py: {str(e)}")
         return []
 
 def check_indexed_documents():
-    """Verifica quais documentos estão indexados no Algolia baseado no sanityId"""
+    """Verifica quais documentos estão indexados no Algolia baseado no strapiId"""
     try:
         # Verificar se as credenciais existem
         app_id = os.environ.get('ALGOLIA_APP_ID')
@@ -72,13 +72,13 @@ def check_indexed_documents():
         index = client.init_index(index_name)
         
         # Buscar todos os objetos indexados
-        results = index.browse_objects({'query': '', 'attributesToRetrieve': ['objectID', 'sanityId']})
+        results = index.browse_objects({'query': '', 'attributesToRetrieve': ['objectID', 'strapiId']})
         
-        # Retornar a lista de IDs do Sanity que já estão indexados
+        # Retornar a lista de IDs do Strapi que já estão indexados
         indexed_ids = []
         for hit in results:
-            if 'sanityId' in hit:
-                indexed_ids.append(hit['sanityId'])
+            if 'strapiId' in hit:
+                indexed_ids.append(hit['strapiId'])
             
         return indexed_ids
     
@@ -118,7 +118,7 @@ def check_for_duplicate_objectID(object_id):
         return False
 
 def generate_unique_objectID(base_id, slug):
-    """Gera um objectID único baseado no slug e ID do Sanity"""
+    """Gera um objectID único baseado no slug e ID do Strapi"""
     # Preferimos usar o slug como objectID por ser mais legível
     object_id = slug if slug else base_id
     
@@ -135,15 +135,15 @@ def generate_unique_objectID(base_id, slug):
 def main():
     """Função principal que configura e executa o agente indexador"""
     try:
-        # Verificar documentos do Sanity
-        print("Buscando documentos do Sanity...")
-        sanity_documents = get_sanity_documents()
+        # Verificar documentos do Strapi
+        print("Buscando documentos do Strapi...")
+        strapi_documents = get_strapi_documents()
         
-        if not sanity_documents:
-            print("Não foram encontrados documentos no Sanity.")
+        if not strapi_documents:
+            print("Não foram encontrados documentos no Strapi.")
             return
             
-        print(f"Encontrados {len(sanity_documents)} documentos no Sanity.")
+        print(f"Encontrados {len(strapi_documents)} documentos no Strapi.")
         
         # Verificar documentos já indexados no Algolia
         print("Verificando documentos já indexados no Algolia...")
@@ -151,7 +151,7 @@ def main():
         print(f"Encontrados {len(indexed_ids)} documentos já indexados no Algolia.")
         
         # Filtrar documentos não indexados
-        documents_to_index = [doc for doc in sanity_documents if doc.get("_id") not in indexed_ids]
+        documents_to_index = [doc for doc in strapi_documents if doc.get("_id") not in indexed_ids]
         print(f"Total de documentos a serem indexados: {len(documents_to_index)}")
         
         if not documents_to_index:
@@ -183,13 +183,13 @@ def main():
         # Criar uma tarefa para o agente
         task = Task(
             description=f"""
-            Indexe no Algolia os documentos do Sanity que ainda não foram indexados.
+            Indexe no Algolia os documentos do Strapi que ainda não foram indexados.
             
             Os documentos estão no arquivo: {temp_file_path}
             
             Para cada documento:
             1. Leia o documento do arquivo
-            2. Converta do formato Sanity para o formato Algolia, garantindo que tenha um objectID único
+            2. Converta do formato Strapi para o formato Algolia, garantindo que tenha um objectID único
             3. Use o campo "_suggested_object_id" que foi adicionado a cada documento como o objectID para evitar duplicatas
             4. Indexe o conteúdo no Algolia usando a ferramenta index_to_algolia
             5. Registre o resultado da indexação
@@ -201,7 +201,7 @@ def main():
                 "content": "Conteúdo textual do artigo",
                 "date": "Data de publicação",
                 "tags": ["tag1", "tag2"],
-                "sanityId": "ID do documento no Sanity"
+                "strapiId": "ID do documento no Strapi"
             }}
             
             IMPORTANTE: Use SEMPRE o valor do campo "_suggested_object_id" como objectID para evitar duplicatas!

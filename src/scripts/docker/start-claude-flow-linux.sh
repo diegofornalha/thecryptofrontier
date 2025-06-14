@@ -1,7 +1,7 @@
 #!/bin/bash
 # Script simplificado para iniciar Claude Flow no Linux
 
-PROJECT_PATH="/home/sanity/thecryptofrontier/claude-flow-diego"
+PROJECT_PATH="/home/strapi/thecryptofrontier/claude-flow-diego"
 cd "$PROJECT_PATH/claude-diego-flow" || exit 1
 
 echo "🚀 Iniciando Claude Flow Diego no Linux"

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script para listar todos os Asset IDs (imagens) no Sanity
+Script para listar todos os Asset IDs (imagens) no Strapi
 Lista detalhes como ID, URL, tamanho, formato e data de upload
 """
 
@@ -23,21 +23,21 @@ logging.basicConfig(
 )
 logger = logging.getLogger("list_assets")
 
-# Sanity config
-SANITY_PROJECT_ID = os.environ.get("SANITY_PROJECT_ID", "z4sx85c6")
-SANITY_DATASET = "production"
-SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN")
-SANITY_API_VERSION = "2023-05-03"
+# Strapi config
+strapi_PROJECT_ID = os.environ.get("strapi_PROJECT_ID", "z4sx85c6")
+strapi_DATASET = "production"
+strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
+strapi_API_VERSION = "2023-05-03"
 
 def get_api_url():
-    """Retorna URL da API do Sanity para queries"""
-    return f"https://{SANITY_PROJECT_ID}.api.sanity.io/v{SANITY_API_VERSION}/data/query/{SANITY_DATASET}"
+    """Retorna URL da API do Strapi para queries"""
+    return f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/query/{strapi_DATASET}"
 
 def get_headers():
     """Retorna headers para requisição"""
     headers = {"Content-Type": "application/json"}
-    if SANITY_API_TOKEN:
-        headers["Authorization"] = f"Bearer {SANITY_API_TOKEN}"
+    if strapi_API_TOKEN:
+        headers["Authorization"] = f"Bearer {strapi_API_TOKEN}"
     return headers
 
 def format_size(size_bytes):
@@ -49,11 +49,11 @@ def format_size(size_bytes):
     return f"{size_bytes:.2f} TB"
 
 def list_all_assets(limit=100):
-    """Lista todos os assets de imagem no Sanity"""
-    logger.info(f"Buscando assets no projeto {SANITY_PROJECT_ID}...")
+    """Lista todos os assets de imagem no Strapi"""
+    logger.info(f"Buscando assets no projeto {strapi_PROJECT_ID}...")
     
     # Query para buscar todos os image assets
-    query = f'''*[_type == "sanity.imageAsset"] | order(_createdAt desc)[0..{limit-1}]{{
+    query = f'''*[_type == "strapi.imageAsset"] | order(_createdAt desc)[0..{limit-1}]{{
         _id,
         _createdAt,
         _updatedAt,
@@ -153,7 +153,7 @@ def display_assets(assets):
     print(f"   Tamanho total: {format_size(total_size)}")
     print(f"   Formatos: {', '.join(set(asset.get('extension', 'N/A').upper() for asset in assets))}")
 
-def export_to_json(assets, filename="sanity_assets.json"):
+def export_to_json(assets, filename="strapi_assets.json"):
     """Exporta lista de assets para JSON"""
     output_path = Path(filename)
     
@@ -178,12 +178,12 @@ def export_to_json(assets, filename="sanity_assets.json"):
 def main():
     """Função principal"""
     print("\n" + "="*60)
-    print("       LISTAR ASSETS DO SANITY")
+    print("       LISTAR ASSETS DO STRAPI")
     print("="*60)
     
     # Verificar credenciais
-    if not SANITY_API_TOKEN:
-        logger.error("❌ SANITY_API_TOKEN não configurado!")
+    if not strapi_API_TOKEN:
+        logger.error("❌ strapi_API_TOKEN não configurado!")
         return
     
     # Listar assets

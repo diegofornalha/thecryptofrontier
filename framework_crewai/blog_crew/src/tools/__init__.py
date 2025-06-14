@@ -4,10 +4,10 @@ from crewai.tools import tool as crewai_tool
 # Importar apenas as ferramentas necessárias e ativas
 from .rss_tools import read_rss_feeds
 from .file_tools import save_to_file, read_from_file  
-from .sanity_tools import publish_to_sanity, publish_manual, verificar_e_criar_categoria, verificar_e_criar_tag
-from .sanity_tools_enhanced import publish_to_sanity_enhanced
-from .sanity_key_validator import validate_sanity_data, ensure_post_keys
-from .formatter_tools import create_slug, format_content_for_sanity
+from .strapi_tools import publish_to_strapi, publish_manual, verificar_e_criar_categoria, verificar_e_criar_tag
+from .strapi_tools_enhanced import publish_to_strapi_enhanced
+from .strapi_key_validator import validate_strapi_data, ensure_post_keys
+from .formatter_tools import create_slug, format_content_for_strapi
 from .algolia_tools import index_to_algolia, search_algolia, delete_from_algolia
 from .dedupe_tools import check_for_duplicates
 from .image_generation_tools_unified import generate_image_for_post, process_all_posts_with_images
@@ -18,15 +18,15 @@ tools = [
     read_rss_feeds,
     save_to_file,
     read_from_file,
-    publish_to_sanity,
-    publish_to_sanity_enhanced,
+    publish_to_strapi,
+    publish_to_strapi_enhanced,
     publish_manual,
     verificar_e_criar_categoria,
     verificar_e_criar_tag,
-    validate_sanity_data,
+    validate_strapi_data,
     ensure_post_keys,
     create_slug,
-    format_content_for_sanity,
+    format_content_for_strapi,
     index_to_algolia,
     search_algolia,
     delete_from_algolia,
@@ -51,15 +51,15 @@ __all__ = [
     'read_rss_feeds',
     'save_to_file',
     'read_from_file',
-    'publish_to_sanity',
-    'publish_to_sanity_enhanced',
+    'publish_to_strapi',
+    'publish_to_strapi_enhanced',
     'publish_manual',
     'verificar_e_criar_categoria',
     'verificar_e_criar_tag',
-    'validate_sanity_data',
+    'validate_strapi_data',
     'ensure_post_keys',
     'create_slug',
-    'format_content_for_sanity',
+    'format_content_for_strapi',
     'index_to_algolia',
     'search_algolia',
     'delete_from_algolia',

@@ -10,7 +10,7 @@ Dashboard simples em Streamlit para monitorar e controlar o pipeline do Blog Cre
 - 📰 Total de artigos RSS capturados
 - 🌐 Artigos traduzidos
 - 🖼️ Artigos com imagens geradas
-- ✅ Artigos publicados no Sanity
+- ✅ Artigos publicados no Strapi
 
 ### 2. Visualização de Posts
 - Ver últimos posts em cada estágio
@@ -36,7 +36,7 @@ Dashboard simples em Streamlit para monitorar e controlar o pipeline do Blog Cre
 
 ### Método 1: Script Automatizado
 ```bash
-cd /home/sanity/thecryptofrontier/framework_crewai/blog_crew
+cd /home/strapi/thecryptofrontier/framework_crewai/blog_crew
 ./run_dashboard.sh
 ```
 
@@ -99,7 +99,7 @@ streamlit run dashboard_streamlit.py --server.address 0.0.0.0
 | Artigos RSS | Posts capturados dos feeds | posts_para_traduzir/ |
 | Traduzidos | Posts em português | posts_traduzidos/ |
 | Com Imagem | Posts com DALL-E | posts_com_imagem/ |
-| Publicados | Posts no Sanity | posts_publicados/ |
+| Publicados | Posts no Strapi | posts_publicados/ |
 
 ## ⚠️ Avisos
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Verifica status dos posts no Sanity
+Verifica status dos posts no Strapi
 """
 import requests
 import os
@@ -9,17 +9,17 @@ from datetime import datetime
 
 load_dotenv()
 
-SANITY_PROJECT_ID = os.getenv('SANITY_PROJECT_ID')
-SANITY_DATASET = os.getenv('SANITY_DATASET', 'production')
-SANITY_API_TOKEN = os.getenv('SANITY_API_TOKEN')
+strapi_PROJECT_ID = os.getenv('strapi_PROJECT_ID')
+strapi_DATASET = os.getenv('strapi_DATASET', 'production')
+strapi_API_TOKEN = os.getenv('strapi_API_TOKEN')
 
 def check_posts():
     # Buscar posts recentes
     query = '*[_type == "post"] | order(_createdAt desc) [0...15]{_id, title, mainImage, _createdAt}'
     
-    url = f'https://{SANITY_PROJECT_ID}.api.sanity.io/v2021-10-21/data/query/{SANITY_DATASET}'
+    url = f'https://{strapi_PROJECT_ID}.api.strapi.io/v2021-10-21/data/query/{strapi_DATASET}'
     params = {'query': query}
-    headers = {'Authorization': f'Bearer {SANITY_API_TOKEN}'}
+    headers = {'Authorization': f'Bearer {strapi_API_TOKEN}'}
     
     response = requests.get(url, params=params, headers=headers)
     

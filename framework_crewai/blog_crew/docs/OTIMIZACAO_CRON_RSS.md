@@ -27,7 +27,7 @@ echo "NOVO_PID" > rss_monitor.pid
 #### 2. Habilitar o serviço systemd:
 ```bash
 # Copiar o arquivo de serviço
-sudo cp /home/sanity/thecryptofrontier/framework_crewai/blog_crew/systemd/rss-monitor.service /etc/systemd/system/
+sudo cp /home/strapi/thecryptofrontier/framework_crewai/blog_crew/systemd/rss-monitor.service /etc/systemd/system/
 
 # Atualizar caminhos no arquivo
 sudo nano /etc/systemd/system/rss-monitor.service
@@ -47,13 +47,13 @@ crontab -e
 Remover a linha do pipeline diário e manter apenas:
 ```cron
 # Limpeza semanal - Domingos às 3:00 AM
-0 3 * * 0 cd /home/sanity/thecryptofrontier/framework_crewai/blog_crew && python delete_sanity_duplicates.py >> /home/sanity/logs/cleanup.log 2>&1
+0 3 * * 0 cd /home/strapi/thecryptofrontier/framework_crewai/blog_crew && python delete_strapi_duplicates.py >> /home/strapi/logs/cleanup.log 2>&1
 
 # Limpeza de logs antigos - Diariamente às 2:00 AM
-0 2 * * * cd /home/sanity/thecryptofrontier/framework_crewai/blog_crew && ./clean_old_logs.sh >> /home/sanity/logs/cleanup.log 2>&1
+0 2 * * * cd /home/strapi/thecryptofrontier/framework_crewai/blog_crew && ./clean_old_logs.sh >> /home/strapi/logs/cleanup.log 2>&1
 
-# Sincronização Sanity-Algolia - Domingos às 4:00 AM
-0 4 * * 0 cd /home/sanity/thecryptofrontier/framework_crewai/blog_crew && python sync_sanity_to_algolia.py >> /home/sanity/logs/sync.log 2>&1
+# Sincronização Strapi-Algolia - Domingos às 4:00 AM
+0 4 * * 0 cd /home/strapi/thecryptofrontier/framework_crewai/blog_crew && python sync_strapi_to_algolia.py >> /home/strapi/logs/sync.log 2>&1
 ```
 
 ### Opção 2: Cron Job como Principal
@@ -73,7 +73,7 @@ crontab -e
 
 ```cron
 # Pipeline 3x ao dia - 8:00, 14:00, 21:00 (horário São Paulo)
-0 8,14,21 * * * cd /home/sanity/thecryptofrontier/framework_crewai/blog_crew && ./daily_pipeline.sh >> /home/sanity/logs/pipeline.log 2>&1
+0 8,14,21 * * * cd /home/strapi/thecryptofrontier/framework_crewai/blog_crew && ./daily_pipeline.sh >> /home/strapi/logs/pipeline.log 2>&1
 
 # Limpeza e manutenção continuam iguais...
 ```
@@ -86,7 +86,7 @@ crontab -e
 #!/bin/bash
 # unified_pipeline.sh
 
-cd /home/sanity/thecryptofrontier/framework_crewai/blog_crew
+cd /home/strapi/thecryptofrontier/framework_crewai/blog_crew
 
 # Configurar ambiente
 export TZ='America/Sao_Paulo'
@@ -127,7 +127,7 @@ fi
 
 ### Estrutura de logs recomendada:
 ```
-/home/sanity/logs/
+/home/strapi/logs/
 ├── rss-monitor/
 │   ├── monitor.log      # Log principal do RSS Monitor
 │   └── monitor.error    # Erros do RSS Monitor
@@ -141,13 +141,13 @@ fi
 ### Rotação de logs:
 ```bash
 # /etc/logrotate.d/crewai
-/home/sanity/logs/*/*.log {
+/home/strapi/logs/*/*.log {
     daily
     rotate 7
     compress
     missingok
     notifempty
-    create 0644 sanity sanity
+    create 0644 strapi strapi
 }
 ```
 
@@ -170,11 +170,11 @@ LAST_PROCESSED=$(find posts_publicados -type f -name "*.json" -mtime -1 | wc -l)
 echo "📊 Posts processados nas últimas 24h: $LAST_PROCESSED"
 
 # Verificar espaço em disco
-DISK_USAGE=$(df -h /home/sanity | tail -1 | awk '{print $5}')
+DISK_USAGE=$(df -h /home/strapi | tail -1 | awk '{print $5}')
 echo "💾 Uso de disco: $DISK_USAGE"
 
 # Verificar logs de erro
-ERRORS_TODAY=$(grep -c "ERROR" /home/sanity/logs/pipeline/pipeline.log 2>/dev/null || echo "0")
+ERRORS_TODAY=$(grep -c "ERROR" /home/strapi/logs/pipeline/pipeline.log 2>/dev/null || echo "0")
 echo "⚠️  Erros hoje: $ERRORS_TODAY"
 ```
 

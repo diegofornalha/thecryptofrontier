@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Script para importar documentos do Sanity CMS diretamente para o Algolia.
-Utiliza o list_sanity_documents.py com opção --algolia para processar os documentos.
+Script para importar documentos do Strapi CMS diretamente para o Algolia.
+Utiliza o list_strapi_documents.py com opção --algolia para processar os documentos.
 """
 
 import os
@@ -16,36 +16,36 @@ from datetime import datetime
 ALGOLIA_APP_ID = os.environ.get("ALGOLIA_APP_ID", "42TZWHW8UP")
 ALGOLIA_ADMIN_API_KEY = os.environ.get("ALGOLIA_ADMIN_API_KEY", "d0cb55ec8f07832bc5f57da0bd25c535")  # Admin API Key
 ALGOLIA_INDEX_NAME = os.environ.get("ALGOLIA_INDEX_NAME", "development_mcpx_content")
-SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN")
+strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
 
-def obter_documentos_do_sanity(tipo_documento="post"):
+def obter_documentos_do_strapi(tipo_documento="post"):
     """
-    Obtém documentos do Sanity no formato adequado para Algolia.
+    Obtém documentos do Strapi no formato adequado para Algolia.
     
     Args:
-        tipo_documento: Tipo de documento a buscar no Sanity
+        tipo_documento: Tipo de documento a buscar no Strapi
         
     Returns:
         list: Lista de documentos preparados para o Algolia
     """
-    # Verificar token do Sanity
-    if not SANITY_API_TOKEN:
-        print("Erro: SANITY_API_TOKEN não está definido", file=sys.stderr)
+    # Verificar token do Strapi
+    if not strapi_API_TOKEN:
+        print("Erro: strapi_API_TOKEN não está definido", file=sys.stderr)
         sys.exit(1)
     
     try:
         # Executar script de listagem com opção --algolia
-        cmd = ["python", "list_sanity_documents.py", tipo_documento, "--algolia"]
+        cmd = ["python", "list_strapi_documents.py", tipo_documento, "--algolia"]
         resultado = subprocess.run(cmd, capture_output=True, text=True, check=True)
         
         # Carregar resultado como JSON
         documentos = json.loads(resultado.stdout)
-        print(f"Documentos obtidos do Sanity: {len(documentos)}")
+        print(f"Documentos obtidos do Strapi: {len(documentos)}")
         
         return documentos
     
     except subprocess.CalledProcessError as e:
-        print(f"Erro ao executar list_sanity_documents.py: {e}", file=sys.stderr)
+        print(f"Erro ao executar list_strapi_documents.py: {e}", file=sys.stderr)
         print(f"Saída de erro: {e.stderr}", file=sys.stderr)
         sys.exit(1)
     
@@ -181,7 +181,7 @@ def indexar_no_algolia(documentos):
         for doc in documentos:
             if "objectID" not in doc:
                 print(f"Aviso: Documento sem objectID: {doc.get('title', 'Sem título')}")
-                doc["objectID"] = doc.get("_id", f"sanity_{hash(str(doc))}")
+                doc["objectID"] = doc.get("_id", f"strapi_{hash(str(doc))}")
         
         # Preparar payload conforme documentação do batch
         payload = {
@@ -230,18 +230,18 @@ def indexar_no_algolia(documentos):
         return False
 
 def main():
-    parser = argparse.ArgumentParser(description="Importa documentos do Sanity CMS para o Algolia.")
-    parser.add_argument("tipo_documento", nargs="?", default="post", help="Tipo de documento no Sanity (padrão: post)")
+    parser = argparse.ArgumentParser(description="Importa documentos do Strapi CMS para o Algolia.")
+    parser.add_argument("tipo_documento", nargs="?", default="post", help="Tipo de documento no Strapi (padrão: post)")
     parser.add_argument("--force", action="store_true", help="Forçar reindexação de todos os documentos, mesmo os já existentes")
     args = parser.parse_args()
     
-    print(f"=== Sincronização Sanity → Algolia ({datetime.now().strftime('%Y-%m-%d %H:%M:%S')}) ===")
+    print(f"=== Sincronização Strapi → Algolia ({datetime.now().strftime('%Y-%m-%d %H:%M:%S')}) ===")
     
-    # Obter documentos do Sanity
-    documentos = obter_documentos_do_sanity(args.tipo_documento)
+    # Obter documentos do Strapi
+    documentos = obter_documentos_do_strapi(args.tipo_documento)
     
     if not documentos:
-        print("Nenhum documento obtido do Sanity. Encerrando.")
+        print("Nenhum documento obtido do Strapi. Encerrando.")
         sys.exit(0)
     
     # Se não forçar reindexação, filtrar duplicados

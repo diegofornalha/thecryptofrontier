@@ -361,7 +361,7 @@ with open('corrected_xrp_content.json', 'w', encoding='utf-8') as f:
 
 print("\n✅ Conteúdo salvo em 'corrected_xrp_content.json'")
 print("\n📌 Próximos passos:")
-print("  1. Abrir o Sanity Studio")
+print("  1. Abrir o Strapi Studio")
 print("  2. Navegar até o post do XRP")
 print("  3. Substituir o conteúdo pelo arquivo gerado")
 print("  4. Salvar e publicar")

@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  strapi-v4:
+    container_name: strapi-v4-cms
+    image: strapi/strapi:4-alpine
+    restart: unless-stopped
+    env_file: ./app/.env
+    environment:
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: strapi-postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: strapi_v4
+      DATABASE_USERNAME: strapi
+      DATABASE_PASSWORD: strapi
+      DATABASE_SSL: false
+      JWT_SECRET: ${JWT_SECRET}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
+      APP_KEYS: ${APP_KEYS}
+      NODE_ENV: ${NODE_ENV}
+    volumes:
+      - ./app:/srv/app
+      - strapi-uploads:/srv/app/public/uploads
+    ports:
+      - '1338:1337'
+    networks:
+      - strapi-network
+    depends_on:
+      strapi-postgres:
+        condition: service_healthy
+
+  strapi-postgres:
+    container_name: strapi-postgres
+    image: postgres:14-alpine
+    restart: unless-stopped
+    env_file: ./app/.env
+    environment:
+      POSTGRES_USER: strapi
+      POSTGRES_PASSWORD: strapi
+      POSTGRES_DB: strapi_v4
+    volumes:
+      - strapi-data:/var/lib/postgresql/data/
+    ports:
+      - '5433:5432'
+    networks:
+      - strapi-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U strapi"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  strapi-data:
+  strapi-uploads:
+
+networks:
+  strapi-network:
+    external: true

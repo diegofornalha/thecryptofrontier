@@ -17,7 +17,7 @@ blog_crew/
 │   ├── logic/               # Lógica de negócio
 │   ├── config/              # Configurações
 │   ├── models/              # Modelos de dados
-│   ├── schemas/             # Schemas do Sanity
+│   ├── schemas/             # Schemas do Strapi
 │   ├── monitoring/          # Monitoramento e métricas
 │   └── utils/               # Utilitários e helpers
 │
@@ -102,7 +102,7 @@ python main.py --help
 ```python
 # Novo padrão de importação
 from src.agents import TranslatorAgent
-from src.tools import sanity_tools
+from src.tools import strapi_tools
 from src.utils.log_config import setup_logger
 from src.pipelines.simple import simple_pipeline
 ```

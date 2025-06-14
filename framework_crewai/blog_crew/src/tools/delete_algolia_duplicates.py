@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Script para identificar e excluir documentos duplicados no Algolia.
-Este script sincroniza a base do Algolia com o Sanity, removendo documentos que não estão mais no Sanity
+Este script sincroniza a base do Algolia com o Strapi, removendo documentos que não estão mais no Strapi
 ou que são duplicados por título.
 
 Uso: python delete_algolia_duplicates.py [--dry-run]
@@ -24,34 +24,34 @@ logging.basicConfig(
 )
 logger = logging.getLogger("algolia_cleaner")
 
-# Configurações do Sanity
-SANITY_PROJECT_ID = os.environ.get("SANITY_PROJECT_ID", "z4sx85c6")
-SANITY_DATASET = "production"
-SANITY_API_VERSION = "2023-05-03"
+# Configurações do Strapi
+strapi_PROJECT_ID = os.environ.get("strapi_PROJECT_ID", "z4sx85c6")
+strapi_DATASET = "production"
+strapi_API_VERSION = "2023-05-03"
 
 # Configurações do Algolia
 ALGOLIA_APP_ID = os.environ.get("ALGOLIA_APP_ID", "42TZWHW8UP")
 ALGOLIA_API_KEY = os.environ.get("ALGOLIA_ADMIN_API_KEY", "d0cb55ec8f07832bc5f57da0bd25c535")
 ALGOLIA_INDEX_NAME = os.environ.get("ALGOLIA_INDEX_NAME", "development_mcpx_content")
 
-def get_sanity_documents():
-    """Obtém todos os documentos do tipo post do Sanity"""
-    # Obter token do Sanity
-    SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN")
-    if not SANITY_API_TOKEN:
-        logger.error("SANITY_API_TOKEN não está definido")
+def get_strapi_documents():
+    """Obtém todos os documentos do tipo post do Strapi"""
+    # Obter token do Strapi
+    strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
+    if not strapi_API_TOKEN:
+        logger.error("strapi_API_TOKEN não está definido")
         sys.exit(1)
     
-    # Query para obter todos os posts do Sanity
+    # Query para obter todos os posts do Strapi
     query = '*[_type == "post"]{ _id, title, slug { current } }'
     encoded_query = quote(query)
     
-    # URL da API do Sanity
-    url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v{SANITY_API_VERSION}/data/query/{SANITY_DATASET}?query={encoded_query}"
+    # URL da API do Strapi
+    url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/query/{strapi_DATASET}?query={encoded_query}"
     
     # Headers
     headers = {
-        "Authorization": f"Bearer {SANITY_API_TOKEN}"
+        "Authorization": f"Bearer {strapi_API_TOKEN}"
     }
     
     try:
@@ -61,7 +61,7 @@ def get_sanity_documents():
         
         # Extrair resultados
         result = response.json().get("result", [])
-        logger.info(f"Total de documentos no Sanity: {len(result)}")
+        logger.info(f"Total de documentos no Strapi: {len(result)}")
         
         # Criar dicionários para facilitar o acesso
         by_id = {doc["_id"]: doc for doc in result}
@@ -77,7 +77,7 @@ def get_sanity_documents():
         }
     
     except Exception as e:
-        logger.error(f"Erro ao obter documentos do Sanity: {str(e)}")
+        logger.error(f"Erro ao obter documentos do Strapi: {str(e)}")
         sys.exit(1)
 
 def get_algolia_documents():
@@ -187,20 +187,20 @@ def main():
     if dry_run:
         logger.info("Executando em modo de simulação (--dry-run)")
     
-    # Obter documentos do Sanity
-    sanity_data = get_sanity_documents()
+    # Obter documentos do Strapi
+    strapi_data = get_strapi_documents()
     
     # Obter documentos do Algolia
     algolia_data = get_algolia_documents()
     
-    # 1. Identificar documentos no Algolia que não existem mais no Sanity
+    # 1. Identificar documentos no Algolia que não existem mais no Strapi
     docs_to_delete = []
     
     for object_id in algolia_data["by_objectid"]:
-        if object_id not in sanity_data["by_id"]:
+        if object_id not in strapi_data["by_id"]:
             docs_to_delete.append(object_id)
     
-    logger.info(f"Documentos no Algolia que não existem no Sanity: {len(docs_to_delete)}")
+    logger.info(f"Documentos no Algolia que não existem no Strapi: {len(docs_to_delete)}")
     
     # 2. Identificar duplicatas por título no Algolia
     duplicate_titles = {}

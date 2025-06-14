@@ -10,8 +10,8 @@ import Link from '../../atoms/Link';
 import RelatedPostsSection from '../../sections/RelatedPostsSection';
 import SocialShare from '../../atoms/SocialShare';
 
-// Cliente Sanity para buscar configurações
-import client from '../../../lib/sanityClient';
+// Cliente Strapi para buscar configurações
+import client from '../../../lib/strapiClient';
 
 export default function PostLayout(props) {
     const { page, site } = props;

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { urlForImage } from '@/sanity/lib/image';
+import { urlForImage } from '@/strapi/lib/image';
 
 interface CryptoNewsCardProps {
   title: string;

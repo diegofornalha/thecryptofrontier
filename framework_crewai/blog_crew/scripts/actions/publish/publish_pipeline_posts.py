@@ -10,18 +10,18 @@ from pathlib import Path
 from datetime import datetime
 
 # Use token from environment
-SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN")
-SANITY_PROJECT_ID = "z4sx85c6"
-SANITY_DATASET = "production"
-SANITY_API_VERSION = "2023-05-03"
+strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
+strapi_PROJECT_ID = "z4sx85c6"
+strapi_DATASET = "production"
+strapi_API_VERSION = "2023-05-03"
 
 # Import the formatting function from simple_pipeline
 import sys
 sys.path.append(str(Path(__file__).parent))
 from simple_pipeline import format_content_blocks, create_slug
 
-def publish_to_sanity(post_file):
-    """Publish a single post to Sanity"""
+def publish_to_strapi(post_file):
+    """Publish a single post to Strapi"""
     
     # Load post data
     with open(post_file, 'r', encoding='utf-8') as f:
@@ -55,10 +55,10 @@ def publish_to_sanity(post_file):
     }
     
     # API request
-    url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v{SANITY_API_VERSION}/data/mutate/{SANITY_DATASET}"
+    url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/{strapi_DATASET}"
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {SANITY_API_TOKEN}"
+        "Authorization": f"Bearer {strapi_API_TOKEN}"
     }
     
     mutations = {
@@ -101,7 +101,7 @@ def main():
     
     success_count = 0
     for post_file in recent_posts:
-        if publish_to_sanity(post_file):
+        if publish_to_strapi(post_file):
             success_count += 1
     
     print(f"\n✅ Published {success_count}/{len(recent_posts)} posts successfully")

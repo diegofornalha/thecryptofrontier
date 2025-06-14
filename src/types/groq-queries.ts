@@ -1,5 +1,5 @@
 // Types for common GROQ queries
-import type { Post, Page, Author, SiteConfig, Header, Footer } from './sanity.generated'
+import type { Post, Page, Author, SiteConfig, Header, Footer } from './strapi.generated'
 
 // Query result types
 export type PostWithAuthor = Post & {

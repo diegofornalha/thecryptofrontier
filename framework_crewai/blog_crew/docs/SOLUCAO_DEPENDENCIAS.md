@@ -18,7 +18,7 @@ O `run_pipeline_enhanced.py` precisa de várias dependências que não estão no
 
 ### Opção 1: Script Automático (Recomendado)
 ```bash
-cd /home/sanity/thecryptofrontier/framework_crewai/blog_crew
+cd /home/strapi/thecryptofrontier/framework_crewai/blog_crew
 ./install_enhanced_deps.sh
 ```
 

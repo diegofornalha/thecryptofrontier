@@ -16,7 +16,7 @@ pydantic>=2.5.0
 Pillow>=10.0.0
 
 # CMS integration (instalado via pip desde PyPI)
-# Nota: sanity-client não existe no PyPI, usar requests para API do Sanity
+# Nota: strapi-client não existe no PyPI, usar requests para API do Strapi
 
 # Environment and configuration
 python-dotenv>=1.0.0

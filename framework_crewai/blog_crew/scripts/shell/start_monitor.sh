@@ -2,7 +2,7 @@
 # Script para iniciar o monitor RSS em background
 
 # Diretório do projeto
-PROJECT_DIR="/home/sanity/thecryptofrontier/framework_crewai/blog_crew"
+PROJECT_DIR="/home/strapi/thecryptofrontier/framework_crewai/blog_crew"
 LOG_FILE="$PROJECT_DIR/monitor_startup.log"
 PID_FILE="$PROJECT_DIR/rss_monitor.pid"
 

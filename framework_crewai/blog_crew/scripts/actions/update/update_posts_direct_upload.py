@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script para atualizar posts existentes no Sanity com suas imagens geradas
+Script para atualizar posts existentes no Strapi com suas imagens geradas
 Usa upload direto de imagem como no teste bem-sucedido
 """
 
@@ -27,28 +27,28 @@ logging.basicConfig(
 )
 logger = logging.getLogger("update_posts_images")
 
-# Sanity config
-SANITY_PROJECT_ID = os.environ.get("SANITY_PROJECT_ID", "z4sx85c6")
-SANITY_DATASET = "production"
-SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN")
-SANITY_API_VERSION = "2021-03-25"  # Usando a versão do teste bem-sucedido
+# Strapi config
+strapi_PROJECT_ID = os.environ.get("strapi_PROJECT_ID", "z4sx85c6")
+strapi_DATASET = "production"
+strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
+strapi_API_VERSION = "2021-03-25"  # Usando a versão do teste bem-sucedido
 
 # Diretórios
 IMAGES_DIR = Path("posts_imagens")
 PUBLISHED_DIR = Path("posts_publicados")
 
 def get_api_url(endpoint="query"):
-    """Retorna URL da API do Sanity"""
+    """Retorna URL da API do Strapi"""
     if endpoint == "query":
-        return f"https://{SANITY_PROJECT_ID}.api.sanity.io/v{SANITY_API_VERSION}/data/query/{SANITY_DATASET}"
+        return f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/query/{strapi_DATASET}"
     else:
-        return f"https://{SANITY_PROJECT_ID}.api.sanity.io/v{SANITY_API_VERSION}/data/mutate/{SANITY_DATASET}"
+        return f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/{strapi_DATASET}"
 
 def get_headers():
     """Retorna headers para requisição"""
     headers = {"Content-Type": "application/json"}
-    if SANITY_API_TOKEN:
-        headers["Authorization"] = f"Bearer {SANITY_API_TOKEN}"
+    if strapi_API_TOKEN:
+        headers["Authorization"] = f"Bearer {strapi_API_TOKEN}"
     return headers
 
 def create_slug(title: str) -> str:
@@ -63,7 +63,7 @@ def create_slug(title: str) -> str:
     return slug[:80]
 
 def list_recent_posts(limit=20):
-    """Lista posts recentes do Sanity"""
+    """Lista posts recentes do Strapi"""
     query = f'*[_type == "post"] | order(publishedAt desc)[0..{limit-1}]{{_id, title, slug, mainImage, publishedAt}}'
     url = f"{get_api_url('query')}?query={query}"
     
@@ -107,8 +107,8 @@ def compress_image(image_path: Path, max_size_mb: float = 1.5) -> bytes:
         logger.error(f"Erro ao processar imagem: {e}")
         return None
 
-def upload_image_to_sanity_direct(image_path: Path) -> str:
-    """Upload direto de imagem para o Sanity (como no teste bem-sucedido)"""
+def upload_image_to_strapi_direct(image_path: Path) -> str:
+    """Upload direto de imagem para o Strapi (como no teste bem-sucedido)"""
     try:
         # Ler e processar imagem
         image_data = compress_image(image_path)
@@ -118,11 +118,11 @@ def upload_image_to_sanity_direct(image_path: Path) -> str:
                 image_data = f.read()
         
         # URL de upload
-        upload_url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v{SANITY_API_VERSION}/assets/images/{SANITY_DATASET}"
+        upload_url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/assets/images/{strapi_DATASET}"
         
         # Headers como no teste bem-sucedido
         headers = {
-            "Authorization": f"Bearer {SANITY_API_TOKEN}",
+            "Authorization": f"Bearer {strapi_API_TOKEN}",
             "Content-Type": "image/png"
         }
         
@@ -229,12 +229,12 @@ def main():
 ╚══════════════════════════════════════════════════════════════╝
     """)
     
-    if not SANITY_API_TOKEN:
-        logger.error("❌ SANITY_API_TOKEN não configurado!")
+    if not strapi_API_TOKEN:
+        logger.error("❌ strapi_API_TOKEN não configurado!")
         return
     
-    # 1. Buscar posts recentes do Sanity
-    logger.info("📋 Buscando posts recentes do Sanity...")
+    # 1. Buscar posts recentes do Strapi
+    logger.info("📋 Buscando posts recentes do Strapi...")
     posts = list_recent_posts()
     
     # Filtrar posts sem imagem
@@ -285,7 +285,7 @@ def main():
                 logger.info(f"🎨 Usando imagem: {image_path.name}")
                 
                 # Upload direto da imagem
-                asset_id = upload_image_to_sanity_direct(image_path)
+                asset_id = upload_image_to_strapi_direct(image_path)
                 
                 if asset_id:
                     # Atualizar post

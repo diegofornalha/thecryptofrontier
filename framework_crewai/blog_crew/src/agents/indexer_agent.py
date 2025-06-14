@@ -8,7 +8,7 @@ from config import config as app_config
 
 # Importar modelos Pydantic para estruturação dos dados
 try:
-    from models import Post, dict_to_post, post_to_sanity_format
+    from models import Post, dict_to_post, post_to_strapi_format
     PYDANTIC_AVAILABLE = True
 except ImportError:
     PYDANTIC_AVAILABLE = False
@@ -65,32 +65,32 @@ class IndexerAgent:
                 "tags": ["tag1", "tag2"]
             }
             
-            Você sabe extrair as informações relevantes do formato Sanity para o formato Algolia.""",
+            Você sabe extrair as informações relevantes do formato Strapi para o formato Algolia.""",
             verbose=True,
             tools=indexer_tools,
             llm=llm
         )
     
     @staticmethod
-    def sanity_to_algolia_format(sanity_post):
+    def strapi_to_algolia_format(strapi_post):
         """
-        Converte um post no formato Sanity para o formato Algolia
+        Converte um post no formato Strapi para o formato Algolia
         
         Args:
-            sanity_post: Dicionário com os dados do post no formato Sanity
+            strapi_post: Dicionário com os dados do post no formato Strapi
             
         Returns:
             Dicionário com os dados no formato para indexação no Algolia
         """
         try:
             # Verifica se o post tem os campos necessários
-            if not all(key in sanity_post for key in ['_id', 'title']):
-                raise ValueError("Post Sanity não contém campos obrigatórios (_id, title)")
+            if not all(key in strapi_post for key in ['_id', 'title']):
+                raise ValueError("Post Strapi não contém campos obrigatórios (_id, title)")
             
             # Extrai o conteúdo textual dos blocos (simplificado)
             content = ""
-            if 'content' in sanity_post and isinstance(sanity_post['content'], list):
-                for block in sanity_post['content']:
+            if 'content' in strapi_post and isinstance(strapi_post['content'], list):
+                for block in strapi_post['content']:
                     if 'children' in block and isinstance(block['children'], list):
                         for child in block['children']:
                             if 'text' in child:
@@ -98,28 +98,28 @@ class IndexerAgent:
 
             # Extrai as tags, se existirem
             tags = []
-            if 'categories' in sanity_post and isinstance(sanity_post['categories'], list):
-                for category in sanity_post['categories']:
+            if 'categories' in strapi_post and isinstance(strapi_post['categories'], list):
+                for category in strapi_post['categories']:
                     if 'title' in category:
                         tags.append(category['title'])
             
             # Determinar o objectID a ser usado
             # Usar o _suggested_object_id se disponível, caso contrário usar o slug ou _id
-            if '_suggested_object_id' in sanity_post:
-                object_id = sanity_post['_suggested_object_id']
-            elif 'slug' in sanity_post and isinstance(sanity_post['slug'], dict) and 'current' in sanity_post['slug']:
-                object_id = sanity_post['slug']['current']
+            if '_suggested_object_id' in strapi_post:
+                object_id = strapi_post['_suggested_object_id']
+            elif 'slug' in strapi_post and isinstance(strapi_post['slug'], dict) and 'current' in strapi_post['slug']:
+                object_id = strapi_post['slug']['current']
             else:
-                object_id = sanity_post['_id']
+                object_id = strapi_post['_id']
             
             # Cria o objeto Algolia
             algolia_post = {
                 "objectID": object_id,
-                "title": sanity_post['title'],
+                "title": strapi_post['title'],
                 "content": content.strip(),
-                "date": sanity_post.get('publishedAt', ''),
+                "date": strapi_post.get('publishedAt', ''),
                 "tags": tags,
-                "sanityId": sanity_post['_id']
+                "strapiId": strapi_post['_id']
             }
             
             return algolia_post

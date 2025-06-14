@@ -492,7 +492,7 @@ export interface EmbedBlock {
 
 ## 📊 Benefícios Esperados
 
-1. **Melhor experiência de edição** no Sanity Studio
+1. **Melhor experiência de edição** no Strapi Studio
 2. **Conteúdo mais rico e interativo**
 3. **Maior engajamento dos leitores**
 4. **SEO aprimorado** com conteúdo estruturado
@@ -504,4 +504,4 @@ export interface EmbedBlock {
 2. **Performance**: Lazy load para componentes pesados
 3. **Acessibilidade**: Todos os componentes devem ser acessíveis
 4. **Mobile**: Garantir responsividade
-5. **Validação**: Adicionar validação nos campos do Sanity
+5. **Validação**: Adicionar validação nos campos do Strapi

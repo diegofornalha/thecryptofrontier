@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Verificar conteúdo do post no Sanity"""
+"""Verificar conteúdo do post no Strapi"""
 
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from logic.sanity_client import client
+from logic.strapi_client import client
 import json
 
 # Query para buscar o post
@@ -60,7 +60,7 @@ try:
                     
                     break
     else:
-        print("Post não encontrado no Sanity")
+        print("Post não encontrado no Strapi")
         
 except Exception as e:
     print(f"Erro ao buscar post: {e}")

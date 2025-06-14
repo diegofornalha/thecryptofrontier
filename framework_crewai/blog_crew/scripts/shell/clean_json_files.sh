@@ -2,7 +2,7 @@
 # Script para limpeza manual de arquivos JSON temporários
 
 # Diretório do projeto
-PROJECT_DIR="/home/sanity/thecryptofrontier/framework_crewai/blog_crew"
+PROJECT_DIR="/home/strapi/thecryptofrontier/framework_crewai/blog_crew"
 
 # Cores para output
 RED='\033[0;31m'

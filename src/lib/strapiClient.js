@@ -1,125 +1,198 @@
-import axios from 'axios';
+/**
+ * Cliente Strapi para substituir o Strapi Client
+ * Configuração para conectar com o Strapi CMS
+ */
 
-const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
+const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'https://ale-blog.agentesintegrados.com';
 const STRAPI_API_TOKEN = process.env.NEXT_PUBLIC_STRAPI_API_TOKEN || '';
 
-// Cliente Strapi
-const strapiClient = axios.create({
-  baseURL: `${STRAPI_URL}/api`,
-  headers: {
-    'Authorization': STRAPI_API_TOKEN ? `Bearer ${STRAPI_API_TOKEN}` : '',
-    'Content-Type': 'application/json'
+class StrapiClient {
+  constructor() {
+    this.baseUrl = STRAPI_URL;
+    this.apiToken = STRAPI_API_TOKEN;
   }
-});
 
-// Funções auxiliares
-export async function getPosts(params = {}) {
-  try {
-    const query = new URLSearchParams({
-      populate: '*',
-      sort: 'publishedAt:desc',
-      ...params
-    });
+  /**
+   * Método genérico para fazer requisições ao Strapi
+   * @param {string} path - Caminho da API (ex: /api/posts)
+   * @param {object} options - Opções da requisição
+   * @returns {Promise} Resposta da API
+   */
+  async fetch(path, options = {}) {
+    const url = `${this.baseUrl}${path}`;
     
-    const response = await strapiClient.get(`/posts?${query}`);
-    return response.data.data || [];
-  } catch (error) {
-    console.error('Error fetching posts:', error);
-    return [];
-  }
-}
+    const headers = {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    };
 
-export async function getPostBySlug(slug) {
-  try {
-    const response = await strapiClient.get(`/posts`, {
-      params: {
-        filters: {
-          slug: {
-            $eq: slug
-          }
-        },
-        populate: '*'
+    // Adiciona token de autenticação se disponível
+    if (this.apiToken) {
+      headers['Authorization'] = `Bearer ${this.apiToken}`;
+    }
+
+    try {
+      const response = await fetch(url, {
+        ...options,
+        headers,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Strapi API error: ${response.status} ${response.statusText}`);
       }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Strapi client error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Buscar posts com paginação
+   * @param {object} params - Parâmetros de busca
+   * @returns {Promise} Posts e metadados
+   */
+  async getPosts(params = {}) {
+    const {
+      start = 0,
+      limit = 10,
+      sort = 'publishedAt:desc',
+      populate = '*',
+    } = params;
+
+    const queryParams = new URLSearchParams({
+      'pagination[start]': start,
+      'pagination[limit]': limit,
+      sort,
+      populate,
     });
+
+    const response = await this.fetch(`/api/posts?${queryParams}`);
+    return response;
+  }
+
+  /**
+   * Buscar um post específico pelo slug
+   * @param {string} slug - Slug do post
+   * @returns {Promise} Post completo
+   */
+  async getPostBySlug(slug) {
+    const queryParams = new URLSearchParams({
+      'filters[slug][$eq]': slug,
+      'populate[author][populate]': '*',
+      'populate[featuredImage]': '*',
+      'populate[seo]': '*',
+    });
+
+    const response = await this.fetch(`/api/posts?${queryParams}`);
     
-    return response.data.data?.[0] || null;
-  } catch (error) {
-    console.error('Error fetching post by slug:', error);
+    if (response.data && response.data.length > 0) {
+      return response.data[0];
+    }
+    
     return null;
   }
-}
 
-export async function getPages(params = {}) {
-  try {
-    const query = new URLSearchParams({
-      populate: '*',
-      ...params
+  /**
+   * Buscar posts por pesquisa de texto
+   * @param {string} searchTerm - Termo de busca
+   * @param {object} params - Parâmetros adicionais
+   * @returns {Promise} Posts encontrados
+   */
+  async searchPosts(searchTerm, params = {}) {
+    const {
+      start = 0,
+      limit = 10,
+    } = params;
+
+    const queryParams = new URLSearchParams({
+      'filters[$or][0][title][$containsi]': searchTerm,
+      'filters[$or][1][excerpt][$containsi]': searchTerm,
+      'filters[$or][2][content][$containsi]': searchTerm,
+      'pagination[start]': start,
+      'pagination[limit]': limit,
+      'sort': 'publishedAt:desc',
+      'populate': 'author',
     });
-    
-    const response = await strapiClient.get(`/pages?${query}`);
-    return response.data.data || [];
-  } catch (error) {
-    console.error('Error fetching pages:', error);
-    return [];
+
+    const response = await this.fetch(`/api/posts?${queryParams}`);
+    return response;
   }
-}
 
-export async function getPageBySlug(slug) {
-  try {
-    const response = await strapiClient.get(`/pages`, {
-      params: {
-        filters: {
-          slug: {
-            $eq: slug
-          }
-        },
-        populate: '*'
-      }
+  /**
+   * Buscar autores
+   * @param {object} params - Parâmetros de busca
+   * @returns {Promise} Lista de autores
+   */
+  async getAuthors(params = {}) {
+    const queryParams = new URLSearchParams({
+      populate: 'avatar',
+      ...params,
     });
+
+    const response = await this.fetch(`/api/authors?${queryParams}`);
+    return response;
+  }
+
+  /**
+   * Buscar autor por slug
+   * @param {string} slug - Slug do autor
+   * @returns {Promise} Dados do autor
+   */
+  async getAuthorBySlug(slug) {
+    const queryParams = new URLSearchParams({
+      'filters[slug][$eq]': slug,
+      'populate': '*',
+    });
+
+    const response = await this.fetch(`/api/authors?${queryParams}`);
     
-    return response.data.data?.[0] || null;
-  } catch (error) {
-    console.error('Error fetching page by slug:', error);
+    if (response.data && response.data.length > 0) {
+      return response.data[0];
+    }
+    
     return null;
   }
-}
 
-export async function getAuthors() {
-  try {
-    const response = await strapiClient.get('/authors?populate=*');
-    return response.data.data || [];
-  } catch (error) {
-    console.error('Error fetching authors:', error);
-    return [];
+  /**
+   * Buscar posts populares (baseado em visualizações ou data)
+   * @param {number} limit - Número de posts
+   * @returns {Promise} Posts populares
+   */
+  async getPopularPosts(limit = 5) {
+    const queryParams = new URLSearchParams({
+      'pagination[limit]': limit,
+      'sort': 'publishedAt:desc', // Por enquanto, ordena por data
+      'populate': 'author',
+    });
+
+    const response = await this.fetch(`/api/posts?${queryParams}`);
+    return response;
+  }
+
+  /**
+   * Buscar posts relacionados
+   * @param {string} currentPostId - ID do post atual
+   * @param {number} limit - Número de posts
+   * @returns {Promise} Posts relacionados
+   */
+  async getRelatedPosts(currentPostId, limit = 3) {
+    const queryParams = new URLSearchParams({
+      'filters[id][$ne]': currentPostId,
+      'pagination[limit]': limit,
+      'sort': 'publishedAt:desc',
+      'populate': 'author,featuredImage',
+    });
+
+    const response = await this.fetch(`/api/posts?${queryParams}`);
+    return response;
   }
 }
 
-// Função para converter dados do Strapi para formato compatível com componentes existentes
-export function transformStrapiPost(post) {
-  if (!post) return null;
-  
-  const { attributes } = post;
-  
-  return {
-    _id: post.id,
-    title: attributes.title,
-    slug: { current: attributes.slug },
-    publishedAt: attributes.publishedAt,
-    excerpt: attributes.excerpt,
-    content: attributes.content,
-    mainImage: attributes.featuredImage?.data ? {
-      asset: {
-        url: `${STRAPI_URL}${attributes.featuredImage.data.attributes.url}`
-      }
-    } : null,
-    categories: attributes.categories || [],
-    tags: attributes.tags || [],
-    author: attributes.author?.data ? {
-      name: attributes.author.data.attributes.name,
-      slug: { current: attributes.author.data.attributes.slug }
-    } : null,
-    seo: attributes.seo || {}
-  };
-}
+// Exporta uma instância única do cliente
+const strapiClient = new StrapiClient();
 
 export default strapiClient;
+export { StrapiClient };

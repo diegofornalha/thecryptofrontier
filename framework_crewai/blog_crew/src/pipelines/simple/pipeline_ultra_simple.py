@@ -39,11 +39,11 @@ BASE_DIR = Path(__file__).parent
 POSTS_DIR = BASE_DIR / "posts_processados"
 POSTS_DIR.mkdir(exist_ok=True)
 
-# Sanity
-SANITY_PROJECT_ID = os.environ.get("SANITY_PROJECT_ID", "z4sx85c6")
-SANITY_DATASET = "production"
-SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN")
-SANITY_API_VERSION = "2023-05-03"
+# Strapi
+strapi_PROJECT_ID = os.environ.get("strapi_PROJECT_ID", "z4sx85c6")
+strapi_DATASET = "production"
+strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
+strapi_API_VERSION = "2023-05-03"
 
 def load_processed_articles() -> set:
     """Carrega IDs de artigos já processados"""
@@ -111,7 +111,7 @@ def clean_html(text: str) -> str:
     return soup.get_text(separator=' ', strip=True)
 
 def format_content_blocks(content: str) -> List[Dict]:
-    """Formata conteúdo em blocos simples para o Sanity"""
+    """Formata conteúdo em blocos simples para o Strapi"""
     # Limpar HTML primeiro
     clean_content = clean_html(content)
     
@@ -135,8 +135,8 @@ def format_content_blocks(content: str) -> List[Dict]:
     
     return blocks
 
-def publish_to_sanity(article: Dict) -> bool:
-    """Publica artigo no Sanity"""
+def publish_to_strapi(article: Dict) -> bool:
+    """Publica artigo no Strapi"""
     try:
         doc_id = f"post-{create_slug(article['title_pt'])}"
         
@@ -153,11 +153,11 @@ def publish_to_sanity(article: Dict) -> bool:
             "content": format_content_blocks(article['content_pt'])
         }
         
-        # Envia para Sanity
-        url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v{SANITY_API_VERSION}/data/mutate/{SANITY_DATASET}"
+        # Envia para Strapi
+        url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/{strapi_DATASET}"
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {SANITY_API_TOKEN}"
+            "Authorization": f"Bearer {strapi_API_TOKEN}"
         }
         
         mutations = {
@@ -173,10 +173,10 @@ def publish_to_sanity(article: Dict) -> bool:
         return True
         
     except Exception as e:
-        logger.error(f"Erro ao publicar no Sanity: {e}")
+        logger.error(f"Erro ao publicar no Strapi: {e}")
         if hasattr(e, 'response') and e.response:
             logger.error(f"Resposta: {e.response.text}")
-        logger.error(f"Token usado: {SANITY_API_TOKEN[:20]}...{SANITY_API_TOKEN[-10:] if SANITY_API_TOKEN else 'NONE'}")
+        logger.error(f"Token usado: {strapi_API_TOKEN[:20]}...{strapi_API_TOKEN[-10:] if strapi_API_TOKEN else 'NONE'}")
         logger.error(f"URL: {url}")
         return False
 
@@ -203,8 +203,8 @@ def process_article(article: Dict) -> bool:
         logger.info(f"Artigo salvo: {filename}")
         
         # 2. Publicar
-        logger.info("2. Publicando no Sanity...")
-        success = publish_to_sanity(article)
+        logger.info("2. Publicando no Strapi...")
+        success = publish_to_strapi(article)
         
         return success
         
@@ -223,8 +223,8 @@ def main():
     """)
     
     # Verificar variáveis de ambiente
-    if not SANITY_API_TOKEN:
-        logger.error("SANITY_API_TOKEN não encontrado no .env")
+    if not strapi_API_TOKEN:
+        logger.error("strapi_API_TOKEN não encontrado no .env")
         return
     
     # Carregar artigos processados

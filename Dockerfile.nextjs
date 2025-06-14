@@ -1,0 +1,57 @@
+# Dockerfile otimizado para Next.js 14+
+FROM node:20-alpine AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+# Copiar arquivos de dependência do diretório src
+COPY src/package.json src/package-lock.json ./
+RUN npm ci --legacy-peer-deps && npm cache clean --force
+
+# Build da aplicação
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copiar todo o conteúdo de src para o WORKDIR
+COPY src/ ./
+
+# Copiar arquivo de ambiente de produção
+COPY .env.production ./
+
+# Ajustar tsconfig.json para o contexto do Docker
+RUN sed -i 's/"@\/\*": \["src\/\*"\]/"@\/*": [".\/\*"]/' tsconfig.json && \
+    sed -i 's/"@\/types": \["src\/types\/index"\]/"@\/types": [".\/types\/index"]/' tsconfig.json && \
+    sed -i 's/"@\/components": \["src\/components\/\*"\]/"@\/components": [".\/components\/\*"]/' tsconfig.json && \
+    sed -i 's/"@\/lib": \["src\/lib\/\*"\]/"@\/lib": [".\/lib\/\*"]/' tsconfig.json && \
+    sed -i 's/"@\/utils": \["src\/utils\/\*"\]/"@\/utils": [".\/utils\/\*"]/' tsconfig.json && \
+    sed -i 's/"@\/hooks": \["src\/hooks\/\*"\]/"@\/hooks": [".\/hooks\/\*"]/' tsconfig.json && \
+    sed -i 's/"@\/strapi": \["src\/strapi\/\*"\]/"@\/strapi": [".\/strapi\/\*"]/' tsconfig.json
+
+# Build do Next.js
+ENV NEXT_TELEMETRY_DISABLED 1
+RUN npm run build
+
+# Imagem de produção
+FROM node:20-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED 1
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Copiar arquivos necessários do build
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+
+# Se houver public, copiar também (ignorar se não existir)
+COPY --from=builder /app/public* ./public/
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT 3000
+
+CMD ["node", "server.js"]

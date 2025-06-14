@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Publish directly to Sanity API
+Publish directly to Strapi API
 """
 
 import os
@@ -9,23 +9,23 @@ import requests
 from datetime import datetime
 
 # Load environment variables
-SANITY_PROJECT_ID = os.environ.get("SANITY_PROJECT_ID", "z4sx85c6")
-SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN")
-SANITY_DATASET = "production"
-SANITY_API_VERSION = "2023-05-03"
+strapi_PROJECT_ID = os.environ.get("strapi_PROJECT_ID", "z4sx85c6")
+strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
+strapi_DATASET = "production"
+strapi_API_VERSION = "2023-05-03"
 
-def publish_to_sanity(post_data):
-    """Publish directly to Sanity API"""
+def publish_to_strapi(post_data):
+    """Publish directly to Strapi API"""
     
-    if not SANITY_API_TOKEN:
-        return {"success": False, "error": "SANITY_API_TOKEN not set"}
+    if not strapi_API_TOKEN:
+        return {"success": False, "error": "strapi_API_TOKEN not set"}
     
     # API URL
-    url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v{SANITY_API_VERSION}/data/mutate/{SANITY_DATASET}"
+    url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/{strapi_DATASET}"
     
     # Headers
     headers = {
-        "Authorization": f"Bearer {SANITY_API_TOKEN}",
+        "Authorization": f"Bearer {strapi_API_TOKEN}",
         "Content-Type": "application/json",
     }
     
@@ -70,11 +70,11 @@ def main():
     with open('test_post_links_converted.json', 'r', encoding='utf-8') as f:
         post_data = json.load(f)
     
-    print("📤 Publishing test post to Sanity...")
+    print("📤 Publishing test post to Strapi...")
     print(f"Title: {post_data['title']}")
     print(f"Slug: {post_data['slug']['current']}")
     
-    result = publish_to_sanity(post_data)
+    result = publish_to_strapi(post_data)
     
     if result['success']:
         print(f"\n✅ Post published successfully!")

@@ -63,7 +63,7 @@ def main():
         logger.error("❌ OPENAI_API_KEY não configurada!")
         logger.info("Carregando do .env...")
         
-        env_file = Path("/home/sanity/thecryptofrontier/.env")
+        env_file = Path("/home/strapi/thecryptofrontier/.env")
         if env_file.exists():
             from dotenv import load_dotenv
             load_dotenv(env_file)

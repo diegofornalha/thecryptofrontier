@@ -3,8 +3,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 // --- Configuração ---
-const schemasSourceDir = path.join(__dirname, 'src', 'sanity', 'schemaTypes');
-const outputDir = path.join(__dirname, 'framework_crewai', 'src', 'generated_sanity_schemas');
+const schemasSourceDir = path.join(__dirname, 'src', 'strapi', 'schemaTypes');
+const outputDir = path.join(__dirname, 'framework_crewai', 'src', 'generated_strapi_schemas');
 const sourceFileGlob = path.join(schemasSourceDir, '**/*.ts');
 const pythonClassPerFile = false;
 
@@ -151,7 +151,7 @@ function extractSimplifiedSchemaInfo(schemaDefinition: any): Record<string, any>
     }
 
     const schemaInfo: Record<string, any> = {};
-    // Tenta extrair propriedades comuns do Sanity diretamente
+    // Tenta extrair propriedades comuns do Strapi diretamente
     for (const key of ['name', 'title', 'type', 'options', 'to', 'of', 'fields']) {
          if (key in schemaDefinition) {
             let value = schemaDefinition[key];
@@ -386,7 +386,7 @@ project.getSourceFiles().forEach(sourceFile => {
 const initFilePath = path.join(outputDir, '__init__.py');
 let initFileContent = `# -*- coding: utf-8 -*-\n`;
 initFileContent += `# Gerado automaticamente - NÃO EDITE MANUALMENTE\n`;
-initFileContent += `# Este arquivo torna o diretório 'generated_sanity_schemas' um pacote Python\n`;
+initFileContent += `# Este arquivo torna o diretório 'generated_strapi_schemas' um pacote Python\n`;
 initFileContent += `# e importa/reexporta todos os schemas gerados.\n\n`;
 initFileContent += `import importlib\n`;
 initFileContent += `import pkgutil\n\n`;
@@ -410,8 +410,8 @@ initFileContent += `               print(f"Aviso: Módulo {module_name} não tem
 initFileContent += `        except Exception as e:\n`;
 initFileContent += `            print(f"Erro ao importar o schema {module_name}: {e}")\n\n`;
 
-initFileContent += `# Você pode acessar os schemas individualmente (ex: from generated_sanity_schemas import post)\n`;
-initFileContent += `# Ou acessar todos através do dicionário loaded_schemas (ex: from generated_sanity_schemas import loaded_schemas)\n`;
+initFileContent += `# Você pode acessar os schemas individualmente (ex: from generated_strapi_schemas import post)\n`;
+initFileContent += `# Ou acessar todos através do dicionário loaded_schemas (ex: from generated_strapi_schemas import loaded_schemas)\n`;
 
 try {
     fs.writeFileSync(initFilePath, initFileContent);
@@ -423,7 +423,7 @@ try {
 
 // --- Limpeza Opcional ---
 // Comente ou remova esta seção se não quiser remover o diretório antigo automaticamente.
-const oldSchemaDir = path.join(__dirname, 'framework_crewai', 'src', 'sanity', 'schemaTypes');
+const oldSchemaDir = path.join(__dirname, 'framework_crewai', 'src', 'strapi', 'schemaTypes');
 if (fs.existsSync(oldSchemaDir)) {
      try {
          // fs.rmSync(oldSchemaDir, { recursive: true, force: true }); // Use com cuidado!
@@ -439,11 +439,11 @@ console.log('\nGeração de schemas Python concluída.');
 console.log(`Total de schemas processados: ${allSchemaInfo.length}`);
 console.log('Próximos passos:');
 console.log('1. Verifique os arquivos .py gerados em:', outputDir);
-console.log('2. Modifique seu script Python em \'framework_crewai\' para importar os schemas de \'generated_sanity_schemas\'.');
-console.log('   Exemplo: from generated_sanity_schemas import post, author');
-console.log('   Ou: from generated_sanity_schemas import loaded_schemas');
+console.log('2. Modifique seu script Python em \'framework_crewai\' para importar os schemas de \'generated_strapi_schemas\'.');
+console.log('   Exemplo: from generated_strapi_schemas import post, author');
+console.log('   Ou: from generated_strapi_schemas import loaded_schemas');
 console.log('       meu_post = {"_type": loaded_schemas["post"]["name"], ...}');
-console.log('3. Remova o diretório antigo: \'framework_crewai/src/sanity/schemaTypes\'');
+console.log('3. Remova o diretório antigo: \'framework_crewai/src/strapi/schemaTypes\'');
 console.log('4. Se ainda não o fez, adicione um script ao package.json para executar este gerador:');
 console.log('   "generate-py-schemas": "ts-node ./generate_python_schemas.ts"');
 console.log('5. Execute \'npm run generate-py-schemas\' (ou yarn) sempre que alterar os schemas TS.'); 

@@ -9,7 +9,7 @@ import uuid
 from datetime import datetime
 
 # Importar o validador
-from tools.sanity_key_validator import ensure_array_keys
+from tools.strapi_key_validator import ensure_array_keys
 
 def generate_key():
     """Gera uma chave única de 8 caracteres"""
@@ -350,5 +350,5 @@ with open(output_file, 'w', encoding='utf-8') as f:
 print(f"✅ Post criado e validado com sucesso!")
 print(f"📁 Arquivo salvo: {output_file}")
 print(f"🔑 Todas as chaves _key foram garantidas")
-print("\n📝 Próximo passo: criar no Sanity usando:")
-print(f"   npx sanity documents create {output_file} --dataset production")
+print("\n📝 Próximo passo: criar no Strapi usando:")
+print(f"   npx strapi documents create {output_file} --dataset production")

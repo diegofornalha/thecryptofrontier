@@ -21,7 +21,7 @@ O U.Today foi removido do sistema devido a problemas persistentes na obtenção 
 
 ## O que foi removido
 
-### Sistema Sanity:
+### Sistema Strapi:
 - ✅ 0 posts encontrados (não havia posts do U.Today armazenados)
 
 ### Algolia Search:

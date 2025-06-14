@@ -1,10 +1,10 @@
 /**
- * Configuração do Sanity CMS
- * Este arquivo contém as configurações necessárias para conexão com o Sanity
+ * Configuração do Strapi CMS
+ * Este arquivo contém as configurações necessárias para conexão com o Strapi
  */
-import { defineConfig } from 'sanity'
-import { visionTool } from '@sanity/vision'
-import { schemaTypes } from './src/sanity/schemaTypes/index.js'
+import { defineConfig } from 'strapi'
+import { visionTool } from '@strapi/vision'
+import { schemaTypes } from './src/strapi/schemaTypes/index.js'
 
 export default defineConfig({
   name: 'crypto-frontier',

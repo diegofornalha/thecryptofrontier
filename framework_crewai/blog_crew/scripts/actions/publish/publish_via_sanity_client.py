@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Publish using @sanity/client directly
+Publish using @strapi/client directly
 """
 
 import os
@@ -9,26 +9,26 @@ from pathlib import Path
 import subprocess
 
 def publish_post(post_file):
-    """Publish a post using Sanity client via Node.js"""
+    """Publish a post using Strapi client via Node.js"""
     
     # Create a temporary Node.js script
     node_script = """
-const sanityClient = require('@sanity/client');
+const strapiClient = require('@strapi/client');
 const fs = require('fs');
 
-const client = sanityClient({
+const client = strapiClient({
     projectId: 'z4sx85c6',
     dataset: 'production',
     apiVersion: '2023-05-03',
     useCdn: false,
-    token: process.env.SANITY_API_TOKEN
+    token: process.env.strapi_API_TOKEN
 });
 
 // Read the post data
 const postFile = process.argv[2];
 const postData = JSON.parse(fs.readFileSync(postFile, 'utf8'));
 
-// Create document for Sanity
+// Create document for Strapi
 const document = {
     _type: 'post',
     title: postData.title_pt,
@@ -58,7 +58,7 @@ const document = {
     }
 };
 
-// Publish to Sanity
+// Publish to Strapi
 client.createOrReplace(document)
     .then(result => {
         console.log('Success:', JSON.stringify({

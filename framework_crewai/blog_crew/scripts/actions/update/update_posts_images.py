@@ -17,17 +17,17 @@ logger = logging.getLogger(__name__)
 # Carregar variáveis de ambiente
 load_dotenv()
 
-SANITY_PROJECT_ID = os.getenv("SANITY_PROJECT_ID")
-SANITY_DATASET = os.getenv("SANITY_DATASET", "production")
-SANITY_API_TOKEN = os.getenv("SANITY_API_TOKEN")
+strapi_PROJECT_ID = os.getenv("strapi_PROJECT_ID")
+strapi_DATASET = os.getenv("strapi_DATASET", "production")
+strapi_API_TOKEN = os.getenv("strapi_API_TOKEN")
 
 def get_posts_without_images():
-    """Busca posts sem imagem no Sanity"""
+    """Busca posts sem imagem no Strapi"""
     query = '*[_type == "post" && !defined(mainImage)]{_id, title, slug}'
     
-    url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v2021-10-21/data/query/{SANITY_DATASET}"
+    url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v2021-10-21/data/query/{strapi_DATASET}"
     params = {"query": query}
-    headers = {"Authorization": f"Bearer {SANITY_API_TOKEN}"}
+    headers = {"Authorization": f"Bearer {strapi_API_TOKEN}"}
     
     response = requests.get(url, params=params, headers=headers)
     
@@ -58,15 +58,15 @@ def find_image_for_post(post_title):
     
     return None
 
-def upload_image_to_sanity(image_path):
-    """Upload de imagem para o Sanity"""
+def upload_image_to_strapi(image_path):
+    """Upload de imagem para o Strapi"""
     try:
         with open(image_path, 'rb') as f:
             image_data = f.read()
         
-        upload_url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v2021-03-25/assets/images/{SANITY_DATASET}"
+        upload_url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v2021-03-25/assets/images/{strapi_DATASET}"
         headers = {
-            "Authorization": f"Bearer {SANITY_API_TOKEN}",
+            "Authorization": f"Bearer {strapi_API_TOKEN}",
             "Content-Type": "image/png"
         }
         
@@ -114,9 +114,9 @@ def update_post_with_image(post_id, image_asset_id, post_title):
             }]
         }
         
-        url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v2021-10-21/data/mutate/{SANITY_DATASET}"
+        url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v2021-10-21/data/mutate/{strapi_DATASET}"
         headers = {
-            "Authorization": f"Bearer {SANITY_API_TOKEN}",
+            "Authorization": f"Bearer {strapi_API_TOKEN}",
             "Content-Type": "application/json"
         }
         
@@ -159,7 +159,7 @@ def main():
             continue
         
         # Upload da imagem
-        asset_id = upload_image_to_sanity(image_path)
+        asset_id = upload_image_to_strapi(image_path)
         
         if not asset_id:
             logger.error(f"Falha no upload da imagem para: {post['title']}")

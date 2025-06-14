@@ -10,7 +10,7 @@ Estrutura do código-fonte principal:
 - logic/      Lógica de negócio
 - config/     Configurações
 - models/     Modelos de dados
-- schemas/    Schemas do Sanity
+- schemas/    Schemas do Strapi
 - monitoring/ Ferramentas de monitoramento
 - utils/      Utilitários e helpers
 """

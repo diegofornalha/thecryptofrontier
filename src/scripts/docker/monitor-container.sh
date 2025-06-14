@@ -16,7 +16,7 @@ check_container() {
     # Verifica se o container está rodando
     if ! docker ps --format "table {{.Names}}" | grep -q "^${CONTAINER_NAME}$"; then
         log_message "Container $CONTAINER_NAME não está rodando. Tentando iniciar..."
-        cd /home/sanity/thecryptofrontier && docker-compose up -d
+        cd /home/strapi/thecryptofrontier && docker-compose up -d
         sleep 30
         return 1
     fi

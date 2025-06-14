@@ -6,7 +6,7 @@
 Recomendo consolidar em 2-3 scripts principais:
 
 1. **publish_main.py** - Script principal de publicação
-   - Consolidar: publish_direct.py, publish_via_sanity_client.py
+   - Consolidar: publish_direct.py, publish_via_strapi_client.py
    
 2. **publish_batch.py** - Publicação em lote
    - Consolidar: publish_all_with_images.py, publish_pipeline_posts.py

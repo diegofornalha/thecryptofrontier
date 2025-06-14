@@ -16,9 +16,9 @@ O sistema carrega automaticamente as variáveis do arquivo `.env` usando `python
 |----------|-----------|-------------|---------|
 | `OPENAI_API_KEY` | Chave da API OpenAI para DALL-E | ✅ | sk-... |
 | `GOOGLE_API_KEY` | Chave da API Google para Gemini | ✅ | AIza... |
-| `SANITY_PROJECT_ID` | ID do projeto Sanity | ✅ | z4sx85c6 |
-| `SANITY_API_TOKEN` | Token de escrita do Sanity | ✅ | sk... |
-| `SANITY_DATASET` | Dataset do Sanity | ✅ | production |
+| `strapi_PROJECT_ID` | ID do projeto Strapi | ✅ | z4sx85c6 |
+| `strapi_API_TOKEN` | Token de escrita do Strapi | ✅ | sk... |
+| `strapi_DATASET` | Dataset do Strapi | ✅ | production |
 | `ALGOLIA_APP_ID` | ID da aplicação Algolia | ⚠️ | 42TZW... |
 | `ALGOLIA_API_KEY` | Chave de admin Algolia | ⚠️ | d0cb5... |
 | `ALGOLIA_INDEX_NAME` | Nome do índice Algolia | ⚠️ | development_mcpx_content |
@@ -99,10 +99,10 @@ python run_pipeline.py
 OPENAI_API_KEY=sk-proj-abc123...
 GOOGLE_API_KEY=AIzaSyB...
 
-# Sanity
-SANITY_PROJECT_ID=z4sx85c6
-SANITY_API_TOKEN=skRW...
-SANITY_DATASET=production
+# Strapi
+strapi_PROJECT_ID=z4sx85c6
+strapi_API_TOKEN=skRW...
+strapi_DATASET=production
 
 # Algolia (opcional)
 ALGOLIA_APP_ID=42TZWHW8UP

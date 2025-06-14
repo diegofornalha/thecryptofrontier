@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Publish posts to the new Sanity Studio
+Publish posts to the new Strapi Studio
 """
 
 import os
@@ -10,12 +10,12 @@ from pathlib import Path
 from datetime import datetime
 
 # Configuration for new project
-SANITY_PROJECT_ID = "z4sx85c6"
-SANITY_DATASET = "production"
-SANITY_API_VERSION = "2023-05-03"
+strapi_PROJECT_ID = "z4sx85c6"
+strapi_DATASET = "production"
+strapi_API_VERSION = "2023-05-03"
 
 # You'll need to update this with a valid token from the new project
-SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN")
+strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
 
 # Import formatting
 import sys
@@ -53,10 +53,10 @@ def publish_post(post_file):
     }
     
     # API request
-    url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v{SANITY_API_VERSION}/data/mutate/{SANITY_DATASET}"
+    url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/{strapi_DATASET}"
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {SANITY_API_TOKEN}"
+        "Authorization": f"Bearer {strapi_API_TOKEN}"
     }
     
     mutations = {
@@ -77,23 +77,23 @@ def publish_post(post_file):
 
 def main():
     print("=" * 60)
-    print("PUBLICAÇÃO DE POSTS NO NOVO SANITY STUDIO")
+    print("PUBLICAÇÃO DE POSTS NO NOVO STRAPI STUDIO")
     print("=" * 60)
-    print(f"Studio URL: https://thecryptofrontier-blog.sanity.studio")
-    print(f"Project ID: {SANITY_PROJECT_ID}")
-    print(f"Dataset: {SANITY_DATASET}")
+    print(f"Studio URL: https://thecryptofrontier-blog.strapi.studio")
+    print(f"Project ID: {strapi_PROJECT_ID}")
+    print(f"Dataset: {strapi_DATASET}")
     
-    if not SANITY_API_TOKEN:
+    if not strapi_API_TOKEN:
         print("\n⚠️  IMPORTANTE: Você precisa criar um token de API no novo projeto!")
         print("\n📝 Passos:")
-        print("1. Acesse: https://www.sanity.io/manage/project/z4sx85c6/api")
+        print("1. Acesse: https://www.strapi.io/manage/project/z4sx85c6/api")
         print("2. Clique em 'Add API token'")
         print("3. Nome: 'Blog Pipeline Token'")
         print("4. Permissions: 'Editor'")
-        print("5. Copie o token e adicione ao .env como SANITY_API_TOKEN")
+        print("5. Copie o token e adicione ao .env como strapi_API_TOKEN")
         return
     
-    print(f"\nToken configurado: {SANITY_API_TOKEN[:20]}...")
+    print(f"\nToken configurado: {strapi_API_TOKEN[:20]}...")
     
     # Find recent posts
     posts_dir = Path("posts_processados")
@@ -121,7 +121,7 @@ def main():
     
     if success_count > 0:
         print(f"\n🎉 Posts publicados no novo Studio!")
-        print(f"   Acesse: https://thecryptofrontier-blog.sanity.studio")
+        print(f"   Acesse: https://thecryptofrontier-blog.strapi.studio")
 
 if __name__ == "__main__":
     main()

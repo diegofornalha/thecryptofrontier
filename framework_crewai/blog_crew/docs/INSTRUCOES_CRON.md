@@ -43,7 +43,7 @@ python main_auto_with_queue.py
 
 ### 1. Editar Script
 ```bash
-cd /home/sanity/thecryptofrontier/framework_crewai/blog_crew
+cd /home/strapi/thecryptofrontier/framework_crewai/blog_crew
 nano daily_pipeline.sh
 ```
 
@@ -93,7 +93,7 @@ grep "artigos processados com sucesso" pipeline.log | tail -5
 ```bash
 # Editar crontab_config
 # Mudar de 21:00 para 08:00
-0 8 * * * export TZ="America/Sao_Paulo" && /home/sanity/thecryptofrontier/framework_crewai/blog_crew/daily_pipeline.sh
+0 8 * * * export TZ="America/Sao_Paulo" && /home/strapi/thecryptofrontier/framework_crewai/blog_crew/daily_pipeline.sh
 ```
 
 ### Ajustar Quantidade
@@ -105,7 +105,7 @@ python run_pipeline_enhanced.py --limit 20
 
 ## ⚠️ Importante
 
-- O cron roda com usuário `sanity`
+- O cron roda com usuário `strapi`
 - Certifique-se que `.env` tem todas as chaves
 - Pipeline otimizado requer mais memória (~2GB)
 - Logs são rotacionados automaticamente

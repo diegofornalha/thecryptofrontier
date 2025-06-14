@@ -11,9 +11,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-SANITY_PROJECT_ID = "z4sx85c6"
-SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN")
-SANITY_API_VERSION = "2023-05-03"
+strapi_PROJECT_ID = "z4sx85c6"
+strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
+strapi_API_VERSION = "2023-05-03"
 
 def update_xrp_post():
     """Update the existing XRP post with new content from pipeline"""
@@ -50,10 +50,10 @@ def update_xrp_post():
     }
     
     # Send request
-    url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v{SANITY_API_VERSION}/data/mutate/production"
+    url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/production"
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {SANITY_API_TOKEN}"
+        "Authorization": f"Bearer {strapi_API_TOKEN}"
     }
     
     response = requests.post(url, headers=headers, json=mutations)

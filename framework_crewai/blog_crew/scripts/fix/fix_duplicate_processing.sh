@@ -41,7 +41,7 @@ case $choice in
         echo "🚀 Configurando RSS Monitor como único mecanismo..."
         
         # Atualizar PID file
-        echo "$RSS_PID" > /home/sanity/thecryptofrontier/framework_crewai/blog_crew/rss_monitor.pid
+        echo "$RSS_PID" > /home/strapi/thecryptofrontier/framework_crewai/blog_crew/rss_monitor.pid
         echo "✅ PID file atualizado"
         
         # Desabilitar cron job
@@ -50,7 +50,7 @@ case $choice in
         
         # Adicionar apenas crons de manutenção
         (crontab -l 2>/dev/null; echo "# Limpeza semanal - Domingos às 3:00 AM") | crontab -
-        (crontab -l 2>/dev/null; echo "0 3 * * 0 cd /home/sanity/thecryptofrontier/framework_crewai/blog_crew && python delete_sanity_duplicates.py >> /home/sanity/logs/cleanup.log 2>&1") | crontab -
+        (crontab -l 2>/dev/null; echo "0 3 * * 0 cd /home/strapi/thecryptofrontier/framework_crewai/blog_crew && python delete_strapi_duplicates.py >> /home/strapi/logs/cleanup.log 2>&1") | crontab -
         echo "✅ Crons de manutenção configurados"
         
         echo ""
@@ -68,13 +68,13 @@ case $choice in
         fi
         
         # Remover PID file
-        rm -f /home/sanity/thecryptofrontier/framework_crewai/blog_crew/rss_monitor.pid
+        rm -f /home/strapi/thecryptofrontier/framework_crewai/blog_crew/rss_monitor.pid
         echo "✅ PID file removido"
         
         # Otimizar cron para múltiplas execuções
         crontab -l | grep -v "daily_pipeline.sh" | crontab -
         (crontab -l 2>/dev/null; echo "# Pipeline 3x ao dia - 8:00, 14:00, 21:00") | crontab -
-        (crontab -l 2>/dev/null; echo "0 8,14,21 * * * export TZ='America/Sao_Paulo' && /home/sanity/thecryptofrontier/framework_crewai/blog_crew/daily_pipeline.sh >> /home/sanity/logs/pipeline.log 2>&1") | crontab -
+        (crontab -l 2>/dev/null; echo "0 8,14,21 * * * export TZ='America/Sao_Paulo' && /home/strapi/thecryptofrontier/framework_crewai/blog_crew/daily_pipeline.sh >> /home/strapi/logs/pipeline.log 2>&1") | crontab -
         echo "✅ Cron job configurado para 3x ao dia"
         
         echo ""
@@ -86,13 +86,13 @@ case $choice in
         echo "🚀 Configurando funções diferentes para cada mecanismo..."
         
         # Atualizar PID file
-        echo "$RSS_PID" > /home/sanity/thecryptofrontier/framework_crewai/blog_crew/rss_monitor.pid
+        echo "$RSS_PID" > /home/strapi/thecryptofrontier/framework_crewai/blog_crew/rss_monitor.pid
         echo "✅ PID file atualizado"
         
         # Modificar cron para apenas limpeza e sincronização
         crontab -l | grep -v "daily_pipeline.sh" | crontab -
         (crontab -l 2>/dev/null; echo "# Limpeza e sincronização - Domingos às 3:00 AM") | crontab -
-        (crontab -l 2>/dev/null; echo "0 3 * * 0 cd /home/sanity/thecryptofrontier/framework_crewai/blog_crew && python delete_sanity_duplicates.py && python sync_sanity_to_algolia.py >> /home/sanity/logs/maintenance.log 2>&1") | crontab -
+        (crontab -l 2>/dev/null; echo "0 3 * * 0 cd /home/strapi/thecryptofrontier/framework_crewai/blog_crew && python delete_strapi_duplicates.py && python sync_strapi_to_algolia.py >> /home/strapi/logs/maintenance.log 2>&1") | crontab -
         echo "✅ Cron job reconfigurado apenas para manutenção"
         
         echo ""

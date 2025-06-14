@@ -1,5 +1,5 @@
 """
-Modelos Pydantic para estrutura de posts do Sanity
+Modelos Pydantic para estrutura de posts do Strapi
 """
 
 from pydantic import BaseModel, Field, HttpUrl, field_validator, model_validator
@@ -21,7 +21,7 @@ class Span(BaseModel):
     }
         
     def model_dump(self, *args, **kwargs):
-        """Sobrescrever para renomear os campos para o formato Sanity"""
+        """Sobrescrever para renomear os campos para o formato Strapi"""
         d = super().model_dump(*args, **kwargs)
         if "key" in d and d["key"] is not None:
             d["_key"] = d.pop("key")
@@ -42,7 +42,7 @@ class Block(BaseModel):
     }
         
     def model_dump(self, *args, **kwargs):
-        """Sobrescrever para renomear os campos para o formato Sanity"""
+        """Sobrescrever para renomear os campos para o formato Strapi"""
         d = super().model_dump(*args, **kwargs)
         if "key" in d and d["key"] is not None:
             d["_key"] = d.pop("key")
@@ -60,7 +60,7 @@ class SlugField(BaseModel):
     }
         
     def model_dump(self, *args, **kwargs):
-        """Sobrescrever para renomear os campos para o formato Sanity"""
+        """Sobrescrever para renomear os campos para o formato Strapi"""
         d = super().model_dump(*args, **kwargs)
         if "type" in d:
             d["_type"] = d.pop("type")
@@ -96,7 +96,7 @@ class Asset(BaseModel):
     }
         
     def model_dump(self, *args, **kwargs):
-        """Sobrescrever para renomear os campos para o formato Sanity"""
+        """Sobrescrever para renomear os campos para o formato Strapi"""
         d = super().model_dump(*args, **kwargs)
         if "type" in d:
             d["_type"] = d.pop("type")
@@ -106,7 +106,7 @@ class Asset(BaseModel):
 
 class ImageCrop(BaseModel):
     """Modelo para crop de imagem"""
-    type: Literal["sanity.imageCrop"] = Field("sanity.imageCrop", alias="_type")
+    type: Literal["strapi.imageCrop"] = Field("strapi.imageCrop", alias="_type")
     top: float = 0
     bottom: float = 0
     left: float = 0
@@ -117,7 +117,7 @@ class ImageCrop(BaseModel):
     }
         
     def model_dump(self, *args, **kwargs):
-        """Sobrescrever para renomear os campos para o formato Sanity"""
+        """Sobrescrever para renomear os campos para o formato Strapi"""
         d = super().model_dump(*args, **kwargs)
         if "type" in d:
             d["_type"] = d.pop("type")
@@ -125,7 +125,7 @@ class ImageCrop(BaseModel):
 
 class ImageHotspot(BaseModel):
     """Modelo para hotspot de imagem"""
-    type: Literal["sanity.imageHotspot"] = Field("sanity.imageHotspot", alias="_type")
+    type: Literal["strapi.imageHotspot"] = Field("strapi.imageHotspot", alias="_type")
     x: float = 0.5
     y: float = 0.5
     height: float = 1.0
@@ -136,7 +136,7 @@ class ImageHotspot(BaseModel):
     }
         
     def model_dump(self, *args, **kwargs):
-        """Sobrescrever para renomear os campos para o formato Sanity"""
+        """Sobrescrever para renomear os campos para o formato Strapi"""
         d = super().model_dump(*args, **kwargs)
         if "type" in d:
             d["_type"] = d.pop("type")
@@ -156,7 +156,7 @@ class MainImage(BaseModel):
     }
         
     def model_dump(self, *args, **kwargs):
-        """Sobrescrever para renomear os campos para o formato Sanity"""
+        """Sobrescrever para renomear os campos para o formato Strapi"""
         d = super().model_dump(*args, **kwargs)
         if "type" in d:
             d["_type"] = d.pop("type")
@@ -184,7 +184,7 @@ class CategoryReference(BaseModel):
     }
         
     def model_dump(self, *args, **kwargs):
-        """Sobrescrever para renomear os campos para o formato Sanity"""
+        """Sobrescrever para renomear os campos para o formato Strapi"""
         d = super().model_dump(*args, **kwargs)
         if "type" in d:
             d["_type"] = d.pop("type")
@@ -205,7 +205,7 @@ class TagReference(BaseModel):
     }
         
     def model_dump(self, *args, **kwargs):
-        """Sobrescrever para renomear os campos para o formato Sanity"""
+        """Sobrescrever para renomear os campos para o formato Strapi"""
         d = super().model_dump(*args, **kwargs)
         if "type" in d:
             d["_type"] = d.pop("type")
@@ -225,7 +225,7 @@ class AuthorReference(BaseModel):
     }
         
     def model_dump(self, *args, **kwargs):
-        """Sobrescrever para renomear os campos para o formato Sanity"""
+        """Sobrescrever para renomear os campos para o formato Strapi"""
         d = super().model_dump(*args, **kwargs)
         if "type" in d:
             d["_type"] = d.pop("type")
@@ -253,7 +253,7 @@ class Post(BaseModel):
     }
         
     def model_dump(self, *args, **kwargs):
-        """Sobrescrever para renomear os campos para o formato Sanity"""
+        """Sobrescrever para renomear os campos para o formato Strapi"""
         d = super().model_dump(*args, **kwargs)
         if "type" in d:
             d["_type"] = d.pop("type")
@@ -321,7 +321,7 @@ def dict_to_post(data: Dict[str, Any]) -> Post:
     # Processar conteúdo
     if 'content' in post_data:
         content = post_data['content']
-        # Se for um dicionário com blocks (resultado de format_content_for_sanity)
+        # Se for um dicionário com blocks (resultado de format_content_for_strapi)
         if isinstance(content, dict) and 'blocks' in content:
             post_data['content'] = content['blocks']
         # Se for um dicionário com success e blocks
@@ -400,9 +400,9 @@ def dict_to_post(data: Dict[str, Any]) -> Post:
             
         return Post(**minimal_data)
 
-def post_to_sanity_format(post: Post) -> Dict[str, Any]:
+def post_to_strapi_format(post: Post) -> Dict[str, Any]:
     """
-    Converte um objeto Post para o formato esperado pelo Sanity.
+    Converte um objeto Post para o formato esperado pelo Strapi.
     """
     # Converter para dict
     post_dict = post.model_dump(exclude_none=True)

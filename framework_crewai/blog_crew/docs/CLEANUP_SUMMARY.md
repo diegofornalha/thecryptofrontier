@@ -15,7 +15,7 @@
 - **Scripts obsoletos**:
   - process_images_working.py
   - publish_simple.py
-  - publish_to_sanity.py
+  - publish_to_strapi.py
   - process_image_queue.py
   - retry_failed_images.py
   
@@ -26,8 +26,8 @@
 
 ### 2. Movido para `utilities/`
 - delete_algolia_duplicates.py
-- delete_sanity_duplicates.py
-- sync_sanity_to_algolia.py
+- delete_strapi_duplicates.py
+- sync_strapi_to_algolia.py
 - import_to_algolia.py
 - index_to_algolia.py
 - view_post.py
@@ -69,10 +69,10 @@ python run_pipeline.py --limit 5 --clean
 ### Utilitários (quando necessário)
 ```bash
 # Limpar duplicatas
-python utilities/delete_sanity_duplicates.py
+python utilities/delete_strapi_duplicates.py
 
 # Sincronizar com Algolia
-python utilities/sync_sanity_to_algolia.py
+python utilities/sync_strapi_to_algolia.py
 ```
 
 ## ⚠️ Importante

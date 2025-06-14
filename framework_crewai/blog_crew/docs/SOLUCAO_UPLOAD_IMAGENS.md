@@ -1,8 +1,8 @@
-# Solução do Problema de Upload de Imagens para o Sanity
+# Solução do Problema de Upload de Imagens para o Strapi
 
 ## Problema Identificado
 
-O upload de imagens para o Sanity estava falhando com o erro:
+O upload de imagens para o Strapi estava falhando com o erro:
 ```
 "Input buffer contains unsupported image format"
 ```
@@ -35,13 +35,13 @@ with open(image_path, 'rb') as f:
 
 ### 1. Script Standalone: `process_images_working.py`
 
-Este script processa posts formatados, gera imagens com DALL-E 3 e faz upload para o Sanity:
+Este script processa posts formatados, gera imagens com DALL-E 3 e faz upload para o Strapi:
 
 ```python
-def upload_image_to_sanity_binary(image_path, alt_text):
-    """Upload binário direto para Sanity (método correto da documentação)"""
+def upload_image_to_strapi_binary(image_path, alt_text):
+    """Upload binário direto para Strapi (método correto da documentação)"""
     # URL da API - usando v2021-06-07 como na documentação
-    upload_url = f"https://{project_id}.api.sanity.io/v2021-06-07/assets/images/{dataset}"
+    upload_url = f"https://{project_id}.api.strapi.io/v2021-06-07/assets/images/{dataset}"
     
     # Headers com Content-Type específico
     headers = {
@@ -62,7 +62,7 @@ Criamos ferramentas compatíveis com o CrewAI:
 
 ### 3. Script de Publicação: `publish_com_imagem.py`
 
-Script para publicar posts que já têm imagens no Sanity.
+Script para publicar posts que já têm imagens no Strapi.
 
 ## Fluxo Completo Funcional
 
@@ -71,23 +71,23 @@ Script para publicar posts que já têm imagens no Sanity.
    - Detecta criptomoeda mencionada
    - Gera prompt específico
    - Cria imagem com DALL-E 3
-   - Upload binário para Sanity
-3. **Publicação**: Post com imagem é publicado no Sanity
+   - Upload binário para Strapi
+3. **Publicação**: Post com imagem é publicado no Strapi
 
 ## Configurações Necessárias
 
 ### Variáveis de Ambiente:
 - `OPENAI_API_KEY`: Para DALL-E 3
-- `SANITY_PROJECT_ID`: ID do projeto Sanity
-- `SANITY_API_TOKEN`: Token de autenticação
-- `SANITY_DATASET`: Dataset (geralmente "production")
+- `strapi_PROJECT_ID`: ID do projeto Strapi
+- `strapi_API_TOKEN`: Token de autenticação
+- `strapi_DATASET`: Dataset (geralmente "production")
 
 ### Estrutura de Diretórios:
 ```
 posts_formatados/    # Posts prontos para imagem
 posts_com_imagem/    # Posts com imagem adicionada
 posts_imagens/       # Backup das imagens geradas
-posts_publicados/    # Posts publicados no Sanity
+posts_publicados/    # Posts publicados no Strapi
 ```
 
 ## Templates de Imagem
@@ -122,7 +122,7 @@ python publish_com_imagem.py
 ```bash
 python main.py  # Gera posts formatados
 python process_images_working.py  # Adiciona imagens
-python publish_com_imagem.py  # Publica no Sanity
+python publish_com_imagem.py  # Publica no Strapi
 ```
 
 ## Troubleshooting
@@ -132,10 +132,10 @@ python publish_com_imagem.py  # Publica no Sanity
 - Verifique o Content-Type no header
 
 ### Erro 401 Unauthorized
-- Verifique o SANITY_API_TOKEN
+- Verifique o strapi_API_TOKEN
 - Token deve ter permissões de escrita
 
-### Imagem não aparece no Sanity
+### Imagem não aparece no Strapi
 - Verifique se o asset_id foi retornado
 - Confirme que mainImage tem a estrutura correta
 

@@ -1,8 +1,8 @@
-# Guia de Deploy do Sanity Studio - Resolvendo Conflitos de Hostname
+# Guia de Deploy do Strapi Studio - Resolvendo Conflitos de Hostname
 
 ## 📋 Contexto
 
-Este documento detalha o processo de deploy do Sanity Studio, incluindo como identificar e resolver conflitos de hostname quando o nome desejado já está em uso.
+Este documento detalha o processo de deploy do Strapi Studio, incluindo como identificar e resolver conflitos de hostname quando o nome desejado já está em uso.
 
 ## 🎯 Projeto Configurado
 
@@ -15,7 +15,7 @@ Este documento detalha o processo de deploy do Sanity Studio, incluindo como ide
 ### 1. Comando Inicial Executado
 
 ```bash
-npm create sanity@latest -- --project z4sx85c6 --dataset production
+npm create strapi@latest -- --project z4sx85c6 --dataset production
 ```
 
 ✅ **Status**: Projeto já estava configurado localmente.
@@ -23,7 +23,7 @@ npm create sanity@latest -- --project z4sx85c6 --dataset production
 ### 2. Tentativa de Deploy Inicial
 
 ```bash
-npx sanity deploy
+npx strapi deploy
 ```
 
 **Resultado**: Solicitou hostname para o studio.
@@ -31,7 +31,7 @@ npx sanity deploy
 ### 3. Primeira Tentativa de Hostname
 
 ```bash
-echo "thecryptofrontier" | npx sanity deploy
+echo "thecryptofrontier" | npx strapi deploy
 ```
 
 **Erro Encontrado**:
@@ -41,7 +41,7 @@ echo "thecryptofrontier" | npx sanity deploy
 
 ### 4. Identificação do Problema
 
-**Diagnóstico**: O hostname `thecryptofrontier` já estava em uso por outro projeto no Sanity.
+**Diagnóstico**: O hostname `thecryptofrontier` já estava em uso por outro projeto no Strapi.
 
 **Sinais de Conflito**:
 - Mensagem: "Studio hostname 'X' is already taken"
@@ -51,17 +51,17 @@ echo "thecryptofrontier" | npx sanity deploy
 ### 5. Solução Implementada
 
 ```bash
-echo "thecryptofrontier-blog" | npx sanity deploy
+echo "thecryptofrontier-blog" | npx strapi deploy
 ```
 
 **Resultado Positivo**:
 ```
 ✓ Clean output folder (17ms)
-✓ Build Sanity Studio (60456ms)
+✓ Build Strapi Studio (60456ms)
 ✓ Verifying local content
-✓ Deploying to sanity.studio
+✓ Deploying to strapi.studio
 
-Success! Studio deployed to https://thecryptofrontier-blog.sanity.studio/
+Success! Studio deployed to https://thecryptofrontier-blog.strapi.studio/
 ```
 
 ## ✅ Studio Deployado com Sucesso
@@ -71,14 +71,14 @@ Success! Studio deployed to https://thecryptofrontier-blog.sanity.studio/
 | Campo | Valor |
 |-------|-------|
 | **Nome** | thecryptofrontier-blog |
-| **URL** | https://thecryptofrontier-blog.sanity.studio/ |
+| **URL** | https://thecryptofrontier-blog.strapi.studio/ |
 | **Status** | ✅ Ativo |
-| **Hosting** | Sanity Studio Cloud |
-| **Deploy por** | CLI Sanity |
+| **Hosting** | Strapi Studio Cloud |
+| **Deploy por** | CLI Strapi |
 
 ### 6. Configuração Recomendada
 
-Para evitar prompts futuros, adicionar ao `sanity.cli.ts`:
+Para evitar prompts futuros, adicionar ao `strapi.cli.ts`:
 
 ```typescript
 export default defineCliConfig({ 
@@ -111,11 +111,11 @@ export default defineCliConfig({
 
 ### Método 1: Tentativa Direta
 ```bash
-echo "seu-nome-desejado" | npx sanity deploy
+echo "seu-nome-desejado" | npx strapi deploy
 ```
 
 ### Método 2: Verificação Manual
-- Acessar: `https://seu-nome-desejado.sanity.studio/`
+- Acessar: `https://seu-nome-desejado.strapi.studio/`
 - Se retornar 404: Nome disponível
 - Se carregar uma página: Nome em uso
 
@@ -125,13 +125,13 @@ echo "seu-nome-desejado" | npx sanity deploy
 - [ ] Schema definido
 - [ ] Build local funcional (`npm run dev`)
 - [ ] Hostname único escolhido
-- [ ] Deploy executado: `npx sanity deploy`
+- [ ] Deploy executado: `npx strapi deploy`
 - [ ] URL de acesso confirmada
 - [ ] Configuração de `studioHost` atualizada
 
 ## 🎉 Resultado Final
 
-**Studio Online**: https://thecryptofrontier-blog.sanity.studio/
+**Studio Online**: https://thecryptofrontier-blog.strapi.studio/
 
 **Acesso Local**: http://localhost:3002/studio (durante desenvolvimento)
 
@@ -144,14 +144,14 @@ echo "seu-nome-desejado" | npx sanity deploy
 **Solução**: Verificar conexão de internet e tentar novamente.
 
 ### Erro: Configuration file issues
-**Solução**: Verificar sintaxe do `sanity.config.ts`.
+**Solução**: Verificar sintaxe do `strapi.config.ts`.
 
 ## 📊 Scripts Úteis Configurados
 
 ```json
 {
   "scripts": {
-    "sanity-deploy": "npx sanity deploy",
+    "strapi-deploy": "npx strapi deploy",
     "dev": "next dev",
     "build": "next build"
   }

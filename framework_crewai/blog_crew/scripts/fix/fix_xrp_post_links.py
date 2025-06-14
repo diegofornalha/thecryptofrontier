@@ -6,12 +6,12 @@ Script específico para corrigir os links markdown no post do XRP
 import os
 import json
 
-# Usar o sanity_client diretamente
-from tools.sanity_client import get_sanity_client
+# Usar o strapi_client diretamente
+from tools.strapi_client import get_strapi_client
 
 def main():
     # Inicializar cliente
-    client = get_sanity_client()
+    client = get_strapi_client()
     
     # Slug do post
     slug = 'xrp-alta-de-647x-no-market-cap-de-apenas-us-17-milhoes-o-que-sabemos'
@@ -85,7 +85,7 @@ def main():
             new_content.append(block)
     
     if found_and_fixed:
-        print("\n🔧 Atualizando post no Sanity...")
+        print("\n🔧 Atualizando post no Strapi...")
         try:
             # Atualizar o post
             result = client.patch(post['_id']).set({'content': new_content}).commit()

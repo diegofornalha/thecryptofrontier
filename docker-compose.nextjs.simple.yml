@@ -1,0 +1,21 @@
+services:
+  nextjs-blog:
+    container_name: nextjs-blog-preview
+    build:
+      context: .
+      dockerfile: Dockerfile.nextjs.simple
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_STRAPI_URL=https://ale-blog.agentesintegrados.com
+      - NEXT_PUBLIC_SITE_URL=https://ale-blog-preview.agentesintegrados.com
+    env_file:
+      - .env.production
+    networks:
+      - strapi-network
+
+networks:
+  strapi-network:
+    external: true

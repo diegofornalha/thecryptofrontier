@@ -54,7 +54,7 @@ posts_publicados: 45 arquivos, 1.2M
 blog_crew/
 ├── posts_para_traduzir/    # JSONs dos feeds RSS
 ├── posts_traduzidos/       # JSONs traduzidos
-├── posts_formatados/       # JSONs formatados para Sanity
+├── posts_formatados/       # JSONs formatados para Strapi
 └── posts_publicados/       # Backup dos publicados
 ```
 

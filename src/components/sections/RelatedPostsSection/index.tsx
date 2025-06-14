@@ -7,7 +7,7 @@ import algoliasearch from 'algoliasearch/lite';
 import * as React from 'react';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
-import client from '../../../lib/sanityClient';
+import client from '../../../lib/strapiClient';
 
 // Verifica se as credenciais do Algolia estão disponíveis
 const hasAlgoliaCredentials = ALGOLIA_APP_ID && ALGOLIA_SEARCH_API_KEY;

@@ -1,6 +1,6 @@
 """
-Validador de chaves _key para Sanity CMS
-Garante que todos os arrays tenham as chaves obrigatórias antes de enviar ao Sanity
+Validador de chaves _key para Strapi CMS
+Garante que todos os arrays tenham as chaves obrigatórias antes de enviar ao Strapi
 """
 
 import uuid
@@ -8,7 +8,7 @@ import logging
 from typing import Dict, List, Any, Optional
 from crewai.tools import tool
 
-logger = logging.getLogger("sanity_key_validator")
+logger = logging.getLogger("strapi_key_validator")
 
 def generate_key():
     """Gera uma chave aleatória de 8 caracteres"""
@@ -88,10 +88,10 @@ def validate_portable_text(content: List[Dict]) -> List[Dict]:
 
 def validate_post_data(post_data: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Valida dados de um post antes de enviar ao Sanity
+    Valida dados de um post antes de enviar ao Strapi
     Garante que todos os arrays tenham _key
     """
-    logger.info("Validando dados do post para Sanity...")
+    logger.info("Validando dados do post para Strapi...")
     
     # Fazer uma cópia para não modificar o original
     validated_data = post_data.copy()
@@ -116,9 +116,9 @@ def validate_post_data(post_data: Dict[str, Any]) -> Dict[str, Any]:
     return validated_data
 
 @tool
-def validate_sanity_data(data=None, **kwargs):
+def validate_strapi_data(data=None, **kwargs):
     """
-    Ferramenta para validar dados antes de enviar ao Sanity CMS.
+    Ferramenta para validar dados antes de enviar ao Strapi CMS.
     Garante que todos os arrays tenham as chaves _key obrigatórias.
     
     Args:
@@ -254,5 +254,5 @@ if __name__ == "__main__":
         ]
     }
     
-    result = validate_sanity_data(test_post)
+    result = validate_strapi_data(test_post)
     print(f"Resultado: {result}") 

@@ -1,14 +1,14 @@
-// Utility types for working with Sanity data
-import type { SanityDocument, SanityReference, SanityImageAsset } from './sanity.generated'
+// Utility types for working with Strapi data
+import type { strapiDocument, strapiReference, strapiImageAsset } from './strapi.generated'
 
 // Extract document type from _type field
-export type DocumentType<T extends SanityDocument> = T['_type']
+export type DocumentType<T extends strapiDocument> = T['_type']
 
 // Make fields optional (useful for drafts)
-export type PartialDocument<T extends SanityDocument> = Partial<T> & Pick<T, '_id' | '_type'>
+export type PartialDocument<T extends strapiDocument> = Partial<T> & Pick<T, '_id' | '_type'>
 
 // Resolve reference type
-export type ResolveReference<T> = T extends SanityReference<infer U> ? U : T
+export type ResolveReference<T> = T extends strapiReference<infer U> ? U : T
 
 // Array element type
 export type ArrayElement<T> = T extends Array<infer U> ? U : never
@@ -36,7 +36,7 @@ export type PortableTextBlock = {
 // Image with resolved asset
 export type ImageWithAsset = {
   _type: 'image'
-  asset: SanityImageAsset & {
+  asset: strapiImageAsset & {
     url: string
     metadata: {
       dimensions: {
@@ -66,13 +66,13 @@ export type Slug = {
 }
 
 // Reference with resolved data
-export type ResolvedReference<T extends SanityDocument> = T & {
+export type ResolvedReference<T extends strapiDocument> = T & {
   _id: string
   _type: T['_type']
 }
 
 // Validation helpers
-export function isDocument<T extends SanityDocument>(
+export function isDocument<T extends strapiDocument>(
   value: unknown,
   type: T['_type']
 ): value is T {
@@ -84,9 +84,9 @@ export function isDocument<T extends SanityDocument>(
   )
 }
 
-export function isReference<T extends SanityDocument>(
+export function isReference<T extends strapiDocument>(
   value: unknown
-): value is SanityReference<T> {
+): value is strapiReference<T> {
   return (
     typeof value === 'object' &&
     value !== null &&
@@ -106,13 +106,13 @@ export function hasSlug(value: unknown): value is { slug: Slug } {
 }
 
 // Type guards
-export const isPost = (doc: SanityDocument): doc is import('./sanity.generated').Post => 
+export const isPost = (doc: strapiDocument): doc is import('./strapi.generated').Post => 
   doc._type === 'post'
 
-export const isPage = (doc: SanityDocument): doc is import('./sanity.generated').Page => 
+export const isPage = (doc: strapiDocument): doc is import('./strapi.generated').Page => 
   doc._type === 'page'
 
-export const isAuthor = (doc: SanityDocument): doc is import('./sanity.generated').Author => 
+export const isAuthor = (doc: strapiDocument): doc is import('./strapi.generated').Author => 
   doc._type === 'author'
 
 // Query result type helpers
@@ -129,18 +129,18 @@ export type PaginatedResult<T> = {
 }
 
 // Error handling types
-export type SanityError = {
+export type strapiError = {
   message: string
   statusCode?: number
   error?: string
 }
 
-export type Result<T, E = SanityError> = 
+export type Result<T, E = strapiError> = 
   | { success: true; data: T }
   | { success: false; error: E }
 
 // Helper to create Result types
 export const createResult = {
   success: <T>(data: T): Result<T> => ({ success: true, data }),
-  error: <E = SanityError>(error: E): Result<any, E> => ({ success: false, error }),
+  error: <E = strapiError>(error: E): Result<any, E> => ({ success: false, error }),
 }

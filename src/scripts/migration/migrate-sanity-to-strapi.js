@@ -1,27 +1,27 @@
 #!/usr/bin/env node
 
 /**
- * Script de Migração Sanity → Strapi
- * Migra posts, páginas e autores do Sanity CMS para Strapi
+ * Script de Migração Strapi → Strapi
+ * Migra posts, páginas e autores do Strapi CMS para Strapi
  */
 
 const axios = require('axios');
-const { createClient } = require('@sanity/client');
+const { createClient } = require('@strapi/client');
 require('dotenv').config();
 
 // Configurações
-const SANITY_PROJECT_ID = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || process.env.SANITY_PROJECT_ID;
-const SANITY_DATASET = process.env.NEXT_PUBLIC_SANITY_DATASET || 'production';
-const SANITY_API_TOKEN = process.env.SANITY_API_TOKEN;
+const strapi_PROJECT_ID = process.env.NEXT_PUBLIC_strapi_PROJECT_ID || process.env.strapi_PROJECT_ID;
+const strapi_DATASET = process.env.NEXT_PUBLIC_strapi_DATASET || 'production';
+const strapi_API_TOKEN = process.env.strapi_API_TOKEN;
 
 const STRAPI_URL = process.env.STRAPI_URL || 'http://localhost:1337';
 const STRAPI_API_TOKEN = process.env.STRAPI_API_TOKEN || '';
 
-// Cliente Sanity
-const sanityClient = createClient({
-  projectId: SANITY_PROJECT_ID,
-  dataset: SANITY_DATASET,
-  token: SANITY_API_TOKEN,
+// Cliente Strapi
+const strapiClient = createClient({
+  projectId: strapi_PROJECT_ID,
+  dataset: strapi_DATASET,
+  token: strapi_API_TOKEN,
   useCdn: false,
   apiVersion: '2023-05-03'
 });
@@ -84,7 +84,7 @@ function convertPortableTextToHTML(blocks) {
     .join('\n');
 }// Função principal de migração
 async function migrate() {
-  console.log('🚀 Iniciando migração Sanity → Strapi...\n');
+  console.log('🚀 Iniciando migração Strapi → Strapi...\n');
   
   try {
     // 1. Migrar Autores
@@ -109,7 +109,7 @@ async function migrate() {
 
 // Migrar Autores
 async function migrateAuthors() {
-  const authors = await sanityClient.fetch(`
+  const authors = await strapiClient.fetch(`
     *[_type == "author"] {
       _id,
       name,
@@ -127,7 +127,7 @@ async function migrateAuthors() {
         name: author.name,
         slug: author.slug?.current || generateSlug(author.name),
         bio: author.bio || '',
-        sanityId: author._id
+        strapiId: author._id
       };
       
       // Criar autor no Strapi
@@ -149,7 +149,7 @@ async function migrateAuthors() {
   }
 }// Migrar Posts
 async function migratePosts() {
-  const posts = await sanityClient.fetch(`
+  const posts = await strapiClient.fetch(`
     *[_type == "post"] {
       _id,
       title,
@@ -184,10 +184,10 @@ async function migratePosts() {
         categories: post.categories || [],
         tags: [],
         originalSource: post.originalSource || {
-          site: 'Sanity CMS',
+          site: 'Strapi CMS',
           id: post._id
         },
-        sanityId: post._id
+        strapiId: post._id
       };
       
       // Criar post no Strapi
@@ -214,7 +214,7 @@ async function migratePosts() {
   console.log(`\nResumo: ${migrated} posts migrados, ${failed} falharam`);
 }// Migrar Páginas
 async function migratePages() {
-  const pages = await sanityClient.fetch(`
+  const pages = await strapiClient.fetch(`
     *[_type == "page"] {
       _id,
       title,
@@ -235,7 +235,7 @@ async function migratePages() {
         slug: page.slug?.current || generateSlug(page.title),
         content: htmlContent,
         seo: page.seo || {},
-        sanityId: page._id
+        strapiId: page._id
       };
       
       // Criar página no Strapi

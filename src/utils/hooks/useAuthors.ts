@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { client } from '../../sanity/lib/client'
+import { client } from '../../strapi/lib/client'
 
 // Tipo para representar um autor
 export type Author = {

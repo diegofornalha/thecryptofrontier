@@ -8,12 +8,17 @@ Este projeto segue uma organização específica para manter os arquivos bem est
 ### 🏗️ Estrutura Principal
 
 ```
-/Users/agents/thecryptofrontier/
-├── docs/                    # Toda documentação do projeto
+/home/strapi/thecryptofrontier/
+├── strapi/
+│   └── docs/               # Toda documentação do projeto (MOVIDO PARA STRAPI)
 ├── scripts/                 # Scripts utilitários
 │   ├── docker/             # Scripts relacionados ao Docker
 │   └── patches/            # Scripts de patches e workarounds
 ├── framework_crewai/        # Framework CrewAI para automação de blog
+├── claude-flow-diego/       # Projeto de agentes
+│   └── claude-diego-flow/
+│       └── src/
+│           └── agents/     # Guardian e outros agentes
 ├── src/                     # Código fonte principal do Next.js
 ├── public/                  # Assets públicos
 └── [arquivos de config]     # package.json, docker-compose.yml, etc (raiz)
@@ -22,7 +27,7 @@ Este projeto segue uma organização específica para manter os arquivos bem est
 ### 📝 Onde Colocar Cada Tipo de Arquivo
 
 #### Documentação
-**Localização:** `/docs/`
+**Localização:** `/strapi/docs/` (ATUALIZADO - movido para dentro de strapi)
 - Arquivos `.md` de documentação
 - Instruções de deploy
 - Guias de configuração
@@ -84,10 +89,17 @@ Quando mover arquivos, lembre-se de atualizar:
 ### 📋 Checklist para Novos Arquivos
 
 Antes de criar um arquivo, pergunte-se:
-- [ ] É documentação? → `/docs/`
+- [ ] É documentação? → `/strapi/docs/`
 - [ ] É um script Docker? → `/scripts/docker/`
 - [ ] É um patch/workaround? → `/scripts/patches/`
 - [ ] É um script utilitário? → `/scripts/`
 - [ ] É parte do CrewAI? → `/framework_crewai/blog_crew/`
 - [ ] É código do Next.js? → `/src/`
 - [ ] É um arquivo de configuração padrão? → Raiz
+
+### 🤖 Agentes do Projeto
+
+#### Guardian
+**Localização:** `/claude-flow-diego/claude-diego-flow/src/agents/`
+- Agente principal do sistema
+- Responsável por coordenação e supervisão

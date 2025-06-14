@@ -1,5 +1,5 @@
 """
-Ferramentas aprimoradas para integração com o Sanity CMS
+Ferramentas aprimoradas para integração com o Strapi CMS
 Inclui suporte completo para tags, categorias e autor
 """
 
@@ -12,25 +12,25 @@ from crewai.tools import tool
 from pathlib import Path
 import uuid
 
-logger = logging.getLogger("sanity_tools_enhanced")
+logger = logging.getLogger("strapi_tools_enhanced")
 
-# Importar configurações do Sanity
+# Importar configurações do Strapi
 try:
-    from ..config import SANITY_CONFIG, get_sanity_api_url
+    from ..config import strapi_CONFIG, get_strapi_api_url
 except ImportError:
     # Fallback para valores padrão se não conseguir importar
-    SANITY_CONFIG = {
-        "project_id": os.environ.get("SANITY_PROJECT_ID", ""),
+    strapi_CONFIG = {
+        "project_id": os.environ.get("strapi_PROJECT_ID", ""),
         "dataset": "production",
         "api_version": "2023-05-03"
     }
     
-    def get_sanity_api_url(project_id=None, dataset=None, api_version=None):
-        _project_id = project_id or SANITY_CONFIG["project_id"]
-        _dataset = dataset or SANITY_CONFIG["dataset"]
-        _api_version = api_version or SANITY_CONFIG["api_version"]
+    def get_strapi_api_url(project_id=None, dataset=None, api_version=None):
+        _project_id = project_id or strapi_CONFIG["project_id"]
+        _dataset = dataset or strapi_CONFIG["dataset"]
+        _api_version = api_version or strapi_CONFIG["api_version"]
         
-        return f"https://{_project_id}.api.sanity.io/v{_api_version}/data/mutate/{_dataset}"
+        return f"https://{_project_id}.api.strapi.io/v{_api_version}/data/mutate/{_dataset}"
 
 def criar_slug(titulo):
     """Cria um slug a partir de um título"""
@@ -45,12 +45,12 @@ def criar_slug(titulo):
     return slug.strip('-')
 
 def ensure_author_exists():
-    """Garante que o autor padrão existe no Sanity"""
+    """Garante que o autor padrão existe no Strapi"""
     try:
-        project_id = SANITY_CONFIG["project_id"]
-        dataset = SANITY_CONFIG["dataset"]
-        api_version = SANITY_CONFIG["api_version"]
-        api_token = os.environ.get("SANITY_API_TOKEN")
+        project_id = strapi_CONFIG["project_id"]
+        dataset = strapi_CONFIG["dataset"]
+        api_version = strapi_CONFIG["api_version"]
+        api_token = os.environ.get("strapi_API_TOKEN")
         
         if not all([project_id, api_token]):
             return None
@@ -59,7 +59,7 @@ def ensure_author_exists():
         author_id = "author-crypto-frontier"
         
         # Verificar se autor existe
-        query_url = f"https://{project_id}.api.sanity.io/v{api_version}/data/query/{dataset}"
+        query_url = f"https://{project_id}.api.strapi.io/v{api_version}/data/query/{dataset}"
         headers = {"Authorization": f"Bearer {api_token}"}
         params = {"query": f'*[_type == "author" && _id == "{author_id}"][0]'}
         
@@ -73,7 +73,7 @@ def ensure_author_exists():
         
         # Criar autor padrão
         logger.info("Criando autor padrão...")
-        mutation_url = get_sanity_api_url(project_id, dataset)
+        mutation_url = get_strapi_api_url(project_id, dataset)
         
         author_doc = {
             "_type": "author",
@@ -107,17 +107,17 @@ def ensure_author_exists():
         return None
 
 def ensure_categories_exist(categories):
-    """Garante que as categorias existem no Sanity"""
-    project_id = SANITY_CONFIG["project_id"]
-    dataset = SANITY_CONFIG["dataset"]
-    api_version = SANITY_CONFIG["api_version"]
-    api_token = os.environ.get("SANITY_API_TOKEN")
+    """Garante que as categorias existem no Strapi"""
+    project_id = strapi_CONFIG["project_id"]
+    dataset = strapi_CONFIG["dataset"]
+    api_version = strapi_CONFIG["api_version"]
+    api_token = os.environ.get("strapi_API_TOKEN")
     
     if not all([project_id, api_token]):
         return []
         
     headers = {"Authorization": f"Bearer {api_token}"}
-    mutation_url = get_sanity_api_url(project_id, dataset)
+    mutation_url = get_strapi_api_url(project_id, dataset)
     
     category_refs = []
     
@@ -127,7 +127,7 @@ def ensure_categories_exist(categories):
             category_id = f"category-{category_slug}"
             
             # Verificar se existe
-            query_url = f"https://{project_id}.api.sanity.io/v{api_version}/data/query/{dataset}"
+            query_url = f"https://{project_id}.api.strapi.io/v{api_version}/data/query/{dataset}"
             params = {"query": f'*[_type == "category" && _id == "{category_id}"][0]'}
             
             response = requests.get(query_url, headers=headers, params=params)
@@ -177,17 +177,17 @@ def ensure_categories_exist(categories):
     return category_refs
 
 def ensure_tags_exist(tags):
-    """Garante que as tags existem no Sanity"""
-    project_id = SANITY_CONFIG["project_id"]
-    dataset = SANITY_CONFIG["dataset"]
-    api_version = SANITY_CONFIG["api_version"]
-    api_token = os.environ.get("SANITY_API_TOKEN")
+    """Garante que as tags existem no Strapi"""
+    project_id = strapi_CONFIG["project_id"]
+    dataset = strapi_CONFIG["dataset"]
+    api_version = strapi_CONFIG["api_version"]
+    api_token = os.environ.get("strapi_API_TOKEN")
     
     if not all([project_id, api_token]):
         return []
         
     headers = {"Authorization": f"Bearer {api_token}"}
-    mutation_url = get_sanity_api_url(project_id, dataset)
+    mutation_url = get_strapi_api_url(project_id, dataset)
     
     tag_refs = []
     
@@ -197,7 +197,7 @@ def ensure_tags_exist(tags):
             tag_id = f"tag-{tag_slug}"
             
             # Verificar se existe
-            query_url = f"https://{project_id}.api.sanity.io/v{api_version}/data/query/{dataset}"
+            query_url = f"https://{project_id}.api.strapi.io/v{api_version}/data/query/{dataset}"
             params = {"query": f'*[_type == "tag" && _id == "{tag_id}"][0]'}
             
             response = requests.get(query_url, headers=headers, params=params)
@@ -313,10 +313,10 @@ def extract_crypto_tags(title, content):
     
     return tags[:5]  # Máximo 5 tags
 
-@tool("Publish to Sanity with full metadata")
-def publish_to_sanity_enhanced(post_data: str) -> str:
+@tool("Publish to Strapi with full metadata")
+def publish_to_strapi_enhanced(post_data: str) -> str:
     """
-    Publica um post no Sanity com suporte completo para tags, categorias e autor.
+    Publica um post no Strapi com suporte completo para tags, categorias e autor.
     Detecta automaticamente categorias e tags baseadas no conteúdo.
     
     Args:
@@ -389,19 +389,19 @@ def publish_to_sanity_enhanced(post_data: str) -> str:
         if tag_refs:
             post_doc["tags"] = tag_refs
         
-        # Configurações do Sanity
-        project_id = SANITY_CONFIG["project_id"]
-        dataset = SANITY_CONFIG["dataset"]
-        api_token = os.environ.get("SANITY_API_TOKEN")
+        # Configurações do Strapi
+        project_id = strapi_CONFIG["project_id"]
+        dataset = strapi_CONFIG["dataset"]
+        api_token = os.environ.get("strapi_API_TOKEN")
         
         if not all([project_id, api_token]):
             return json.dumps({
                 "success": False,
-                "error": "Credenciais do Sanity não configuradas"
+                "error": "Credenciais do Strapi não configuradas"
             })
         
         # URL da API
-        url = get_sanity_api_url(project_id, dataset)
+        url = get_strapi_api_url(project_id, dataset)
         
         # Headers
         headers = {

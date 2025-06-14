@@ -2,12 +2,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@/types": ["src/types/index"],
-      "@/components": ["src/components/*"],
-      "@/lib": ["src/lib/*"],
-      "@/utils": ["src/utils/*"],
-      "@/hooks": ["src/hooks/*"]
+      "@/*": ["./*"]
     },
     "target": "es2018",
     "lib": [

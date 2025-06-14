@@ -3,10 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(request: NextRequest) {
   try {
     // Verificar se há um token de webhook configurado como variável de ambiente
-    const webhookSecret = process.env.SANITY_WEBHOOK_SECRET;
+    const webhookSecret = process.env.strapi_WEBHOOK_SECRET;
     
     // Obter o token fornecido no cabeçalho da requisição
-    const providedToken = request.headers.get('sanity-webhook-secret');
+    const providedToken = request.headers.get('strapi-webhook-secret');
 
     // Verificar se o token é válido (se configurado)
     if (webhookSecret && webhookSecret !== providedToken) {
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     }, { status: 200 });
 
   } catch (error) {
-    console.error('Erro no webhook do Sanity:', error);
+    console.error('Erro no webhook do Strapi:', error);
     return NextResponse.json({ 
       message: 'Erro interno do servidor',
       error: process.env.NODE_ENV === 'development' ? error : undefined

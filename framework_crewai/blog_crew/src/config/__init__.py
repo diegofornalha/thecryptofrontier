@@ -1,6 +1,6 @@
 import os
 import yaml
-from .sanity_config import SANITY_CONFIG, get_sanity_api_url
+from .strapi_config import strapi_CONFIG, get_strapi_api_url
 
 def load_config():
     """Carrega as configurações do arquivo YAML"""
@@ -11,4 +11,4 @@ def load_config():
 # Exporta as configurações
 config = load_config()
 
-__all__ = ['config', 'SANITY_CONFIG', 'get_sanity_api_url']
+__all__ = ['config', 'strapi_CONFIG', 'get_strapi_api_url']

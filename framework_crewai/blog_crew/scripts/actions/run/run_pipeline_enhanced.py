@@ -235,17 +235,17 @@ class EnhancedPipeline:
             return article
     
     async def publish_articles(self, articles: List[Dict]) -> List[Dict]:
-        """Publica artigos no Sanity"""
-        logger.info(f"Publishing {len(articles)} articles to Sanity")
+        """Publica artigos no Strapi"""
+        logger.info(f"Publishing {len(articles)} articles to Strapi")
         
         # Usar publicação em batch se muitos artigos
         if len(articles) > 5:
-            from utils.parallel_processor import BatchSanityOperations
+            from utils.parallel_processor import BatchstrapiOperations
             
-            batch_ops = BatchSanityOperations(
-                project_id=os.getenv("SANITY_PROJECT_ID"),
-                dataset=os.getenv("SANITY_DATASET"),
-                token=os.getenv("SANITY_API_TOKEN")
+            batch_ops = BatchstrapiOperations(
+                project_id=os.getenv("strapi_PROJECT_ID"),
+                dataset=os.getenv("strapi_DATASET"),
+                token=os.getenv("strapi_API_TOKEN")
             )
             
             results = await batch_ops.publish_documents_batch(articles)
@@ -253,11 +253,11 @@ class EnhancedPipeline:
             
         else:
             # Publicar individualmente
-            from tools.sanity_tools_enhanced import publish_to_sanity_enhanced
+            from tools.strapi_tools_enhanced import publish_to_strapi_enhanced
             
             for article in articles:
                 try:
-                    result = publish_to_sanity_enhanced(json.dumps(article))
+                    result = publish_to_strapi_enhanced(json.dumps(article))
                     logger.info(
                         "Article published",
                         article_id=article.get('slug'),

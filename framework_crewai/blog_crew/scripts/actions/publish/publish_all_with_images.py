@@ -28,11 +28,11 @@ logger = logging.getLogger("publish_all")
 # APIs
 genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
 
-# Sanity
-SANITY_PROJECT_ID = os.environ.get("SANITY_PROJECT_ID")
-SANITY_DATASET = "production"
-SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN")
-SANITY_API_VERSION = "2023-05-03"
+# Strapi
+strapi_PROJECT_ID = os.environ.get("strapi_PROJECT_ID")
+strapi_DATASET = "production"
+strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
+strapi_API_VERSION = "2023-05-03"
 
 # Diretórios
 IMAGES_DIR = Path("posts_imagens")
@@ -68,7 +68,7 @@ Texto: {text}"""
         return text
 
 def format_content_blocks(content: str) -> list:
-    """Formata conteúdo em blocos para o Sanity"""
+    """Formata conteúdo em blocos para o Strapi"""
     # Remove tags HTML
     content = re.sub(r'<[^>]+>', '', content)
     
@@ -93,18 +93,18 @@ def format_content_blocks(content: str) -> list:
     
     return blocks
 
-def upload_image_to_sanity(image_path: Path) -> str:
-    """Upload de imagem para o Sanity usando upload binário"""
+def upload_image_to_strapi(image_path: Path) -> str:
+    """Upload de imagem para o Strapi usando upload binário"""
     try:
         # URL da API - usando v2021-06-07 como na documentação
-        url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v2021-06-07/assets/images/{SANITY_DATASET}"
+        url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v2021-06-07/assets/images/{strapi_DATASET}"
         
         # Determinar content type baseado na extensão
         content_type = 'image/png' if image_path.suffix.lower() == '.png' else 'image/jpeg'
         
         # Headers com Content-Type específico
         headers = {
-            'Authorization': f'Bearer {SANITY_API_TOKEN}',
+            'Authorization': f'Bearer {strapi_API_TOKEN}',
             'Content-Type': content_type
         }
         
@@ -126,8 +126,8 @@ def upload_image_to_sanity(image_path: Path) -> str:
         logger.error(f"Erro ao fazer upload: {e}")
         return None
 
-def publish_to_sanity(article: dict, image_id: str = None) -> bool:
-    """Publica artigo no Sanity"""
+def publish_to_strapi(article: dict, image_id: str = None) -> bool:
+    """Publica artigo no Strapi"""
     try:
         title = article.get('title_pt', article.get('title'))
         doc_id = f"post-{create_slug(title)}"
@@ -159,11 +159,11 @@ def publish_to_sanity(article: dict, image_id: str = None) -> bool:
                 }
             }
         
-        # Envia para Sanity
-        url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v{SANITY_API_VERSION}/data/mutate/{SANITY_DATASET}"
+        # Envia para Strapi
+        url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/{strapi_DATASET}"
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {SANITY_API_TOKEN}"
+            "Authorization": f"Bearer {strapi_API_TOKEN}"
         }
         
         mutations = {
@@ -237,11 +237,11 @@ def main():
             image_id = None
             if i < len(images):
                 logger.info(f"🎨 Fazendo upload da imagem: {images[i].name}")
-                image_id = upload_image_to_sanity(images[i])
+                image_id = upload_image_to_strapi(images[i])
             
             # Publicar
-            logger.info("📤 Publicando no Sanity...")
-            if publish_to_sanity(article, image_id):
+            logger.info("📤 Publicando no Strapi...")
+            if publish_to_strapi(article, image_id):
                 success_count += 1
             
         except Exception as e:

@@ -32,22 +32,22 @@ e blockchain, capaz de adaptar conteúdo para ter mais relevância cultural no B
 ================================================================================
 
 PROPÓSITO:
-- Preparar conteúdo traduzido para publicação no Sanity CMS
-- Converter markdown para formato Portable Text do Sanity
+- Preparar conteúdo traduzido para publicação no Strapi CMS
+- Converter markdown para formato Portable Text do Strapi
 - Estruturar metadados, criar slugs e organizar conteúdo para SEO
 
 CARACTERÍSTICAS:
 - Role: "Formatador de Conteúdo"
-- Goal: "Preparar o conteúdo traduzido para publicação no Sanity CMS"
+- Goal: "Preparar o conteúdo traduzido para publicação no Strapi CMS"
 - Suporte a modelos Pydantic para validação de dados
-- Conversão automática de markdown para blocos Sanity
+- Conversão automática de markdown para blocos Strapi
 
 FERRAMENTAS UTILIZADAS:
 1. read_from_file - Lê arquivos traduzidos
 2. save_to_file - Salva arquivos formatados
 3. create_slug - Cria slugs SEO-friendly
-4. format_content_for_sanity - Formata conteúdo para estrutura do Sanity
-5. convert_markdown_to_sanity_objects - Converte markdown para objetos Sanity
+4. format_content_for_strapi - Formata conteúdo para estrutura do Strapi
+5. convert_markdown_to_strapi_objects - Converte markdown para objetos Strapi
 
 ESTRUTURA DE DADOS ESPERADA:
 {
@@ -74,23 +74,23 @@ FUNCIONALIDADES ESPECIAIS:
 ================================================================================
 
 PROPÓSITO:
-- Publicar artigos formatados diretamente no Sanity CMS
+- Publicar artigos formatados diretamente no Strapi CMS
 - Garantir que todos os campos obrigatórios estejam presentes
 - Adicionar metadados automaticamente (categorias, tags, autor)
 
 CARACTERÍSTICAS:
 - Role: "Publicador de Conteúdo"
-- Goal: "Publicar os artigos formatados no Sanity CMS"
+- Goal: "Publicar os artigos formatados no Strapi CMS"
 - Validação de posts antes da publicação
 - Tratamento de erros de API
 
 FERRAMENTAS UTILIZADAS:
 1. read_from_file - Lê arquivos formatados
 2. save_to_file - Salva logs de publicação
-3. publish_to_sanity - Publicação básica no Sanity
-4. publish_to_sanity_enhanced - Publicação avançada com detecção automática de categorias/tags
+3. publish_to_strapi - Publicação básica no Strapi
+4. publish_to_strapi_enhanced - Publicação avançada com detecção automática de categorias/tags
 
-FUNCIONALIDADES DO publish_to_sanity_enhanced:
+FUNCIONALIDADES DO publish_to_strapi_enhanced:
 - Detecta categorias automaticamente (Bitcoin, Ethereum, DeFi, etc)
 - Cria tags baseadas em criptomoedas mencionadas
 - Adiciona autor padrão "Crypto Frontier"
@@ -99,7 +99,7 @@ FUNCIONALIDADES DO publish_to_sanity_enhanced:
 VALIDAÇÃO:
 - Valida estrutura do post usando modelos Pydantic
 - Verifica campos obrigatórios antes da publicação
-- Converte dados para formato esperado pelo Sanity
+- Converte dados para formato esperado pelo Strapi
 
 ================================================================================
 4. IMAGE GENERATOR AGENT (image_generator_agent.py)
@@ -108,7 +108,7 @@ VALIDAÇÃO:
 PROPÓSITO:
 - Gerar imagens profissionais usando DALL-E 3 para todos os posts
 - Garantir identidade visual consistente
-- Fazer upload automático das imagens para o Sanity
+- Fazer upload automático das imagens para o Strapi
 
 CARACTERÍSTICAS:
 - Role: "Gerador de Imagens Profissional"
@@ -131,7 +131,7 @@ PROCESSO DE TRABALHO:
 1. Lê posts de 'posts_formatados'
 2. Gera prompts baseados no conteúdo
 3. Cria imagens via DALL-E 3
-4. Faz upload para Sanity
+4. Faz upload para Strapi
 5. Salva posts com imagens em 'posts_com_imagem'
 6. Reporta estatísticas (processados, sucessos, falhas)
 
@@ -147,8 +147,8 @@ CONHECIMENTOS ESPECIALIZADOS:
 
 PROPÓSITO:
 - Indexar artigos publicados no Algolia para busca
-- Converter formato Sanity para formato Algolia
-- Manter sincronização entre Sanity e Algolia
+- Converter formato Strapi para formato Algolia
+- Manter sincronização entre Strapi e Algolia
 
 CARACTERÍSTICAS:
 - Role: "Indexador de Conteúdo para Algolia"
@@ -163,20 +163,20 @@ FERRAMENTAS UTILIZADAS:
 4. search_algolia - Busca conteúdo no Algolia
 5. delete_from_algolia - Remove conteúdo do Algolia
 
-CONVERSÃO DE FORMATO (Sanity → Algolia):
+CONVERSÃO DE FORMATO (Strapi → Algolia):
 {
     "objectID": "slug ou ID único",
     "title": "Título",
     "content": "Texto extraído dos blocos",
     "date": "Data de publicação",
     "tags": ["tag1", "tag2"],
-    "sanityId": "ID original do Sanity"
+    "strapiId": "ID original do Strapi"
 }
 
 FUNCIONALIDADES ESPECIAIS:
 - Extrai texto de blocos Portable Text
 - Converte categorias em tags
-- Mantém referência ao ID do Sanity
+- Mantém referência ao ID do Strapi
 - Registra todas as operações para auditoria
 
 ================================================================================
@@ -211,9 +211,9 @@ FLUXO GERAL DO SISTEMA
 
 1. MONITOR AGENT captura artigos de feeds RSS
 2. TRANSLATOR AGENT traduz artigos para português
-3. FORMATTER AGENT formata para o Sanity CMS
+3. FORMATTER AGENT formata para o Strapi CMS
 4. IMAGE GENERATOR AGENT cria imagens profissionais
-5. PUBLISHER AGENT publica no Sanity
+5. PUBLISHER AGENT publica no Strapi
 6. INDEXER AGENT indexa no Algolia para busca
 
 Cada agente é especializado em sua função e trabalha de forma coordenada

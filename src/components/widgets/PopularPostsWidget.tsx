@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import PopularPostItem from './PopularPostItem';
-import { client } from '@/sanity/client';
+import { client } from "@/lib/strapiClient";
 
 const popularPostsQuery = `*[_type == "post"] | order(views desc, publishedAt desc) [0...5] {
   _id,

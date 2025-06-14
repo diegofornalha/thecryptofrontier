@@ -1,4 +1,4 @@
-import { client } from '../sanity/lib/client';
+import { client } from '../strapi/lib/client';
 
 // Query para buscar as configurações do cabeçalho
 const HEADER_QUERY = `*[_type == "header"][0]{

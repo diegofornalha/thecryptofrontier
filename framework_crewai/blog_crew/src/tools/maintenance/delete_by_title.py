@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Script para deletar posts por título, slug OU ID no Sanity CMS e Algolia.
+Script para deletar posts por título, slug OU ID no Strapi CMS e Algolia.
 Busca inteligente que procura por:
 - Título do post
 - Slug do post  
-- ID do documento (Sanity)
+- ID do documento (Strapi)
 """
 
 import os
@@ -21,63 +21,63 @@ logging.basicConfig(
 )
 logger = logging.getLogger("delete_by_title")
 
-# Configurações do Sanity
+# Configurações do Strapi
 PROJECT_ID = "z4sx85c6"
 DATASET = "production"
 API_VERSION = "2023-05-03"
 
-def get_SANITY_API_TOKEN():
-    """Obtém o token de API do Sanity das variáveis de ambiente."""
-    token = os.environ.get("SANITY_API_TOKEN")
+def get_strapi_API_TOKEN():
+    """Obtém o token de API do Strapi das variáveis de ambiente."""
+    token = os.environ.get("strapi_API_TOKEN")
     if not token:
-        raise ValueError("SANITY_API_TOKEN não está definido nas variáveis de ambiente")
+        raise ValueError("strapi_API_TOKEN não está definido nas variáveis de ambiente")
     return token
 
-def search_posts_by_title_or_slug_sanity(search_term):
-    """Busca posts no Sanity pelo título, slug OU ID."""
+def search_posts_by_title_or_slug_strapi(search_term):
+    """Busca posts no Strapi pelo título, slug OU ID."""
     try:
-        SANITY_API_TOKEN = get_SANITY_API_TOKEN()
+        strapi_API_TOKEN = get_strapi_API_TOKEN()
         
-        # Verificar se é um ID do Sanity (formato específico)
+        # Verificar se é um ID do Strapi (formato específico)
         if len(search_term) > 15 and not "/" in search_term and not " " in search_term:
             # Buscar diretamente por ID
             query = f'*[_type == "post" && _id == "{search_term}"]{{_id, title, slug, source}}'
-            logger.info(f"Buscando posts no Sanity por ID: {search_term}")
+            logger.info(f"Buscando posts no Strapi por ID: {search_term}")
         else:
             # Query GROQ para buscar posts pelo título OU slug
             query = f'*[_type == "post" && (title match "{search_term}*" || slug.current match "{search_term}*" || title match "*{search_term}*" || slug.current match "*{search_term}*")]{{_id, title, slug, source}}'
-            logger.info(f"Buscando posts no Sanity com título/slug: {search_term}")
+            logger.info(f"Buscando posts no Strapi com título/slug: {search_term}")
         
         encoded_query = quote(query)
         
-        url = f"https://{PROJECT_ID}.api.sanity.io/v{API_VERSION}/data/query/{DATASET}?query={encoded_query}"
+        url = f"https://{PROJECT_ID}.api.strapi.io/v{API_VERSION}/data/query/{DATASET}?query={encoded_query}"
         
         headers = {
-            "Authorization": f"Bearer {SANITY_API_TOKEN}"
+            "Authorization": f"Bearer {strapi_API_TOKEN}"
         }
         
         response = requests.get(url, headers=headers)
         response.raise_for_status()
         
         result = response.json().get("result", [])
-        logger.info(f"Encontrados {len(result)} posts no Sanity")
+        logger.info(f"Encontrados {len(result)} posts no Strapi")
         
         return result
         
     except Exception as e:
-        logger.error(f"Erro ao buscar posts no Sanity: {str(e)}")
+        logger.error(f"Erro ao buscar posts no Strapi: {str(e)}")
         return []
 
-def delete_sanity_document(document_id):
-    """Deleta um documento específico do Sanity."""
+def delete_strapi_document(document_id):
+    """Deleta um documento específico do Strapi."""
     try:
-        SANITY_API_TOKEN = get_SANITY_API_TOKEN()
+        strapi_API_TOKEN = get_strapi_API_TOKEN()
         
-        url = f"https://{PROJECT_ID}.api.sanity.io/v{API_VERSION}/data/mutate/{DATASET}"
+        url = f"https://{PROJECT_ID}.api.strapi.io/v{API_VERSION}/data/mutate/{DATASET}"
         
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {SANITY_API_TOKEN}"
+            "Authorization": f"Bearer {strapi_API_TOKEN}"
         }
         
         mutations = {
@@ -101,7 +101,7 @@ def delete_sanity_document(document_id):
             return False, result
             
     except Exception as e:
-        logger.error(f"Erro ao deletar documento Sanity {document_id}: {str(e)}")
+        logger.error(f"Erro ao deletar documento Strapi {document_id}: {str(e)}")
         return False, str(e)
 
 def search_posts_by_title_or_slug_algolia(search_term):
@@ -206,42 +206,42 @@ def delete_posts_by_search_term(search_term, confirm=False):
     logger.info(f"=== INICIANDO DELEÇÃO DE POSTS COM {search_type}: {search_term} ===")
     
     results = {
-        "sanity": {"deleted": 0, "failed": 0, "posts": []},
+        "strapi": {"deleted": 0, "failed": 0, "posts": []},
         "algolia": {"deleted": 0, "failed": 0, "posts": []}
     }
     
-    # 1. Deletar do Sanity
-    logger.info("1. Buscando e deletando do Sanity...")
-    sanity_posts = search_posts_by_title_or_slug_sanity(search_term)
+    # 1. Deletar do Strapi
+    logger.info("1. Buscando e deletando do Strapi...")
+    strapi_posts = search_posts_by_title_or_slug_strapi(search_term)
     
-    for post in sanity_posts:
+    for post in strapi_posts:
         post_id = post.get("_id")
         post_title = post.get("title", "Sem título")
         post_slug = post.get("slug", {}).get("current", "sem-slug") if post.get("slug") else "sem-slug"
         
-        logger.info(f"Deletando do Sanity: {post_title} (slug: {post_slug}, ID: {post_id})")
+        logger.info(f"Deletando do Strapi: {post_title} (slug: {post_slug}, ID: {post_id})")
         
-        success, result = delete_sanity_document(post_id)
+        success, result = delete_strapi_document(post_id)
         
         if success:
-            results["sanity"]["deleted"] += 1
-            results["sanity"]["posts"].append({
+            results["strapi"]["deleted"] += 1
+            results["strapi"]["posts"].append({
                 "id": post_id, 
                 "title": post_title, 
                 "slug": post_slug,
                 "status": "deleted"
             })
-            logger.info(f"✓ Deletado do Sanity: {post_title}")
+            logger.info(f"✓ Deletado do Strapi: {post_title}")
         else:
-            results["sanity"]["failed"] += 1
-            results["sanity"]["posts"].append({
+            results["strapi"]["failed"] += 1
+            results["strapi"]["posts"].append({
                 "id": post_id, 
                 "title": post_title, 
                 "slug": post_slug,
                 "status": "failed", 
                 "error": str(result)
             })
-            logger.error(f"✗ Falha no Sanity: {post_title} - {result}")
+            logger.error(f"✗ Falha no Strapi: {post_title} - {result}")
     
     # 2. Deletar do Algolia
     logger.info("2. Buscando e deletando do Algolia...")
@@ -278,11 +278,11 @@ def delete_posts_by_search_term(search_term, confirm=False):
     
     # 3. Resumo
     logger.info("=== RESUMO DA DELEÇÃO ===")
-    logger.info(f"Sanity - Deletados: {results['sanity']['deleted']}, Falhas: {results['sanity']['failed']}")
+    logger.info(f"Strapi - Deletados: {results['strapi']['deleted']}, Falhas: {results['strapi']['failed']}")
     logger.info(f"Algolia - Deletados: {results['algolia']['deleted']}, Falhas: {results['algolia']['failed']}")
     
-    total_deleted = results["sanity"]["deleted"] + results["algolia"]["deleted"]
-    total_failed = results["sanity"]["failed"] + results["algolia"]["failed"]
+    total_deleted = results["strapi"]["deleted"] + results["algolia"]["deleted"]
+    total_failed = results["strapi"]["failed"] + results["algolia"]["failed"]
     
     results["success"] = total_failed == 0
     results["total_deleted"] = total_deleted
@@ -297,7 +297,7 @@ def main():
         print("\nExemplos:")
         print('python delete_by_title.py "Bitcoin Price Analysis" --confirm')
         print('python delete_by_title.py "bitcoin-price-prediction-2024" --confirm')
-        print('python delete_by_title.py "yyI2iEG3EcZDDf0Q6thQG8" --confirm  # ID do Sanity')
+        print('python delete_by_title.py "yyI2iEG3EcZDDf0Q6thQG8" --confirm  # ID do Strapi')
         print('python delete_by_title.py "solana" --confirm  # Busca qualquer post com "solana" no título ou slug')
         return 1
     

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script para visualizar detalhes completos de um post do Sanity
+Script para visualizar detalhes completos de um post do Strapi
 """
 
 import os
@@ -9,21 +9,21 @@ import json
 import requests
 from datetime import datetime
 
-# Configurações do Sanity
-SANITY_PROJECT_ID = os.environ.get("SANITY_PROJECT_ID", "z4sx85c6")
-SANITY_DATASET = "production"
-SANITY_API_VERSION = "2023-05-03"
-SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN")
+# Configurações do Strapi
+strapi_PROJECT_ID = os.environ.get("strapi_PROJECT_ID", "z4sx85c6")
+strapi_DATASET = "production"
+strapi_API_VERSION = "2023-05-03"
+strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
 
 def get_api_url():
-    """Retorna URL da API do Sanity"""
-    return f"https://{SANITY_PROJECT_ID}.api.sanity.io/v{SANITY_API_VERSION}/data/query/{SANITY_DATASET}"
+    """Retorna URL da API do Strapi"""
+    return f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/query/{strapi_DATASET}"
 
 def get_headers():
     """Retorna headers para requisição"""
     headers = {"Content-Type": "application/json"}
-    if SANITY_API_TOKEN:
-        headers["Authorization"] = f"Bearer {SANITY_API_TOKEN}"
+    if strapi_API_TOKEN:
+        headers["Authorization"] = f"Bearer {strapi_API_TOKEN}"
     return headers
 
 def view_post(post_id):

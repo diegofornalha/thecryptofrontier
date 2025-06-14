@@ -1,5 +1,5 @@
 """
-Script de teste para verificar a conversão de markdown para objetos Sanity
+Script de teste para verificar a conversão de markdown para objetos Strapi
 """
 
 import sys
@@ -9,7 +9,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import re
 import uuid
 
-def convert_markdown_to_sanity_objects_direct(content_text):
+def convert_markdown_to_strapi_objects_direct(content_text):
     """
     Versão direta da função sem o decorator do CrewAI para teste
     """
@@ -59,7 +59,7 @@ def convert_markdown_to_sanity_objects_direct(content_text):
                 )
                 
                 if is_image:
-                    # Criar objeto de imagem para Sanity
+                    # Criar objeto de imagem para Strapi
                     image_block = {
                         "_type": "image",
                         "_key": str(uuid.uuid4())[:8],
@@ -75,7 +75,7 @@ def convert_markdown_to_sanity_objects_direct(content_text):
                     continue
                     
                 elif is_twitter:
-                    # Criar objeto de embed do Twitter para Sanity
+                    # Criar objeto de embed do Twitter para Strapi
                     twitter_block = {
                         "_type": "embedBlock",
                         "_key": str(uuid.uuid4())[:8],
@@ -158,7 +158,7 @@ def convert_markdown_to_sanity_objects_direct(content_text):
 
 def process_paragraph_with_links_direct(paragraph):
     """
-    Processa um parágrafo que contém links markdown, convertendo para formato Sanity.
+    Processa um parágrafo que contém links markdown, convertendo para formato Strapi.
     """
     children = []
     markDefs = []
@@ -219,7 +219,7 @@ def process_paragraph_with_links_direct(paragraph):
     }
 
 def test_image_conversion():
-    """Testa a conversão de imagens markdown para objetos Sanity"""
+    """Testa a conversão de imagens markdown para objetos Strapi"""
     
     print("🧪 Testando conversão de imagens...")
     
@@ -231,7 +231,7 @@ Este é um parágrafo normal.
 Outro parágrafo após a imagem.
 """
     
-    result = convert_markdown_to_sanity_objects_direct(content_with_image)
+    result = convert_markdown_to_strapi_objects_direct(content_with_image)
     
     if result["success"]:
         print("✅ Conversão de imagem bem-sucedida!")
@@ -248,7 +248,7 @@ Outro parágrafo após a imagem.
         print(f"  {result['error']}")
 
 def test_twitter_conversion():
-    """Testa a conversão de embeds do Twitter para objetos Sanity"""
+    """Testa a conversão de embeds do Twitter para objetos Strapi"""
     
     print("\n🧪 Testando conversão de embeds do Twitter...")
     
@@ -258,7 +258,7 @@ Este artigo foi mencionado [em 8 de junho](https://x.com/ChadSteingraber/status/
 O tweet gerou muito debate na comunidade.
 """
     
-    result = convert_markdown_to_sanity_objects_direct(content_with_twitter)
+    result = convert_markdown_to_strapi_objects_direct(content_with_twitter)
     
     if result["success"]:
         print("✅ Conversão de Twitter bem-sucedida!")
@@ -296,7 +296,7 @@ Esta alta foi comentada [em 8 de junho](https://x.com/ChadSteingraber/status/193
 - Desenvolvimentos técnicos importantes
 """
     
-    result = convert_markdown_to_sanity_objects_direct(mixed_content)
+    result = convert_markdown_to_strapi_objects_direct(mixed_content)
     
     if result["success"]:
         print("✅ Conversão de conteúdo misto bem-sucedida!")
@@ -327,7 +327,7 @@ Esta alta foi comentada [em 8 de junho](https://x.com/ChadSteingraber/status/193
         print(f"  {result['error']}")
 
 if __name__ == "__main__":
-    print("🚀 Iniciando testes de conversão markdown → Sanity\n")
+    print("🚀 Iniciando testes de conversão markdown → Strapi\n")
     
     test_image_conversion()
     test_twitter_conversion() 

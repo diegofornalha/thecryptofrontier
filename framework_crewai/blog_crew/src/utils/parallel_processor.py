@@ -262,17 +262,17 @@ class ParallelProcessor:
         """Limpa recursos"""
         self.executor.shutdown(wait=True)
 
-class BatchSanityOperations:
-    """Operações em batch para Sanity CMS"""
+class BatchstrapiOperations:
+    """Operações em batch para Strapi CMS"""
     
     def __init__(self, project_id: str, dataset: str, token: str):
         self.project_id = project_id
         self.dataset = dataset
         self.token = token
-        self.api_url = f"https://{project_id}.api.sanity.io/v2021-10-21"
+        self.api_url = f"https://{project_id}.api.strapi.io/v2021-10-21"
     
     def create_batch_mutations(self, documents: List[Dict], batch_size: int = 100) -> List[List[Dict]]:
-        """Cria batches de mutações para Sanity"""
+        """Cria batches de mutações para Strapi"""
         mutations = []
         
         for doc in documents:
@@ -293,7 +293,7 @@ class BatchSanityOperations:
         return batches
     
     async def execute_batch_mutations(self, mutations: List[Dict]) -> Dict:
-        """Executa mutações em batch no Sanity"""
+        """Executa mutações em batch no Strapi"""
         import aiohttp
         
         url = f"{self.api_url}/data/mutate/{self.dataset}"
@@ -317,7 +317,7 @@ class BatchSanityOperations:
                     raise Exception(f"Batch mutation failed: {error_text}")
     
     async def publish_documents_batch(self, documents: List[Dict]) -> List[Dict]:
-        """Publica múltiplos documentos no Sanity"""
+        """Publica múltiplos documentos no Strapi"""
         batches = self.create_batch_mutations(documents)
         results = []
         

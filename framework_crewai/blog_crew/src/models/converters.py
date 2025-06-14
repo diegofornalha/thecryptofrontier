@@ -10,9 +10,9 @@ import re
 import unicodedata
 from pathlib import Path
 
-def fix_sanity_field_names(data: Dict[str, Any]) -> Dict[str, Any]:
+def fix_strapi_field_names(data: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Corrige nomes de campos para o formato esperado pelo Sanity.
+    Corrige nomes de campos para o formato esperado pelo Strapi.
     Converte 'type' para '_type', 'key' para '_key', 'ref' para '_ref', etc.
     
     Args:
@@ -24,7 +24,7 @@ def fix_sanity_field_names(data: Dict[str, Any]) -> Dict[str, Any]:
     result = {}
     
     for key, value in data.items():
-        # Converter campos especiais para formato Sanity
+        # Converter campos especiais para formato Strapi
         if key == "type":
             result["_type"] = value
         elif key == "key":
@@ -34,10 +34,10 @@ def fix_sanity_field_names(data: Dict[str, Any]) -> Dict[str, Any]:
         else:
             # Processar valores aninhados
             if isinstance(value, dict):
-                result[key] = fix_sanity_field_names(value)
+                result[key] = fix_strapi_field_names(value)
             elif isinstance(value, list):
                 result[key] = [
-                    fix_sanity_field_names(item) if isinstance(item, dict) else item
+                    fix_strapi_field_names(item) if isinstance(item, dict) else item
                     for item in value
                 ]
             else:
@@ -47,7 +47,7 @@ def fix_sanity_field_names(data: Dict[str, Any]) -> Dict[str, Any]:
 
 def save_json_file(data: Dict[str, Any], file_path: str) -> None:
     """
-    Salva dados em um arquivo JSON, garantindo que a estrutura esteja correta para o Sanity.
+    Salva dados em um arquivo JSON, garantindo que a estrutura esteja correta para o Strapi.
     
     Args:
         data: Dicionário com dados a serem salvos
@@ -57,7 +57,7 @@ def save_json_file(data: Dict[str, Any], file_path: str) -> None:
     Path(file_path).parent.mkdir(parents=True, exist_ok=True)
     
     # Corrigir nomes de campos
-    corrected_data = fix_sanity_field_names(data)
+    corrected_data = fix_strapi_field_names(data)
     
     # Salvar arquivo
     with open(file_path, 'w', encoding='utf-8') as f:

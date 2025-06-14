@@ -19,7 +19,7 @@ Implementamos a **detecção automática de links do Twitter** no frontend. Esta
 ### Vantagens
 
 - ✅ Funciona com conteúdo existente
-- ✅ Não requer mudanças no Sanity
+- ✅ Não requer mudanças no Strapi
 - ✅ Agentes não precisam processar links
 - ✅ Suporta Twitter.com e X.com
 - ✅ Carregamento assíncrono otimizado
@@ -64,5 +64,5 @@ O embed é centralizado com margens adequadas:
 
 1. Cache de embeds para melhor performance
 2. Suporte para outros embeds (YouTube, Instagram)
-3. Preview no Sanity Studio
+3. Preview no Strapi Studio
 4. Fallback para tweets deletados

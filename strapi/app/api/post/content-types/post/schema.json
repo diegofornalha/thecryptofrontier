@@ -50,8 +50,19 @@
       "enum": ["draft", "published", "archived"],
       "default": "draft"
     },
-    "sanityId": {
+    "strapiId": {
       "type": "string"
+    },
+    "author": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::author.author",
+      "inversedBy": "posts"
+    },
+    "seo": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.seo"
     }
   }
 }

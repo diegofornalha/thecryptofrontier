@@ -117,8 +117,8 @@ class RSSMonitor:
             except Exception as e:
                 logger.error(f"Erro ao rotacionar logs: {e}")
     
-    def get_recent_titles_from_sanity(self) -> Set[str]:
-        """Obtém títulos recentes do Sanity com cache"""
+    def get_recent_titles_from_strapi(self) -> Set[str]:
+        """Obtém títulos recentes do Strapi com cache"""
         now = datetime.now()
         
         # Verificar se o cache ainda é válido
@@ -137,7 +137,7 @@ class RSSMonitor:
             logger.info(f"Cache de títulos atualizado: {len(titles)} títulos")
             return titles
         except Exception as e:
-            logger.error(f"Erro ao obter títulos do Sanity: {e}")
+            logger.error(f"Erro ao obter títulos do Strapi: {e}")
             return self.recent_titles_cache  # Retornar cache antigo se houver erro
     
     def cleanup_old_json_files(self):
@@ -226,8 +226,8 @@ class RSSMonitor:
                 logger.error(f"Erro ao parsear feed: {feed.bozo_exception}")
                 return []
             
-            # Obter títulos recentes do Sanity para verificação adicional
-            recent_sanity_titles = self.get_recent_titles_from_sanity()
+            # Obter títulos recentes do Strapi para verificação adicional
+            recent_strapi_titles = self.get_recent_titles_from_strapi()
             
             new_articles = []
             
@@ -237,9 +237,9 @@ class RSSMonitor:
                 
                 # Verificar se já foi processado pelo GUID
                 if guid and guid not in self.processed_guids:
-                    # Verificação adicional: título já existe no Sanity?
-                    if title.lower() in recent_sanity_titles:
-                        logger.info(f"Artigo já existe no Sanity (cache): {title}")
+                    # Verificação adicional: título já existe no Strapi?
+                    if title.lower() in recent_strapi_titles:
+                        logger.info(f"Artigo já existe no Strapi (cache): {title}")
                         # Adicionar ao processados para não verificar novamente
                         self.processed_guids.add(guid)
                         continue

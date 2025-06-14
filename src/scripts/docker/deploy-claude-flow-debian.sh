@@ -5,7 +5,7 @@ echo "🚀 Deploy do Claude Flow Diego para Debian"
 echo "=========================================="
 
 # Configurações
-PROJECT_PATH="/home/sanity/thecryptofrontier/claude-flow-diego"
+PROJECT_PATH="/home/strapi/thecryptofrontier/claude-flow-diego"
 PORTAINER_PORT=9992
 PORTAINER_HTTPS_PORT=9993
 

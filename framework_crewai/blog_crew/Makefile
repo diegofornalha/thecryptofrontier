@@ -60,7 +60,7 @@ pipeline-images: ## Executa o pipeline com geração de imagens
 clean: ## Remove volumes e limpa dados
 	@echo "$(RED)🗑️  Limpando volumes e dados...$(NC)"
 	docker compose down -v
-	rm -f processed_articles.json sanity_assets.json
+	rm -f processed_articles.json strapi_assets.json
 	rm -rf src/pipelines/simple/posts_processados/*
 	rm -rf src/pipelines/simple/posts_imagens/*
 
@@ -74,6 +74,6 @@ monitor: ## Abre o monitor no navegador
 
 test: ## Testa a configuração
 	@echo "$(GREEN)🧪 Testando configuração...$(NC)"
-	@docker compose run --rm blog-crew python -c "import os; print('✅ SANITY_PROJECT_ID:', 'OK' if os.getenv('SANITY_PROJECT_ID') else '❌ MISSING')"
+	@docker compose run --rm blog-crew python -c "import os; print('✅ strapi_PROJECT_ID:', 'OK' if os.getenv('strapi_PROJECT_ID') else '❌ MISSING')"
 	@docker compose run --rm blog-crew python -c "import os; print('✅ OPENAI_API_KEY:', 'OK' if os.getenv('OPENAI_API_KEY') else '❌ MISSING')"
 	@docker compose run --rm blog-crew python -c "import os; print('✅ GEMINI_API_KEY:', 'OK' if os.getenv('GEMINI_API_KEY') else '❌ MISSING')"

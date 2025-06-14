@@ -1,5 +1,5 @@
 """
-Ferramentas para integração com o Sanity CMS
+Ferramentas para integração com o Strapi CMS
 """
 
 import os
@@ -18,31 +18,31 @@ import unicodedata
 import asyncio
 import shutil
 
-logger = logging.getLogger("sanity_tools")
+logger = logging.getLogger("strapi_tools")
 
 # Adicionar diretório de schemas ao path
 schemas_dir = Path(__file__).parent.parent / "schemas"
 if schemas_dir.exists() and str(schemas_dir) not in sys.path:
     sys.path.append(str(schemas_dir))
 
-# Importar configurações do Sanity
+# Importar configurações do Strapi
 try:
-    from ..config import SANITY_CONFIG, get_sanity_api_url
+    from ..config import strapi_CONFIG, get_strapi_api_url
 except ImportError:
     # Fallback para valores padrão se não conseguir importar
-    logger.warning("Não foi possível importar configurações do Sanity, usando valores padrão")
-    SANITY_CONFIG = {
-        "project_id": os.environ.get("SANITY_PROJECT_ID", ""),
+    logger.warning("Não foi possível importar configurações do Strapi, usando valores padrão")
+    strapi_CONFIG = {
+        "project_id": os.environ.get("strapi_PROJECT_ID", ""),
         "dataset": "production",
         "api_version": "2023-05-03"
     }
     
-    def get_sanity_api_url(project_id=None, dataset=None, api_version=None):
-        _project_id = project_id or SANITY_CONFIG["project_id"]
-        _dataset = dataset or SANITY_CONFIG["dataset"]
-        _api_version = api_version or SANITY_CONFIG["api_version"]
+    def get_strapi_api_url(project_id=None, dataset=None, api_version=None):
+        _project_id = project_id or strapi_CONFIG["project_id"]
+        _dataset = dataset or strapi_CONFIG["dataset"]
+        _api_version = api_version or strapi_CONFIG["api_version"]
         
-        return f"https://{_project_id}.api.sanity.io/v{_api_version}/data/mutate/{_dataset}"
+        return f"https://{_project_id}.api.strapi.io/v{_api_version}/data/mutate/{_dataset}"
 
 # Função para criar um slug a partir de um título
 def criar_slug(titulo):
@@ -57,9 +57,9 @@ def criar_slug(titulo):
     slug = re.sub(r'\s+', '-', slug)
     return slug.strip('-')
 
-# Função para gerar uma chave aleatória para o Sanity
+# Função para gerar uma chave aleatória para o Strapi
 def gerar_chave():
-    """Gera uma chave aleatória para o Sanity"""
+    """Gera uma chave aleatória para o Strapi"""
     return ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(8))
 
 # Função para remover links HTML de um texto
@@ -76,16 +76,16 @@ def remover_todas_tags_html(texto):
     # Depois remove todas as outras tags HTML
     return re.sub(r'<[^>]*>', '', texto)
 
-# Função para converter texto em formato Portable Text do Sanity
+# Função para converter texto em formato Portable Text do Strapi
 def texto_para_portable_text(texto):
-    """Converte texto em formato Portable Text do Sanity"""
+    """Converte texto em formato Portable Text do Strapi"""
     # Remover todas as tags HTML do texto
     texto = remover_todas_tags_html(texto)
     
     # Dividir o texto em parágrafos
     paragrafos = [p.strip() for p in texto.split("\n\n") if p.strip()]
     
-    # Criar blocos no formato do Sanity
+    # Criar blocos no formato do Strapi
     blocos = []
     for paragrafo in paragrafos:
         bloco = {
@@ -106,9 +106,9 @@ def texto_para_portable_text(texto):
     
     return blocos
 
-# Função para converter HTML em formato Portable Text do Sanity
+# Função para converter HTML em formato Portable Text do Strapi
 def html_para_portable_text(html):
-    """Converte HTML em formato Portable Text do Sanity"""
+    """Converte HTML em formato Portable Text do Strapi"""
     # Primeiro remover todas as tags HTML
     html = remover_todas_tags_html(html)
     
@@ -120,11 +120,11 @@ def html_para_portable_text(html):
     # Dividir em parágrafos e filtrar vazios
     paragrafos = [p.strip() for p in re.split(r'\n\n+', limpo) if p.strip()]
     
-    # Criar blocos no formato do Sanity
+    # Criar blocos no formato do Strapi
     return texto_para_portable_text('\n\n'.join(paragrafos))
 
 def load_schema(schema_name):
-    """Carrega um schema do Sanity dinamicamente"""
+    """Carrega um schema do Strapi dinamicamente"""
     try:
         # Primeiro tenta importar como módulo
         try:
@@ -155,15 +155,15 @@ def verificar_e_criar_categoria(categoria, projeto_id=None, dataset=None, api_ve
     categoria_slug = criar_slug(categoria)
     categoria_id = f"category-{categoria_slug}"
     
-    # Configurações do Sanity
-    project_id = projeto_id or SANITY_CONFIG["project_id"]
-    dataset = dataset or SANITY_CONFIG["dataset"]
-    api_version = api_version or SANITY_CONFIG["api_version"]
-    api_token = os.environ.get("SANITY_API_TOKEN")
+    # Configurações do Strapi
+    project_id = projeto_id or strapi_CONFIG["project_id"]
+    dataset = dataset or strapi_CONFIG["dataset"]
+    api_version = api_version or strapi_CONFIG["api_version"]
+    api_token = os.environ.get("strapi_API_TOKEN")
     
     if not project_id or not api_token:
-        logger.error("Credenciais do Sanity não configuradas corretamente")
-        return {"success": False, "error": "Credenciais do Sanity não configuradas"}
+        logger.error("Credenciais do Strapi não configuradas corretamente")
+        return {"success": False, "error": "Credenciais do Strapi não configuradas"}
     
     # Configuração de autenticação
     headers = {
@@ -172,7 +172,7 @@ def verificar_e_criar_categoria(categoria, projeto_id=None, dataset=None, api_ve
     }
     
     # Verificar se categoria existe
-    query_url = f"https://{project_id}.api.sanity.io/v{api_version}/data/query/{dataset}?query=*[_type=='category'&&_id=='{categoria_id}'][0]"
+    query_url = f"https://{project_id}.api.strapi.io/v{api_version}/data/query/{dataset}?query=*[_type=='category'&&_id=='{categoria_id}'][0]"
     
     try:
         response = requests.get(query_url, headers=headers)
@@ -185,7 +185,7 @@ def verificar_e_criar_categoria(categoria, projeto_id=None, dataset=None, api_ve
         
         # Criar categoria
         logger.info(f"Criando categoria '{categoria}'...")
-        mutation_url = f"https://{project_id}.api.sanity.io/v{api_version}/data/mutate/{dataset}"
+        mutation_url = f"https://{project_id}.api.strapi.io/v{api_version}/data/mutate/{dataset}"
         
         documento = {
             "_type": "category",
@@ -226,15 +226,15 @@ def verificar_e_criar_tag(tag, projeto_id=None, dataset=None, api_version=None):
     tag_slug = criar_slug(tag)
     tag_id = f"tag-{tag_slug}"
     
-    # Configurações do Sanity
-    project_id = projeto_id or SANITY_CONFIG["project_id"]
-    dataset = dataset or SANITY_CONFIG["dataset"]
-    api_version = api_version or SANITY_CONFIG["api_version"]
-    api_token = os.environ.get("SANITY_API_TOKEN")
+    # Configurações do Strapi
+    project_id = projeto_id or strapi_CONFIG["project_id"]
+    dataset = dataset or strapi_CONFIG["dataset"]
+    api_version = api_version or strapi_CONFIG["api_version"]
+    api_token = os.environ.get("strapi_API_TOKEN")
     
     if not project_id or not api_token:
-        logger.error("Credenciais do Sanity não configuradas corretamente")
-        return {"success": False, "error": "Credenciais do Sanity não configuradas"}
+        logger.error("Credenciais do Strapi não configuradas corretamente")
+        return {"success": False, "error": "Credenciais do Strapi não configuradas"}
     
     # Configuração de autenticação
     headers = {
@@ -243,7 +243,7 @@ def verificar_e_criar_tag(tag, projeto_id=None, dataset=None, api_version=None):
     }
     
     # Verificar se tag existe
-    query_url = f"https://{project_id}.api.sanity.io/v{api_version}/data/query/{dataset}?query=*[_type=='tag'&&_id=='{tag_id}'][0]"
+    query_url = f"https://{project_id}.api.strapi.io/v{api_version}/data/query/{dataset}?query=*[_type=='tag'&&_id=='{tag_id}'][0]"
     
     try:
         response = requests.get(query_url, headers=headers)
@@ -256,7 +256,7 @@ def verificar_e_criar_tag(tag, projeto_id=None, dataset=None, api_version=None):
         
         # Criar tag
         logger.info(f"Criando tag '{tag}'...")
-        mutation_url = f"https://{project_id}.api.sanity.io/v{api_version}/data/mutate/{dataset}"
+        mutation_url = f"https://{project_id}.api.strapi.io/v{api_version}/data/mutate/{dataset}"
         
         documento = {
             "_type": "tag",
@@ -307,26 +307,26 @@ def publish_manual(file_path=None):
     except json.JSONDecodeError as e:
         return {"success": False, "error": f"Erro ao decodificar o JSON: {str(e)}"}
     
-    # Publicar o post usando a ferramenta publish_to_sanity
+    # Publicar o post usando a ferramenta publish_to_strapi
     logger.info(f"Publicando o post do arquivo: {file_path}")
-    return publish_to_sanity(post_data=post_data, file_path=file_path)
+    return publish_to_strapi(post_data=post_data, file_path=file_path)
 
 @tool
-def publish_to_sanity(post_data=None, file_path=None, **kwargs):
-    """Publica um post no Sanity CMS. Recebe um dicionário com dados do post (title, slug, content, etc.) 
+def publish_to_strapi(post_data=None, file_path=None, **kwargs):
+    """Publica um post no Strapi CMS. Recebe um dicionário com dados do post (title, slug, content, etc.) 
     e opcionalmente o caminho do arquivo original para movê-lo após a publicação."""
     try:
         # Configurar log mais detalhado para debug
         logger.setLevel(logging.DEBUG)
         logging.getLogger().setLevel(logging.DEBUG)
         
-        logger.debug(f"publish_to_sanity: Iniciando publicação")
-        logger.info(f"publish_to_sanity: Recebido post_data={type(post_data)}, file_path={file_path}, kwargs={list(kwargs.keys()) if kwargs else 'nenhum'}")
+        logger.debug(f"publish_to_strapi: Iniciando publicação")
+        logger.info(f"publish_to_strapi: Recebido post_data={type(post_data)}, file_path={file_path}, kwargs={list(kwargs.keys()) if kwargs else 'nenhum'}")
         
         # Se o caminho do arquivo não foi fornecido, procurar em kwargs
         if file_path is None and 'file_path' in kwargs:
             file_path = kwargs['file_path']
-            logger.debug(f"publish_to_sanity: Encontrado file_path em kwargs: {file_path}")
+            logger.debug(f"publish_to_strapi: Encontrado file_path em kwargs: {file_path}")
             
         # Processamento avançado para lidar com a forma como o LLM envia os dados
         # 1. Se o argumento for uma string, tentar extrair um JSON dela
@@ -397,9 +397,9 @@ def publish_to_sanity(post_data=None, file_path=None, **kwargs):
             logger.error(f"post_data deve ser um dicionário, recebido: {type(post_data)}")
             return {"success": False, "error": "O argumento post_data deve ser um dicionário válido"}
         
-        # Validar e garantir chaves _key antes de enviar ao Sanity
+        # Validar e garantir chaves _key antes de enviar ao Strapi
         try:
-            from .sanity_key_validator import validate_post_data
+            from .strapi_key_validator import validate_post_data
             logger.info("Validando chaves _key obrigatórias...")
             post_data = validate_post_data(post_data)
             logger.info("Chaves _key validadas com sucesso")
@@ -409,16 +409,16 @@ def publish_to_sanity(post_data=None, file_path=None, **kwargs):
         # Tentar importar dinâmicamente os modelos Pydantic
         try:
             # Tentar importar os modelos e conversores
-            from models import Post, dict_to_post, post_to_sanity_format
+            from models import Post, dict_to_post, post_to_strapi_format
             
             # Se importou com sucesso, usar a validação do Pydantic
             try:
                 logger.info("Validando dados usando modelo Pydantic Post")
                 post_model = dict_to_post(post_data)
-                sanity_post = post_to_sanity_format(post_model)
+                strapi_post = post_to_strapi_format(post_model)
                 
                 # Atualizar post_data com o formato validado
-                post_data = sanity_post
+                post_data = strapi_post
                 logger.info("Dados validados e convertidos usando Pydantic")
             except Exception as pydantic_error:
                 logger.warning(f"Erro na validação Pydantic: {str(pydantic_error)}")
@@ -426,28 +426,28 @@ def publish_to_sanity(post_data=None, file_path=None, **kwargs):
         except ImportError:
             logger.warning("Modelos Pydantic não encontrados, usando abordagem tradicional")
             
-        # Configurações do Sanity
-        project_id = os.environ.get("SANITY_PROJECT_ID", SANITY_CONFIG.get("project_id"))
-        dataset = SANITY_CONFIG.get("dataset", "production")
-        api_token = os.environ.get("SANITY_API_TOKEN")
+        # Configurações do Strapi
+        project_id = os.environ.get("strapi_PROJECT_ID", strapi_CONFIG.get("project_id"))
+        dataset = strapi_CONFIG.get("dataset", "production")
+        api_token = os.environ.get("strapi_API_TOKEN")
         
-        logger.debug(f"publish_to_sanity: Sanity project_id={project_id}, dataset={dataset}")
-        logger.debug(f"publish_to_sanity: API token disponível: {bool(api_token)}")
+        logger.debug(f"publish_to_strapi: Strapi project_id={project_id}, dataset={dataset}")
+        logger.debug(f"publish_to_strapi: API token disponível: {bool(api_token)}")
         
         if not project_id or not api_token:
-            logger.error("Credenciais do Sanity não configuradas corretamente")
-            return {"success": False, "error": "Credenciais do Sanity não configuradas"}
+            logger.error("Credenciais do Strapi não configuradas corretamente")
+            return {"success": False, "error": "Credenciais do Strapi não configuradas"}
         
-        # URL da API do Sanity
-        url = get_sanity_api_url(project_id, dataset)
-        logger.debug(f"publish_to_sanity: URL da API do Sanity: {url}")
+        # URL da API do Strapi
+        url = get_strapi_api_url(project_id, dataset)
+        logger.debug(f"publish_to_strapi: URL da API do Strapi: {url}")
         
         # Configuração de autenticação
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {api_token}"
         }
-        logger.debug(f"publish_to_sanity: Headers configurados com token de autorização")
+        logger.debug(f"publish_to_strapi: Headers configurados com token de autorização")
         
         # Carregar o schema de post para validação
         post_schema = load_schema("post")
@@ -482,7 +482,7 @@ def publish_to_sanity(post_data=None, file_path=None, **kwargs):
             # Se content for um dicionário com campo "blocks", extrair os blocos
             if isinstance(content, dict) and "blocks" in content:
                 create_doc["content"] = content["blocks"]
-            # Se content for um dicionário com campo "success" (resultado de format_content_for_sanity)
+            # Se content for um dicionário com campo "success" (resultado de format_content_for_strapi)
             elif isinstance(content, dict) and "success" in content and "blocks" in content:
                 create_doc["content"] = content["blocks"]
             else:
@@ -536,27 +536,27 @@ def publish_to_sanity(post_data=None, file_path=None, **kwargs):
             ]
         }
         
-        logger.info(f"Enviando post '{post_data.get('title')}' para o Sanity")
-        logger.debug(f"publish_to_sanity: Dados da mutação: {json.dumps(mutations, indent=2)}")
+        logger.info(f"Enviando post '{post_data.get('title')}' para o Strapi")
+        logger.debug(f"publish_to_strapi: Dados da mutação: {json.dumps(mutations, indent=2)}")
         
         try:
             # Enviar a requisição
-            logger.debug(f"publish_to_sanity: Fazendo requisição POST para: {url}")
+            logger.debug(f"publish_to_strapi: Fazendo requisição POST para: {url}")
             response = requests.post(url, headers=headers, json=mutations, timeout=30)
             
-            logger.debug(f"publish_to_sanity: Resposta recebida - Status: {response.status_code}")
-            logger.debug(f"publish_to_sanity: Resposta: {response.text[:500]}")  # Limitado para evitar logs muito grandes
+            logger.debug(f"publish_to_strapi: Resposta recebida - Status: {response.status_code}")
+            logger.debug(f"publish_to_strapi: Resposta: {response.text[:500]}")  # Limitado para evitar logs muito grandes
             
             if response.status_code == 200:
                 result = response.json()
-                logger.debug(f"publish_to_sanity: Resposta JSON completa: {json.dumps(result, indent=2)}")
+                logger.debug(f"publish_to_strapi: Resposta JSON completa: {json.dumps(result, indent=2)}")
                 
                 # Verificar se temos resultados na resposta
                 if not result.get("results") or len(result.get("results", [])) == 0:
                     logger.error("Resposta sem resultados, possível falha ao criar documento")
                     return {
                         "success": False,
-                        "error": "Resposta do Sanity sem resultados, possível falha na criação do documento"
+                        "error": "Resposta do Strapi sem resultados, possível falha na criação do documento"
                     }
                 
                 document_id = result.get("results", [{}])[0].get("id")
@@ -564,10 +564,10 @@ def publish_to_sanity(post_data=None, file_path=None, **kwargs):
                     logger.error("ID do documento não encontrado na resposta")
                     return {
                         "success": False,
-                        "error": "ID do documento não encontrado na resposta do Sanity"
+                        "error": "ID do documento não encontrado na resposta do Strapi"
                     }
                 
-                logger.info(f"Post publicado com sucesso no Sanity, ID: {document_id}")
+                logger.info(f"Post publicado com sucesso no Strapi, ID: {document_id}")
                 
                 # Se temos um caminho de arquivo e ele existe, vamos movê-lo para a pasta de publicados
                 if file_path and os.path.exists(file_path):
@@ -594,7 +594,7 @@ def publish_to_sanity(post_data=None, file_path=None, **kwargs):
                             return {
                                 "success": True, 
                                 "document_id": document_id,
-                                "message": "Artigo publicado com sucesso no Sanity CMS",
+                                "message": "Artigo publicado com sucesso no Strapi CMS",
                                 "published_file": new_file_path
                             }
                     except Exception as move_error:
@@ -604,7 +604,7 @@ def publish_to_sanity(post_data=None, file_path=None, **kwargs):
                 return {
                     "success": True, 
                     "document_id": document_id,
-                    "message": "Artigo publicado com sucesso no Sanity CMS"
+                    "message": "Artigo publicado com sucesso no Strapi CMS"
                 }
             else:
                 logger.error(f"Erro ao publicar: {response.status_code} - {response.text}")
@@ -613,12 +613,12 @@ def publish_to_sanity(post_data=None, file_path=None, **kwargs):
                     "error": f"Erro HTTP {response.status_code}: {response.text}"
                 }
         except requests.RequestException as req_error:
-            logger.error(f"Erro na requisição para o Sanity: {str(req_error)}")
+            logger.error(f"Erro na requisição para o Strapi: {str(req_error)}")
             return {
                 "success": False,
                 "error": f"Erro na requisição: {str(req_error)}"
             }
             
     except Exception as e:
-        logger.error(f"Erro ao publicar no Sanity: {str(e)}")
+        logger.error(f"Erro ao publicar no Strapi: {str(e)}")
         return {"success": False, "error": str(e)}

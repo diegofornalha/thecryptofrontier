@@ -8,7 +8,7 @@ from config import config as app_config
 
 # Importar modelos Pydantic para estruturação dos dados
 try:
-    from models import Post, dict_to_post, post_to_sanity_format
+    from models import Post, dict_to_post, post_to_strapi_format
     PYDANTIC_AVAILABLE = True
 except ImportError:
     PYDANTIC_AVAILABLE = False
@@ -28,7 +28,7 @@ llm = LLM(
 )
 
 class PublisherAgent:
-    """Agente publicador responsável por enviar o conteúdo para o Sanity CMS"""
+    """Agente publicador responsável por enviar o conteúdo para o Strapi CMS"""
     
     @staticmethod
     def create(tools):
@@ -37,26 +37,26 @@ class PublisherAgent:
         publisher_tools = [tool for tool in tools if tool.name in [
             "read_from_file", 
             "save_to_file",
-            "publish_to_sanity",
-            "publish_to_sanity_enhanced"
+            "publish_to_strapi",
+            "publish_to_strapi_enhanced"
         ]]
         
         return Agent(
             role="Publicador de Conteúdo",
-            goal="Publicar os artigos formatados no Sanity CMS",
+            goal="Publicar os artigos formatados no Strapi CMS",
             backstory="""Você é um especialista em publicação de conteúdo em CMS. 
-            Seu trabalho é enviar os artigos formatados para o Sanity CMS,
+            Seu trabalho é enviar os artigos formatados para o Strapi CMS,
             garantindo que todos os campos obrigatórios estejam presentes e 
             que o conteúdo seja publicado corretamente.
             
-            IMPORTANTE: Use preferencialmente 'publish_to_sanity_enhanced' que:
+            IMPORTANTE: Use preferencialmente 'publish_to_strapi_enhanced' que:
             - Detecta automaticamente categorias e tags baseadas no conteúdo
             - Cria categorias e tags automaticamente se não existirem
             - Adiciona autor padrão "Crypto Frontier"
             - Garante publicação completa com todos os metadados
             
             Você verifica cada artigo antes de publicá-lo, certificando-se de que
-            ele está no formato esperado pelo Sanity CMS. Você sabe como lidar com
+            ele está no formato esperado pelo Strapi CMS. Você sabe como lidar com
             erros de API e resolver problemas de publicação.
             
             O formato esperado para publicação é:
@@ -69,7 +69,7 @@ class PublisherAgent:
                 "mainImage": {...referência da imagem se disponível...}
             }
             
-            A ferramenta 'publish_to_sanity_enhanced' adiciona automaticamente:
+            A ferramenta 'publish_to_strapi_enhanced' adiciona automaticamente:
             - Categorias relevantes (Bitcoin, Ethereum, DeFi, etc)
             - Tags baseadas em criptomoedas mencionadas
             - Autor padrão do blog""",
@@ -96,8 +96,8 @@ class PublisherAgent:
             # Converter para modelo Pydantic
             post_model = dict_to_post(post_data)
             
-            # Converter de volta para o formato que o Sanity espera
-            validated_post = post_to_sanity_format(post_model)
+            # Converter de volta para o formato que o Strapi espera
+            validated_post = post_to_strapi_format(post_model)
             
             return validated_post
         except Exception as e:

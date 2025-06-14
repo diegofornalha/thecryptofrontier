@@ -83,11 +83,11 @@ def sync_algolia(args):
     sync_main()
 
 
-def sync_sanity_duplicates(args):
-    """Deletar duplicatas no Sanity"""
-    logger.info("Deletando duplicatas no Sanity...")
-    from src.tools.delete_sanity_duplicates import main as delete_sanity_main
-    delete_sanity_main()
+def sync_strapi_duplicates(args):
+    """Deletar duplicatas no Strapi"""
+    logger.info("Deletando duplicatas no Strapi...")
+    from src.tools.delete_strapi_duplicates import main as delete_strapi_main
+    delete_strapi_main()
 
 
 def sync_algolia_duplicates(args):
@@ -137,9 +137,9 @@ def main():
     parser_sync = subparsers.add_parser("sync-algolia", help="Sincronizar Algolia")
     parser_sync.set_defaults(func=sync_algolia)
 
-    # sync-sanity-duplicates
-    parser_sync_sanity = subparsers.add_parser("sync-sanity-duplicates", help="Deletar duplicatas no Sanity")
-    parser_sync_sanity.set_defaults(func=sync_sanity_duplicates)
+    # sync-strapi-duplicates
+    parser_sync_strapi = subparsers.add_parser("sync-strapi-duplicates", help="Deletar duplicatas no Strapi")
+    parser_sync_strapi.set_defaults(func=sync_strapi_duplicates)
 
     # sync-algolia-duplicates
     parser_sync_algolia = subparsers.add_parser("sync-algolia-duplicates", help="Deletar duplicatas no Algolia")

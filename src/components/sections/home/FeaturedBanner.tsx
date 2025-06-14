@@ -1,8 +1,8 @@
 import React from "react";
-import { client } from "../../../sanity/client";
+import { client } from "@/lib/strapiClient";
 import Banner from "./Banner";
 import AdBanner from "./AdBanner";
-import { urlForImage } from "../../../sanity/lib/image";
+import { urlForImage } from "../../../strapi/lib/image";
 
 // Query para buscar o post principal do banner
 const featuredPostQuery = `*[_type == "post"] | order(date desc) [0] {

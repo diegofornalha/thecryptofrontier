@@ -1,8 +1,8 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { client } from '../../../sanity/lib/client';
-import { urlForImage } from '../../../sanity/lib/image';
+import { client } from '../../../strapi/lib/client';
+import { urlForImage } from '../../../strapi/lib/image';
 import { PortableText } from '@portabletext/react';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';

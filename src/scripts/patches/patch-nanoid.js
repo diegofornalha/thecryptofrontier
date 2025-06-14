@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Caminho para o arquivo problemático
-const filePath = path.resolve('./node_modules/@sanity/client/dist/index.cjs');
+const filePath = path.resolve('./node_modules/@strapi/client/dist/index.cjs');
 
 // Verificar se o arquivo existe
 if (!fs.existsSync(filePath)) {

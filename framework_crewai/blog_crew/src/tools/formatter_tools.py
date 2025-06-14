@@ -1,5 +1,5 @@
 """
-Ferramentas para formatação de conteúdo para o Sanity CMS
+Ferramentas para formatação de conteúdo para o Strapi CMS
 """
 
 import re
@@ -19,9 +19,9 @@ except ImportError:
 logger = logging.getLogger("formatter_tools")
 
 @tool
-def convert_markdown_to_sanity_objects(content_text=None, **kwargs):
+def convert_markdown_to_strapi_objects(content_text=None, **kwargs):
     """
-    Converte links markdown de imagens e Twitter para objetos estruturados do Sanity.
+    Converte links markdown de imagens e Twitter para objetos estruturados do Strapi.
     """
     try:
         # Processar parâmetros
@@ -81,7 +81,7 @@ def convert_markdown_to_sanity_objects(content_text=None, **kwargs):
                 )
                 
                 if is_image:
-                    # Criar objeto de imagem para Sanity
+                    # Criar objeto de imagem para Strapi
                     image_block = {
                         "_type": "image",
                         "_key": str(uuid.uuid4())[:8],
@@ -97,7 +97,7 @@ def convert_markdown_to_sanity_objects(content_text=None, **kwargs):
                     continue
                     
                 elif is_twitter:
-                    # Criar objeto de embed do Twitter para Sanity
+                    # Criar objeto de embed do Twitter para Strapi
                     twitter_block = {
                         "_type": "embedBlock",
                         "_key": str(uuid.uuid4())[:8],
@@ -176,12 +176,12 @@ def convert_markdown_to_sanity_objects(content_text=None, **kwargs):
         return {"success": True, "blocks": processed_blocks}
         
     except Exception as e:
-        logger.error(f"Erro ao converter markdown para objetos Sanity: {str(e)}")
+        logger.error(f"Erro ao converter markdown para objetos Strapi: {str(e)}")
         return {"success": False, "error": str(e)}
 
 def process_paragraph_with_links(paragraph):
     """
-    Processa um parágrafo que contém links markdown, convertendo para formato Sanity.
+    Processa um parágrafo que contém links markdown, convertendo para formato Strapi.
     """
     children = []
     markDefs = []
@@ -295,10 +295,10 @@ def create_slug(title=None, **kwargs):
         return {"success": False, "error": str(e)}
 
 @tool
-def format_content_for_sanity(content_text=None, **kwargs):
+def format_content_for_strapi(content_text=None, **kwargs):
     """
-    Formata texto simples em formato Portable Text para o Sanity.
-    Divide o texto em parágrafos e formata cada um deles conforme o schema do Sanity.
+    Formata texto simples em formato Portable Text para o Strapi.
+    Divide o texto em parágrafos e formata cada um deles conforme o schema do Strapi.
     """
     try:
         # Processar parâmetros
@@ -336,11 +336,11 @@ def format_content_for_sanity(content_text=None, **kwargs):
             logger.error("Conteúdo não fornecido")
             return {"success": False, "error": "Conteúdo é obrigatório para formatação"}
             
-        # Se o conteúdo já for uma lista (pode ser que já esteja no formato do Sanity)
+        # Se o conteúdo já for uma lista (pode ser que já esteja no formato do Strapi)
         if isinstance(content_text, list):
-            # Verificar se já está no formato do Sanity
+            # Verificar se já está no formato do Strapi
             if all(isinstance(block, dict) and "_type" in block for block in content_text):
-                logger.info("Conteúdo já está no formato do Sanity")
+                logger.info("Conteúdo já está no formato do Strapi")
                 return {"success": True, "blocks": content_text}
         
         # Garantir que content_text seja uma string
@@ -446,7 +446,7 @@ def format_content_for_sanity(content_text=None, **kwargs):
             return {"success": True, "blocks": blocks}
             
     except Exception as e:
-        logger.error(f"Erro ao formatar conteúdo para Sanity: {str(e)}")
+        logger.error(f"Erro ao formatar conteúdo para Strapi: {str(e)}")
         # Retornar um único bloco com todo o conteúdo em caso de erro
         fallback_blocks = [{
             "_type": "block",

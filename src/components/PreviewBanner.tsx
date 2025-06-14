@@ -13,7 +13,7 @@ export function PreviewBanner() {
       window.location.hostname.includes('deploy-preview') || 
       window.location.hostname.includes('netlify.app') ||
       router.query.preview === 'true' ||
-      process.env.NEXT_PUBLIC_SANITY_PREVIEW === 'true';
+      process.env.NEXT_PUBLIC_strapi_PREVIEW === 'true';
     
     setIsPreview(isPreviewMode);
   }, [router.query]);

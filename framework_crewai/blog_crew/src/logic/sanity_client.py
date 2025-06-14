@@ -1,5 +1,5 @@
 """
-Cliente para interação com o Sanity CMS
+Cliente para interação com o Strapi CMS
 Simplificado para uso com o CrewAI sem dependências do Streamlit
 """
 
@@ -11,52 +11,52 @@ from datetime import datetime
 from pathlib import Path
 
 # Configuração de logging
-logger = logging.getLogger("sanity_client")
+logger = logging.getLogger("strapi_client")
 
 try:
-    from ..config import SANITY_CONFIG, get_sanity_api_url
+    from ..config import strapi_CONFIG, get_strapi_api_url
 except ImportError:
     # Fallback para valores padrão se não conseguir importar
-    logger.warning("Não foi possível importar configurações do Sanity, usando valores padrão")
-    SANITY_CONFIG = {
-        "project_id": os.environ.get("SANITY_PROJECT_ID", ""),
+    logger.warning("Não foi possível importar configurações do Strapi, usando valores padrão")
+    strapi_CONFIG = {
+        "project_id": os.environ.get("strapi_PROJECT_ID", ""),
         "dataset": "production",
         "api_version": "2023-05-03"
     }
     
-    def get_sanity_api_url(project_id=None, dataset=None, api_version=None):
-        """Constrói URL da API do Sanity"""
-        _project_id = project_id or SANITY_CONFIG["project_id"]
-        _dataset = dataset or SANITY_CONFIG["dataset"]
-        _api_version = api_version or SANITY_CONFIG["api_version"]
+    def get_strapi_api_url(project_id=None, dataset=None, api_version=None):
+        """Constrói URL da API do Strapi"""
+        _project_id = project_id or strapi_CONFIG["project_id"]
+        _dataset = dataset or strapi_CONFIG["dataset"]
+        _api_version = api_version or strapi_CONFIG["api_version"]
         
-        return f"https://{_project_id}.api.sanity.io/v{_api_version}/data/mutate/{_dataset}"
+        return f"https://{_project_id}.api.strapi.io/v{_api_version}/data/mutate/{_dataset}"
 
-class SanityClient:
-    """Cliente para interação com o Sanity CMS"""
+class strapiClient:
+    """Cliente para interação com o Strapi CMS"""
     
     def __init__(self):
-        """Inicializa o cliente Sanity"""
-        self.project_id = os.environ.get("SANITY_PROJECT_ID", SANITY_CONFIG.get("project_id"))
-        self.dataset = SANITY_CONFIG.get("dataset", "production")
-        self.api_version = SANITY_CONFIG.get("api_version", "2023-05-03")
-        self.api_token = os.environ.get("SANITY_API_TOKEN")
+        """Inicializa o cliente Strapi"""
+        self.project_id = os.environ.get("strapi_PROJECT_ID", strapi_CONFIG.get("project_id"))
+        self.dataset = strapi_CONFIG.get("dataset", "production")
+        self.api_version = strapi_CONFIG.get("api_version", "2023-05-03")
+        self.api_token = os.environ.get("strapi_API_TOKEN")
         
         # Validar configuração
         if not self.project_id:
-            logger.warning("ID do projeto Sanity não configurado")
+            logger.warning("ID do projeto Strapi não configurado")
         if not self.api_token:
-            logger.warning("Token de API do Sanity não configurado")
+            logger.warning("Token de API do Strapi não configurado")
     
     def fetch_posts(self):
-        """Busca todos os posts do Sanity CMS"""
+        """Busca todos os posts do Strapi CMS"""
         try:
             if not self.project_id:
-                logger.error("ID do projeto Sanity não configurado")
+                logger.error("ID do projeto Strapi não configurado")
                 return []
             
             # Montar URL da API com GROQ query
-            url = f"https://{self.project_id}.api.sanity.io/v{self.api_version}/data/query/{self.dataset}?query=*%5B_type%20%3D%3D%20%22post%22%5D%7B%0A%20%20_id%2C%0A%20%20title%2C%0A%20%20slug%2C%0A%20%20publishedAt%2C%0A%20%20excerpt%2C%0A%20%20%22estimatedReadingTime%22%3A%20round%28length%28pt%3A%3Atext%28content%29%29%20%2F%205%20%2F%20180%29%0A%7D%20%7C%20order%28publishedAt%20desc%29"
+            url = f"https://{self.project_id}.api.strapi.io/v{self.api_version}/data/query/{self.dataset}?query=*%5B_type%20%3D%3D%20%22post%22%5D%7B%0A%20%20_id%2C%0A%20%20title%2C%0A%20%20slug%2C%0A%20%20publishedAt%2C%0A%20%20excerpt%2C%0A%20%20%22estimatedReadingTime%22%3A%20round%28length%28pt%3A%3Atext%28content%29%29%20%2F%205%20%2F%20180%29%0A%7D%20%7C%20order%28publishedAt%20desc%29"
             
             # Adicionar token se disponível
             headers = {}
@@ -64,7 +64,7 @@ class SanityClient:
                 headers["Authorization"] = f"Bearer {self.api_token}"
             
             # Fazer a requisição
-            logger.info("Buscando posts do Sanity CMS...")
+            logger.info("Buscando posts do Strapi CMS...")
             response = requests.get(url, headers=headers)
             
             if response.status_code == 200:
@@ -80,14 +80,14 @@ class SanityClient:
             return []
     
     def create_post(self, post_data):
-        """Cria um novo post no Sanity CMS"""
+        """Cria um novo post no Strapi CMS"""
         try:
             if not self.project_id or not self.api_token:
-                logger.error("Credenciais do Sanity não configuradas")
-                return {"success": False, "error": "Credenciais do Sanity não configuradas"}
+                logger.error("Credenciais do Strapi não configuradas")
+                return {"success": False, "error": "Credenciais do Strapi não configuradas"}
             
-            # URL da API do Sanity
-            url = get_sanity_api_url(self.project_id, self.dataset, self.api_version)
+            # URL da API do Strapi
+            url = get_strapi_api_url(self.project_id, self.dataset, self.api_version)
             
             # Configuração de autenticação
             headers = {
@@ -137,7 +137,7 @@ class SanityClient:
                 ]
             }
             
-            logger.info(f"Enviando post '{post_data.get('title')}' para o Sanity")
+            logger.info(f"Enviando post '{post_data.get('title')}' para o Strapi")
             
             # Enviar a requisição
             response = requests.post(url, headers=headers, json=mutations)
@@ -149,7 +149,7 @@ class SanityClient:
                 return {
                     "success": True, 
                     "document_id": document_id,
-                    "message": "Artigo publicado com sucesso no Sanity CMS"
+                    "message": "Artigo publicado com sucesso no Strapi CMS"
                 }
             else:
                 logger.error(f"Erro ao publicar: {response.status_code} - {response.text}")
@@ -159,5 +159,5 @@ class SanityClient:
                 }
                 
         except Exception as e:
-            logger.error(f"Erro ao publicar no Sanity: {str(e)}")
+            logger.error(f"Erro ao publicar no Strapi: {str(e)}")
             return {"success": False, "error": str(e)}

@@ -21,10 +21,10 @@ logger = logging.getLogger(__name__)
 # Configurar OpenAI
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# Configurações Sanity
-SANITY_PROJECT_ID = os.getenv("SANITY_PROJECT_ID", "z4sx85c6")
-SANITY_DATASET = os.getenv("SANITY_DATASET", "production")
-SANITY_API_TOKEN = os.getenv("SANITY_API_TOKEN")
+# Configurações Strapi
+strapi_PROJECT_ID = os.getenv("strapi_PROJECT_ID", "z4sx85c6")
+strapi_DATASET = os.getenv("strapi_DATASET", "production")
+strapi_API_TOKEN = os.getenv("strapi_API_TOKEN")
 
 # Templates de criptomoedas conhecidas
 CRYPTO_TEMPLATES = {
@@ -73,18 +73,18 @@ def generate_dalle_prompt(title: str, crypto: Optional[str] = None) -> str:
         {base_style}
         """
 
-def upload_image_to_sanity(image_url: str, filename: str) -> Optional[str]:
-    """Faz upload da imagem para o Sanity e retorna o asset ID"""
+def upload_image_to_strapi(image_url: str, filename: str) -> Optional[str]:
+    """Faz upload da imagem para o Strapi e retorna o asset ID"""
     try:
         # Download da imagem
         response = requests.get(image_url, timeout=30)
         response.raise_for_status()
         
-        # Upload para Sanity
-        upload_url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v2021-03-25/assets/images/{SANITY_DATASET}"
+        # Upload para Strapi
+        upload_url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v2021-03-25/assets/images/{strapi_DATASET}"
         
         headers = {
-            "Authorization": f"Bearer {SANITY_API_TOKEN}",
+            "Authorization": f"Bearer {strapi_API_TOKEN}",
             "Content-Type": "image/png"
         }
         
@@ -154,12 +154,12 @@ def generate_image_for_post(post_file_path: str) -> dict:
         
         image_url = response.data[0].url
         
-        # Upload para Sanity
+        # Upload para Strapi
         filename = f"crypto-{crypto or 'general'}-{int(time.time())}.png"
-        asset_id = upload_image_to_sanity(image_url, filename)
+        asset_id = upload_image_to_strapi(image_url, filename)
         
         if not asset_id:
-            return {"success": False, "message": "Falha no upload para Sanity"}
+            return {"success": False, "message": "Falha no upload para Strapi"}
         
         # Atualizar post com a imagem
         post_data['mainImage'] = {

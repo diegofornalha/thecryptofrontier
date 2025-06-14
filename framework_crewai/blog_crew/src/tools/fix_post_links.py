@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script para corrigir links markdown em posts já publicados no Sanity
+Script para corrigir links markdown em posts já publicados no Strapi
 """
 
 import os
@@ -11,13 +11,13 @@ import uuid
 # Adicionar o diretório pai ao path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Importar o cliente Sanity do projeto
+# Importar o cliente Strapi do projeto
 try:
-    from logic.sanity_client import client
+    from logic.strapi_client import client
 except:
     # Fallback para importação direta
-    from sanity_client import get_sanity_client
-    client = get_sanity_client()
+    from strapi_client import get_strapi_client
+    client = get_strapi_client()
 
 def convert_markdown_links_in_text(text):
     """Detecta e marca posições de links markdown no texto"""
@@ -36,7 +36,7 @@ def convert_markdown_links_in_text(text):
     return links_info
 
 def convert_block_with_markdown_links(block):
-    """Converte um bloco que contém links markdown para formato Sanity com markDefs"""
+    """Converte um bloco que contém links markdown para formato Strapi com markDefs"""
     if block.get('_type') != 'block':
         return block
     

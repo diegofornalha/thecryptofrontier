@@ -1,9 +1,9 @@
 import { draftMode } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { client } from '@/sanity/lib/client'
+import { client } from '@/strapi/lib/client'
 
-// URL do Sanity Studio para redirecionamento em caso de erro
-const SANITY_STUDIO_URL = '/studio'
+// URL do Strapi Studio para redirecionamento em caso de erro
+const strapi_STUDIO_URL = '/studio'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   const type = searchParams.get('type')
 
   // Verificação de segurança
-  if (secret !== process.env.SANITY_SECRET_TOKEN) {
+  if (secret !== process.env.strapi_SECRET_TOKEN) {
     return new Response('Invalid token', { status: 401 })
   }
 

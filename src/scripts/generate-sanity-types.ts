@@ -81,56 +81,56 @@ function generateTypes() {
 // Generated on ${new Date().toISOString()}
 
 import type {
-  SanityReference,
-  SanityAsset,
-  SanityImage,
-  SanityFile,
-  SanityGeoPoint,
-  SanityBlock,
-  SanityDocument,
-  SanityImageCrop,
-  SanityImageHotspot,
-  SanityKeyed,
-  SanityImageAsset,
-  SanityImageMetadata,
-  SanityImageDimensions,
-  SanityImagePalette,
-  SanityImagePaletteSwatch,
-} from "sanity-codegen";
+  strapiReference,
+  strapiAsset,
+  strapiImage,
+  strapiFile,
+  strapiGeoPoint,
+  strapiBlock,
+  strapiDocument,
+  strapiImageCrop,
+  strapiImageHotspot,
+  strapiKeyed,
+  strapiImageAsset,
+  strapiImageMetadata,
+  strapiImageDimensions,
+  strapiImagePalette,
+  strapiImagePaletteSwatch,
+} from "strapi-codegen";
 
 export type {
-  SanityReference,
-  SanityAsset,
-  SanityImage,
-  SanityFile,
-  SanityGeoPoint,
-  SanityBlock,
-  SanityDocument,
-  SanityImageCrop,
-  SanityImageHotspot,
-  SanityKeyed,
-  SanityImageAsset,
-  SanityImageMetadata,
-  SanityImageDimensions,
-  SanityImagePalette,
-  SanityImagePaletteSwatch,
+  strapiReference,
+  strapiAsset,
+  strapiImage,
+  strapiFile,
+  strapiGeoPoint,
+  strapiBlock,
+  strapiDocument,
+  strapiImageCrop,
+  strapiImageHotspot,
+  strapiKeyed,
+  strapiImageAsset,
+  strapiImageMetadata,
+  strapiImageDimensions,
+  strapiImagePalette,
+  strapiImagePaletteSwatch,
 };
 
 // Document types
-export interface Post extends SanityDocument {
+export interface Post extends strapiDocument {
   _type: "post";
   title?: string;
   slug?: { _type: "slug"; current: string };
   publishedAt?: string;
   mainImage?: MainImage;
-  author?: SanityReference<Author>;
+  author?: strapiReference<Author>;
   source?: "manual" | "agent" | "rss";
   excerpt?: string;
-  content?: Array<SanityBlock | HighlightBox | CryptoWidget | EmbedBlock | SanityImage & {_type: 'image'; caption?: string; alt?: string}>;
+  content?: Array<strapiBlock | HighlightBox | CryptoWidget | EmbedBlock | strapiImage & {_type: 'image'; caption?: string; alt?: string}>;
   seo?: Seo;
   featured?: boolean;
   readingTime?: number;
-  relatedPosts?: Array<SanityReference<Post>>;
+  relatedPosts?: Array<strapiReference<Post>>;
   originalSource?: {
     url?: string;
     title?: string;
@@ -138,19 +138,19 @@ export interface Post extends SanityDocument {
   };
 }
 
-export interface Page extends SanityDocument {
+export interface Page extends strapiDocument {
   _type: "page";
   title?: string;
   slug?: { _type: "slug"; current: string };
   seo?: Seo;
-  content?: Array<SanityBlock>;
+  content?: Array<strapiBlock>;
 }
 
-export interface Author extends SanityDocument {
+export interface Author extends strapiDocument {
   _type: "author";
   name?: string;
   slug?: { _type: "slug"; current: string };
-  image?: SanityImage;
+  image?: strapiImage;
   bio?: string;
   socialLinks?: {
     twitter?: string;
@@ -160,29 +160,29 @@ export interface Author extends SanityDocument {
   };
 }
 
-export interface SiteConfig extends SanityDocument {
+export interface SiteConfig extends strapiDocument {
   _type: "siteConfig";
   title?: string;
   description?: string;
-  favicon?: SanityImage;
-  logo?: SanityImage;
+  favicon?: strapiImage;
+  logo?: strapiImage;
   seo?: Seo;
 }
 
-export interface Header extends SanityDocument {
+export interface Header extends strapiDocument {
   _type: "header";
   title?: string;
   navLinks?: Array<NavLink>;
 }
 
-export interface Footer extends SanityDocument {
+export interface Footer extends strapiDocument {
   _type: "footer";
   copyrightText?: string;
   navLinks?: Array<NavLink>;
 }
 
 // Object types
-export interface MainImage extends SanityImage {
+export interface MainImage extends strapiImage {
   _type: "mainImage";
   alt?: string;
   caption?: string;
@@ -192,7 +192,7 @@ export interface Seo {
   _type: "seo";
   metaTitle?: string;
   metaDescription?: string;
-  openGraphImage?: SanityImage;
+  openGraphImage?: strapiImage;
 }
 
 export interface NavLink {
@@ -208,7 +208,7 @@ export interface HighlightBox {
   _key: string;
   type?: "info" | "tip" | "warning" | "error" | "success";
   title?: string;
-  content?: Array<SanityBlock>;
+  content?: Array<strapiBlock>;
 }
 
 export interface CryptoWidget {
@@ -232,7 +232,7 @@ export interface EmbedBlock {
 }
 
 // All document types
-export type AllSanitySchemaTypes = Post | Page | Author | SiteConfig | Header | Footer;
+export type AllstrapiSchemaTypes = Post | Page | Author | SiteConfig | Header | Footer;
 `;
 
   // Write file
@@ -241,8 +241,8 @@ export type AllSanitySchemaTypes = Post | Page | Author | SiteConfig | Header | 
     fs.mkdirSync(outputDir, { recursive: true });
   }
 
-  fs.writeFileSync(path.join(outputDir, 'sanity.generated.ts'), output);
-  console.log('✅ Types generated successfully at src/types/sanity.generated.ts');
+  fs.writeFileSync(path.join(outputDir, 'strapi.generated.ts'), output);
+  console.log('✅ Types generated successfully at src/types/strapi.generated.ts');
 }
 
 generateTypes();

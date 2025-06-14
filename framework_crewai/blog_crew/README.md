@@ -52,9 +52,9 @@ O sistema executa 5 agentes em sequência:
 
 1. **Monitor RSS** → Captura artigos de feeds configurados
 2. **Tradutor** → Traduz para português brasileiro
-3. **Formatador** → Prepara conteúdo para Sanity CMS
+3. **Formatador** → Prepara conteúdo para Strapi CMS
 4. **Gerador de Imagens** → Cria imagens com DALL-E 3 (opcional)
-5. **Publicador** → Publica no Sanity com categorias e tags
+5. **Publicador** → Publica no Strapi com categorias e tags
 
 ### Fluxo de Dados
 ```
@@ -100,9 +100,9 @@ cp .env.example .env
 OPENAI_API_KEY=sk-...          # Para DALL-E 3
 GOOGLE_API_KEY=...             # Para Gemini (tradução)
 
-# Sanity CMS
-SANITY_PROJECT_ID=z4sx85c6     # ID do projeto
-SANITY_API_TOKEN=sk...         # Token de API
+# Strapi CMS
+strapi_PROJECT_ID=z4sx85c6     # ID do projeto
+strapi_API_TOKEN=sk...         # Token de API
 
 # Algolia (opcional)
 ALGOLIA_APP_ID=...             # Para busca

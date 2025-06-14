@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Script para listar todos os documentos de um tipo específico no Sanity CMS.
-Uso: python list_sanity_documents.py [tipo_documento] [--json]
-Ex.: python list_sanity_documents.py post
-     python list_sanity_documents.py post --json
+Script para listar todos os documentos de um tipo específico no Strapi CMS.
+Uso: python list_strapi_documents.py [tipo_documento] [--json]
+Ex.: python list_strapi_documents.py post
+     python list_strapi_documents.py post --json
 """
 
 import os
@@ -12,7 +12,7 @@ import json
 import requests
 from urllib.parse import quote
 
-# Configurações do Sanity
+# Configurações do Strapi
 PROJECT_ID = "z4sx85c6"
 DATASET = "production"
 API_VERSION = "2023-05-03"
@@ -21,10 +21,10 @@ def main():
     # Verificar argumentos
     if len(sys.argv) < 2:
         print("Erro: Nenhum tipo de documento especificado")
-        print("Uso: python list_sanity_documents.py [tipo_documento] [--json|--algolia]")
-        print("Ex.: python list_sanity_documents.py post")
-        print("     python list_sanity_documents.py post --json")
-        print("     python list_sanity_documents.py post --algolia")
+        print("Uso: python list_strapi_documents.py [tipo_documento] [--json|--algolia]")
+        print("Ex.: python list_strapi_documents.py post")
+        print("     python list_strapi_documents.py post --json")
+        print("     python list_strapi_documents.py post --algolia")
         sys.exit(1)
     
     # Obter o tipo de documento
@@ -34,11 +34,11 @@ def main():
     output_json = "--json" in sys.argv
     output_algolia = "--algolia" in sys.argv
     
-    # Obter o token do Sanity
-    SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN")
-    if not SANITY_API_TOKEN:
-        print("Erro: SANITY_API_TOKEN não está definido", file=sys.stderr)
-        print("Defina a variável de ambiente SANITY_API_TOKEN", file=sys.stderr)
+    # Obter o token do Strapi
+    strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
+    if not strapi_API_TOKEN:
+        print("Erro: strapi_API_TOKEN não está definido", file=sys.stderr)
+        print("Defina a variável de ambiente strapi_API_TOKEN", file=sys.stderr)
         sys.exit(1)
     
     # Construir a query GROQ - expandir para obter mais campos quando for JSON ou Algolia
@@ -64,12 +64,12 @@ def main():
     
     encoded_query = quote(query)
     
-    # URL da API do Sanity
-    url = f"https://{PROJECT_ID}.api.sanity.io/v{API_VERSION}/data/query/{DATASET}?query={encoded_query}"
+    # URL da API do Strapi
+    url = f"https://{PROJECT_ID}.api.strapi.io/v{API_VERSION}/data/query/{DATASET}?query={encoded_query}"
     
     # Headers
     headers = {
-        "Authorization": f"Bearer {SANITY_API_TOKEN}"
+        "Authorization": f"Bearer {strapi_API_TOKEN}"
     }
     
     try:

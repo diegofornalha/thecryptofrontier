@@ -1,4 +1,4 @@
-import { client } from '../sanity/lib/client';
+import { client } from '../strapi/lib/client';
 
 // Query para buscar as configurações do rodapé
 const FOOTER_QUERY = `*[_type == "footer"][0]{

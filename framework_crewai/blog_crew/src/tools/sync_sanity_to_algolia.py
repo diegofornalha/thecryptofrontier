@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Script para sincronizar documentos do Sanity CMS com o Algolia.
+Script para sincronizar documentos do Strapi CMS com o Algolia.
 Verifica quais documentos já estão indexados e indexa apenas os novos.
 
-Uso: python sync_sanity_to_algolia.py [tipo_documento]
-Ex.: python sync_sanity_to_algolia.py post
+Uso: python sync_strapi_to_algolia.py [tipo_documento]
+Ex.: python sync_strapi_to_algolia.py post
 """
 
 import os
@@ -18,21 +18,21 @@ from datetime import datetime
 
 # Configuração de logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger("sync_sanity_to_algolia")
+logger = logging.getLogger("sync_strapi_to_algolia")
 
-# Configurações do Sanity
-SANITY_PROJECT_ID = os.environ.get("SANITY_PROJECT_ID", "z4sx85c6")
-SANITY_DATASET = "production"
-SANITY_API_VERSION = "2023-05-03"
+# Configurações do Strapi
+strapi_PROJECT_ID = os.environ.get("strapi_PROJECT_ID", "z4sx85c6")
+strapi_DATASET = "production"
+strapi_API_VERSION = "2023-05-03"
 
 # Configurações do Algolia
 ALGOLIA_APP_ID = os.environ.get("ALGOLIA_APP_ID", "42TZWHW8UP")
 ALGOLIA_ADMIN_API_KEY = os.environ.get("ALGOLIA_ADMIN_API_KEY", "d0cb55ec8f07832bc5f57da0bd25c535")  # Admin API Key
 ALGOLIA_INDEX_NAME = os.environ.get("ALGOLIA_INDEX_NAME", "development_mcpx_content")
 
-def get_sanity_documents(document_type, fields=None):
+def get_strapi_documents(document_type, fields=None):
     """
-    Busca documentos de um tipo específico no Sanity CMS.
+    Busca documentos de um tipo específico no Strapi CMS.
     
     Args:
         document_type: Tipo de documento a ser buscado
@@ -56,39 +56,39 @@ def get_sanity_documents(document_type, fields=None):
                 "estimatedReadingTime": round(length(pt::text(content)) / 5 / 180)
             }"""
         
-        # Obter o token do Sanity
-        SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN")
-        if not SANITY_API_TOKEN:
-            logger.error("SANITY_API_TOKEN não está definido")
-            print("Erro: SANITY_API_TOKEN não está definido", file=sys.stderr)
-            print("Defina a variável de ambiente SANITY_API_TOKEN", file=sys.stderr)
+        # Obter o token do Strapi
+        strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
+        if not strapi_API_TOKEN:
+            logger.error("strapi_API_TOKEN não está definido")
+            print("Erro: strapi_API_TOKEN não está definido", file=sys.stderr)
+            print("Defina a variável de ambiente strapi_API_TOKEN", file=sys.stderr)
             sys.exit(1)
         
         # Construir a query GROQ
         query = f'*[_type == "{document_type}"]{fields}'
         encoded_query = quote(query)
         
-        # URL da API do Sanity
-        url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v{SANITY_API_VERSION}/data/query/{SANITY_DATASET}?query={encoded_query}"
+        # URL da API do Strapi
+        url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/query/{strapi_DATASET}?query={encoded_query}"
         
         # Headers
         headers = {
-            "Authorization": f"Bearer {SANITY_API_TOKEN}"
+            "Authorization": f"Bearer {strapi_API_TOKEN}"
         }
         
         # Fazer a requisição
-        logger.info(f"Buscando documentos do tipo '{document_type}' no Sanity...")
+        logger.info(f"Buscando documentos do tipo '{document_type}' no Strapi...")
         response = requests.get(url, headers=headers)
         response.raise_for_status()
         
         # Extrair os resultados
         result = response.json().get("result", [])
-        logger.info(f"Documentos encontrados no Sanity: {len(result)}")
+        logger.info(f"Documentos encontrados no Strapi: {len(result)}")
         
         return result
     
     except Exception as e:
-        logger.error(f"Erro ao buscar documentos do Sanity: {str(e)}")
+        logger.error(f"Erro ao buscar documentos do Strapi: {str(e)}")
         return []
 
 def get_indexed_documents():
@@ -151,10 +151,10 @@ def get_indexed_documents():
 
 def prepare_document_for_algolia(document):
     """
-    Prepara um documento do Sanity para indexação no Algolia.
+    Prepara um documento do Strapi para indexação no Algolia.
     
     Args:
-        document: Documento do Sanity
+        document: Documento do Strapi
     
     Returns:
         dict: Documento preparado para o Algolia
@@ -162,7 +162,7 @@ def prepare_document_for_algolia(document):
     # Copiar documento para não modificar o original
     prepared_doc = document.copy()
     
-    # Definir objectID para o Algolia (usar _id do Sanity)
+    # Definir objectID para o Algolia (usar _id do Strapi)
     if '_id' in prepared_doc:
         prepared_doc['objectID'] = prepared_doc['_id']
     
@@ -251,8 +251,8 @@ def is_document_already_indexed(doc, indexed_info):
 def main():
     # Verificar argumentos
     if len(sys.argv) < 2:
-        print("Uso: python sync_sanity_to_algolia.py [tipo_documento]")
-        print("Ex.: python sync_sanity_to_algolia.py post")
+        print("Uso: python sync_strapi_to_algolia.py [tipo_documento]")
+        print("Ex.: python sync_strapi_to_algolia.py post")
         sys.exit(1)
     
     # Obter o tipo de documento
@@ -260,7 +260,7 @@ def main():
     
     # Verificar variáveis de ambiente
     for env_var, name in [
-        ("SANITY_API_TOKEN", "token da API do Sanity"),
+        ("strapi_API_TOKEN", "token da API do Strapi"),
         ("ALGOLIA_APP_ID", "ID da aplicação Algolia"),
         ("ALGOLIA_ADMIN_API_KEY", "chave da API do Algolia")
     ]:
@@ -269,11 +269,11 @@ def main():
             print(f"Defina a variável de ambiente {env_var} com seu {name}", file=sys.stderr)
             sys.exit(1)
     
-    # Buscar documentos do Sanity
-    sanity_documents = get_sanity_documents(document_type)
+    # Buscar documentos do Strapi
+    strapi_documents = get_strapi_documents(document_type)
     
-    if not sanity_documents:
-        print(f"Nenhum documento do tipo '{document_type}' encontrado no Sanity.")
+    if not strapi_documents:
+        print(f"Nenhum documento do tipo '{document_type}' encontrado no Strapi.")
         sys.exit(0)
     
     # Buscar informações dos documentos já indexados no Algolia
@@ -284,7 +284,7 @@ def main():
     skipped_documents = 0
     duplicates_prevented = 0
     
-    for doc in sanity_documents:
+    for doc in strapi_documents:
         # Preparar documento para indexação
         prepared_doc = prepare_document_for_algolia(doc)
         
@@ -298,7 +298,7 @@ def main():
             documents_to_index.append(prepared_doc)
     
     # Exibir informações
-    print(f"Documentos encontrados no Sanity: {len(sanity_documents)}")
+    print(f"Documentos encontrados no Strapi: {len(strapi_documents)}")
     print(f"Documentos já indexados no Algolia (por ID): {len(indexed_info['ids'])}")
     print(f"Documentos para indexar: {len(documents_to_index)}")
     

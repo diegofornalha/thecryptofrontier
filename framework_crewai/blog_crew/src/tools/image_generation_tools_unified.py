@@ -1,5 +1,5 @@
 """
-Ferramenta unificada para geração de imagens com DALL-E e upload para Sanity
+Ferramenta unificada para geração de imagens com DALL-E e upload para Strapi
 Substitui todas as implementações duplicadas
 """
 
@@ -220,18 +220,18 @@ def generate_image_with_dalle(title: str, excerpt: str) -> Dict:
         logger.error(f"Erro ao gerar imagem: {str(e)}")
         return {"error": str(e)}
 
-def upload_to_sanity(image_path: str, alt_text: str) -> Dict:
-    """Faz upload de uma imagem para o Sanity"""
+def upload_to_strapi(image_path: str, alt_text: str) -> Dict:
+    """Faz upload de uma imagem para o Strapi"""
     try:
-        project_id = os.environ.get("SANITY_PROJECT_ID")
-        dataset = os.environ.get("SANITY_DATASET", "production")
-        api_token = os.environ.get("SANITY_API_TOKEN")
+        project_id = os.environ.get("strapi_PROJECT_ID")
+        dataset = os.environ.get("strapi_DATASET", "production")
+        api_token = os.environ.get("strapi_API_TOKEN")
         
         if not all([project_id, api_token]):
-            return {"error": "Credenciais do Sanity não configuradas"}
+            return {"error": "Credenciais do Strapi não configuradas"}
         
         # URL para upload
-        upload_url = f"https://{project_id}.api.sanity.io/v2021-06-07/assets/images/{dataset}"
+        upload_url = f"https://{project_id}.api.strapi.io/v2021-06-07/assets/images/{dataset}"
         
         headers = {
             "Authorization": f"Bearer {api_token}"
@@ -309,8 +309,8 @@ def generate_image_for_post(post_data: str) -> str:
         if not image_result.get("success"):
             return json.dumps(image_result)
         
-        # Upload para Sanity
-        upload_result = upload_to_sanity(
+        # Upload para Strapi
+        upload_result = upload_to_strapi(
             image_result["image_path"],
             image_result["alt_text"]
         )
@@ -330,7 +330,7 @@ def generate_image_for_post(post_data: str) -> str:
 @tool("Process all posts with images")
 def process_all_posts_with_images() -> str:
     """
-    Processa TODOS os posts formatados, gerando imagens e fazendo upload para o Sanity.
+    Processa TODOS os posts formatados, gerando imagens e fazendo upload para o Strapi.
     Lê arquivos de 'posts_formatados' e salva com imagens em 'posts_com_imagem'.
     
     Returns:
@@ -387,8 +387,8 @@ def process_all_posts_with_images() -> str:
                 image_result = generate_image_with_dalle(title, excerpt)
                 
                 if image_result.get("success"):
-                    # Upload para Sanity
-                    upload_result = upload_to_sanity(
+                    # Upload para Strapi
+                    upload_result = upload_to_strapi(
                         image_result["image_path"],
                         image_result["alt_text"]
                     )

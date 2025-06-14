@@ -150,7 +150,7 @@ O monitor se integra perfeitamente com o pipeline existente:
 2. **Pipeline processa normalmente**:
    - Lê feeds RSS
    - Traduz artigos
-   - Formata para Sanity
+   - Formata para Strapi
    - Publica no CMS
    - Sincroniza com Algolia
 
@@ -175,8 +175,8 @@ self.brazil_tz_offset = timedelta(hours=-3)  # UTC-3
 ```
 
 ### Variáveis de Ambiente Necessárias:
-- `SANITY_API_TOKEN`
-- `SANITY_PROJECT_ID`
+- `strapi_API_TOKEN`
+- `strapi_PROJECT_ID`
 - `ALGOLIA_APP_ID`
 - `ALGOLIA_ADMIN_API_KEY`
 - `ALGOLIA_INDEX_NAME`

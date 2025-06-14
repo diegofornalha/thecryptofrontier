@@ -1,16 +1,8 @@
 import React from "react";
 import Link from "next/link";
-import { client } from "../../../sanity/client";
+import strapiClient from "@/lib/strapiClient";
 import { formatDate } from "../../../utils/date-utils";
 import FeaturedClient from "./FeaturedClient";
-
-// Query responsiva - busca posts em destaque diferentes dos últimos posts
-const featuredPostsQuery = `*[_type == "post"] | order(date desc) [3...20] {
-  _id,
-  title,
-  "slug": slug.current,
-  date
-}`;
 
 // Server Component - busca dados no servidor
 export default async function Featured() {
@@ -18,7 +10,15 @@ export default async function Featured() {
   let error = null;
 
   try {
-    featuredPosts = await client.fetch(featuredPostsQuery);
+    const response = await strapiClient.getPosts({ start: 3, limit: 17 });
+    if (response.data) {
+      featuredPosts = response.data.map((post: any) => ({
+        _id: post.id,
+        title: post.attributes?.title || post.title,
+        slug: post.attributes?.slug || post.slug,
+        date: post.attributes?.publishedAt || post.publishedAt
+      }));
+    }
   } catch (err) {
     console.error('Erro ao buscar posts em destaque:', err);
     error = err;

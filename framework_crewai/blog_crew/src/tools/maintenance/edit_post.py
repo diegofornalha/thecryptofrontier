@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script para editar posts do Sanity via terminal
+Script para editar posts do Strapi via terminal
 """
 
 import os
@@ -10,24 +10,24 @@ import requests
 from datetime import datetime
 import argparse
 
-# Configurações do Sanity
-SANITY_PROJECT_ID = os.environ.get("SANITY_PROJECT_ID", "z4sx85c6")
-SANITY_DATASET = "production"
-SANITY_API_VERSION = "2023-05-03"
-SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN")
+# Configurações do Strapi
+strapi_PROJECT_ID = os.environ.get("strapi_PROJECT_ID", "z4sx85c6")
+strapi_DATASET = "production"
+strapi_API_VERSION = "2023-05-03"
+strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
 
 def get_api_url(endpoint="query"):
-    """Retorna URL da API do Sanity"""
+    """Retorna URL da API do Strapi"""
     if endpoint == "query":
-        return f"https://{SANITY_PROJECT_ID}.api.sanity.io/v{SANITY_API_VERSION}/data/query/{SANITY_DATASET}"
+        return f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/query/{strapi_DATASET}"
     else:
-        return f"https://{SANITY_PROJECT_ID}.api.sanity.io/v{SANITY_API_VERSION}/data/mutate/{SANITY_DATASET}"
+        return f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/{strapi_DATASET}"
 
 def get_headers():
     """Retorna headers para requisição"""
     headers = {"Content-Type": "application/json"}
-    if SANITY_API_TOKEN:
-        headers["Authorization"] = f"Bearer {SANITY_API_TOKEN}"
+    if strapi_API_TOKEN:
+        headers["Authorization"] = f"Bearer {strapi_API_TOKEN}"
     return headers
 
 def list_posts(limit=10):
@@ -87,7 +87,7 @@ def update_post(post_id, updates):
         return False
 
 def main():
-    parser = argparse.ArgumentParser(description='Editar posts do Sanity via terminal')
+    parser = argparse.ArgumentParser(description='Editar posts do Strapi via terminal')
     parser.add_argument('action', choices=['list', 'edit', 'update'], 
                        help='Ação a executar')
     parser.add_argument('--id', help='ID do post')
@@ -98,9 +98,9 @@ def main():
     
     args = parser.parse_args()
     
-    if not SANITY_API_TOKEN:
-        print("⚠️  Token do Sanity não configurado. As operações podem ser limitadas.")
-        print("Configure com: export SANITY_API_TOKEN='seu-token-aqui'")
+    if not strapi_API_TOKEN:
+        print("⚠️  Token do Strapi não configurado. As operações podem ser limitadas.")
+        print("Configure com: export strapi_API_TOKEN='seu-token-aqui'")
     
     if args.action == 'list':
         list_posts(args.limit)

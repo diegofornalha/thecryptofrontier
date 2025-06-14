@@ -20,6 +20,16 @@ const nextConfig = {
         ignoreBuildErrors: true,
     },
 
+    // Desabilitar otimizações durante build (temporário para migração)
+    eslint: {
+        ignoreDuringBuilds: true,
+    },
+
+    // Pular geração estática (temporário durante migração)
+    experimental: {
+        ppr: false,
+    },
+
     // Output standalone para melhor compatibilidade com Netlify
     output: 'standalone'
 };

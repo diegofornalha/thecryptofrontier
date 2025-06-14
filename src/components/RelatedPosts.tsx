@@ -1,8 +1,8 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { urlForImage } from '@/sanity/lib/image';
-import { client } from '@/sanity/lib/client';
+import { urlForImage } from '@/strapi/lib/image';
+import { client } from '@/strapi/lib/client';
 
 interface Post {
   _id: string;

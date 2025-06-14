@@ -8,7 +8,7 @@ export function resolveStaticPaths({ pages, objects }) {
     })));
     
     return pages.reduce((paths, page) => {
-        if (!process.env.sanityPreview && page.isDraft) {
+        if (!process.env.strapiPreview && page.isDraft) {
             return paths;
         }
         const objectType = page.__metadata?.modelName;
@@ -40,7 +40,7 @@ export function resolveStaticPaths({ pages, objects }) {
 const StaticPathsResolvers = {
     PostFeedLayout: (page, objects) => {
         let posts = getAllNonFeaturedPostsSorted(objects);
-        if (!process.env.sanityPreview) {
+        if (!process.env.strapiPreview) {
             posts = posts.filter(isPublished);
         }
         const numOfPostsPerPage = page.numOfPostsPerPage ?? 10;
@@ -50,7 +50,7 @@ const StaticPathsResolvers = {
         const categoryId = page.__metadata?.id;
         const numOfPostsPerPage = page.numOfPostsPerPage ?? 10;
         let categoryPosts = getAllCategoryPostsSorted(objects, categoryId);
-        if (!process.env.sanityPreview) {
+        if (!process.env.strapiPreview) {
             categoryPosts = categoryPosts.filter(isPublished);
         }
         return generatePagedPathsForPage(page, categoryPosts, numOfPostsPerPage);

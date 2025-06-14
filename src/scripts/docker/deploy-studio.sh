@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Deploy Sanity Studio script
-echo "Deploying Sanity Studio..."
+# Deploy Strapi Studio script
+echo "Deploying Strapi Studio..."
 
 # Use the existing hostname
-echo "thecryptofrontier" | npx sanity deploy
+echo "thecryptofrontier" | npx strapi deploy
 
 echo "Deploy complete!"
-echo "Studio URL: https://thecryptofrontier.sanity.studio"
+echo "Studio URL: https://thecryptofrontier.strapi.studio"

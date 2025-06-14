@@ -12,17 +12,17 @@ from dotenv import load_dotenv
 # Load environment
 load_dotenv()
 
-SANITY_PROJECT_ID = os.environ.get("SANITY_PROJECT_ID", "z4sx85c6")
-SANITY_DATASET = "production"
-SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN")
-SANITY_API_VERSION = "2021-03-25"
+strapi_PROJECT_ID = os.environ.get("strapi_PROJECT_ID", "z4sx85c6")
+strapi_DATASET = "production"
+strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
+strapi_API_VERSION = "2021-03-25"
 
 def get_existing_post(slug):
     """Check if a post already exists"""
     query = f'*[_type == "post" && slug.current == "{slug}"][0]'
-    url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v{SANITY_API_VERSION}/data/query/{SANITY_DATASET}?query={query}"
+    url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/query/{strapi_DATASET}?query={query}"
     
-    headers = {"Authorization": f"Bearer {SANITY_API_TOKEN}"}
+    headers = {"Authorization": f"Bearer {strapi_API_TOKEN}"}
     
     response = requests.get(url, headers=headers)
     if response.status_code == 200:
@@ -91,10 +91,10 @@ def update_post_content(post_file):
         }
     
     # Send request
-    url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v{SANITY_API_VERSION}/data/mutate/{SANITY_DATASET}"
+    url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/{strapi_DATASET}"
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {SANITY_API_TOKEN}"
+        "Authorization": f"Bearer {strapi_API_TOKEN}"
     }
     
     response = requests.post(url, headers=headers, json=mutations)

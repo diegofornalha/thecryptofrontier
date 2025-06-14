@@ -1,11 +1,11 @@
 import { MetadataRoute } from 'next';
-import { client } from '@/sanity/lib/client';
+import { client } from '@/strapi/lib/client';
 import { SITEMAP_QUERY } from '@/lib/queries';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://thecryptofrontier.com';
 
-  // Buscar dados do Sanity
+  // Buscar dados do Strapi
   const data = await client.fetch(SITEMAP_QUERY);
 
   // Páginas estáticas

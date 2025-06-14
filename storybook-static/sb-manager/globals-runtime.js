@@ -11814,7 +11814,7 @@ var DA = L((K4e, U1) => {
           C.highlightedCode = P, o.hooks.run("before-insert", C), C.element.innerHTML = C.highlightedCode, o.hooks.run("after-highlight", C),
           o.hooks.run("complete", C), E && E.call(C.element);
         }
-        if (a(D, "insertHighlightedCode"), o.hooks.run("before-sanity-check", C), x = C.element.parentElement, x && x.nodeName.toLowerCase() ===
+        if (a(D, "insertHighlightedCode"), o.hooks.run("before-strapi-check", C), x = C.element.parentElement, x && x.nodeName.toLowerCase() ===
         "pre" && !x.hasAttribute("tabindex") && x.setAttribute("tabindex", "0"), !C.code) {
           o.hooks.run("complete", C), E && E.call(C.element);
           return;

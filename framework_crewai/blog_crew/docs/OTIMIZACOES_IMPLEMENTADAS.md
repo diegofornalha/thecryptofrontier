@@ -7,7 +7,7 @@ Todas as 6 melhorias recomendadas foram implementadas com sucesso:
 ### ✅ 1. Sistema de Monitoramento e Alertas
 - **Arquivo**: `monitoring/health_checker.py`
 - **Funcionalidades**:
-  - Health checks automáticos para OpenAI, Google AI, Sanity e Redis
+  - Health checks automáticos para OpenAI, Google AI, Strapi e Redis
   - Monitoramento de quotas de API com alertas em 80%
   - Histórico de métricas e alertas
   - Dashboard HTML com visualização de status
@@ -25,7 +25,7 @@ Todas as 6 melhorias recomendadas foram implementadas com sucesso:
 - **Funcionalidades**:
   - Processamento paralelo de múltiplos artigos
   - Cache inteligente de imagens para evitar regeneração
-  - Operações em batch para Sanity CMS
+  - Operações em batch para Strapi CMS
   - Thread/Process pool configurável
 
 ### ✅ 4. Segurança e Confiabilidade

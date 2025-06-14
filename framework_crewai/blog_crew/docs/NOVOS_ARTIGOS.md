@@ -4,7 +4,7 @@
 
 ### 1. Busca de Artigos Novos
 
-O pipeline agora verifica automaticamente se um artigo já foi publicado no Sanity antes de processá-lo. Isso garante que o comando:
+O pipeline agora verifica automaticamente se um artigo já foi publicado no Strapi antes de processá-lo. Isso garante que o comando:
 
 ```bash
 python run_pipeline.py --max-articles 10
@@ -14,10 +14,10 @@ Sempre busque **10 artigos novos** (não publicados), em vez de simplesmente peg
 
 ## 🔍 Como funciona
 
-1. **Busca artigos publicados**: Ao iniciar, o pipeline consulta o Sanity CMS para obter uma lista de todos os títulos já publicados.
+1. **Busca artigos publicados**: Ao iniciar, o pipeline consulta o Strapi CMS para obter uma lista de todos os títulos já publicados.
 
 2. **Filtragem inteligente**: Para cada artigo do RSS, o pipeline verifica:
-   - Se o título já existe no Sanity (artigo publicado)
+   - Se o título já existe no Strapi (artigo publicado)
    - Se o artigo já foi processado na sessão atual (duplicata)
    - Se contém palavras da blacklist
 
@@ -39,15 +39,15 @@ python run_pipeline.py
 # Verificar quantos artigos já estão publicados
 python test_new_articles.py
 
-# Listar todos os artigos no Sanity
-python list_sanity_documents.py post
+# Listar todos os artigos no Strapi
+python list_strapi_documents.py post
 ```
 
 ## 🛑 Importante
 
-1. **Token do Sanity**: A verificação de artigos publicados requer o token do Sanity:
+1. **Token do Strapi**: A verificação de artigos publicados requer o token do Strapi:
    ```bash
-   export SANITY_API_TOKEN="seu_token_aqui"
+   export strapi_API_TOKEN="seu_token_aqui"
    ```
 
 2. **Sem token**: Se o token não estiver disponível, o pipeline ainda funcionará, mas não poderá verificar artigos já publicados.
@@ -66,8 +66,8 @@ python run_pipeline.py --max-articles 10
 O comando agora executa:
 1. Busca 10 artigos novos no RSS
 2. Traduz os artigos
-3. Formata para o Sanity
-4. Publica no Sanity CMS
+3. Formata para o Strapi
+4. Publica no Strapi CMS
 5. **Sincroniza automaticamente com Algolia** ✨
 
 ## 🔧 Detalhes técnicos
@@ -76,16 +76,16 @@ O comando agora executa:
 
 A função `obter_artigos_publicados()` foi adicionada ao arquivo `run_pipeline.py`:
 
-- Consulta o Sanity usando a API com GROQ query
+- Consulta o Strapi usando a API com GROQ query
 - Retorna um conjunto (set) de títulos em minúsculas
 - Faz comparação case-insensitive dos títulos
 
 A lógica de verificação foi adicionada na função `monitorar_feeds()`:
 
 ```python
-# Verificar se o artigo já foi publicado no Sanity
+# Verificar se o artigo já foi publicado no Strapi
 if title.lower() in published_titles:
-    logger.warning(f"Artigo já publicado no Sanity ignorado: {title}")
+    logger.warning(f"Artigo já publicado no Strapi ignorado: {title}")
     articles_skipped += 1
     continue
 ```
@@ -94,7 +94,7 @@ if title.lower() in published_titles:
 
 A função `sincronizar_com_algolia()` foi adicionada para:
 
-- Buscar detalhes completos dos artigos publicados no Sanity
+- Buscar detalhes completos dos artigos publicados no Strapi
 - Preparar documentos com os campos necessários para busca
 - Indexar os documentos no Algolia automaticamente
 
@@ -102,7 +102,7 @@ A função `sincronizar_com_algolia()` foi adicionada para:
 
 O pipeline agora mostra informações detalhadas sobre o processo:
 
-- Quantos artigos já estão publicados no Sanity
+- Quantos artigos já estão publicados no Strapi
 - Quais artigos foram ignorados por já estarem publicados
 - Quais artigos foram ignorados por serem duplicatas
 - Quais artigos foram ignorados por conterem palavras da blacklist
@@ -130,7 +130,7 @@ Se precisar sincronizar artigos já publicados:
 
 ```bash
 # Sincronizar todos os posts
-python sync_sanity_to_algolia.py post
+python sync_strapi_to_algolia.py post
 
 # Sincronizar apenas os últimos 10 artigos
 python sync_direct_algolia.py

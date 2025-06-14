@@ -11,7 +11,7 @@
   - ✅ Salvamento de arquivos corrigido
   - ✅ Pipeline completo: RSS → Tradução → Formatação → Imagens → Publicação
   - ✅ Imagens integradas com DALL-E 3
-  - ✅ Publicação automática no Sanity
+  - ✅ Publicação automática no Strapi
 
 **Como usar**:
 ```bash
@@ -65,7 +65,7 @@ posts_para_traduzir/   → Artigos originais RSS
 posts_traduzidos/      → Artigos em português
 posts_formatados/      → Artigos estruturados
 posts_com_imagem/      → Artigos com imagens DALL-E
-posts_publicados/      → Confirmações do Sanity
+posts_publicados/      → Confirmações do Strapi
 ```
 
 ## 🔄 Fluxo de Processamento
@@ -76,7 +76,7 @@ graph LR
     B --> C[Tradução PT-BR]
     C --> D[Formatação]
     D --> E[Geração Imagem]
-    E --> F[Publicação Sanity]
+    E --> F[Publicação Strapi]
     F --> G[Posts Live! 🎉]
 ```
 

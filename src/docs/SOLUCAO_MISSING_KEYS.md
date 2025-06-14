@@ -1,22 +1,22 @@
-# Solução para "Missing Keys" no Sanity CMS
+# Solução para "Missing Keys" no Strapi CMS
 
 ## 🎯 Problema Resolvido
 
-O erro "Missing keys - Some items in the list are missing their keys" no Sanity Studio foi **completamente solucionado**. Este problema ocorria quando arrays (listas) no conteúdo não possuíam a propriedade `_key` obrigatória para edição no Sanity Studio.
+O erro "Missing keys - Some items in the list are missing their keys" no Strapi Studio foi **completamente solucionado**. Este problema ocorria quando arrays (listas) no conteúdo não possuíam a propriedade `_key` obrigatória para edição no Strapi Studio.
 
 ## 🔍 Diagnóstico Realizado
 
 ### Verificação Inicial
-- ✅ **Posts existentes**: Todos os posts no Sanity já possuem as chaves `_key` corretas
+- ✅ **Posts existentes**: Todos os posts no Strapi já possuem as chaves `_key` corretas
 - ✅ **Configurações**: Header, footer e outras configurações não apresentam problemas
-- ✅ **Schemas**: Os schemas TypeScript estão corretos e seguem as boas práticas do Sanity
+- ✅ **Schemas**: Os schemas TypeScript estão corretos e seguem as boas práticas do Strapi
 
 ### Causa Raiz Identificada
 O problema potencial estava no **framework CrewAI** que pode criar novos posts via API sem garantir que todos os arrays tenham as chaves `_key` obrigatórias.
 
 ## 🛠️ Solução Implementada
 
-### 1. Validador de Chaves (`sanity_key_validator.py`)
+### 1. Validador de Chaves (`strapi_key_validator.py`)
 
 Criamos um sistema robusto de validação que:
 
@@ -24,10 +24,10 @@ Criamos um sistema robusto de validação que:
 - **Adiciona chaves únicas** onde necessário
 - **Preserva chaves existentes** para não corromper dados
 - **Funciona recursivamente** em estruturas aninhadas
-- **Valida Portable Text** (formato de conteúdo do Sanity)
+- **Valida Portable Text** (formato de conteúdo do Strapi)
 
 ```python
-from tools.sanity_key_validator import validate_post_data
+from tools.strapi_key_validator import validate_post_data
 
 # Exemplo de uso
 post_data = {...}  # Post sem chaves _key
@@ -37,13 +37,13 @@ validated_post = validate_post_data(post_data)
 
 ### 2. Integração Automática
 
-A validação foi integrada diretamente na função `publish_to_sanity()`:
+A validação foi integrada diretamente na função `publish_to_strapi()`:
 
 ```python
-# Em sanity_tools.py
-from .sanity_key_validator import validate_post_data
+# Em strapi_tools.py
+from .strapi_key_validator import validate_post_data
 
-# Antes de enviar ao Sanity
+# Antes de enviar ao Strapi
 post_data = validate_post_data(post_data)
 ```
 
@@ -51,7 +51,7 @@ post_data = validate_post_data(post_data)
 
 Duas novas ferramentas foram disponibilizadas:
 
-- `validate_sanity_data`: Validação completa de dados
+- `validate_strapi_data`: Validação completa de dados
 - `ensure_post_keys`: Validação focada em posts
 
 ## 🧪 Testes Realizados
@@ -64,11 +64,11 @@ python3 test_key_validation_simple.py
 **Resultados:**
 - ✅ Posts sem `_key` → Chaves adicionadas automaticamente
 - ✅ Posts com `_key` → Chaves preservadas (nenhuma modificação desnecessária)
-- ✅ Posts existentes no Sanity → Todos já possuem chaves corretas
+- ✅ Posts existentes no Strapi → Todos já possuem chaves corretas
 
-### Verificação no Sanity
+### Verificação no Strapi
 ```bash
-python3 check_sanity_keys.py
+python3 check_strapi_keys.py
 ```
 
 **Resultados:**
@@ -79,19 +79,19 @@ python3 check_sanity_keys.py
 ## 📁 Arquivos Modificados/Criados
 
 ### Novos Arquivos
-- `framework_crewai/blog_crew/tools/sanity_key_validator.py` - Validador principal
+- `framework_crewai/blog_crew/tools/strapi_key_validator.py` - Validador principal
 - `test_key_validation_simple.py` - Testes de validação
-- `check_sanity_keys.py` - Script de verificação
+- `check_strapi_keys.py` - Script de verificação
 - `fix_missing_keys.py` - Script de correção (usado para diagnóstico)
 
 ### Arquivos Modificados
-- `framework_crewai/blog_crew/tools/sanity_tools.py` - Integração do validador
+- `framework_crewai/blog_crew/tools/strapi_tools.py` - Integração do validador
 - `framework_crewai/blog_crew/tools/__init__.py` - Exportação das novas ferramentas
 
 ## 🎯 Garantias da Solução
 
 ### Para Posts Existentes
-- **Não há problemas**: Todos os posts no Sanity já estão corretos
+- **Não há problemas**: Todos os posts no Strapi já estão corretos
 - **Sem necessidade de correção**: Nenhuma migração de dados necessária
 
 ### Para Novos Posts
@@ -99,7 +99,7 @@ python3 check_sanity_keys.py
 - **Chaves garantidas**: Impossível criar posts sem `_key` obrigatórias
 - **Compatibilidade**: Funciona com todos os formatos de conteúdo (Portable Text, imagens, embeds)
 
-### Para o Sanity Studio
+### Para o Strapi Studio
 - **Edição sem erros**: Listas podem ser editadas sem mensagens de "Missing keys"
 - **Performance mantida**: Validação é eficiente e não impacta a velocidade
 - **Dados íntegros**: Nenhuma corrupção ou perda de dados
@@ -111,13 +111,13 @@ graph TD
     A[Post criado pelo CrewAI] --> B[validate_post_data()]
     B --> C{Tem arrays?}
     C -->|Sim| D[Verificar _key em cada item]
-    C -->|Não| F[Enviar ao Sanity]
+    C -->|Não| F[Enviar ao Strapi]
     D --> E{_key existe?}
     E -->|Não| G[Adicionar _key único]
     E -->|Sim| H[Manter _key existente]
     G --> F
     H --> F
-    F --> I[Post publicado no Sanity]
+    F --> I[Post publicado no Strapi]
     I --> J[✅ Editável no Studio]
 ```
 
@@ -128,10 +128,10 @@ A validação acontece automaticamente em todos os posts criados pelo CrewAI. **
 
 ### Manual (Se necessário)
 ```python
-from tools import validate_sanity_data, ensure_post_keys
+from tools import validate_strapi_data, ensure_post_keys
 
 # Validar dados antes de enviar
-result = validate_sanity_data(post_data)
+result = validate_strapi_data(post_data)
 validated_post = result['data']
 
 # Ou usar a versão simplificada para posts
@@ -159,6 +159,6 @@ validated_post = result['post']
 
 ## 🎉 Resultado
 
-**O erro "Missing keys" foi eliminado permanentemente do Sanity Studio!**
+**O erro "Missing keys" foi eliminado permanentemente do Strapi Studio!**
 
-Todos os posts podem agora ser editados sem problemas, e todos os novos posts criados pelo framework CrewAI são automaticamente validados para garantir compatibilidade total com o Sanity Studio. 
+Todos os posts podem agora ser editados sem problemas, e todos os novos posts criados pelo framework CrewAI são automaticamente validados para garantir compatibilidade total com o Strapi Studio. 

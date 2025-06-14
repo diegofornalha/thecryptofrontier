@@ -32,8 +32,8 @@ def verify_environment():
     """Verifica apenas as variáveis essenciais (sem OpenAI)"""
     required_vars = {
         "GOOGLE_API_KEY": "Para tradução com Gemini",
-        "SANITY_PROJECT_ID": "Para publicação no Sanity",
-        "SANITY_API_TOKEN": "Para autenticação no Sanity"
+        "strapi_PROJECT_ID": "Para publicação no Strapi",
+        "strapi_API_TOKEN": "Para autenticação no Strapi"
     }
     
     missing_vars = []
@@ -97,7 +97,7 @@ def run_pipeline(limit: int = 3, clean: bool = False):
 ║   Tempo de execução: {duration}                              
 ║                                                              ║
 ║   Posts processados SEM imagens!                             ║
-║   Acesse o Sanity Studio para visualizar!                    ║
+║   Acesse o Strapi Studio para visualizar!                    ║
 ╚══════════════════════════════════════════════════════════════╝
         """)
         

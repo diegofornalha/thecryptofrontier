@@ -1,8 +1,8 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { client } from '../../sanity/lib/client';
-import { urlForImage } from '../../sanity/lib/image';
+import { client } from '../../strapi/lib/client';
+import { urlForImage } from '../../strapi/lib/image';
 import CryptoBasicFooter from '@/components/sections/CryptoBasicFooter';
 import NewsHeader from '../../components/sections/NewsHeader';
 import BreakingNewsTicker from '@/components/sections/home/BreakingNewsTicker';

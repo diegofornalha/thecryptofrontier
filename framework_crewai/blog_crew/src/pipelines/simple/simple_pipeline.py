@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Pipeline Simplificado para Blog Automatizado
-Coleta RSS → Traduz → Gera Imagens → Publica no Sanity
+Coleta RSS → Traduz → Gera Imagens → Publica no Strapi
 """
 
 import os
@@ -55,11 +55,11 @@ IMAGES_DIR.mkdir(exist_ok=True)
 genai_configured = False
 openai_client = None
 
-# Sanity
-SANITY_PROJECT_ID = os.environ.get("SANITY_PROJECT_ID")
-SANITY_DATASET = "production"
-SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN")
-SANITY_API_VERSION = "2023-05-03"
+# Strapi
+strapi_PROJECT_ID = os.environ.get("strapi_PROJECT_ID")
+strapi_DATASET = "production"
+strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
+strapi_API_VERSION = "2023-05-03"
 
 def load_processed_articles() -> set:
     """Carrega IDs de artigos já processados"""
@@ -172,25 +172,25 @@ Resolution: High quality, sharp details"""
         
         logger.info(f"Imagem salva: {filename}")
         
-        # Upload para Sanity
-        return upload_to_sanity(image_path, title)
+        # Upload para Strapi
+        return upload_to_strapi(image_path, title)
         
     except Exception as e:
         logger.error(f"Erro ao gerar imagem: {e}")
         return None
 
-def upload_to_sanity(image_path: Path, title: str) -> Optional[str]:
-    """Faz upload da imagem para o Sanity usando upload binário"""
+def upload_to_strapi(image_path: Path, title: str) -> Optional[str]:
+    """Faz upload da imagem para o Strapi usando upload binário"""
     try:
         # URL da API - usando v2021-06-07 como na documentação
-        url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v2021-06-07/assets/images/{SANITY_DATASET}"
+        url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v2021-06-07/assets/images/{strapi_DATASET}"
         
         # Determinar content type baseado na extensão
         content_type = 'image/png' if image_path.suffix.lower() == '.png' else 'image/jpeg'
         
         # Headers com Content-Type específico
         headers = {
-            'Authorization': f'Bearer {SANITY_API_TOKEN}',
+            'Authorization': f'Bearer {strapi_API_TOKEN}',
             'Content-Type': content_type
         }
         
@@ -202,11 +202,11 @@ def upload_to_sanity(image_path: Path, title: str) -> Optional[str]:
             data = response.json()
             asset_id = data['document']['_id']
             
-            logger.info(f"Imagem enviada para Sanity: {asset_id}")
+            logger.info(f"Imagem enviada para Strapi: {asset_id}")
             return asset_id
             
     except Exception as e:
-        logger.error(f"Erro no upload para Sanity: {e}")
+        logger.error(f"Erro no upload para Strapi: {e}")
         return None
 
 def create_slug(title: str) -> str:
@@ -240,7 +240,7 @@ def convert_markdown_to_html(text: str) -> str:
     return text
 
 def process_paragraph_with_links(element) -> Dict:
-    """Processa um parágrafo preservando links no formato Sanity"""
+    """Processa um parágrafo preservando links no formato Strapi"""
     import uuid
     block_key = str(uuid.uuid4())[:8]
     
@@ -324,7 +324,7 @@ def process_paragraph_with_links(element) -> Dict:
     return block
 
 def format_content_blocks(content: str) -> List[Dict]:
-    """Formata conteúdo em blocos para o Sanity, preservando imagens e links"""
+    """Formata conteúdo em blocos para o Strapi, preservando imagens e links"""
     # Converter Markdown para HTML primeiro
     content = convert_markdown_to_html(content)
     
@@ -360,7 +360,7 @@ def format_content_blocks(content: str) -> List[Dict]:
                     caption_elem = element.find('figcaption')
                     caption = caption_elem.get_text(strip=True) if caption_elem else ''
                     
-                    # Criar bloco de imagem do Sanity
+                    # Criar bloco de imagem do Strapi
                     blocks.append({
                         "_type": "image",
                         "_key": f"image{block_count}",
@@ -378,7 +378,7 @@ def format_content_blocks(content: str) -> List[Dict]:
                 
                 img_alt = element.get('alt', '')
                 
-                # Criar bloco de imagem do Sanity
+                # Criar bloco de imagem do Strapi
                 blocks.append({
                     "_type": "image",
                     "_key": f"image{block_count}",
@@ -435,8 +435,8 @@ def format_content_blocks(content: str) -> List[Dict]:
     
     return blocks
 
-def publish_to_sanity(article: Dict, image_id: Optional[str] = None) -> bool:
-    """Publica artigo no Sanity"""
+def publish_to_strapi(article: Dict, image_id: Optional[str] = None) -> bool:
+    """Publica artigo no Strapi"""
     try:
         doc_id = f"post-{create_slug(article['title_pt'])}"
         
@@ -473,11 +473,11 @@ def publish_to_sanity(article: Dict, image_id: Optional[str] = None) -> bool:
                 }
             }
         
-        # Envia para Sanity
-        url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v{SANITY_API_VERSION}/data/mutate/{SANITY_DATASET}"
+        # Envia para Strapi
+        url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/{strapi_DATASET}"
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {SANITY_API_TOKEN}"
+            "Authorization": f"Bearer {strapi_API_TOKEN}"
         }
         
         mutations = {
@@ -493,7 +493,7 @@ def publish_to_sanity(article: Dict, image_id: Optional[str] = None) -> bool:
         return True
         
     except Exception as e:
-        logger.error(f"Erro ao publicar no Sanity: {e}")
+        logger.error(f"Erro ao publicar no Strapi: {e}")
         return False
 
 def process_article(article: Dict) -> bool:
@@ -527,8 +527,8 @@ def process_article(article: Dict) -> bool:
             logger.info("2. Geração de imagens desativada")
         
         # 3. Publicar
-        logger.info("3. Publicando no Sanity...")
-        success = publish_to_sanity(article, image_id)
+        logger.info("3. Publicando no Strapi...")
+        success = publish_to_strapi(article, image_id)
         
         return success
         
@@ -547,7 +547,7 @@ def main():
     """)
     
     # Verificar variáveis de ambiente
-    required_vars = ["GOOGLE_API_KEY", "SANITY_PROJECT_ID", "SANITY_API_TOKEN"]
+    required_vars = ["GOOGLE_API_KEY", "strapi_PROJECT_ID", "strapi_API_TOKEN"]
     if GENERATE_IMAGES:
         required_vars.append("OPENAI_API_KEY")
     

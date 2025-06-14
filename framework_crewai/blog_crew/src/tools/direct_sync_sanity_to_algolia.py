@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Script para sincronizar diretamente todos os documentos do Sanity para o Algolia,
+Script para sincronizar diretamente todos os documentos do Strapi para o Algolia,
 sem depender da biblioteca algoliasearch.
 
-Uso: python direct_sync_sanity_to_algolia.py
+Uso: python direct_sync_strapi_to_algolia.py
 """
 
 import os
@@ -21,25 +21,25 @@ logging.basicConfig(
 )
 logger = logging.getLogger("direct_sync")
 
-# Configurações do Sanity
-SANITY_PROJECT_ID = os.environ.get("SANITY_PROJECT_ID", "z4sx85c6")
-SANITY_DATASET = "production"
-SANITY_API_VERSION = "2023-05-03"
+# Configurações do Strapi
+strapi_PROJECT_ID = os.environ.get("strapi_PROJECT_ID", "z4sx85c6")
+strapi_DATASET = "production"
+strapi_API_VERSION = "2023-05-03"
 
 # Configurações do Algolia
 ALGOLIA_APP_ID = os.environ.get("ALGOLIA_APP_ID", "42TZWHW8UP")
 ALGOLIA_API_KEY = os.environ.get("ALGOLIA_ADMIN_API_KEY", "d0cb55ec8f07832bc5f57da0bd25c535")
 ALGOLIA_INDEX_NAME = os.environ.get("ALGOLIA_INDEX_NAME", "development_mcpx_content")
 
-def get_sanity_documents():
-    """Obtém todos os documentos do tipo post do Sanity"""
-    # Obter token do Sanity
-    SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN")
-    if not SANITY_API_TOKEN:
-        logger.error("SANITY_API_TOKEN não está definido")
+def get_strapi_documents():
+    """Obtém todos os documentos do tipo post do Strapi"""
+    # Obter token do Strapi
+    strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
+    if not strapi_API_TOKEN:
+        logger.error("strapi_API_TOKEN não está definido")
         sys.exit(1)
     
-    # Query para obter todos os posts do Sanity com os campos necessários
+    # Query para obter todos os posts do Strapi com os campos necessários
     query = '''*[_type == "post"]{
         _id,
         title,
@@ -54,12 +54,12 @@ def get_sanity_documents():
     }'''
     encoded_query = quote(query)
     
-    # URL da API do Sanity
-    url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v{SANITY_API_VERSION}/data/query/{SANITY_DATASET}?query={encoded_query}"
+    # URL da API do Strapi
+    url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/query/{strapi_DATASET}?query={encoded_query}"
     
     # Headers
     headers = {
-        "Authorization": f"Bearer {SANITY_API_TOKEN}"
+        "Authorization": f"Bearer {strapi_API_TOKEN}"
     }
     
     try:
@@ -69,19 +69,19 @@ def get_sanity_documents():
         
         # Extrair resultados
         result = response.json().get("result", [])
-        logger.info(f"Total de documentos no Sanity: {len(result)}")
+        logger.info(f"Total de documentos no Strapi: {len(result)}")
         
         return result
     
     except Exception as e:
-        logger.error(f"Erro ao obter documentos do Sanity: {str(e)}")
+        logger.error(f"Erro ao obter documentos do Strapi: {str(e)}")
         sys.exit(1)
 
-def prepare_for_algolia(sanity_docs):
-    """Prepara documentos do Sanity para indexação no Algolia"""
+def prepare_for_algolia(strapi_docs):
+    """Prepara documentos do Strapi para indexação no Algolia"""
     algolia_docs = []
     
-    for doc in sanity_docs:
+    for doc in strapi_docs:
         # Criar documento para o Algolia
         algolia_doc = {
             "objectID": doc["_id"],
@@ -155,11 +155,11 @@ def send_to_algolia(algolia_docs):
     logger.info(f"Total de documentos enviados para o Algolia: {len(algolia_docs)}")
 
 def main():
-    # Obter documentos do Sanity
-    sanity_docs = get_sanity_documents()
+    # Obter documentos do Strapi
+    strapi_docs = get_strapi_documents()
     
     # Preparar documentos para o Algolia
-    algolia_docs = prepare_for_algolia(sanity_docs)
+    algolia_docs = prepare_for_algolia(strapi_docs)
     
     # Enviar documentos para o Algolia
     send_to_algolia(algolia_docs)

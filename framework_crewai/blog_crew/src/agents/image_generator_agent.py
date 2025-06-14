@@ -21,7 +21,7 @@ class ImageGeneratorAgent:
             Seu objetivo é garantir que TODOS os posts tenham imagens profissionais:
             1. Processar todos os arquivos em 'posts_formatados'
             2. Gerar imagens relevantes usando DALL-E 3
-            3. Fazer upload automático para o Sanity
+            3. Fazer upload automático para o Strapi
             4. Salvar posts com imagens em 'posts_com_imagem'
             5. Relatar estatísticas completas (processados, sucesso, falhas)
             

@@ -97,7 +97,7 @@ def test_image_generation():
 
 if __name__ == "__main__":
     # Verificar variáveis de ambiente
-    required_env = ["OPENAI_API_KEY", "SANITY_API_TOKEN"]
+    required_env = ["OPENAI_API_KEY", "strapi_API_TOKEN"]
     missing = [var for var in required_env if not os.getenv(var)]
     
     if missing:

@@ -81,7 +81,7 @@ Todos os pipelines agora salvam arquivos corretamente em:
 - `posts_traduzidos/` - Artigos traduzidos
 - `posts_formatados/` - Artigos formatados
 - `posts_com_imagem/` - Artigos com imagens geradas
-- `posts_publicados/` - Artigos publicados no Sanity
+- `posts_publicados/` - Artigos publicados no Strapi
 
 ## 🚀 Configuração no Cron
 

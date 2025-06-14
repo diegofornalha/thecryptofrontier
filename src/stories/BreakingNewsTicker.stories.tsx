@@ -16,7 +16,7 @@ const meta = {
   argTypes: {
     news: {
       control: 'object',
-      description: 'Array de notícias para exibir. Se não fornecido, busca do Sanity CMS.',
+      description: 'Array de notícias para exibir. Se não fornecido, busca do Strapi CMS.',
     },
   },
 } satisfies Meta<typeof BreakingNewsTicker>;
@@ -74,7 +74,7 @@ export const BuscandoDados: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Quando não há propriedade news, o componente busca automaticamente do Sanity CMS.',
+        story: 'Quando não há propriedade news, o componente busca automaticamente do Strapi CMS.',
       },
     },
   },

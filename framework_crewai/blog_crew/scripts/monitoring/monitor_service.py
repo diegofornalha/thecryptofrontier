@@ -22,7 +22,7 @@ After=network.target
 
 [Service]
 Type=simple
-User={os.getenv('USER', 'sanity')}
+User={os.getenv('USER', 'strapi')}
 WorkingDirectory={project_dir}
 ExecStart=/usr/bin/python3 {project_dir}/rss_monitor.py
 Restart=always

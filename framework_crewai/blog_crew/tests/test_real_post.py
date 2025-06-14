@@ -7,7 +7,7 @@ import os
 import json
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from tests.test_markdown_conversion import convert_markdown_to_sanity_objects_direct
+from tests.test_markdown_conversion import convert_markdown_to_strapi_objects_direct
 
 def process_real_xrp_post():
     """Processa o post real do XRP com os problemas identificados"""
@@ -37,7 +37,7 @@ No entanto, o XRP terminou o mesmo dia com um fluxo líquido negativo de US$ 5,8
 Vale ressaltar que, nos últimos meses, fluxos negativos maiores dominaram o mercado XRP. Isso pode ajudar a explicar o desempenho de preço relativamente plano do XRP nos últimos seis meses.
 """
     
-    result = convert_markdown_to_sanity_objects_direct(problematic_content)
+    result = convert_markdown_to_strapi_objects_direct(problematic_content)
     
     if result["success"]:
         print("✅ Conversão bem-sucedida!")
@@ -80,8 +80,8 @@ Vale ressaltar que, nos últimos meses, fluxos negativos maiores dominaram o mer
                 "Links markdown do Twitter não convertidos"
             ],
             "fixedIssues": [
-                "✅ Imagens convertidas para objetos Sanity",
-                "✅ Embeds do Twitter convertidos para objetos Sanity",
+                "✅ Imagens convertidas para objetos Strapi",
+                "✅ Embeds do Twitter convertidos para objetos Strapi",
                 "✅ Links normais mantidos como anotações"
             ]
         }
@@ -110,7 +110,7 @@ def show_before_after():
     print("[Imagem mostrando os multiplicadores](https://pbs.twimg.com/media/Gs7ldW9WsAAnJLq?format=jpg&name=large)")
     print("```")
     
-    print("\n✅ DEPOIS (Objetos Sanity):")
+    print("\n✅ DEPOIS (Objetos Strapi):")
     print("```json")
     print("""{
   "_type": "embedBlock",

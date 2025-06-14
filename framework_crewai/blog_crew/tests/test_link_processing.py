@@ -6,7 +6,7 @@ import re
 import uuid
 
 def convert_paragraph_with_links(paragraph):
-    """Converte parágrafo com links markdown para formato Sanity"""
+    """Converte parágrafo com links markdown para formato Strapi"""
     # Pattern para detectar links markdown
     link_pattern = r'\[([^\]]+)\]\((https?://[^\s)]+)\)'
     

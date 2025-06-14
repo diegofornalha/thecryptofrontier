@@ -16,11 +16,11 @@ class TranslationResult(BaseModel):
     files: List[str] = Field(..., description="Lista de arquivos JSON traduzidos salvos na pasta 'posts_traduzidos'")
 
 class FormattingResult(BaseModel):
-    """Resultado da tarefa de formatação para o Sanity CMS"""
+    """Resultado da tarefa de formatação para o Strapi CMS"""
     files: List[str] = Field(..., description="Lista de arquivos JSON formatados salvos na pasta 'posts_formatados'")
 
 class PublishingResult(BaseModel):
-    """Resultado da tarefa de publicação no Sanity CMS"""
+    """Resultado da tarefa de publicação no Strapi CMS"""
     published_files: List[str] = Field(..., description="Lista dos arquivos que foram publicados e movidos para 'posts_publicados'")
     success_count: int = Field(..., description="Número de artigos publicados com sucesso")
     failed_count: int = Field(0, description="Número de artigos que falharam na publicação")
@@ -101,7 +101,7 @@ def create_translation_task(agent):
     )
 
 def create_formatting_task(agent):
-    """Cria a tarefa de formatação para o Sanity CMS"""
+    """Cria a tarefa de formatação para o Strapi CMS"""
     from models.feed import FormattedArticle
     
     return Task(
@@ -112,7 +112,7 @@ def create_formatting_task(agent):
         Para cada arquivo na lista fornecida:
         1. Leia o arquivo JSON com o artigo traduzido usando o nome do arquivo.
         2. Crie um slug a partir do título (remova acentos, substitua espaços por hífens, use letras minúsculas).
-        3. Formate o conteúdo para o Sanity, separando em parágrafos.
+        3. Formate o conteúdo para o Strapi, separando em parágrafos.
         4. Adicione metadados: título, slug, resumo, data de publicação (use a data atual se não houver uma no arquivo).
         5. Salve o artigo formatado em um arquivo na pasta 'posts_formatados'
            com nome 'formatado_{nome_original_do_arquivo.json}'. (Ex: se o arquivo traduzido era 'traduzido_artigo_xyz.json', salve como 'formatado_artigo_xyz.json')
@@ -155,7 +155,7 @@ def create_formatting_task(agent):
     )
 
 def create_publishing_task(agent):
-    """Cria a tarefa de publicação no Sanity CMS"""
+    """Cria a tarefa de publicação no Strapi CMS"""
     from models.post import Post
     
     return Task(
@@ -165,7 +165,7 @@ def create_publishing_task(agent):
 
         Para cada arquivo na lista fornecida:
         1. Leia o arquivo JSON com o artigo formatado e com imagem usando o nome do arquivo da pasta 'posts_com_imagem'.
-        2. Use a ferramenta 'publish_to_sanity_enhanced' para publicar com metadados completos.
+        2. Use a ferramenta 'publish_to_strapi_enhanced' para publicar com metadados completos.
            Esta ferramenta:
            - Detecta automaticamente categorias baseadas no conteúdo
            - Extrai tags relevantes de criptomoedas mencionadas
@@ -174,7 +174,7 @@ def create_publishing_task(agent):
         3. Passe apenas o conteúdo JSON do arquivo como parâmetro 'post_data'.
         4. Verifique se a publicação foi bem-sucedida através do retorno:
            - success: booleano indicando sucesso
-           - document_id: ID do documento no Sanity
+           - document_id: ID do documento no Strapi
            - categories: lista de categorias detectadas
            - tags: lista de tags extraídas
            - error: mensagem de erro (se falhar)
@@ -188,6 +188,6 @@ def create_publishing_task(agent):
         - Categorias e tags detectadas para cada post
         """,
         agent=agent,
-        expected_output="Relatório de publicação dos artigos no Sanity CMS, incluindo uma lista dos arquivos que foram publicados e movidos.",
+        expected_output="Relatório de publicação dos artigos no Strapi CMS, incluindo uma lista dos arquivos que foram publicados e movidos.",
         output_pydantic=PublishingResult
     )

@@ -10,10 +10,10 @@ from pathlib import Path
 from datetime import datetime
 
 # Use the deploy token
-SANITY_API_TOKEN = "skCrPsOJjFClmx28BTkCDT4gh0ucILwKHOdCLiI6dmK3vhAuVEj0BeUZeXlsDTYijvNyeQIsk1FyaVhWlnETobxJE35s9PLjBAdWDWBAP7YB4xCzFhEzYeEoKdjLqrZIdKIX1bEsfOOZ2dPHt7hM86BN0s8G6QKscOTpm86i34zXsNi34fJ5skpIRw0zxaggI1OrnbhXr7EaTWu3o2R1LxIE2KZwESzbxUcg7waOHG1EUXwxMg3sM0imfmUmyfgyxLrMEugG3nGbpLeMWWHYoWYsq02O2qJ5hIFYoCPEjQOyBbevEp34shXqbIrMPMO5r6q3Njtnd66WOtjAiHR6a6BBDUPxgMrXCooNml41"
-SANITY_PROJECT_ID = "z4sx85c6"
-SANITY_DATASET = "production"
-SANITY_API_VERSION = "2023-05-03"
+strapi_API_TOKEN = "skCrPsOJjFClmx28BTkCDT4gh0ucILwKHOdCLiI6dmK3vhAuVEj0BeUZeXlsDTYijvNyeQIsk1FyaVhWlnETobxJE35s9PLjBAdWDWBAP7YB4xCzFhEzYeEoKdjLqrZIdKIX1bEsfOOZ2dPHt7hM86BN0s8G6QKscOTpm86i34zXsNi34fJ5skpIRw0zxaggI1OrnbhXr7EaTWu3o2R1LxIE2KZwESzbxUcg7waOHG1EUXwxMg3sM0imfmUmyfgyxLrMEugG3nGbpLeMWWHYoWYsq02O2qJ5hIFYoCPEjQOyBbevEp34shXqbIrMPMO5r6q3Njtnd66WOtjAiHR6a6BBDUPxgMrXCooNml41"
+strapi_PROJECT_ID = "z4sx85c6"
+strapi_DATASET = "production"
+strapi_API_VERSION = "2023-05-03"
 
 # Import formatting
 import sys
@@ -55,10 +55,10 @@ def publish_post(post_file):
     }
     
     # API request
-    url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v{SANITY_API_VERSION}/data/mutate/{SANITY_DATASET}"
+    url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/{strapi_DATASET}"
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {SANITY_API_TOKEN}"
+        "Authorization": f"Bearer {strapi_API_TOKEN}"
     }
     
     mutations = {
@@ -78,9 +78,9 @@ def publish_post(post_file):
         return False
 
 def main():
-    print(f"Using Project ID: {SANITY_PROJECT_ID}")
-    print(f"Token length: {len(SANITY_API_TOKEN)}")
-    print(f"Token prefix: {SANITY_API_TOKEN[:20]}...")
+    print(f"Using Project ID: {strapi_PROJECT_ID}")
+    print(f"Token length: {len(strapi_API_TOKEN)}")
+    print(f"Token prefix: {strapi_API_TOKEN[:20]}...")
     
     # Find recent posts
     posts_dir = Path("posts_processados")

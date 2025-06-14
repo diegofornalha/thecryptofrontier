@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { client } from "../../../sanity/client";
+import { client } from "@/lib/strapiClient";
 import LatestNewsClient from "./LatestNewsClient";
 
 interface NewsItem {

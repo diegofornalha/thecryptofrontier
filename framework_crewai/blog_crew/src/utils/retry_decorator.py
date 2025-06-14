@@ -257,14 +257,14 @@ def retry_google_ai(func: Callable) -> Callable:
         service_name="google_ai"
     )(func)
 
-def retry_sanity(func: Callable) -> Callable:
-    """Retry decorator específico para Sanity"""
+def retry_strapi(func: Callable) -> Callable:
+    """Retry decorator específico para Strapi"""
     return retry_with_backoff(
         max_retries=5,
         initial_delay=1.0,
         backoff_factor=1.5,
         exceptions=(Exception,),
-        service_name="sanity"
+        service_name="strapi"
     )(func)
 
 # Queue persistente para reprocessamento

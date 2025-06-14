@@ -1,4 +1,4 @@
-// Este script serve como alternativa para quando não é possível rodar o Sanity Studio
+// Este script serve como alternativa para quando não é possível rodar o Strapi Studio
 // devido a incompatibilidades nas dependências
 // É uma simples API para permitir listar e atualizar conteúdo sem o Studio
 
@@ -9,26 +9,26 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 // Importe diretamente a versão 6.8.0 do client
-const { createClient } = require('@sanity/client');
+const { createClient } = require('@strapi/client');
 
-// Configurações do Sanity
-const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
-const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || 'production';
-const apiVersion = process.env.NEXT_PUBLIC_SANITY_API_VERSION || '2023-05-03';
+// Configurações do Strapi
+const projectId = process.env.NEXT_PUBLIC_strapi_PROJECT_ID;
+const dataset = process.env.NEXT_PUBLIC_strapi_DATASET || 'production';
+const apiVersion = process.env.NEXT_PUBLIC_strapi_API_VERSION || '2023-05-03';
 
-console.log('Usando Sanity com as configurações:', {
+console.log('Usando Strapi com as configurações:', {
   projectId,
   dataset,
   apiVersion
 });
 
-// Cliente Sanity
+// Cliente Strapi
 const client = createClient({
   projectId,
   dataset,
   apiVersion,
   useCdn: false,
-  token: process.env.SANITY_API_TOKEN,
+  token: process.env.strapi_API_TOKEN,
 });
 
 // Servidor HTTP simples
@@ -52,15 +52,15 @@ const server = http.createServer(async (req, res) => {
       // Página inicial com informações sobre a API
       res.statusCode = 200;
       res.end(JSON.stringify({
-        name: 'Sanity API Alternativa',
-        description: 'API para gerenciar conteúdo do Sanity quando o Studio não está disponível',
+        name: 'Strapi API Alternativa',
+        description: 'API para gerenciar conteúdo do Strapi quando o Studio não está disponível',
         version: '1.0.0',
         endpoints: {
           '/api/status': 'Informações sobre o status da API',
-          '/api/documents': 'Listar documentos do Sanity (opções: type, limit)',
+          '/api/documents': 'Listar documentos do Strapi (opções: type, limit)',
           '/api/content-sync': 'Sincronizar conteúdo (POST)'
         },
-        sanity: {
+        strapi: {
           projectId,
           dataset
         }
@@ -71,7 +71,7 @@ const server = http.createServer(async (req, res) => {
       res.statusCode = 200;
       res.end(JSON.stringify({ 
         status: 'online',
-        sanity: {
+        strapi: {
           projectId,
           dataset,
           apiVersion
@@ -93,7 +93,7 @@ const server = http.createServer(async (req, res) => {
       res.end(JSON.stringify({ documents }));
     }
     else if (route === '/api/content-sync') {
-      // Sincronizar conteúdo do filesystem para o Sanity
+      // Sincronizar conteúdo do filesystem para o Strapi
       if (req.method !== 'POST') {
         res.statusCode = 405;
         res.end(JSON.stringify({ error: 'Method not allowed' }));
@@ -136,10 +136,10 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-const PORT = process.env.SANITY_WORKAROUND_PORT || 3333;
+const PORT = process.env.strapi_WORKAROUND_PORT || 3333;
 
 server.listen(PORT, () => {
-  console.log(`🚀 Sanity Workaround API rodando em http://localhost:${PORT}`);
+  console.log(`🚀 Strapi Workaround API rodando em http://localhost:${PORT}`);
   console.log(`✅ Use http://localhost:${PORT}/api/status para verificar o status`);
   console.log(`📚 Use http://localhost:${PORT}/api/documents para listar documentos`);
 }); 

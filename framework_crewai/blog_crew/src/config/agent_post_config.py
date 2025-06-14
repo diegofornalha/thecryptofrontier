@@ -1,13 +1,13 @@
 """
-Configuração para usar o novo tipo de documento 'agentPost' no Sanity
+Configuração para usar o novo tipo de documento 'agentPost' no Strapi
 """
 
 # Tipo de documento a ser usado pelo agente
-SANITY_DOCUMENT_TYPE = "agentPost"
+strapi_DOCUMENT_TYPE = "agentPost"
 
 # Campos simplificados para o agente
 AGENT_POST_FIELDS = {
-    "_type": SANITY_DOCUMENT_TYPE,
+    "_type": strapi_DOCUMENT_TYPE,
     "required_fields": [
         "title",
         "slug",
@@ -30,7 +30,7 @@ AGENT_POST_FIELDS = {
 
 # Template para criar posts do agente
 AGENT_POST_TEMPLATE = {
-    "_type": SANITY_DOCUMENT_TYPE,
+    "_type": strapi_DOCUMENT_TYPE,
     "publishedAt": None,  # Será preenchido com datetime atual
     "author": {
         "_type": "reference",
@@ -40,7 +40,7 @@ AGENT_POST_TEMPLATE = {
 
 # Instruções para o agente
 AGENT_INSTRUCTIONS = """
-IMPORTANTE: Ao publicar posts no Sanity, use o tipo 'agentPost' ao invés de 'post'.
+IMPORTANTE: Ao publicar posts no Strapi, use o tipo 'agentPost' ao invés de 'post'.
 
 Campos obrigatórios:
 - title: Título do artigo (10-100 caracteres)

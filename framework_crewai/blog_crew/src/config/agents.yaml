@@ -19,7 +19,7 @@ translator:
 
 formatter:
   name: Formatador
-  description: "Agente que formata artigos traduzidos para publicação no Sanity CMS"
+  description: "Agente que formata artigos traduzidos para publicação no Strapi CMS"
   allow_delegation: false
   verbose: true
   temperature: 0.3
@@ -27,7 +27,7 @@ formatter:
 
 publisher:
   name: Publicador
-  description: "Agente que publica artigos formatados no Sanity CMS"
+  description: "Agente que publica artigos formatados no Strapi CMS"
   allow_delegation: false
   verbose: true
   temperature: 0.2

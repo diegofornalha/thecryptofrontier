@@ -4,20 +4,20 @@ Correção direta dos links no post XRP
 """
 
 import os
-from sanityio import Client
+from strapiio import Client
 
 # Configuração direta
-SANITY_PROJECT_ID = 'sgy3g5d4'
-SANITY_DATASET = 'production'
-SANITY_API_VERSION = '2024-01-01'
-SANITY_API_TOKEN = os.getenv('SANITY_API_TOKEN')
+strapi_PROJECT_ID = 'sgy3g5d4'
+strapi_DATASET = 'production'
+strapi_API_VERSION = '2024-01-01'
+strapi_API_TOKEN = os.getenv('strapi_API_TOKEN')
 
 # Cliente
 client = Client(
-    project_id=SANITY_PROJECT_ID,
-    dataset=SANITY_DATASET,
-    api_version=SANITY_API_VERSION,
-    token=SANITY_API_TOKEN,
+    project_id=strapi_PROJECT_ID,
+    dataset=strapi_DATASET,
+    api_version=strapi_API_VERSION,
+    token=strapi_API_TOKEN,
     use_cdn=False
 )
 

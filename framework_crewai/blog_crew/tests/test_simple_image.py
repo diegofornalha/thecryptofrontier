@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 # Carregar variáveis de ambiente
 env_files = [
     Path(".env"),  # Local
-    Path("/home/sanity/thecryptofrontier/framework_crewai/blog_crew/.env"),  # Absoluto
+    Path("/home/strapi/thecryptofrontier/framework_crewai/blog_crew/.env"),  # Absoluto
 ]
 
 for env_file in env_files:
@@ -33,10 +33,10 @@ for env_file in env_files:
 # Configurar cliente OpenAI
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Configurações Sanity
-SANITY_PROJECT_ID = os.getenv("SANITY_PROJECT_ID", "z4sx85c6")
-SANITY_DATASET = os.getenv("SANITY_DATASET", "production")
-SANITY_API_TOKEN = os.getenv("SANITY_API_TOKEN")
+# Configurações Strapi
+strapi_PROJECT_ID = os.getenv("strapi_PROJECT_ID", "z4sx85c6")
+strapi_DATASET = os.getenv("strapi_DATASET", "production")
+strapi_API_TOKEN = os.getenv("strapi_API_TOKEN")
 
 def test_image_generation():
     """Testa geração de imagem diretamente"""
@@ -94,12 +94,12 @@ def test_image_generation():
             f.write(img_response.content)
         logger.info(f"✅ Imagem salva em: {img_path}")
         
-        # 5. Upload para Sanity
-        logger.info("\n📤 Fazendo upload para Sanity...")
+        # 5. Upload para Strapi
+        logger.info("\n📤 Fazendo upload para Strapi...")
         
-        upload_url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v2021-03-25/assets/images/{SANITY_DATASET}"
+        upload_url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v2021-03-25/assets/images/{strapi_DATASET}"
         headers = {
-            "Authorization": f"Bearer {SANITY_API_TOKEN}",
+            "Authorization": f"Bearer {strapi_API_TOKEN}",
             "Content-Type": "image/png"
         }
         

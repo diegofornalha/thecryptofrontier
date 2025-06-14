@@ -6,10 +6,10 @@ services:
     container_name: crewai-blog-pipeline
     restart: unless-stopped
     environment:
-      # Sanity
-      - SANITY_PROJECT_ID=${SANITY_PROJECT_ID}
-      - SANITY_DATASET=${SANITY_DATASET}
-      - SANITY_API_TOKEN=${SANITY_API_TOKEN}
+      # Strapi
+      - strapi_PROJECT_ID=${strapi_PROJECT_ID}
+      - strapi_DATASET=${strapi_DATASET}
+      - strapi_API_TOKEN=${strapi_API_TOKEN}
       
       # APIs
       - OPENAI_API_KEY=${OPENAI_API_KEY}
@@ -26,7 +26,7 @@ services:
     volumes:
       # Persistir dados processados
       - ./processed_articles.json:/app/processed_articles.json
-      - ./sanity_assets.json:/app/sanity_assets.json
+      - ./strapi_assets.json:/app/strapi_assets.json
       
       # Logs
       - ./logs:/app/logs

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Gerado automaticamente - NÃO EDITE MANUALMENTE
-# Este arquivo torna o diretório 'generated_sanity_schemas' um pacote Python
+# Este arquivo torna o diretório 'generated_strapi_schemas' um pacote Python
 # e importa/reexporta todos os schemas gerados.
 
 import importlib
@@ -27,5 +27,5 @@ for _, module_name, _ in pkgutil.iter_modules(__path__):
         except Exception as e:
             print(f"Erro ao importar o schema {module_name}: {e}")
 
-# Você pode acessar os schemas individualmente (ex: from generated_sanity_schemas import post)
-# Ou acessar todos através do dicionário loaded_schemas (ex: from generated_sanity_schemas import loaded_schemas)
+# Você pode acessar os schemas individualmente (ex: from generated_strapi_schemas import post)
+# Ou acessar todos através do dicionário loaded_schemas (ex: from generated_strapi_schemas import loaded_schemas)

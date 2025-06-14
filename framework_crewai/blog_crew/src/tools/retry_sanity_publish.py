@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script para republicar artigos no Sanity usando os dados já processados
+Script para republicar artigos no Strapi usando os dados já processados
 """
 
 import os
@@ -22,11 +22,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger("retry_publish")
 
-# Sanity config
-SANITY_PROJECT_ID = os.environ.get("SANITY_PROJECT_ID")
-SANITY_DATASET = "production"
-SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN")
-SANITY_API_VERSION = "2023-05-03"
+# Strapi config
+strapi_PROJECT_ID = os.environ.get("strapi_PROJECT_ID")
+strapi_DATASET = "production"
+strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
+strapi_API_VERSION = "2023-05-03"
 
 def create_slug(title: str) -> str:
     """Cria slug a partir do título"""
@@ -41,7 +41,7 @@ def create_slug(title: str) -> str:
     return slug[:80]
 
 def format_content_blocks(content: str) -> list:
-    """Formata conteúdo em blocos para o Sanity"""
+    """Formata conteúdo em blocos para o Strapi"""
     # Remove tags HTML
     content = re.sub(r'<[^>]+>', '', content)
     
@@ -67,13 +67,13 @@ def format_content_blocks(content: str) -> list:
     return blocks
 
 def upload_existing_image(image_path: Path, title: str) -> str:
-    """Faz upload de imagem existente para o Sanity"""
+    """Faz upload de imagem existente para o Strapi"""
     try:
-        url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v{SANITY_API_VERSION}/assets/images/{SANITY_DATASET}"
+        url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/assets/images/{strapi_DATASET}"
         
         with open(image_path, 'rb') as f:
             files = {'file': (image_path.name, f, 'image/png')}
-            headers = {'Authorization': f'Bearer {SANITY_API_TOKEN}'}
+            headers = {'Authorization': f'Bearer {strapi_API_TOKEN}'}
             
             response = requests.post(url, files=files, headers=headers)
             
@@ -90,8 +90,8 @@ def upload_existing_image(image_path: Path, title: str) -> str:
         logger.error(f"Erro ao fazer upload: {e}")
         return None
 
-def publish_to_sanity(article: dict, image_path: Path = None) -> bool:
-    """Publica artigo no Sanity"""
+def publish_to_strapi(article: dict, image_path: Path = None) -> bool:
+    """Publica artigo no Strapi"""
     try:
         # Upload da imagem primeiro
         image_id = None
@@ -140,11 +140,11 @@ def publish_to_sanity(article: dict, image_path: Path = None) -> bool:
                 }
             }
         
-        # Envia para Sanity
-        url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v{SANITY_API_VERSION}/data/mutate/{SANITY_DATASET}"
+        # Envia para Strapi
+        url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/{strapi_DATASET}"
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {SANITY_API_TOKEN}"
+            "Authorization": f"Bearer {strapi_API_TOKEN}"
         }
         
         mutations = {
@@ -170,15 +170,15 @@ def publish_to_sanity(article: dict, image_path: Path = None) -> bool:
 def main():
     logger.info("""
 ╔══════════════════════════════════════════════════════════════╗
-║              REPUBLICAÇÃO NO SANITY                          ║
+║              REPUBLICAÇÃO NO STRAPI                          ║
 ║                                                              ║
 ║   Usando artigos e imagens já processados                    ║
 ╚══════════════════════════════════════════════════════════════╝
     """)
     
     # Verificar credenciais
-    if not SANITY_PROJECT_ID or not SANITY_API_TOKEN:
-        logger.error("Credenciais do Sanity não configuradas!")
+    if not strapi_PROJECT_ID or not strapi_API_TOKEN:
+        logger.error("Credenciais do Strapi não configuradas!")
         return
     
     # Diretórios
@@ -231,7 +231,7 @@ def main():
                     logger.info(f"Usando imagem: {image_path.name}")
             
             # Publicar
-            if publish_to_sanity(article, image_path):
+            if publish_to_strapi(article, image_path):
                 success_count += 1
                 
                 # Mover arquivo processado

@@ -17,13 +17,13 @@ python run_crew.py --limit 3
 python process_images_working.py
 ```
 
-### 3. Publicação no Sanity
+### 3. Publicação no Strapi
 ```bash
 # Publicar posts SEM tags/categorias/autor (evita erros)
 python publish_simple.py
 
 # Publicação tradicional (requer tags/categorias configuradas)
-python publish_to_sanity.py
+python publish_to_strapi.py
 ```
 
 ### 4. Monitor RSS
@@ -41,7 +41,7 @@ python rss_monitor.py
 python sync_last_10_articles.py
 
 # Sincronização completa
-python sync_sanity_to_algolia.py
+python sync_strapi_to_algolia.py
 ```
 
 ## Fluxo de Trabalho Recomendado
@@ -56,7 +56,7 @@ python sync_sanity_to_algolia.py
    python process_images_working.py
    ```
 
-3. **Publicar no Sanity**:
+3. **Publicar no Strapi**:
    ```bash
    python publish_simple.py
    ```
@@ -71,9 +71,9 @@ python sync_sanity_to_algolia.py
 ```
 posts_para_traduzir/   # Artigos coletados do RSS
 posts_traduzidos/      # Artigos traduzidos
-posts_formatados/      # Artigos formatados para Sanity
+posts_formatados/      # Artigos formatados para Strapi
 posts_com_imagem/      # Artigos com imagens geradas
-posts_publicados/      # Artigos publicados no Sanity
+posts_publicados/      # Artigos publicados no Strapi
 posts_imagens/         # Backup das imagens geradas
 ```
 
@@ -83,25 +83,25 @@ posts_imagens/         # Backup das imagens geradas
 ```
 OPENAI_API_KEY=sk-...          # Para DALL-E 3
 GOOGLE_API_KEY=...             # Para Gemini (tradução)
-SANITY_PROJECT_ID=z4sx85c6
-SANITY_DATASET=production
-SANITY_API_TOKEN=sk...
+strapi_PROJECT_ID=z4sx85c6
+strapi_DATASET=production
+strapi_API_TOKEN=sk...
 ALGOLIA_APP_ID=...
 ALGOLIA_API_KEY=...
 ```
 
 ## Scripts Utilitários
 
-- `delete_sanity_duplicates.py` - Remove posts duplicados no Sanity
+- `delete_strapi_duplicates.py` - Remove posts duplicados no Strapi
 - `delete_algolia_duplicates.py` - Remove duplicados no Algolia
-- `list_sanity_documents.py` - Lista documentos no Sanity
+- `list_strapi_documents.py` - Lista documentos no Strapi
 - `edit_post.py` - Edita um post específico
 - `view_post.py` - Visualiza um post
 
 ## Notas Importantes
 
-1. **Tags**: O script `publish_simple.py` remove automaticamente tags/categorias/autor para evitar erros de validação no Sanity.
+1. **Tags**: O script `publish_simple.py` remove automaticamente tags/categorias/autor para evitar erros de validação no Strapi.
 
-2. **Imagens**: Todas as imagens são geradas com DALL-E 3 e fazem upload binário direto para o Sanity.
+2. **Imagens**: Todas as imagens são geradas com DALL-E 3 e fazem upload binário direto para o Strapi.
 
 3. **Processamento**: O sistema usa Gemini para tradução/formatação e OpenAI para geração de imagens.

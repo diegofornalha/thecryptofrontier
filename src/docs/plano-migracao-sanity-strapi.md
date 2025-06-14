@@ -1,11 +1,11 @@
-# Plano de Migração Sanity → Strapi
+# Plano de Migração Strapi → Strapi
 
 ## 📋 Status da Migração
 
 ### ✅ Concluído
-1. **Análise de Referências ao Sanity**
+1. **Análise de Referências ao Strapi**
    - Identificados todos os arquivos e dependências
-   - Mapeados componentes React que usam Sanity
+   - Mapeados componentes React que usam Strapi
    - Listados scripts Python do framework CrewAI
 
 2. **Configuração Inicial do Strapi**
@@ -15,7 +15,7 @@
    - Preparado Dockerfile para build
 
 3. **Scripts de Migração**
-   - Criado `/scripts/migration/migrate-sanity-to-strapi.js`
+   - Criado `/scripts/migration/migrate-strapi-to-strapi.js`
    - Implementadas funções para migrar:
      - Autores
      - Posts
@@ -23,7 +23,7 @@
 
 4. **Cliente Strapi**
    - Criado `/src/lib/strapiClient.js`
-   - Implementadas funções equivalentes ao Sanity:
+   - Implementadas funções equivalentes ao Strapi:
      - getPosts()
      - getPostBySlug()
      - getPages()
@@ -60,7 +60,7 @@ Após configurar o Strapi:
 
 ```bash
 # Executar script de migração
-node scripts/migration/migrate-sanity-to-strapi.js
+node scripts/migration/migrate-strapi-to-strapi.js
 ```
 
 ## 📝 Próximos Passos
@@ -77,7 +77,7 @@ Arquivos que precisam ser atualizados:
 Mudanças necessárias:
 ```javascript
 // De:
-import client from '@/lib/sanityClient';
+import client from '@/lib/strapiClient';
 
 // Para:
 import { getPosts, transformStrapiPost } from '@/lib/strapiClient';
@@ -87,7 +87,7 @@ import { getPosts, transformStrapiPost } from '@/lib/strapiClient';
 Substituir queries GROQ por chamadas ao Strapi:
 
 ```javascript
-// Antes (Sanity):
+// Antes (Strapi):
 const posts = await client.fetch(groq`*[_type == "post"]`);
 
 // Depois (Strapi):
@@ -97,29 +97,29 @@ const transformedPosts = posts.map(transformStrapiPost);
 
 ### 3. Atualizar Framework CrewAI
 Arquivos Python que precisam migração:
-- `/framework_crewai/blog_crew/src/config/sanity_config.py`
-- `/framework_crewai/blog_crew/src/tools/sanity_tools.py`
+- `/framework_crewai/blog_crew/src/config/strapi_config.py`
+- `/framework_crewai/blog_crew/src/tools/strapi_tools.py`
 - Scripts de publicação em `/framework_crewai/blog_crew/scripts/actions/publish/`
 
-### 4. Remover Dependências Sanity
+### 4. Remover Dependências Strapi
 Após tudo funcionando com Strapi:
 
 ```bash
-# Remover pacotes Sanity do package.json
-npm uninstall @sanity/client @sanity/image-url sanity next-sanity
+# Remover pacotes Strapi do package.json
+npm uninstall @strapi/client @strapi/image-url strapi next-strapi
 
-# Remover arquivos Sanity
-rm -rf src/sanity
-rm sanity.config.ts sanity.cli.ts
+# Remover arquivos Strapi
+rm -rf src/strapi
+rm strapi.config.ts strapi.cli.ts
 ```
 
 ### 5. Atualizar Variáveis de Ambiente
 Remover do `.env`:
-- NEXT_PUBLIC_SANITY_PROJECT_ID
-- NEXT_PUBLIC_SANITY_DATASET
-- NEXT_PUBLIC_SANITY_API_VERSION
-- SANITY_API_TOKEN
-- SANITY_DEPLOY_TOKEN
+- NEXT_PUBLIC_strapi_PROJECT_ID
+- NEXT_PUBLIC_strapi_DATASET
+- NEXT_PUBLIC_strapi_API_VERSION
+- strapi_API_TOKEN
+- strapi_DEPLOY_TOKEN
 
 ## 🔧 Comandos Úteis
 
@@ -142,7 +142,7 @@ docker-compose down -v
 
 ## ⚠️ Pontos de Atenção
 
-1. **Imagens**: Strapi gerencia uploads diferente do Sanity
+1. **Imagens**: Strapi gerencia uploads diferente do Strapi
 2. **Rich Text**: Conteúdo precisa ser convertido de Portable Text para HTML
 3. **Relações**: Verificar se autores/categorias estão linkados corretamente
 4. **SEO**: Garantir que metadados sejam preservados
@@ -153,9 +153,9 @@ docker-compose down -v
 - [ ] Strapi rodando com Docker
 - [ ] Content-Types criados no Strapi
 - [ ] API Token gerado e configurado
-- [ ] Dados migrados do Sanity
+- [ ] Dados migrados do Strapi
 - [ ] Componentes React atualizados
 - [ ] Framework CrewAI atualizado
 - [ ] Testes realizados
-- [ ] Dependências Sanity removidas
+- [ ] Dependências Strapi removidas
 - [ ] Deploy em produção

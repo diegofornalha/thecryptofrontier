@@ -3,7 +3,7 @@
 # Mantém apenas os últimos 30 dias de logs
 
 # Acessar diretório do projeto
-cd /home/sanity/thecryptofrontier/framework_crewai/blog_crew || exit 1
+cd /home/strapi/thecryptofrontier/framework_crewai/blog_crew || exit 1
 
 # Limpar logs mais antigos que 30 dias
 echo "Limpando logs antigos (> 30 dias)..."

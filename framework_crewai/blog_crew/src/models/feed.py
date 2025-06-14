@@ -26,7 +26,7 @@ class TranslatedArticle(BaseModel):
     original_title: Optional[str] = None
 
 class FormattedArticle(BaseModel):
-    """Modelo para artigos formatados para o Sanity"""
+    """Modelo para artigos formatados para o Strapi"""
     type: str = Field("post", alias="_type")
     title: str
     slug: Dict[str, str]
@@ -40,7 +40,7 @@ class FormattedArticle(BaseModel):
     }
         
     def model_dump(self, *args, **kwargs):
-        """Sobrescrever para renomear os campos para o formato Sanity"""
+        """Sobrescrever para renomear os campos para o formato Strapi"""
         d = super().model_dump(*args, **kwargs)
         if "type" in d:
             d["_type"] = d.pop("type")

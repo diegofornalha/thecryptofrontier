@@ -1,4 +1,4 @@
-import { client } from '../src/sanity/lib/client';
+import { client } from '../src/strapi/lib/client';
 
 const createDefaultAuthor = async () => {
   const authorData = {
@@ -28,7 +28,7 @@ const createDefaultAuthor = async () => {
     //   _type: 'image',
     //   asset: {
     //     _type: 'reference',
-    //     _ref: 'ID_DA_IMAGEM_NO_SANITY'
+    //     _ref: 'ID_DA_IMAGEM_NO_strapi'
     //   }
     // }
   };

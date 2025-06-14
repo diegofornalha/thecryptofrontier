@@ -17,8 +17,8 @@ blog_crew/
 │   ├── agents.yaml
 │   ├── crewai.yaml           # Configuração principal do CrewAI
 │   ├── formatter_enhanced_prompt.py
-│   ├── sanity_config.py
-│   ├── sanity.config.js      # Config JavaScript do Sanity
+│   ├── strapi_config.py
+│   ├── strapi.config.js      # Config JavaScript do Strapi
 │   ├── settings.yaml
 │   ├── tasks.yaml
 │   └── visual_config.py
@@ -42,7 +42,7 @@ blog_crew/
 │
 ├── logic/                     # Lógica de negócio
 │   ├── feed_manager.py
-│   └── sanity_client.py
+│   └── strapi_client.py
 │
 ├── models/                    # Modelos de dados
 │   ├── converters.py
@@ -74,7 +74,7 @@ blog_crew/
 │   ├── publish_pipeline_posts.py
 │   ├── publish_test_post.py
 │   ├── publish_to_new_studio.py
-│   ├── publish_via_sanity_client.py
+│   ├── publish_via_strapi_client.py
 │   └── publish_with_deploy_token.py
 │
 ├── run/                       # Scripts de execução
@@ -84,7 +84,7 @@ blog_crew/
 │   ├── run_pipeline_enhanced.py
 │   └── run_pipeline_no_images.py
 │
-├── schemas/                   # Schemas do Sanity
+├── schemas/                   # Schemas do Strapi
 │   ├── author_schema.py
 │   ├── category_schema.py
 │   └── ...
@@ -113,7 +113,7 @@ blog_crew/
 │   └── image_generation_task_v2.py
 │
 ├── tests/                     # Testes organizados
-│   ├── check_sanity_post.py
+│   ├── check_strapi_post.py
 │   ├── test_image_integration.py
 │   └── ...
 │
@@ -121,7 +121,7 @@ blog_crew/
 │   ├── maintenance/          # Ferramentas de manutenção
 │   ├── algolia_tools.py
 │   ├── formatter_tools.py
-│   ├── sanity_tools.py
+│   ├── strapi_tools.py
 │   └── ...
 │
 ├── update/                    # Scripts de atualização
@@ -131,8 +131,8 @@ blog_crew/
 │
 ├── utilities/                 # Utilitários diversos
 │   ├── delete_algolia_duplicates.py
-│   ├── retry_sanity_publish.py
-│   ├── sync_sanity_to_algolia.py
+│   ├── retry_strapi_publish.py
+│   ├── sync_strapi_to_algolia.py
 │   └── ...
 │
 ├── utils/                     # Utils do sistema
@@ -194,7 +194,7 @@ blog_crew/
 
 ### Configuração
 - **config/** - Todos os arquivos de configuração
-- **schemas/** - Definições de esquema do Sanity
+- **schemas/** - Definições de esquema do Strapi
 
 ## 🚀 Como Usar
 

@@ -7,27 +7,27 @@ Esta pasta contém scripts utilitários para manutenção manual do sistema de b
 ### Gestão de Posts
 
 #### `delete_by_title.py`
-Remove posts do Sanity por título específico.
+Remove posts do Strapi por título específico.
 ```bash
 python delete_by_title.py "Título do Post"
 ```
 
 #### `edit_post.py`
-Edita posts existentes no Sanity CMS.
+Edita posts existentes no Strapi CMS.
 ```bash
 python edit_post.py
 ```
 
-#### `list_sanity_documents.py`
-Lista todos os documentos no Sanity para verificação.
+#### `list_strapi_documents.py`
+Lista todos os documentos no Strapi para verificação.
 ```bash
-python list_sanity_documents.py
+python list_strapi_documents.py
 ```
 
 ### Sincronização
 
 #### `sync_last_10_articles.py`
-Sincroniza apenas os últimos 10 artigos do Sanity para o Algolia.
+Sincroniza apenas os últimos 10 artigos do Strapi para o Algolia.
 Útil para testes rápidos sem sincronizar toda a base.
 ```bash
 python sync_last_10_articles.py
@@ -36,7 +36,7 @@ python sync_last_10_articles.py
 ### Limpeza U.Today
 
 #### `delete_utoday_posts.py`
-Remove posts do U.Today do Sanity CMS.
+Remove posts do U.Today do Strapi CMS.
 ```bash
 python delete_utoday_posts.py
 ```
@@ -52,8 +52,8 @@ python delete_utoday_algolia.py
 - Sempre faça backup antes de executar scripts de deleção
 - Use o modo `--dry-run` quando disponível para simular
 - Verifique as variáveis de ambiente necessárias:
-  - `SANITY_API_TOKEN`
-  - `SANITY_PROJECT_ID`
+  - `strapi_API_TOKEN`
+  - `strapi_PROJECT_ID`
   - `ALGOLIA_APP_ID`
   - `ALGOLIA_ADMIN_API_KEY`
 

@@ -8,9 +8,9 @@ A integração do DALL-E 3 foi implementada para gerar automaticamente imagens p
 
 1. **RSS Monitor** → Busca artigos
 2. **Translator** → Traduz para PT-BR
-3. **Formatter** → Formata para Sanity
+3. **Formatter** → Formata para Strapi
 4. **Image Generator** → Gera imagem com DALL-E e faz upload *(NOVO)*
-5. **Publisher** → Publica no Sanity CMS
+5. **Publisher** → Publica no Strapi CMS
 
 ## Componentes Implementados
 
@@ -26,7 +26,7 @@ A integração do DALL-E 3 foi implementada para gerar automaticamente imagens p
 - **Arquivo**: `tools/image_generation_tools.py`
 - **Ferramentas**:
   - `generate_crypto_image`: Gera imagem com DALL-E
-  - `upload_image_to_sanity`: Faz upload para Sanity
+  - `upload_image_to_strapi`: Faz upload para Strapi
   - `generate_and_upload_image`: Combina geração e upload
 
 ### 3. Configurações
@@ -61,9 +61,9 @@ Bitcoin, Ethereum, XRP, BNB, Dogecoin, Solana, Chainlink, Shiba Inu, Sui, USDT, 
 ### Variáveis de Ambiente Necessárias
 ```bash
 OPENAI_API_KEY=sua_chave_openai
-SANITY_PROJECT_ID=seu_projeto
-SANITY_API_TOKEN=seu_token
-SANITY_DATASET=production
+strapi_PROJECT_ID=seu_projeto
+strapi_API_TOKEN=seu_token
+strapi_DATASET=production
 ```
 
 ### Executar o Pipeline

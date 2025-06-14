@@ -3,9 +3,9 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { urlForImage } from '@/sanity/lib/image';
+import { urlForImage } from '@/strapi/lib/image';
 import { PortableText } from '@portabletext/react';
-import { client } from '@/sanity/lib/client';
+import { client } from '@/strapi/lib/client';
 
 interface AuthorCardProps {
   author: {

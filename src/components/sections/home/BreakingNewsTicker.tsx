@@ -1,15 +1,10 @@
-import { client } from "../../../sanity/client";
+import strapiClient from "@/lib/strapiClient";
 import BreakingNewsTickerClient from "./BreakingNewsTickerClient";
 
 interface NewsItem {
   title: string;
   slug?: string;
 }
-
-const breakingNewsQuery = `*[_type == "post"] | order(publishedAt desc) [0...5] {
-  title,
-  "slug": slug.current
-}`;
 
 // Fallback de notícias padrão
 const defaultNews: NewsItem[] = [
@@ -30,17 +25,17 @@ export default async function BreakingNewsTicker({ news }: BreakingNewsTickerPro
     return <BreakingNewsTickerClient news={news} />;
   }
 
-  // Caso contrário, busca do Sanity
+  // Caso contrário, busca do Strapi
   let newsItems: NewsItem[] = [];
   
   try {
-    const posts = await client.fetch(breakingNewsQuery);
+    const response = await strapiClient.getPosts({ limit: 5 });
     
-    if (posts && posts.length > 0) {
-      newsItems = posts
+    if (response.data && response.data.length > 0) {
+      newsItems = response.data
         .map((post: any) => ({
-          title: post.title,
-          slug: post.slug
+          title: post.attributes?.title || post.title,
+          slug: post.attributes?.slug || post.slug
         }))
         .filter((item: NewsItem) => item.title);
     }

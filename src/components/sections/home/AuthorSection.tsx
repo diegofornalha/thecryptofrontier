@@ -3,8 +3,8 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { urlForImage } from '@/sanity/lib/image';
-import { client } from '@/sanity/lib/client';
+import { urlForImage } from '@/lib/imageHelper';
+import strapiClient from '@/lib/strapiClient';
 
 interface Author {
   _id: string;
@@ -24,19 +24,23 @@ export default function AuthorSection() {
   const [author, setAuthor] = React.useState<Author | null>(null);
   
   React.useEffect(() => {
-    // Buscar o autor Alexandre Bianchi
-    const query = `*[_type == "author" && slug.current == "alexandre-bianchi"][0]{
-      _id,
-      name,
-      image,
-      role,
-      slug,
-      bio,
-      social
-    }`;
-    
-    client.fetch(query)
-      .then(data => setAuthor(data))
+    // Buscar o autor Alexandre Bianchi do Strapi
+    strapiClient.getAuthorBySlug('alexandre-bianchi')
+      .then(data => {
+        if (data) {
+          // Adaptar dados do Strapi para o formato esperado
+          const adaptedAuthor = {
+            _id: data.id,
+            name: data.attributes?.name || data.name,
+            image: data.attributes?.avatar || data.avatar,
+            role: data.attributes?.role || data.role,
+            slug: { current: data.attributes?.slug || data.slug },
+            bio: data.attributes?.bio || data.bio,
+            social: data.attributes?.social || data.social || {}
+          };
+          setAuthor(adaptedAuthor);
+        }
+      })
       .catch(err => console.error('Erro ao buscar autor:', err));
   }, []);
 

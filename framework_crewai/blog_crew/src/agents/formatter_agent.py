@@ -8,7 +8,7 @@ from config import config as app_config
 
 # Importar modelos Pydantic para estruturação dos dados
 try:
-    from models import Post, dict_to_post, post_to_sanity_format
+    from models import Post, dict_to_post, post_to_strapi_format
     from models.feed import FormattedArticle
     from models.post import Block, Span, SlugField
     PYDANTIC_AVAILABLE = True
@@ -30,7 +30,7 @@ llm = LLM(
 )
 
 class FormatterAgent:
-    """Agente formatador responsável por preparar o conteúdo para o Sanity CMS"""
+    """Agente formatador responsável por preparar o conteúdo para o Strapi CMS"""
     
     @staticmethod
     def create(tools):
@@ -40,23 +40,23 @@ class FormatterAgent:
             "read_from_file", 
             "save_to_file",
             "create_slug",
-            "format_content_for_sanity",
-            "convert_markdown_to_sanity_objects"
+            "format_content_for_strapi",
+            "convert_markdown_to_strapi_objects"
         ]]
         
         return Agent(
             role="Formatador de Conteúdo",
-            goal="Preparar o conteúdo traduzido para publicação no Sanity CMS",
+            goal="Preparar o conteúdo traduzido para publicação no Strapi CMS",
             backstory="""Você é especialista em formatação de conteúdo para CMS. 
-            Seu trabalho é transformar o artigo traduzido em um formato compatível com o Sanity CMS,
+            Seu trabalho é transformar o artigo traduzido em um formato compatível com o Strapi CMS,
             organizando metadados, conteúdo e criando slugs apropriados. 
             Você conhece as boas práticas de SEO e sabe como estruturar o conteúdo 
             para maximizar a visibilidade nos mecanismos de busca.
             
             Você é meticuloso e garante que os dados formatados estejam em conformidade 
-            com o modelo Post da Pydantic, que reflete a estrutura de dados esperada pelo Sanity CMS.
+            com o modelo Post da Pydantic, que reflete a estrutura de dados esperada pelo Strapi CMS.
             
-            Você sabe como criar conteúdo no formato Portable Text do Sanity, dividindo o texto
+            Você sabe como criar conteúdo no formato Portable Text do Strapi, dividindo o texto
             em blocos apropriados e aplicando formatação quando necessário.
             
             Você segue rigorosamente a estrutura de dados definida pelo formato JSON esperado:
@@ -101,7 +101,7 @@ class FormatterAgent:
             post_data: Dicionário com os dados do post
             
         Returns:
-            Objeto Post formatado para o Sanity CMS
+            Objeto Post formatado para o Strapi CMS
         """
         if not PYDANTIC_AVAILABLE:
             return post_data
@@ -157,7 +157,7 @@ class FormatterAgent:
             # Converter para modelo Pydantic
             if "_type" in post_data and post_data["_type"] == "post":
                 post_model = dict_to_post(post_data)
-                formatted_post = post_to_sanity_format(post_model)
+                formatted_post = post_to_strapi_format(post_model)
                 return formatted_post
             else:
                 # Tentar formatar como FormattedArticle

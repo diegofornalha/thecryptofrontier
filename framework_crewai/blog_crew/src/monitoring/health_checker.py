@@ -119,19 +119,19 @@ class HealthChecker:
                 error=str(e)
             )
     
-    async def check_sanity_health(self) -> HealthCheckResult:
-        """Verifica saúde do Sanity CMS"""
+    async def check_strapi_health(self) -> HealthCheckResult:
+        """Verifica saúde do Strapi CMS"""
         start_time = time.time()
         
         try:
-            project_id = os.getenv("SANITY_PROJECT_ID")
-            dataset = os.getenv("SANITY_DATASET", "production")
+            project_id = os.getenv("strapi_PROJECT_ID")
+            dataset = os.getenv("strapi_DATASET", "production")
             
             response = requests.get(
-                f"https://{project_id}.api.sanity.io/v2021-10-21/data/query/{dataset}",
+                f"https://{project_id}.api.strapi.io/v2021-10-21/data/query/{dataset}",
                 params={"query": "*[_type == 'post'][0]"},
                 headers={
-                    "Authorization": f"Bearer {os.getenv('SANITY_API_TOKEN')}"
+                    "Authorization": f"Bearer {os.getenv('strapi_API_TOKEN')}"
                 },
                 timeout=5
             )
@@ -146,7 +146,7 @@ class HealthChecker:
                 error = f"HTTP {response.status_code}"
             
             return HealthCheckResult(
-                service="Sanity CMS",
+                service="Strapi CMS",
                 status=status,
                 response_time=response_time,
                 error=error,
@@ -155,10 +155,10 @@ class HealthChecker:
             
         except Exception as e:
             response_time = time.time() - start_time
-            logger.error(f"Sanity health check failed: {e}")
+            logger.error(f"Strapi health check failed: {e}")
             
             return HealthCheckResult(
-                service="Sanity CMS",
+                service="Strapi CMS",
                 status=ServiceStatus.UNHEALTHY,
                 response_time=response_time,
                 error=str(e)
@@ -202,7 +202,7 @@ class HealthChecker:
         tasks = [
             self.check_openai_health(),
             self.check_google_ai_health(),
-            self.check_sanity_health(),
+            self.check_strapi_health(),
             self.check_redis_health()
         ]
         
@@ -212,7 +212,7 @@ class HealthChecker:
         processed_results = []
         for i, result in enumerate(results):
             if isinstance(result, Exception):
-                service_names = ["OpenAI", "Google AI", "Sanity CMS", "Redis"]
+                service_names = ["OpenAI", "Google AI", "Strapi CMS", "Redis"]
                 processed_results.append(
                     HealthCheckResult(
                         service=service_names[i],

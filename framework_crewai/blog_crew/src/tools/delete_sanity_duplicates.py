@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Script para identificar e excluir artigos duplicados no Sanity CMS.
+Script para identificar e excluir artigos duplicados no Strapi CMS.
 Este script remove todas as duplicatas, mantendo apenas o documento mais recente de cada título.
 
-Uso: python delete_sanity_duplicates.py [--dry-run]
+Uso: python delete_strapi_duplicates.py [--dry-run]
      --dry-run: apenas mostra as duplicatas, sem excluí-las
 """
 
@@ -22,30 +22,30 @@ logging.basicConfig(
 )
 logger = logging.getLogger("duplicates_cleaner")
 
-# Configurações do Sanity
-PROJECT_ID = os.environ.get("SANITY_PROJECT_ID", "z4sx85c6")
+# Configurações do Strapi
+PROJECT_ID = os.environ.get("strapi_PROJECT_ID", "z4sx85c6")
 DATASET = "production"
 API_VERSION = "2023-05-03"
 
-def get_SANITY_API_TOKEN():
-    """Obtém o token de API do Sanity das variáveis de ambiente"""
-    token = os.environ.get("SANITY_API_TOKEN")
+def get_strapi_API_TOKEN():
+    """Obtém o token de API do Strapi das variáveis de ambiente"""
+    token = os.environ.get("strapi_API_TOKEN")
     if not token:
-        logger.error("SANITY_API_TOKEN não definido")
-        print("Erro: SANITY_API_TOKEN não definido. Defina a variável de ambiente antes de executar o script.")
+        logger.error("strapi_API_TOKEN não definido")
+        print("Erro: strapi_API_TOKEN não definido. Defina a variável de ambiente antes de executar o script.")
         sys.exit(1)
     return token
 
 def fetch_all_posts():
-    """Obtém todos os posts do Sanity CMS"""
-    token = get_SANITY_API_TOKEN()
+    """Obtém todos os posts do Strapi CMS"""
+    token = get_strapi_API_TOKEN()
     
     # Query para obter todos os posts com _id, título e criatedAt
     query = '*[_type == "post"]{_id, title, _createdAt}'
     encoded_query = quote(query)
     
-    # URL da API do Sanity
-    url = f"https://{PROJECT_ID}.api.sanity.io/v{API_VERSION}/data/query/{DATASET}?query={encoded_query}"
+    # URL da API do Strapi
+    url = f"https://{PROJECT_ID}.api.strapi.io/v{API_VERSION}/data/query/{DATASET}?query={encoded_query}"
     
     # Headers
     headers = {
@@ -81,11 +81,11 @@ def find_duplicates(posts):
     return duplicates
 
 def delete_document(document_id):
-    """Exclui um documento do Sanity CMS"""
-    token = get_SANITY_API_TOKEN()
+    """Exclui um documento do Strapi CMS"""
+    token = get_strapi_API_TOKEN()
     
-    # URL da API do Sanity
-    url = f"https://{PROJECT_ID}.api.sanity.io/v{API_VERSION}/data/mutate/{DATASET}"
+    # URL da API do Strapi
+    url = f"https://{PROJECT_ID}.api.strapi.io/v{API_VERSION}/data/mutate/{DATASET}"
     
     # Headers
     headers = {

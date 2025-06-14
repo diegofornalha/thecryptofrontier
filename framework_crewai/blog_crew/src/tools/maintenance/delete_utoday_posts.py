@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script para deletar em massa postagens do U.Today no Sanity CMS.
+Script para deletar em massa postagens do U.Today no Strapi CMS.
 """
 
 import os
@@ -18,35 +18,35 @@ logging.basicConfig(
 )
 logger = logging.getLogger("delete_utoday")
 
-# Configurações do Sanity
+# Configurações do Strapi
 PROJECT_ID = "z4sx85c6"
 DATASET = "production"
 API_VERSION = "2023-05-03"
 
-def get_SANITY_API_TOKEN():
-    """Obtém o token de API do Sanity das variáveis de ambiente."""
-    token = os.environ.get("SANITY_API_TOKEN")
+def get_strapi_API_TOKEN():
+    """Obtém o token de API do Strapi das variáveis de ambiente."""
+    token = os.environ.get("strapi_API_TOKEN")
     if not token:
-        raise ValueError("SANITY_API_TOKEN não está definido nas variáveis de ambiente")
+        raise ValueError("strapi_API_TOKEN não está definido nas variáveis de ambiente")
     return token
 
 def list_utoday_posts():
     """Lista todas as postagens que vieram do U.Today."""
     try:
-        SANITY_API_TOKEN = get_SANITY_API_TOKEN()
+        strapi_API_TOKEN = get_strapi_API_TOKEN()
         
         # Query GROQ para encontrar posts do U.Today
         query = '*[_type == "post" && source == "U.Today"]{_id, title, source, slug}'
         encoded_query = quote(query)
         
-        # URL da API do Sanity
-        url = f"https://{PROJECT_ID}.api.sanity.io/v{API_VERSION}/data/query/{DATASET}?query={encoded_query}"
+        # URL da API do Strapi
+        url = f"https://{PROJECT_ID}.api.strapi.io/v{API_VERSION}/data/query/{DATASET}?query={encoded_query}"
         
         headers = {
-            "Authorization": f"Bearer {SANITY_API_TOKEN}"
+            "Authorization": f"Bearer {strapi_API_TOKEN}"
         }
         
-        logger.info("Buscando posts do U.Today no Sanity...")
+        logger.info("Buscando posts do U.Today no Strapi...")
         response = requests.get(url, headers=headers)
         response.raise_for_status()
         
@@ -60,16 +60,16 @@ def list_utoday_posts():
         return []
 
 def delete_document(document_id):
-    """Deleta um documento específico do Sanity."""
+    """Deleta um documento específico do Strapi."""
     try:
-        SANITY_API_TOKEN = get_SANITY_API_TOKEN()
+        strapi_API_TOKEN = get_strapi_API_TOKEN()
         
-        # URL da API do Sanity para mutações
-        url = f"https://{PROJECT_ID}.api.sanity.io/v{API_VERSION}/data/mutate/{DATASET}"
+        # URL da API do Strapi para mutações
+        url = f"https://{PROJECT_ID}.api.strapi.io/v{API_VERSION}/data/mutate/{DATASET}"
         
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {SANITY_API_TOKEN}"
+            "Authorization": f"Bearer {strapi_API_TOKEN}"
         }
         
         # Mutação para deletar o documento
@@ -178,7 +178,7 @@ def main():
     if len(sys.argv) > 1 and sys.argv[1] == "--confirm":
         confirmed = True
     else:
-        print("ATENÇÃO: Esta operação irá deletar TODOS os posts do U.Today no Sanity!")
+        print("ATENÇÃO: Esta operação irá deletar TODOS os posts do U.Today no Strapi!")
         print("Isso NÃO pode ser desfeito!")
         print("\nPara confirmar, execute:")
         print("python delete_utoday_posts.py --confirm")
@@ -188,7 +188,7 @@ def main():
     
     try:
         # 1. Deletar todos os posts do U.Today
-        logger.info("1. Deletando posts do U.Today do Sanity...")
+        logger.info("1. Deletando posts do U.Today do Strapi...")
         delete_result = delete_all_utoday_posts()
         
         logger.info(f"Posts deletados: {delete_result['deleted_count']}")
@@ -205,7 +205,7 @@ def main():
         
         # 3. Mostrar resumo
         logger.info("=== REMOÇÃO CONCLUÍDA ===")
-        logger.info(f"Posts deletados do Sanity: {delete_result['deleted_count']}")
+        logger.info(f"Posts deletados do Strapi: {delete_result['deleted_count']}")
         logger.info(f"Configuração atualizada: {'✓' if feeds_result else '✗'}")
         
         if delete_result['success'] and feeds_result:

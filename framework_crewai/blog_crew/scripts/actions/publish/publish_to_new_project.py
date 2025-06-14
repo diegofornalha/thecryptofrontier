@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Publish posts to the new Sanity project
+Publish posts to the new Strapi project
 """
 
 import os
@@ -13,9 +13,9 @@ from dotenv import load_dotenv
 # Load environment
 load_dotenv()
 
-SANITY_PROJECT_ID = "z4sx85c6"
-SANITY_DATASET = "production"
-SANITY_API_VERSION = "2023-05-03"
+strapi_PROJECT_ID = "z4sx85c6"
+strapi_DATASET = "production"
+strapi_API_VERSION = "2023-05-03"
 
 # Import formatting
 import sys
@@ -26,17 +26,17 @@ def publish_all_posts():
     """Publish all posts from pipeline to new project"""
     
     # Get token from environment
-    SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN")
+    strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
     
-    if not SANITY_API_TOKEN:
-        print("❌ SANITY_API_TOKEN not found in environment")
+    if not strapi_API_TOKEN:
+        print("❌ strapi_API_TOKEN not found in environment")
         print("Please set it in .env file")
         return
     
-    print(f"🚀 Publishing to new Sanity project")
-    print(f"Project ID: {SANITY_PROJECT_ID}")
-    print(f"Token length: {len(SANITY_API_TOKEN)}")
-    print(f"Token prefix: {SANITY_API_TOKEN[:20]}...")
+    print(f"🚀 Publishing to new Strapi project")
+    print(f"Project ID: {strapi_PROJECT_ID}")
+    print(f"Token length: {len(strapi_API_TOKEN)}")
+    print(f"Token prefix: {strapi_API_TOKEN[:20]}...")
     
     # Find all posts
     posts_dir = Path("posts_processados")
@@ -91,10 +91,10 @@ def publish_all_posts():
                 }
             
             # API request
-            url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v{SANITY_API_VERSION}/data/mutate/{SANITY_DATASET}"
+            url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/{strapi_DATASET}"
             headers = {
                 "Content-Type": "application/json",
-                "Authorization": f"Bearer {SANITY_API_TOKEN}"
+                "Authorization": f"Bearer {strapi_API_TOKEN}"
             }
             
             mutations = {
@@ -107,7 +107,7 @@ def publish_all_posts():
             
             if response.status_code == 200:
                 print(f"✅ Success!")
-                print(f"🔗 https://thecryptofrontier-blog.sanity.studio/desk/post;{doc_id}")
+                print(f"🔗 https://thecryptofrontier-blog.strapi.studio/desk/post;{doc_id}")
                 success_count += 1
             else:
                 print(f"❌ Error {response.status_code}: {response.text[:100]}")
@@ -117,7 +117,7 @@ def publish_all_posts():
     
     print(f"\n{'='*60}")
     print(f"✅ Published {success_count}/{len(post_files)} posts successfully")
-    print(f"\n🎉 Studio URL: https://thecryptofrontier-blog.sanity.studio")
+    print(f"\n🎉 Studio URL: https://thecryptofrontier-blog.strapi.studio")
 
 if __name__ == "__main__":
     publish_all_posts()

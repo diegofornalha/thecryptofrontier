@@ -7,7 +7,7 @@
 export TZ="America/Sao_Paulo"
 
 # Acessar diretório do projeto
-cd /home/sanity/thecryptofrontier/framework_crewai/blog_crew || exit 1
+cd /home/strapi/thecryptofrontier/framework_crewai/blog_crew || exit 1
 
 # Ativar ambiente virtual, se existir
 if [ -d "venv" ]; then
@@ -46,8 +46,8 @@ echo "=== Pipeline de blog concluído em $(date) ===" >> "$LOG_FILE"
 if [ "$(date +%u)" = "7" ]; then
     echo "=== Iniciando limpeza de duplicatas em $(date) ===" >> "$LOG_FILE"
     
-    # Limpar duplicatas do Sanity
-    python main.py sync-sanity-duplicates >> "$LOG_FILE" 2>&1
+    # Limpar duplicatas do Strapi
+    python main.py sync-strapi-duplicates >> "$LOG_FILE" 2>&1
     
     # Limpar duplicatas do Algolia
     python main.py sync-algolia-duplicates >> "$LOG_FILE" 2>&1

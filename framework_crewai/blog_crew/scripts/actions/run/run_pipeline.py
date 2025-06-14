@@ -80,7 +80,7 @@ def save_crew_results(result) -> int:
                             save_dir = Path("posts_formatados")
                         elif 'image_url' in str(data) or 'main_image' in str(data):
                             save_dir = Path("posts_com_imagem")
-                        elif 'published' in str(data) or 'sanity_id' in str(data):
+                        elif 'published' in str(data) or 'strapi_id' in str(data):
                             save_dir = Path("posts_publicados")
                         else:
                             save_dir = Path("posts_para_traduzir")
@@ -141,8 +141,8 @@ def verify_environment():
     required_vars = {
         "OPENAI_API_KEY": "Para geração de imagens com DALL-E",
         "GOOGLE_API_KEY": "Para tradução com Gemini",
-        "SANITY_PROJECT_ID": "Para publicação no Sanity",
-        "SANITY_API_TOKEN": "Para autenticação no Sanity"
+        "strapi_PROJECT_ID": "Para publicação no Strapi",
+        "strapi_API_TOKEN": "Para autenticação no Strapi"
     }
     
     missing_vars = []
@@ -229,7 +229,7 @@ def run_pipeline(limit: int = 3, clean: bool = False):
 ║   Tempo de execução: {duration}                              
 ║   Artigos publicados: {success_count}                        
 ║                                                              ║
-║   Acesse o Sanity Studio para visualizar os posts!          ║
+║   Acesse o Strapi Studio para visualizar os posts!          ║
 ╚══════════════════════════════════════════════════════════════╝
         """)
         

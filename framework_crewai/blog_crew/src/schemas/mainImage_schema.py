@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Gerado automaticamente a partir de src/sanity/schemaTypes/objects/mainImage.ts
+# Gerado automaticamente a partir de src/strapi/schemaTypes/objects/mainImage.ts
 # NÃO EDITE MANUALMENTE - Altere o schema TS e regenere.
 
 schema = {

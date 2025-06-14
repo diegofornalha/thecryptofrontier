@@ -23,9 +23,9 @@ ALGOLIA_APP_ID = os.environ.get('ALGOLIA_APP_ID', '42TZWHW8UP')
 ALGOLIA_ADMIN_API_KEY = os.environ.get('ALGOLIA_ADMIN_API_KEY', 'd0cb55ec8f07832bc5f57da0bd25c535')
 ALGOLIA_INDEX_NAME = os.environ.get('ALGOLIA_INDEX_NAME', 'development_mcpx_content')
 
-SANITY_PROJECT_ID = os.environ.get("SANITY_PROJECT_ID", "z4sx85c6")
-SANITY_DATASET = "production"
-SANITY_API_VERSION = "2023-05-03"
+strapi_PROJECT_ID = os.environ.get("strapi_PROJECT_ID", "z4sx85c6")
+strapi_DATASET = "production"
+strapi_API_VERSION = "2023-05-03"
 
 def sync_to_algolia(documents):
     """Sincroniza documentos com Algolia usando API REST"""
@@ -74,9 +74,9 @@ def main():
     logger.info(f"Encontrados {len(ultimos_10)} artigos publicados para sincronizar")
     
     # Buscar detalhes dos artigos publicados
-    SANITY_API_TOKEN = os.environ.get("SANITY_API_TOKEN")
-    if not SANITY_API_TOKEN:
-        logger.error("Token do Sanity não encontrado")
+    strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
+    if not strapi_API_TOKEN:
+        logger.error("Token do Strapi não encontrado")
         return
     
     documents_to_sync = []
@@ -95,21 +95,21 @@ def main():
             
             logger.info(f"Processando: {title}")
             
-            # Buscar o post no Sanity para obter o _id
+            # Buscar o post no Strapi para obter o _id
             # Escapar título para GROQ
             escaped_title = title.replace('"', '\\"')
             query = f'*[_type == "post" && title == "{escaped_title}"][0]{{ _id, title, slug {{ current }}, publishedAt, excerpt }}'
             encoded_query = quote(query)
             
-            url = f"https://{SANITY_PROJECT_ID}.api.sanity.io/v{SANITY_API_VERSION}/data/query/{SANITY_DATASET}?query={encoded_query}"
-            headers = {"Authorization": f"Bearer {SANITY_API_TOKEN}"}
+            url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/query/{strapi_DATASET}?query={encoded_query}"
+            headers = {"Authorization": f"Bearer {strapi_API_TOKEN}"}
             
             response = requests.get(url, headers=headers)
             response.raise_for_status()
             
             result = response.json().get("result")
             if not result:
-                logger.warning(f"Post não encontrado no Sanity: {title}")
+                logger.warning(f"Post não encontrado no Strapi: {title}")
                 continue
             
             # Preparar documento para Algolia
