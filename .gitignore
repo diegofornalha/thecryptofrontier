@@ -40,6 +40,10 @@ logs/
 .env
 .env.*
 .envrc
+.env.production
+claude-flow-diego/.env
+claude-flow-diego/claude-diego-flow/.env
+framework_crewai/blog_crew/.env
 
 # vercel
 .vercel
@@ -144,3 +148,37 @@ framework_crewai/blog_crew/venv/bin/pyrsa-keygen
 framework_crewai/blog_crew/venv/bin/activate.fish
 framework_crewai/blog_crew/venv/bin/activate.csh
 framework_crewai/blog_crew/venv/bin/httpx
+
+# Arquivos com credenciais e dados sensíveis (IMPORTANTE!)
+*credentials*
+*secret*
+*token*
+*key*
+serviceAccount.json
+serviceAccountKey.json
+
+# Arquivos de configuração sensíveis
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Dados de produção
+production.json
+prod.json
+staging.json
+
+# Arquivos temporários de deploy
+.deploy/
+.deployment/
+
+# Strapi específico
+strapi/.tmp/
+strapi/.cache/
+strapi/build/
+strapi/node_modules/
+strapi/.env
+strapi/.env.*
+strapi/exports/
+strapi/uploads/
