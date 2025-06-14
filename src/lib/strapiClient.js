@@ -38,7 +38,9 @@ class StrapiClient {
       });
 
       if (!response.ok) {
-        throw new Error(`Strapi API error: ${response.status} ${response.statusText}`);
+        console.warn(`Strapi API warning: ${response.status} ${response.statusText}`);
+        // Retorna dados vazios em vez de lançar erro
+        return { data: [], meta: { pagination: { total: 0, page: 1, pageSize: 10, pageCount: 0 } } };
       }
 
       const data = await response.json();

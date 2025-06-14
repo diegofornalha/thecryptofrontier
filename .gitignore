@@ -182,3 +182,4 @@ strapi/.env
 strapi/.env.*
 strapi/exports/
 strapi/uploads/
+src/.next/

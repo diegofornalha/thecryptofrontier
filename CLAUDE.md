@@ -63,7 +63,7 @@ Estes arquivos são padrão e devem ficar na raiz:
 - `package.json`
 - `docker-compose.yml`
 - `docker-compose.production.yml`
-- `Dockerfile.nextjs`
+- `Dockerfile.frontend.production`
 - `next.config.js`
 - `tailwind.config.js`
 - `tsconfig.json`
