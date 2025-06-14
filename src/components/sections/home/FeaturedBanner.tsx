@@ -1,20 +1,10 @@
 import React from "react";
-import { client } from "@/lib/strapiClient";
+import strapiClient from "@/lib/strapiClient";
 import Banner from "./Banner";
 import AdBanner from "./AdBanner";
-import { urlForImage } from "../../../strapi/lib/image";
+import { urlForImage } from "@/lib/imageHelper";
 
-// Query para buscar o post principal do banner
-const featuredPostQuery = `*[_type == "post"] | order(date desc) [0] {
-  _id,
-  title,
-  "slug": slug.current,
-  excerpt,
-  coverImage,
-  author-> {
-    name
-  }
-}`;
+// Função para buscar o post principal do banner
 
 // Interface para o resultado da query
 interface FeaturedPost {
