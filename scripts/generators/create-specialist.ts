@@ -86,11 +86,35 @@ async function extractTemplate(isSimple: boolean): Promise<string> {
     
     if (isSimple) {
         // Extrair SimpleSpecialistTemplate
-        const match = content.match(/export class SimpleSpecialistTemplate[\s\S]*?(?=\n}\n)/);
-        if (!match) {
+        const startMarker = 'export class SimpleSpecialistTemplate';
+        const startIndex = content.indexOf(startMarker);
+        if (startIndex === -1) {
             throw new Error('Template simples não encontrado');
         }
-        return match[0] + '\n}';
+        
+        // Encontrar o fechamento da classe
+        let braceCount = 0;
+        let inClass = false;
+        let endIndex = startIndex;
+        
+        for (let i = startIndex; i < content.length; i++) {
+            if (content[i] === '{') {
+                braceCount++;
+                inClass = true;
+            } else if (content[i] === '}') {
+                braceCount--;
+                if (inClass && braceCount === 0) {
+                    endIndex = i + 1;
+                    break;
+                }
+            }
+        }
+        
+        // Incluir imports necessários
+        const imports = `import { Agent } from '../core/agent';\nimport { Message } from '../types';\n\n`;
+        const classContent = content.substring(startIndex, endIndex);
+        
+        return imports + classContent;
     } else {
         // Extrair SpecialistTemplateAgent
         const match = content.match(/export class SpecialistTemplateAgent[\s\S]*?(?=\n}\n)/);
