@@ -73,7 +73,7 @@ services:
       - "com.thecryptofrontier.version=1.0.0"
     
     # Comando padrão (análise)
-    command: ["npm", "run", "cleanup:analyze"]
+    command: ["npx", "tsx", "src/agents/cleanup-specialist-agent.ts"]
 
   # Opcional: Cleanup Scheduler (cron job containerizado)
   cleanup-scheduler:
