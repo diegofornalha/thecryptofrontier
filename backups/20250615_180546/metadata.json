@@ -1,0 +1,20 @@
+{
+    "timestamp": "20250615_180546",
+    "date": "2025-06-15T18:05:46+00:00",
+    "strapi_version": "4",
+    "backup_version": "1.0",
+    "hostname": "srv782625",
+    "user": "root",
+    "project_root": "/home/strapi/thecryptofrontier",
+    "components": {
+        "database": false,
+        "uploads": true,
+        "configs": true,
+        "api": true,
+        "components": true
+    },
+    "docker_info": {
+        "strapi_container": "",
+        "postgres_container": "Up 45 hours"
+    }
+}
