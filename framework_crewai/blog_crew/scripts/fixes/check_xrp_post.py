@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-strapi_PROJECT_ID = "z4sx85c6"
+STRAPI_PROJECT_ID = "z4sx85c6"
 strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
 strapi_API_VERSION = "2023-05-03"
 
@@ -20,7 +20,7 @@ def check_post():
     query = f'*[_type == "post" && slug.current == "{slug}"][0]'
     encoded_query = requests.utils.quote(query)
     
-    url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/query/production?query={encoded_query}"
+    url = f"https://{STRAPI_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/query/production?query={encoded_query}"
     
     headers = {}
     if strapi_API_TOKEN:

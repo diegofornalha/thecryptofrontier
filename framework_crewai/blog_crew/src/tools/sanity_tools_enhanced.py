@@ -20,7 +20,7 @@ try:
 except ImportError:
     # Fallback para valores padrão se não conseguir importar
     strapi_CONFIG = {
-        "project_id": os.environ.get("strapi_PROJECT_ID", ""),
+        "project_id": os.environ.get("STRAPI_PROJECT_ID", ""),
         "dataset": "production",
         "api_version": "2023-05-03"
     }

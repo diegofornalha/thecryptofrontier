@@ -21,6 +21,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - claude-network
+      - mem0-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
@@ -33,19 +34,20 @@ services:
       - "com.thecryptofrontier.version=unified-1.0.0"
 
   # Mem0 Bridge (se ainda não estiver rodando)
-  mem0-bridge:
-    image: mem0-bridge:latest
-    container_name: mem0-bridge
-    ports:
-      - "3002:8000"
-    environment:
-      - NODE_ENV=production
-    networks:
-      - claude-network
-    restart: unless-stopped
+  # mem0-bridge:
+  #   image: mem0-bridge:latest
+  #   container_name: mem0-bridge
+  #   ports:
+  #     - "3002:8000"
+  #   environment:
+  #     - NODE_ENV=production
+  #   networks:
+  #     - claude-network
 
 networks:
   claude-network:
+    external: true
+  mem0-network:
     external: true
 
 volumes:

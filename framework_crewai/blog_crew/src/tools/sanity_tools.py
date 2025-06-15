@@ -32,7 +32,7 @@ except ImportError:
     # Fallback para valores padrão se não conseguir importar
     logger.warning("Não foi possível importar configurações do Strapi, usando valores padrão")
     strapi_CONFIG = {
-        "project_id": os.environ.get("strapi_PROJECT_ID", ""),
+        "project_id": os.environ.get("STRAPI_PROJECT_ID", ""),
         "dataset": "production",
         "api_version": "2023-05-03"
     }
@@ -427,7 +427,7 @@ def publish_to_strapi(post_data=None, file_path=None, **kwargs):
             logger.warning("Modelos Pydantic não encontrados, usando abordagem tradicional")
             
         # Configurações do Strapi
-        project_id = os.environ.get("strapi_PROJECT_ID", strapi_CONFIG.get("project_id"))
+        project_id = os.environ.get("STRAPI_PROJECT_ID", strapi_CONFIG.get("project_id"))
         dataset = strapi_CONFIG.get("dataset", "production")
         api_token = os.environ.get("strapi_API_TOKEN")
         

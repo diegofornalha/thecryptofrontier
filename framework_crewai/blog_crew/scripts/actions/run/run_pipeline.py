@@ -141,7 +141,7 @@ def verify_environment():
     required_vars = {
         "OPENAI_API_KEY": "Para geração de imagens com DALL-E",
         "GOOGLE_API_KEY": "Para tradução com Gemini",
-        "strapi_PROJECT_ID": "Para publicação no Strapi",
+        "STRAPI_PROJECT_ID": "Para publicação no Strapi",
         "strapi_API_TOKEN": "Para autenticação no Strapi"
     }
     

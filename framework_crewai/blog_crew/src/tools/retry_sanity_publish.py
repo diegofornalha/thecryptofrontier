@@ -23,7 +23,7 @@ logging.basicConfig(
 logger = logging.getLogger("retry_publish")
 
 # Strapi config
-strapi_PROJECT_ID = os.environ.get("strapi_PROJECT_ID")
+STRAPI_PROJECT_ID = os.environ.get("STRAPI_PROJECT_ID")
 strapi_DATASET = "production"
 strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
 strapi_API_VERSION = "2023-05-03"
@@ -69,7 +69,7 @@ def format_content_blocks(content: str) -> list:
 def upload_existing_image(image_path: Path, title: str) -> str:
     """Faz upload de imagem existente para o Strapi"""
     try:
-        url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/assets/images/{strapi_DATASET}"
+        url = f"https://{STRAPI_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/assets/images/{strapi_DATASET}"
         
         with open(image_path, 'rb') as f:
             files = {'file': (image_path.name, f, 'image/png')}
@@ -141,7 +141,7 @@ def publish_to_strapi(article: dict, image_path: Path = None) -> bool:
             }
         
         # Envia para Strapi
-        url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/{strapi_DATASET}"
+        url = f"https://{STRAPI_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/{strapi_DATASET}"
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {strapi_API_TOKEN}"
@@ -177,7 +177,7 @@ def main():
     """)
     
     # Verificar credenciais
-    if not strapi_PROJECT_ID or not strapi_API_TOKEN:
+    if not STRAPI_PROJECT_ID or not strapi_API_TOKEN:
         logger.error("Credenciais do Strapi não configuradas!")
         return
     

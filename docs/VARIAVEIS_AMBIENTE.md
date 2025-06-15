@@ -16,7 +16,7 @@ O sistema carrega automaticamente as variáveis do arquivo `.env` usando `python
 |----------|-----------|-------------|---------|
 | `OPENAI_API_KEY` | Chave da API OpenAI para DALL-E | ✅ | sk-... |
 | `GOOGLE_API_KEY` | Chave da API Google para Gemini | ✅ | AIza... |
-| `strapi_PROJECT_ID` | ID do projeto Strapi | ✅ | z4sx85c6 |
+| `STRAPI_PROJECT_ID` | ID do projeto Strapi | ✅ | z4sx85c6 |
 | `strapi_API_TOKEN` | Token de escrita do Strapi | ✅ | sk... |
 | `strapi_DATASET` | Dataset do Strapi | ✅ | production |
 | `ALGOLIA_APP_ID` | ID da aplicação Algolia | ⚠️ | 42TZW... |
@@ -100,7 +100,7 @@ OPENAI_API_KEY=sk-proj-abc123...
 GOOGLE_API_KEY=AIzaSyB...
 
 # Strapi
-strapi_PROJECT_ID=z4sx85c6
+STRAPI_PROJECT_ID=z4sx85c6
 strapi_API_TOKEN=skRW...
 strapi_DATASET=production
 

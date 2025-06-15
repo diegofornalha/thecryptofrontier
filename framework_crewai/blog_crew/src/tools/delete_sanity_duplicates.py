@@ -23,7 +23,7 @@ logging.basicConfig(
 logger = logging.getLogger("duplicates_cleaner")
 
 # Configurações do Strapi
-PROJECT_ID = os.environ.get("strapi_PROJECT_ID", "z4sx85c6")
+PROJECT_ID = os.environ.get("STRAPI_PROJECT_ID", "z4sx85c6")
 DATASET = "production"
 API_VERSION = "2023-05-03"
 

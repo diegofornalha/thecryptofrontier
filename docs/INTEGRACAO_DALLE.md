@@ -61,7 +61,7 @@ Bitcoin, Ethereum, XRP, BNB, Dogecoin, Solana, Chainlink, Shiba Inu, Sui, USDT, 
 ### Variáveis de Ambiente Necessárias
 ```bash
 OPENAI_API_KEY=sua_chave_openai
-strapi_PROJECT_ID=seu_projeto
+STRAPI_PROJECT_ID=seu_projeto
 strapi_API_TOKEN=seu_token
 strapi_DATASET=production
 ```

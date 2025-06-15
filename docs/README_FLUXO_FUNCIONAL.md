@@ -83,7 +83,7 @@ posts_imagens/         # Backup das imagens geradas
 ```
 OPENAI_API_KEY=sk-...          # Para DALL-E 3
 GOOGLE_API_KEY=...             # Para Gemini (tradução)
-strapi_PROJECT_ID=z4sx85c6
+STRAPI_PROJECT_ID=z4sx85c6
 strapi_DATASET=production
 strapi_API_TOKEN=sk...
 ALGOLIA_APP_ID=...

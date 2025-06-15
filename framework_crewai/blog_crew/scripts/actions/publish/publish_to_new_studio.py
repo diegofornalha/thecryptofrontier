@@ -10,7 +10,7 @@ from pathlib import Path
 from datetime import datetime
 
 # Configuration for new project
-strapi_PROJECT_ID = "z4sx85c6"
+STRAPI_PROJECT_ID = "z4sx85c6"
 strapi_DATASET = "production"
 strapi_API_VERSION = "2023-05-03"
 
@@ -53,7 +53,7 @@ def publish_post(post_file):
     }
     
     # API request
-    url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/{strapi_DATASET}"
+    url = f"https://{STRAPI_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/{strapi_DATASET}"
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {strapi_API_TOKEN}"
@@ -80,7 +80,7 @@ def main():
     print("PUBLICAÇÃO DE POSTS NO NOVO STRAPI STUDIO")
     print("=" * 60)
     print(f"Studio URL: https://thecryptofrontier-blog.strapi.studio")
-    print(f"Project ID: {strapi_PROJECT_ID}")
+    print(f"Project ID: {STRAPI_PROJECT_ID}")
     print(f"Dataset: {strapi_DATASET}")
     
     if not strapi_API_TOKEN:

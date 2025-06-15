@@ -32,7 +32,7 @@ def verify_environment():
     """Verifica apenas as variáveis essenciais (sem OpenAI)"""
     required_vars = {
         "GOOGLE_API_KEY": "Para tradução com Gemini",
-        "strapi_PROJECT_ID": "Para publicação no Strapi",
+        "STRAPI_PROJECT_ID": "Para publicação no Strapi",
         "strapi_API_TOKEN": "Para autenticação no Strapi"
     }
     

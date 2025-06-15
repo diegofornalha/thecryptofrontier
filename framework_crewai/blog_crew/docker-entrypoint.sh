@@ -4,8 +4,8 @@ set -e
 echo "🚀 Iniciando CrewAI Blog Pipeline Container..."
 
 # Verificar variáveis de ambiente críticas
-if [ -z "$strapi_PROJECT_ID" ] || [ -z "$strapi_API_TOKEN" ]; then
-    echo "❌ Erro: Variáveis strapi_PROJECT_ID e strapi_API_TOKEN são obrigatórias!"
+if [ -z "$STRAPI_URL" ] || [ -z "$STRAPI_API_TOKEN" ]; then
+    echo "❌ Erro: Variáveis STRAPI_URL e STRAPI_API_TOKEN são obrigatórias!"
     exit 1
 fi
 

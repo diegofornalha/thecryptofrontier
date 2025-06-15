@@ -55,7 +55,7 @@ def simple_pipeline(args):
     os.environ["GENERATE_IMAGES"] = "true" if args.with_images else "false"
     
     # Importar e executar
-    from src.pipelines.simple.simple_pipeline import main as simple_main
+    from src.pipelines.simple.strapi_pipeline import main as simple_main
     simple_main()
 
 

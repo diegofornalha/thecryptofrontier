@@ -25,7 +25,7 @@ logging.basicConfig(
 logger = logging.getLogger("algolia_cleaner")
 
 # Configurações do Strapi
-strapi_PROJECT_ID = os.environ.get("strapi_PROJECT_ID", "z4sx85c6")
+STRAPI_PROJECT_ID = os.environ.get("STRAPI_PROJECT_ID", "z4sx85c6")
 strapi_DATASET = "production"
 strapi_API_VERSION = "2023-05-03"
 
@@ -47,7 +47,7 @@ def get_strapi_documents():
     encoded_query = quote(query)
     
     # URL da API do Strapi
-    url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/query/{strapi_DATASET}?query={encoded_query}"
+    url = f"https://{STRAPI_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/query/{strapi_DATASET}?query={encoded_query}"
     
     # Headers
     headers = {

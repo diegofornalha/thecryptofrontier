@@ -101,7 +101,7 @@ OPENAI_API_KEY=sk-...          # Para DALL-E 3
 GOOGLE_API_KEY=...             # Para Gemini (tradução)
 
 # Strapi CMS
-strapi_PROJECT_ID=z4sx85c6     # ID do projeto
+STRAPI_PROJECT_ID=z4sx85c6     # ID do projeto
 strapi_API_TOKEN=sk...         # Token de API
 
 # Algolia (opcional)

@@ -78,7 +78,7 @@ Script para publicar posts que já têm imagens no Strapi.
 
 ### Variáveis de Ambiente:
 - `OPENAI_API_KEY`: Para DALL-E 3
-- `strapi_PROJECT_ID`: ID do projeto Strapi
+- `STRAPI_PROJECT_ID`: ID do projeto Strapi
 - `strapi_API_TOKEN`: Token de autenticação
 - `strapi_DATASET`: Dataset (geralmente "production")
 

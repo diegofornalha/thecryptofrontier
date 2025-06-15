@@ -23,7 +23,7 @@ ALGOLIA_APP_ID = os.environ.get('ALGOLIA_APP_ID', '42TZWHW8UP')
 ALGOLIA_ADMIN_API_KEY = os.environ.get('ALGOLIA_ADMIN_API_KEY', 'd0cb55ec8f07832bc5f57da0bd25c535')
 ALGOLIA_INDEX_NAME = os.environ.get('ALGOLIA_INDEX_NAME', 'development_mcpx_content')
 
-strapi_PROJECT_ID = os.environ.get("strapi_PROJECT_ID", "z4sx85c6")
+STRAPI_PROJECT_ID = os.environ.get("STRAPI_PROJECT_ID", "z4sx85c6")
 strapi_DATASET = "production"
 strapi_API_VERSION = "2023-05-03"
 
@@ -101,7 +101,7 @@ def main():
             query = f'*[_type == "post" && title == "{escaped_title}"][0]{{ _id, title, slug {{ current }}, publishedAt, excerpt }}'
             encoded_query = quote(query)
             
-            url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/query/{strapi_DATASET}?query={encoded_query}"
+            url = f"https://{STRAPI_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/query/{strapi_DATASET}?query={encoded_query}"
             headers = {"Authorization": f"Bearer {strapi_API_TOKEN}"}
             
             response = requests.get(url, headers=headers)

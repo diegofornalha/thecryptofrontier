@@ -53,7 +53,7 @@ python delete_utoday_algolia.py
 - Use o modo `--dry-run` quando disponível para simular
 - Verifique as variáveis de ambiente necessárias:
   - `strapi_API_TOKEN`
-  - `strapi_PROJECT_ID`
+  - `STRAPI_PROJECT_ID`
   - `ALGOLIA_APP_ID`
   - `ALGOLIA_ADMIN_API_KEY`
 

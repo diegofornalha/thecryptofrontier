@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 # Carregar variáveis de ambiente
 load_dotenv()
 
-strapi_PROJECT_ID = os.getenv("strapi_PROJECT_ID")
+STRAPI_PROJECT_ID = os.getenv("STRAPI_PROJECT_ID")
 strapi_DATASET = os.getenv("strapi_DATASET", "production")
 strapi_API_TOKEN = os.getenv("strapi_API_TOKEN")
 
@@ -25,7 +25,7 @@ def get_posts_without_images():
     """Busca posts sem imagem no Strapi"""
     query = '*[_type == "post" && !defined(mainImage)]{_id, title, slug}'
     
-    url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v2021-10-21/data/query/{strapi_DATASET}"
+    url = f"https://{STRAPI_PROJECT_ID}.api.strapi.io/v2021-10-21/data/query/{strapi_DATASET}"
     params = {"query": query}
     headers = {"Authorization": f"Bearer {strapi_API_TOKEN}"}
     
@@ -64,7 +64,7 @@ def upload_image_to_strapi(image_path):
         with open(image_path, 'rb') as f:
             image_data = f.read()
         
-        upload_url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v2021-03-25/assets/images/{strapi_DATASET}"
+        upload_url = f"https://{STRAPI_PROJECT_ID}.api.strapi.io/v2021-03-25/assets/images/{strapi_DATASET}"
         headers = {
             "Authorization": f"Bearer {strapi_API_TOKEN}",
             "Content-Type": "image/png"
@@ -114,7 +114,7 @@ def update_post_with_image(post_id, image_asset_id, post_title):
             }]
         }
         
-        url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v2021-10-21/data/mutate/{strapi_DATASET}"
+        url = f"https://{STRAPI_PROJECT_ID}.api.strapi.io/v2021-10-21/data/mutate/{strapi_DATASET}"
         headers = {
             "Authorization": f"Bearer {strapi_API_TOKEN}",
             "Content-Type": "application/json"

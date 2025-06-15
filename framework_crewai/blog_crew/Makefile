@@ -74,6 +74,6 @@ monitor: ## Abre o monitor no navegador
 
 test: ## Testa a configuração
 	@echo "$(GREEN)🧪 Testando configuração...$(NC)"
-	@docker compose run --rm blog-crew python -c "import os; print('✅ strapi_PROJECT_ID:', 'OK' if os.getenv('strapi_PROJECT_ID') else '❌ MISSING')"
+	@docker compose run --rm blog-crew python -c "import os; print('✅ STRAPI_PROJECT_ID:', 'OK' if os.getenv('STRAPI_PROJECT_ID') else '❌ MISSING')"
 	@docker compose run --rm blog-crew python -c "import os; print('✅ OPENAI_API_KEY:', 'OK' if os.getenv('OPENAI_API_KEY') else '❌ MISSING')"
 	@docker compose run --rm blog-crew python -c "import os; print('✅ GEMINI_API_KEY:', 'OK' if os.getenv('GEMINI_API_KEY') else '❌ MISSING')"

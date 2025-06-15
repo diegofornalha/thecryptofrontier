@@ -115,7 +115,7 @@ rm strapi.config.ts strapi.cli.ts
 
 ### 5. Atualizar Variáveis de Ambiente
 Remover do `.env`:
-- NEXT_PUBLIC_strapi_PROJECT_ID
+- NEXT_PUBLIC_STRAPI_PROJECT_ID
 - NEXT_PUBLIC_strapi_DATASET
 - NEXT_PUBLIC_strapi_API_VERSION
 - strapi_API_TOKEN

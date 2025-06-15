@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 # Load environment
 load_dotenv()
 
-strapi_PROJECT_ID = "z4sx85c6"
+STRAPI_PROJECT_ID = "z4sx85c6"
 strapi_DATASET = "production"
 strapi_API_VERSION = "2023-05-03"
 
@@ -34,7 +34,7 @@ def publish_all_posts():
         return
     
     print(f"🚀 Publishing to new Strapi project")
-    print(f"Project ID: {strapi_PROJECT_ID}")
+    print(f"Project ID: {STRAPI_PROJECT_ID}")
     print(f"Token length: {len(strapi_API_TOKEN)}")
     print(f"Token prefix: {strapi_API_TOKEN[:20]}...")
     
@@ -91,7 +91,7 @@ def publish_all_posts():
                 }
             
             # API request
-            url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/{strapi_DATASET}"
+            url = f"https://{STRAPI_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/{strapi_DATASET}"
             headers = {
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {strapi_API_TOKEN}"

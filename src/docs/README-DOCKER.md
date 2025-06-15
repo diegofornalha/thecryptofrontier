@@ -52,7 +52,7 @@ As principais variáveis são configuradas no `docker-compose.yml`:
 ```yaml
 environment:
   - NODE_ENV=production
-  - NEXT_PUBLIC_strapi_PROJECT_ID=z4sx85c6
+  - NEXT_PUBLIC_STRAPI_PROJECT_ID=z4sx85c6
   - NEXT_PUBLIC_strapi_DATASET=production
   - NEXT_PUBLIC_strapi_API_VERSION=2023-05-03
   - TZ=America/Sao_Paulo

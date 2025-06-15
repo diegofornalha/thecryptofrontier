@@ -9,7 +9,7 @@ import requests
 from datetime import datetime
 
 # Load environment variables
-strapi_PROJECT_ID = os.environ.get("strapi_PROJECT_ID", "z4sx85c6")
+STRAPI_PROJECT_ID = os.environ.get("STRAPI_PROJECT_ID", "z4sx85c6")
 strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
 strapi_DATASET = "production"
 strapi_API_VERSION = "2023-05-03"
@@ -21,7 +21,7 @@ def publish_to_strapi(post_data):
         return {"success": False, "error": "strapi_API_TOKEN not set"}
     
     # API URL
-    url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/{strapi_DATASET}"
+    url = f"https://{STRAPI_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/{strapi_DATASET}"
     
     # Headers
     headers = {

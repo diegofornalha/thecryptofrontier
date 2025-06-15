@@ -27,7 +27,7 @@ logging.basicConfig(
 logger = logging.getLogger("update_posts_images")
 
 # Strapi config
-strapi_PROJECT_ID = os.environ.get("strapi_PROJECT_ID", "z4sx85c6")
+STRAPI_PROJECT_ID = os.environ.get("STRAPI_PROJECT_ID", "z4sx85c6")
 strapi_DATASET = "production"
 strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
 strapi_API_VERSION = "2023-05-03"
@@ -39,9 +39,9 @@ PUBLISHED_DIR = Path("posts_publicados")
 def get_api_url(endpoint="query"):
     """Retorna URL da API do Strapi"""
     if endpoint == "query":
-        return f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/query/{strapi_DATASET}"
+        return f"https://{STRAPI_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/query/{strapi_DATASET}"
     else:
-        return f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/{strapi_DATASET}"
+        return f"https://{STRAPI_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/{strapi_DATASET}"
 
 def get_headers():
     """Retorna headers para requisição"""
@@ -128,7 +128,7 @@ def upload_image_to_strapi(image_path: Path) -> str:
             return None
         
         # URL da API - usando v2021-06-07 como na documentação
-        url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v2021-06-07/assets/images/{strapi_DATASET}"
+        url = f"https://{STRAPI_PROJECT_ID}.api.strapi.io/v2021-06-07/assets/images/{strapi_DATASET}"
         
         # Headers com Content-Type específico
         headers = {

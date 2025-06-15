@@ -34,7 +34,7 @@ for env_file in env_files:
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Configurações Strapi
-strapi_PROJECT_ID = os.getenv("strapi_PROJECT_ID", "z4sx85c6")
+STRAPI_PROJECT_ID = os.getenv("STRAPI_PROJECT_ID", "z4sx85c6")
 strapi_DATASET = os.getenv("strapi_DATASET", "production")
 strapi_API_TOKEN = os.getenv("strapi_API_TOKEN")
 
@@ -97,7 +97,7 @@ def test_image_generation():
         # 5. Upload para Strapi
         logger.info("\n📤 Fazendo upload para Strapi...")
         
-        upload_url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v2021-03-25/assets/images/{strapi_DATASET}"
+        upload_url = f"https://{STRAPI_PROJECT_ID}.api.strapi.io/v2021-03-25/assets/images/{strapi_DATASET}"
         headers = {
             "Authorization": f"Bearer {strapi_API_TOKEN}",
             "Content-Type": "image/png"

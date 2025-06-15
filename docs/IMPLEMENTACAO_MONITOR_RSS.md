@@ -176,7 +176,7 @@ self.brazil_tz_offset = timedelta(hours=-3)  # UTC-3
 
 ### Variáveis de Ambiente Necessárias:
 - `strapi_API_TOKEN`
-- `strapi_PROJECT_ID`
+- `STRAPI_PROJECT_ID`
 - `ALGOLIA_APP_ID`
 - `ALGOLIA_ADMIN_API_KEY`
 - `ALGOLIA_INDEX_NAME`

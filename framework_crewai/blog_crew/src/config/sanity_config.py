@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 strapi_CONFIG = {
     "name": "crypto-frontier",
     "title": "The Crypto Frontier",
-    "project_id": os.environ.get("strapi_PROJECT_ID", "z4sx85c6"),
+    "project_id": os.environ.get("STRAPI_PROJECT_ID", "z4sx85c6"),
     "dataset": "production",
     "api_version": "2023-05-03"
 }

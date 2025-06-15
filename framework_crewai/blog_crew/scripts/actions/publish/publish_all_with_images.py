@@ -29,7 +29,7 @@ logger = logging.getLogger("publish_all")
 genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
 
 # Strapi
-strapi_PROJECT_ID = os.environ.get("strapi_PROJECT_ID")
+STRAPI_PROJECT_ID = os.environ.get("STRAPI_PROJECT_ID")
 strapi_DATASET = "production"
 strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
 strapi_API_VERSION = "2023-05-03"
@@ -97,7 +97,7 @@ def upload_image_to_strapi(image_path: Path) -> str:
     """Upload de imagem para o Strapi usando upload binário"""
     try:
         # URL da API - usando v2021-06-07 como na documentação
-        url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v2021-06-07/assets/images/{strapi_DATASET}"
+        url = f"https://{STRAPI_PROJECT_ID}.api.strapi.io/v2021-06-07/assets/images/{strapi_DATASET}"
         
         # Determinar content type baseado na extensão
         content_type = 'image/png' if image_path.suffix.lower() == '.png' else 'image/jpeg'
@@ -160,7 +160,7 @@ def publish_to_strapi(article: dict, image_id: str = None) -> bool:
             }
         
         # Envia para Strapi
-        url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/{strapi_DATASET}"
+        url = f"https://{STRAPI_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/{strapi_DATASET}"
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {strapi_API_TOKEN}"

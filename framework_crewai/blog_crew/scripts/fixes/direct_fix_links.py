@@ -7,14 +7,14 @@ import os
 from strapiio import Client
 
 # Configuração direta
-strapi_PROJECT_ID = 'sgy3g5d4'
+STRAPI_PROJECT_ID = 'sgy3g5d4'
 strapi_DATASET = 'production'
 strapi_API_VERSION = '2024-01-01'
 strapi_API_TOKEN = os.getenv('strapi_API_TOKEN')
 
 # Cliente
 client = Client(
-    project_id=strapi_PROJECT_ID,
+    project_id=STRAPI_PROJECT_ID,
     dataset=strapi_DATASET,
     api_version=strapi_API_VERSION,
     token=strapi_API_TOKEN,

@@ -243,7 +243,7 @@ class EnhancedPipeline:
             from utils.parallel_processor import BatchstrapiOperations
             
             batch_ops = BatchstrapiOperations(
-                project_id=os.getenv("strapi_PROJECT_ID"),
+                project_id=os.getenv("STRAPI_PROJECT_ID"),
                 dataset=os.getenv("strapi_DATASET"),
                 token=os.getenv("strapi_API_TOKEN")
             )

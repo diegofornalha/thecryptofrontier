@@ -10,14 +10,14 @@ import requests
 from datetime import datetime
 
 # Configurações do Strapi
-strapi_PROJECT_ID = os.environ.get("strapi_PROJECT_ID", "z4sx85c6")
+STRAPI_PROJECT_ID = os.environ.get("STRAPI_PROJECT_ID", "z4sx85c6")
 strapi_DATASET = "production"
 strapi_API_VERSION = "2023-05-03"
 strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
 
 def get_api_url():
     """Retorna URL da API do Strapi"""
-    return f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/query/{strapi_DATASET}"
+    return f"https://{STRAPI_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/query/{strapi_DATASET}"
 
 def get_headers():
     """Retorna headers para requisição"""

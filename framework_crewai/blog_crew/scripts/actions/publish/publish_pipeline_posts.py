@@ -11,7 +11,7 @@ from datetime import datetime
 
 # Use token from environment
 strapi_API_TOKEN = os.environ.get("strapi_API_TOKEN")
-strapi_PROJECT_ID = "z4sx85c6"
+STRAPI_PROJECT_ID = "z4sx85c6"
 strapi_DATASET = "production"
 strapi_API_VERSION = "2023-05-03"
 
@@ -55,7 +55,7 @@ def publish_to_strapi(post_file):
     }
     
     # API request
-    url = f"https://{strapi_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/{strapi_DATASET}"
+    url = f"https://{STRAPI_PROJECT_ID}.api.strapi.io/v{strapi_API_VERSION}/data/mutate/{strapi_DATASET}"
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {strapi_API_TOKEN}"

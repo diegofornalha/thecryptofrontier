@@ -7,9 +7,8 @@ services:
     restart: unless-stopped
     environment:
       # Strapi
-      - strapi_PROJECT_ID=${strapi_PROJECT_ID}
-      - strapi_DATASET=${strapi_DATASET}
-      - strapi_API_TOKEN=${strapi_API_TOKEN}
+      - STRAPI_URL=${STRAPI_URL}
+      - STRAPI_API_TOKEN=${STRAPI_API_TOKEN}
       
       # APIs
       - OPENAI_API_KEY=${OPENAI_API_KEY}
@@ -36,7 +35,7 @@ services:
       - ./src/pipelines/simple/posts_imagens:/app/src/pipelines/simple/posts_imagens
       
       # Arquivo .env
-      - ../../.env:/app/.env:ro
+      - ./.env:/app/.env:ro
     
     networks:
       - crewai-network

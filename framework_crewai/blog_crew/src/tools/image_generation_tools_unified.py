@@ -223,7 +223,7 @@ def generate_image_with_dalle(title: str, excerpt: str) -> Dict:
 def upload_to_strapi(image_path: str, alt_text: str) -> Dict:
     """Faz upload de uma imagem para o Strapi"""
     try:
-        project_id = os.environ.get("strapi_PROJECT_ID")
+        project_id = os.environ.get("STRAPI_PROJECT_ID")
         dataset = os.environ.get("strapi_DATASET", "production")
         api_token = os.environ.get("strapi_API_TOKEN")
         

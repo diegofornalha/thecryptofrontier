@@ -124,7 +124,7 @@ class HealthChecker:
         start_time = time.time()
         
         try:
-            project_id = os.getenv("strapi_PROJECT_ID")
+            project_id = os.getenv("STRAPI_PROJECT_ID")
             dataset = os.getenv("strapi_DATASET", "production")
             
             response = requests.get(

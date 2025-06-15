@@ -9,7 +9,7 @@ from datetime import datetime
 
 load_dotenv()
 
-strapi_PROJECT_ID = os.getenv('strapi_PROJECT_ID')
+STRAPI_PROJECT_ID = os.getenv('STRAPI_PROJECT_ID')
 strapi_DATASET = os.getenv('strapi_DATASET', 'production')
 strapi_API_TOKEN = os.getenv('strapi_API_TOKEN')
 
@@ -17,7 +17,7 @@ def check_posts():
     # Buscar posts recentes
     query = '*[_type == "post"] | order(_createdAt desc) [0...15]{_id, title, mainImage, _createdAt}'
     
-    url = f'https://{strapi_PROJECT_ID}.api.strapi.io/v2021-10-21/data/query/{strapi_DATASET}'
+    url = f'https://{STRAPI_PROJECT_ID}.api.strapi.io/v2021-10-21/data/query/{strapi_DATASET}'
     params = {'query': query}
     headers = {'Authorization': f'Bearer {strapi_API_TOKEN}'}
     

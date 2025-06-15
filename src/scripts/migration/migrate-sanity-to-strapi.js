@@ -10,7 +10,7 @@ const { createClient } = require('@strapi/client');
 require('dotenv').config();
 
 // Configurações
-const strapi_PROJECT_ID = process.env.NEXT_PUBLIC_strapi_PROJECT_ID || process.env.strapi_PROJECT_ID;
+const STRAPI_PROJECT_ID = process.env.NEXT_PUBLIC_STRAPI_PROJECT_ID || process.env.STRAPI_PROJECT_ID;
 const strapi_DATASET = process.env.NEXT_PUBLIC_strapi_DATASET || 'production';
 const strapi_API_TOKEN = process.env.strapi_API_TOKEN;
 
@@ -19,7 +19,7 @@ const STRAPI_API_TOKEN = process.env.STRAPI_API_TOKEN || '';
 
 // Cliente Strapi
 const strapiClient = createClient({
-  projectId: strapi_PROJECT_ID,
+  projectId: STRAPI_PROJECT_ID,
   dataset: strapi_DATASET,
   token: strapi_API_TOKEN,
   useCdn: false,

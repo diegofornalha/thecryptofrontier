@@ -19,7 +19,7 @@ except ImportError:
     # Fallback para valores padrão se não conseguir importar
     logger.warning("Não foi possível importar configurações do Strapi, usando valores padrão")
     strapi_CONFIG = {
-        "project_id": os.environ.get("strapi_PROJECT_ID", ""),
+        "project_id": os.environ.get("STRAPI_PROJECT_ID", ""),
         "dataset": "production",
         "api_version": "2023-05-03"
     }
@@ -37,7 +37,7 @@ class strapiClient:
     
     def __init__(self):
         """Inicializa o cliente Strapi"""
-        self.project_id = os.environ.get("strapi_PROJECT_ID", strapi_CONFIG.get("project_id"))
+        self.project_id = os.environ.get("STRAPI_PROJECT_ID", strapi_CONFIG.get("project_id"))
         self.dataset = strapi_CONFIG.get("dataset", "production")
         self.api_version = strapi_CONFIG.get("api_version", "2023-05-03")
         self.api_token = os.environ.get("strapi_API_TOKEN")
