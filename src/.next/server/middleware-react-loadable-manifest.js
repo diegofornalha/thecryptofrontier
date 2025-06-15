@@ -1,1 +1,1 @@
-self.__REACT_LOADABLE_MANIFEST="{\"app/buscas/page.tsx -> ../../components/CryptoSearchComponent\":{\"id\":\"app/buscas/page.tsx -> ../../components/CryptoSearchComponent\",\"files\":[\"static/chunks/_app-pages-browser_components_CryptoSearchComponent_tsx.js\"]}}"
+self.__REACT_LOADABLE_MANIFEST="{}"

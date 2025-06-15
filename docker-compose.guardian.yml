@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # Guardian Unificado - Sistema completo de gestão
+  unified-guardian:
+    build:
+      context: ./claude-flow-diego
+      dockerfile: ../Dockerfile.guardian-unified
+    container_name: unified-guardian
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=production
+      - PROJECT_PATH=/workspace
+      - MEMORY_ENABLED=true
+      - MCP_ENABLED=true
+      - AUTO_FIX=false
+      - LOG_LEVEL=info
+    volumes:
+      - .:/workspace:ro
+      - guardian-data:/app/data
+      - guardian-logs:/app/logs
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - claude-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "com.thecryptofrontier.service=guardian"
+      - "com.thecryptofrontier.version=unified-1.0.0"
+
+  # MCP Diego Tools (opcional - se não estiver rodando separadamente)
+  mcp-diego-tools:
+    build:
+      context: ./claude-flow-diego/mcp-diego-tools
+      dockerfile: Dockerfile
+    container_name: mcp-diego-tools
+    environment:
+      - NODE_ENV=production
+      - MEM0_BASE_URL=http://mem0-bridge:3002
+    networks:
+      - claude-network
+    restart: unless-stopped
+    depends_on:
+      - mem0-bridge
+
+  # Mem0 Bridge (se ainda não estiver rodando)
+  mem0-bridge:
+    image: mem0-bridge:latest
+    container_name: mem0-bridge
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - claude-network
+    restart: unless-stopped
+
+networks:
+  claude-network:
+    external: true
+
+volumes:
+  guardian-data:
+    name: guardian-unified-data
+  guardian-logs:
+    name: guardian-unified-logs

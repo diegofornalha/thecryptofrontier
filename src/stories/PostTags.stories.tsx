@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import PostTags from '../components/PostTags';
+import PostTags from '../components/post-tags';
 
 const meta: Meta<typeof PostTags> = {
   title: 'Post Components/PostTags',

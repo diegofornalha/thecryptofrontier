@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import AuthorCard from '../components/AuthorCard';
+import AuthorCard from '../components/author-card';
 
 const meta: Meta<typeof AuthorCard> = {
   title: 'Post Components/AuthorCard',

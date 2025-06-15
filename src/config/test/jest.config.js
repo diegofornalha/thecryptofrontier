@@ -1,13 +1,14 @@
 module.exports = {
+  rootDir: '../../',
   testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/config/test/jest.setup.js'],
   testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/'],
   moduleNameMapper: {
-    '^@/components/(.*)$': '<rootDir>/src/components/$1',
-    '^@/lib/(.*)$': '<rootDir>/src/lib/$1',
-    '^@/hooks/(.*)$': '<rootDir>/src/hooks/$1',
-    '^@/utils/(.*)$': '<rootDir>/src/utils/$1',
-    '^@/css/(.*)$': '<rootDir>/src/css/$1',
+    '^@/components/(.*)$': '<rootDir>/components/$1',
+    '^@/lib/(.*)$': '<rootDir>/lib/$1',
+    '^@/hooks/(.*)$': '<rootDir>/hooks/$1',
+    '^@/utils/(.*)$': '<rootDir>/utils/$1',
+    '^@/css/(.*)$': '<rootDir>/css/$1',
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy'
   },
   transform: {
@@ -18,7 +19,7 @@ module.exports = {
     '^.+\\.module\\.(css|sass|scss)$'
   ],
   collectCoverageFrom: [
-    'src/components/**/*.{js,jsx,ts,tsx}',
-    '!src/components/**/*.d.ts'
+    'components/**/*.{js,jsx,ts,tsx}',
+    '!components/**/*.d.ts'
   ]
 }; 
