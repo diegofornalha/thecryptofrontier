@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import strapiClient from "@/lib/strapiClient";
-import LatestNewsClient from "./LatestNewsClient";
+import LatestNewsClient from "./latest-news-client";
 
 interface NewsItem {
   _id: string;

@@ -5,10 +5,10 @@ import { client } from '../../strapi/lib/client';
 import { urlForImage } from "@/lib/imageHelper"
 import CryptoBasicFooter from '@/components/sections/CryptoBasicFooter';
 import NewsHeader from '../../components/sections/NewsHeader';
-import BreakingNewsTicker from '@/components/sections/home/BreakingNewsTicker';
+import BreakingNewsTicker from '@/components/sections/home/breaking-news-ticker';
 import CryptoNewsCard from '@/components/sections/CryptoNewsCard';
 import Pagination from '@/components/ui/pagination';
-import PopularPostsWidget from '@/components/widgets/PopularPostsWidget';
+import PopularPostsWidget from '@/components/widgets/popular-posts-widget';
 import { POSTS_LIST_QUERY } from '@/lib/queries';
 import { Metadata } from 'next';
 

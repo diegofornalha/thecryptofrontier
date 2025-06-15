@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import BreakingNewsTicker from '@/components/sections/home/BreakingNewsTicker';
+import BreakingNewsTicker from '@/components/sections/home/breaking-news-ticker';
 
 const meta = {
   title: 'Sections/Home/BreakingNewsTicker',

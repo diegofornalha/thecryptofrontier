@@ -1,5 +1,5 @@
 import strapiClient from "@/lib/strapiClient";
-import BreakingNewsTickerClient from "./BreakingNewsTickerClient";
+import BreakingNewsTickerClient from "./breaking-news-ticker-client";
 
 interface NewsItem {
   title: string;

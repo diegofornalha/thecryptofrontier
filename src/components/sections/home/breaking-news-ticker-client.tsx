@@ -38,10 +38,10 @@ export default function BreakingNewsTickerClient({ news }: BreakingNewsTickerCli
   const currentNews = newsItems[currentIndex] || newsItems[0];
 
   return (
-    <div className="bg-red-600 text-white py-3 px-4">
+    <div className="bg-blue-600 text-white py-3 px-4">
       <div className="max-w-[1440px] mx-auto flex items-center justify-between">
         <div className="flex items-center space-x-4 flex-1">
-          <span className="bg-white text-red-600 px-3 py-1 text-sm font-bold rounded animate-pulse">
+          <span className="bg-white text-blue-600 px-3 py-1 text-sm font-bold rounded animate-pulse">
             ÚLTIMAS
           </span>
           

@@ -4,12 +4,12 @@ import React from 'react';
 import dynamic from 'next/dynamic';
 import NewsHeader from '@/components/sections/NewsHeader';
 import CryptoBasicFooter from '@/components/sections/CryptoBasicFooter';
-import BreakingNewsTicker from '@/components/sections/home/BreakingNewsTicker';
-import PopularPostsWidget from '@/components/widgets/PopularPostsWidget';
+import BreakingNewsTicker from '@/components/sections/home/breaking-news-ticker';
+import PopularPostsWidget from '@/components/widgets/popular-posts-widget';
 
 // Importação dinâmica do SearchComponent para evitar erros de SSR
 const CryptoSearchComponent = dynamic(
-  () => import('../../components/CryptoSearchComponent'),
+  () => import('../../components/crypto-search-component'),
   { 
     ssr: false,
     loading: () => (

@@ -32,27 +32,12 @@ services:
       - "com.thecryptofrontier.service=guardian"
       - "com.thecryptofrontier.version=unified-1.0.0"
 
-  # MCP Diego Tools (opcional - se não estiver rodando separadamente)
-  mcp-diego-tools:
-    build:
-      context: ./claude-flow-diego/mcp-diego-tools
-      dockerfile: Dockerfile
-    container_name: mcp-diego-tools
-    environment:
-      - NODE_ENV=production
-      - MEM0_BASE_URL=http://mem0-bridge:3002
-    networks:
-      - claude-network
-    restart: unless-stopped
-    depends_on:
-      - mem0-bridge
-
   # Mem0 Bridge (se ainda não estiver rodando)
   mem0-bridge:
     image: mem0-bridge:latest
     container_name: mem0-bridge
     ports:
-      - "3002:3002"
+      - "3002:8000"
     environment:
       - NODE_ENV=production
     networks:

@@ -5,16 +5,16 @@ WORKDIR /app
 
 # Install dependencies
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm install
 
 # Copy application code
 COPY . .
 
-# Build TypeScript
-RUN npm run build
+# Skip build - use tsx for runtime
+# RUN npm run build
 
 # Expose port
 EXPOSE 8000
 
-# Start the application
-CMD ["npm", "start"]
+# Start the application with tsx - using simple version
+CMD ["npx", "tsx", "src/index-simple.ts"]

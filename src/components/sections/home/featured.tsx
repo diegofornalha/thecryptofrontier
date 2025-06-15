@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import strapiClient from "@/lib/strapiClient";
 import { formatDate } from "../../../utils/date-utils";
-import FeaturedClient from "./FeaturedClient";
+import FeaturedClient from "./featured-client";
 
 // Server Component - busca dados no servidor
 export default async function Featured() {

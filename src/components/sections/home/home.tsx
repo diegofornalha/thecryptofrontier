@@ -1,11 +1,11 @@
 'use client';
 
 import React from 'react';
-import LatestNews from './LatestNews';
-import Featured from './Featured';
-import FeaturedBanner from './FeaturedBanner';
-import BreakingNewsTicker from './BreakingNewsTicker';
-import AuthorSection from './AuthorSection';
+import LatestNews from './latest-news';
+import Featured from './featured';
+import FeaturedBanner from './featured-banner';
+import BreakingNewsTicker from './breaking-news-ticker';
+import AuthorSection from './author-section';
 
 export default function Home() {
   return (

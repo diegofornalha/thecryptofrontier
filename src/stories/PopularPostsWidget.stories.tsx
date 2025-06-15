@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import PopularPostsWidget from '../components/widgets/PopularPostsWidget';
+import PopularPostsWidget from '../components/widgets/popular-posts-widget';
 
 const meta: Meta<typeof PopularPostsWidget> = {
   title: 'Widgets/PopularPostsWidget',

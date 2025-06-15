@@ -1,7 +1,7 @@
 import React from "react";
 import strapiClient from "@/lib/strapiClient";
-import Banner from "./Banner";
-import AdBanner from "./AdBanner";
+import Banner from "./banner";
+import AdBanner from "./ad-banner";
 import { urlForImage } from "@/lib/imageHelper";
 
 // Função para buscar o post principal do banner

@@ -1,6 +1,6 @@
 import { Providers } from "./providers"
-import GoogleAnalytics from "@/components/GoogleAnalytics"
-import GoogleTagManager, { GoogleTagManagerNoscript } from "@/components/GoogleTagManager"
+import GoogleAnalytics from "@/components/google-analytics"
+import GoogleTagManager, { GoogleTagManagerNoscript } from "@/components/google-tag-manager"
 import "../css/main.css"
 
 export const metadata = {

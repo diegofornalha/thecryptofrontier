@@ -3,7 +3,7 @@
 import React from 'react';
 import NewsHeader from '@/components/sections/NewsHeader';
 import CryptoBasicFooter from '@/components/sections/CryptoBasicFooter';
-import BreakingNewsTicker from '@/components/sections/home/BreakingNewsTicker';
+import BreakingNewsTicker from '@/components/sections/home/breaking-news-ticker';
 
 interface ThreeColumnLayoutProps {
   children: React.ReactNode;
