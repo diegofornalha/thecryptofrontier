@@ -9,8 +9,8 @@ Este projeto segue uma organização específica para manter os arquivos bem est
 
 ```
 /home/strapi/thecryptofrontier/
-├── strapi/
-│   └── docs/               # Toda documentação do projeto (MOVIDO PARA STRAPI)
+├── docs/                    # Toda documentação do projeto
+├── strapi/                  # Aplicação Strapi
 ├── scripts/                 # Scripts utilitários
 │   ├── docker/             # Scripts relacionados ao Docker
 │   └── patches/            # Scripts de patches e workarounds
@@ -27,11 +27,12 @@ Este projeto segue uma organização específica para manter os arquivos bem est
 ### 📝 Onde Colocar Cada Tipo de Arquivo
 
 #### Documentação
-**Localização:** `/strapi/docs/` (ATUALIZADO - movido para dentro de strapi)
+**Localização:** `/docs/` (na raiz do projeto)
 - Arquivos `.md` de documentação
 - Instruções de deploy
 - Guias de configuração
 - Documentação técnica
+- **EXCEÇÃO:** CLAUDE.md permanece na raiz
 
 #### Scripts Docker
 **Localização:** `/scripts/docker/`
@@ -89,7 +90,7 @@ Quando mover arquivos, lembre-se de atualizar:
 ### 📋 Checklist para Novos Arquivos
 
 Antes de criar um arquivo, pergunte-se:
-- [ ] É documentação? → `/strapi/docs/`
+- [ ] É documentação? → `/docs/`
 - [ ] É um script Docker? → `/scripts/docker/`
 - [ ] É um patch/workaround? → `/scripts/patches/`
 - [ ] É um script utilitário? → `/scripts/`

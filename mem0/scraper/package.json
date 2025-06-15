@@ -1,0 +1,25 @@
+{
+  "name": "mem0-docs-scraper",
+  "version": "1.0.0",
+  "description": "Documentation scraper for Mem0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "puppeteer": "^21.6.0",
+    "cheerio": "^1.0.0-rc.12",
+    "node-cron": "^3.0.3",
+    "pg": "^8.11.3",
+    "dotenv": "^16.3.1",
+    "winston": "^3.11.0",
+    "axios": "^1.6.2",
+    "p-queue": "^7.4.1",
+    "markdown-it": "^14.0.0",
+    "turndown": "^7.1.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

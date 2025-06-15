@@ -3,9 +3,7 @@ version: '3.8'
 services:
   # Guardian Unificado - Sistema completo de gestão
   unified-guardian:
-    build:
-      context: ./claude-flow-diego
-      dockerfile: ../Dockerfile.guardian-unified
+    image: guardian-unified-simple
     container_name: unified-guardian
     ports:
       - "3003:3003"
@@ -14,10 +12,10 @@ services:
       - PROJECT_PATH=/workspace
       - MEMORY_ENABLED=true
       - MCP_ENABLED=true
-      - AUTO_FIX=false
+      - AUTO_FIX=true
       - LOG_LEVEL=info
     volumes:
-      - .:/workspace:ro
+      - .:/workspace:rw
       - guardian-data:/app/data
       - guardian-logs:/app/logs
       - /var/run/docker.sock:/var/run/docker.sock:ro
