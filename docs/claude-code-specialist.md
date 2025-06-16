@@ -8,7 +8,7 @@ O Claude Code Specialist é um agente especializado em boas práticas do Claude 
 
 ### 📌 Versão e Status
 - **Versão Claude Code**: 0.2.9
-- **Versão do Especialista**: 4.0.0
+- **Versão do Especialista**: 4.1.0
 - **Status**: Beta Product
 - **Disclaimer**: All code acceptance/rejection decisions constitute Feedback under Anthropic's Commercial Terms
 
@@ -46,6 +46,7 @@ O Claude Code Specialist é um agente especializado em boas práticas do Claude 
 
 O especialista evolui automaticamente:
 - Versão inicial: 4.0.0
+- Versão atual: 4.1.0
 - Aprende com interações via mem0
 - Evolui incrementalmente (4.0.1, 4.0.2, etc.)
 - Salva histórico de evolução
@@ -215,6 +216,33 @@ npx tsx src/agents/claude-code-specialist-agent.ts "analyze CLI terminal"
 - Comandos MCP (Model Context Protocol)
 - Ferramentas aprovadas
 - Action verbs divertidos para progresso
+
+### 12. Análise de Diferenças entre Modelos
+```bash
+npx tsx src/agents/claude-code-specialist-agent.ts "analyze modelo opus sonnet"
+```
+- Claude Opus 4 vs Claude Sonnet 4
+- Pontos fortes de cada modelo
+- Quando usar cada um
+- IDs dos modelos para API
+
+### 13. Análise de Regras de Citação
+```bash
+npx tsx src/agents/claude-code-specialist-agent.ts "analyze citation rules"
+```
+- Quando usar citações (web_search, drive_search)
+- Formato correto de citações
+- Regras para múltiplas fontes
+- Exemplos práticos
+
+### 14. Análise de Diretrizes de Busca
+```bash
+npx tsx src/agents/claude-code-specialist-agent.ts "analyze search guidelines"
+```
+- Categorias: nunca buscar, oferecer busca, busca única, pesquisa completa
+- Quando usar 1 busca vs 5+ buscas
+- Melhores práticas de queries
+- Escalonamento por complexidade
 
 ## Comandos Slash
 

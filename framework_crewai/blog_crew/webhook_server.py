@@ -13,6 +13,8 @@ from fastapi.responses import JSONResponse
 import uvicorn
 from dotenv import load_dotenv
 import logging
+import httpx
+from pathlib import Path
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
@@ -174,6 +176,129 @@ async def test_webhook(request: Request):
         "timestamp": datetime.now().isoformat(),
         "data": body
     }
+
+@app.post("/webhook/create-post")
+async def create_post_webhook(
+    request: Request,
+    authorization: Optional[str] = Header(None)
+):
+    """
+    Endpoint para criar posts diretamente via webhook
+    URL: https://webhook-crewai.agentesintegrados.com/webhook/create-post
+    """
+    
+    # Validar autorização
+    if not authorization or authorization != f"Bearer {WEBHOOK_SECRET}":
+        logger.warning(f"Unauthorized create-post attempt from {request.client.host}")
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    # Parse do payload
+    try:
+        payload = await request.json()
+    except Exception as e:
+        logger.error(f"Invalid JSON payload: {e}")
+        raise HTTPException(status_code=400, detail="Invalid JSON")
+    
+    # Extrair dados do artigo
+    article_data = payload.get('data') or payload.get('entry') or payload
+    
+    if not article_data.get('title'):
+        raise HTTPException(status_code=400, detail="Title is required")
+    
+    logger.info(f"Creating post: {article_data.get('title')}")
+    
+    # Preparar dados para o Strapi
+    
+    # Token do Strapi (mesmo usado no publish_to_strapi.py)
+    STRAPI_API_TOKEN = '87e5f7e4c6917d39415f669f077cafa528e26c3aff065206805c82daa7e6ede2941bb783992ab6a8fc0f31f45b239dce9915b8a161d41ff312529464da6f9501218cb15b375253cfad94df96fb61286ca4e96558dfc37d36bbdb58214fd7bf76dcec1c61a3c7c1d9d00d541dc14c7d158463432f252708b9b421a02f65e0defb'
+    STRAPI_URL = 'https://ale-blog.agentesintegrados.com'
+    
+    strapi_data = {
+        "data": {
+            "title": article_data.get('title'),
+            "slug": article_data.get('slug', '').lower().replace(' ', '-'),
+            "content": article_data.get('content', ''),
+            "excerpt": article_data.get('excerpt', ''),
+            "status": "published",
+            "seo": article_data.get('seo', {
+                "metaTitle": article_data.get('title'),
+                "metaDescription": article_data.get('excerpt', ''),
+                "keywords": ", ".join(article_data.get('tags', []))
+            }),
+            "tags": article_data.get('tags', []),
+            "categories": article_data.get('categories', []),
+            "publishedAt": datetime.now().isoformat()
+        }
+    }
+    
+    headers = {
+        'Authorization': f'Bearer {STRAPI_API_TOKEN}',
+        'Content-Type': 'application/json'
+    }
+    
+    # Tentar criar o post no Strapi
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                f"{STRAPI_URL}/api/posts",
+                headers=headers,
+                json=strapi_data,
+                timeout=30
+            )
+        
+        if resp.status_code in [200, 201]:
+            result = resp.json()
+            post_id = result.get('data', {}).get('id')
+            logger.info(f"Post created successfully: ID {post_id}")
+            
+            return JSONResponse(
+                content={
+                    "status": "success",
+                    "post_id": post_id,
+                    "url": f"{STRAPI_URL}/api/posts/{post_id}",
+                    "title": article_data.get('title'),
+                    "timestamp": datetime.now().isoformat()
+                },
+                status_code=201
+            )
+        else:
+            logger.error(f"Strapi API error: {resp.status_code} - {resp.text}")
+            
+            # Se falhar, salvar localmente para processamento posterior
+            
+            # Criar diretório para posts pendentes
+            pending_dir = Path("/tmp/pending_posts")
+            pending_dir.mkdir(exist_ok=True)
+            
+            # Salvar o artigo
+            filename = f"post_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            filepath = pending_dir / filename
+            
+            with open(filepath, 'w') as f:
+                json.dump({
+                    "article": article_data,
+                    "error": {
+                        "status": resp.status_code,
+                        "message": resp.text[:500]
+                    },
+                    "timestamp": datetime.now().isoformat()
+                }, f, indent=2)
+            
+            logger.info(f"Post saved to pending queue: {filepath}")
+            
+            return JSONResponse(
+                content={
+                    "status": "queued",
+                    "message": "Post saved for later processing",
+                    "filename": filename,
+                    "error": f"Strapi returned {resp.status_code}"
+                },
+                status_code=202
+            )
+            
+    except Exception as e:
+        logger.error(f"Error creating post: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     # Rodar servidor na porta 8000
