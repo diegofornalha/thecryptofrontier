@@ -12,8 +12,8 @@ from dotenv import load_dotenv
 # Carregar variáveis de ambiente
 load_dotenv()
 
-STRAPI_URL = 'https://ale-blog.agentesintegrados.com'
-STRAPI_API_TOKEN = '87e5f7e4c6917d39415f669f077cafa528e26c3aff065206805c82daa7e6ede2941bb783992ab6a8fc0f31f45b239dce9915b8a161d41ff312529464da6f9501218cb15b375253cfad94df96fb61286ca4e96558dfc37d36bbdb58214fd7bf76dcec1c61a3c7c1d9d00d541dc14c7d158463432f252708b9b421a02f65e0defb'
+STRAPI_URL = os.getenv('STRAPI_URL', 'https://ale-blog.agentesintegrados.com')
+STRAPI_API_TOKEN = os.getenv('STRAPI_API_TOKEN', '')
 
 def publish_article():
     """Publica o artigo no Strapi"""

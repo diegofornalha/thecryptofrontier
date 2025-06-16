@@ -14,6 +14,7 @@ import hashlib
 import re
 from pathlib import Path
 import logging
+from multilingual_config import MultilingualConfig
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
@@ -22,9 +23,13 @@ logger = logging.getLogger(__name__)
 class RSSBlogAgent:
     """Agente para monitorar RSS e criar posts automaticamente"""
     
-    def __init__(self):
+    def __init__(self, publishing_strategy='single_language'):
         self.strapi_url = os.getenv('STRAPI_URL', 'https://ale-blog.agentesintegrados.com')
         self.strapi_token = os.getenv('STRAPI_API_TOKEN', '87e5f7e4c6917d39415f669f077cafa528e26c3aff065206805c82daa7e6ede2941bb783992ab6a8fc0f31f45b239dce9915b8a161d41ff312529464da6f9501218cb15b375253cfad94df96fb61286ca4e96558dfc37d36bbdb58214fd7bf76dcec1c61a3c7c1d9d00d541dc14c7d158463432f252708b9b421a02f65e0defb')
+        
+        # Configuração multi-idioma
+        self.config = MultilingualConfig()
+        self.publishing_strategy = publishing_strategy
         
         # Feeds RSS configurados
         self.feeds = [
@@ -100,17 +105,75 @@ class RSSBlogAgent:
         return html_content.strip()
     
     def translate_simple(self, text: str, from_lang: str = 'en', to_lang: str = 'pt') -> str:
-        """Tradução simples usando substituições básicas (sem API)"""
-        # Por enquanto, retorna o texto original
-        # Em uma implementação real, você poderia:
-        # 1. Usar um dicionário de traduções comuns
-        # 2. Integrar com uma API de tradução local/gratuita
-        # 3. Usar modelos de tradução offline
+        """Tradução usando o agente tradutor"""
+        try:
+            from translator_agent import TranslatorAgent
+            translator = TranslatorAgent()
+            
+            # Se for diferente idioma, traduz
+            if from_lang != to_lang:
+                translated = translator.translate(text, from_lang, to_lang)
+                # Se a tradução falhou ou é muito similar, marca como não traduzido
+                if translated == text or len(translated) < len(text) * 0.5:
+                    return f"[Conteúdo original em {from_lang.upper()}]\n\n{text}"
+                return translated
+                
+        except ImportError:
+            # Se não conseguir importar o tradutor, usa método antigo
+            if from_lang != to_lang:
+                return f"[Conteúdo original em {from_lang.upper()}]\n\n{text}"
         
-        # Adiciona nota de que é conteúdo traduzido
-        if from_lang != to_lang:
-            return f"[Conteúdo original em {from_lang.upper()}]\n\n{text}"
         return text
+    
+    def format_content_markdown(self, content: str, title: str) -> str:
+        """Formata conteúdo em Markdown estruturado"""
+        # Divide o conteúdo em parágrafos
+        paragraphs = [p.strip() for p in content.split('\n\n') if p.strip()]
+        
+        # Se não houver parágrafos suficientes, divide por frases longas
+        if len(paragraphs) < 3:
+            sentences = content.split('. ')
+            paragraphs = []
+            current_para = ""
+            for sentence in sentences:
+                current_para += sentence + ". "
+                if len(current_para) > 200 or sentence == sentences[-1]:
+                    paragraphs.append(current_para.strip())
+                    current_para = ""
+        
+        # Constrói o conteúdo formatado
+        formatted = f"## Sobre este artigo\n\n"
+        formatted += f"Este artigo discute **{title.lower()}** e suas implicações no mercado de criptomoedas.\n\n"
+        
+        # Adiciona introdução
+        if paragraphs:
+            formatted += f"### Introdução\n\n{paragraphs[0]}\n\n"
+        
+        # Adiciona seções principais
+        if len(paragraphs) > 1:
+            formatted += "### Análise do Mercado\n\n"
+            
+            # Adiciona alguns parágrafos com formatação
+            for i, para in enumerate(paragraphs[1:], 1):
+                if i == 1 and len(paragraphs) > 3:
+                    formatted += para + "\n\n"
+                    formatted += "### Pontos Principais:\n\n"
+                    formatted += "1. **Movimento de preços** - Análise das tendências atuais\n"
+                    formatted += "2. **Volume de negociação** - Impacto no mercado\n"
+                    formatted += "3. **Sentimento do mercado** - Perspectivas futuras\n\n"
+                elif i < len(paragraphs) - 1:
+                    formatted += para + "\n\n"
+                else:
+                    # Último parágrafo como conclusão
+                    formatted += "### Conclusão\n\n"
+                    formatted += para + "\n\n"
+                    formatted += "**Nota**: Este conteúdo foi importado automaticamente e pode conter informações sensíveis ao tempo. Sempre faça sua própria pesquisa antes de tomar decisões de investimento.\n"
+                
+                # Adiciona uma subseção a cada 2 parágrafos
+                if i % 2 == 0 and i < len(paragraphs) - 2:
+                    formatted += "### Considerações Adicionais\n\n"
+        
+        return formatted
     
     async def check_feeds(self, limit: int = 5) -> List[Dict[str, Any]]:
         """Verifica feeds RSS por novos artigos"""
@@ -125,7 +188,8 @@ class RSSBlogAgent:
                     logger.error(f"Erro ao parsear feed {feed_config['name']}: {feed.bozo_exception}")
                     continue
                 
-                for entry in feed.entries[:limit]:
+                # Inverte para pegar os mais recentes que ainda não foram processados
+                for entry in reversed(feed.entries[:limit*3]):
                     # Gera GUID único
                     guid = entry.get('id', entry.get('link', ''))
                     if not guid:
@@ -163,18 +227,42 @@ class RSSBlogAgent:
             # Limpa conteúdo HTML
             content = self.clean_html(article['content'] or article['summary'])
             
-            # Traduz se necessário
-            if article['feed']['language'] != 'pt':
-                title = self.translate_simple(article['title'], article['feed']['language'], 'pt')
-                content = self.translate_simple(content, article['feed']['language'], 'pt')
+            # Determina idiomas alvo baseado na estratégia
+            original_lang = article['feed']['language']
+            target_languages = self.config.get_target_languages(original_lang, self.publishing_strategy)
+            
+            logger.info(f"Estratégia: {self.publishing_strategy}, Idiomas alvo: {target_languages}")
+            
+            # Para estratégia single_language, traduz para PT
+            if self.publishing_strategy == 'single_language' and 'pt' in target_languages:
+                if original_lang != 'pt':
+                    title = self.translate_simple(article['title'], original_lang, 'pt')
+                    content = self.translate_simple(content, original_lang, 'pt')
+                else:
+                    title = article['title']
             else:
+                # Para outras estratégias, mantém original por enquanto
                 title = article['title']
+                # Adiciona indicação do idioma se não for PT
+                if original_lang != 'pt':
+                    title = f"[{original_lang.upper()}] {title}"
+            
+            # Formata conteúdo em Markdown
+            content = self.format_content_markdown(content, article['title'])
             
             # Gera slug
-            slug = self.generate_slug(title)
+            base_slug = self.generate_slug(article['title'])
             
-            # Cria excerpt
-            excerpt = content[:200] + '...' if len(content) > 200 else content
+            # Para single_language em PT, usa slug sem prefixo
+            if self.publishing_strategy == 'single_language' and 'pt' in target_languages:
+                slug = base_slug
+            else:
+                # Para outras estratégias, adiciona prefixo de idioma se necessário
+                slug = self.config.format_slug_for_language(base_slug, original_lang)
+            
+            # Cria excerpt (sem tags Markdown)
+            excerpt_text = content.replace('#', '').replace('*', '').replace('\n', ' ')
+            excerpt = excerpt_text[:200] + '...' if len(excerpt_text) > 200 else excerpt_text
             
             # Prepara dados do post
             post_data = {
