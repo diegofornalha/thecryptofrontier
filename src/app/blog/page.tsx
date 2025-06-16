@@ -35,6 +35,7 @@ interface Post {
       _ref: string;
     };
   };
+  featuredImageUrl?: string;
   publishedAt: string;
   excerpt?: string;
   author?: {
@@ -104,7 +105,8 @@ async function getPosts(page: number = 1): Promise<{ posts: Post[], total: numbe
       } : post.author ? { name: post.author } : undefined,
       categories: post.attributes?.categories || post.categories,
       tags: post.attributes?.tags || post.tags,
-      estimatedReadingTime: post.attributes?.readingTime || post.readingTime || 5
+      estimatedReadingTime: post.attributes?.readingTime || post.readingTime || 5,
+      featuredImageUrl: post.featuredImage?.url || post.attributes?.featuredImage?.url
     }));
     
     return {
@@ -182,6 +184,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
                       slug={post.slug}
                       excerpt={post.excerpt}
                       coverImage={post.mainImage}
+                      featuredImageUrl={post.featuredImageUrl}
                       authorName={post.author?.name}
                       publishedAt={post.publishedAt}
                       category={post.categories?.[0] ? {

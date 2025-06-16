@@ -117,8 +117,17 @@ export default async function PostPage({ params }: PageProps) {
     author,
     featured,
     tags,
-    categories
+    categories,
+    featuredImage
   } = data;
+  
+  // Extrai a URL da imagem
+  const featuredImageUrl = featuredImage?.url || featuredImage?.data?.attributes?.url;
+  const fullImageUrl = featuredImageUrl 
+    ? (featuredImageUrl.startsWith('http') 
+        ? featuredImageUrl 
+        : `${process.env.NEXT_PUBLIC_STRAPI_URL || 'https://ale-blog.agentesintegrados.com'}${featuredImageUrl}`)
+    : null;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -161,6 +170,21 @@ export default async function PostPage({ params }: PageProps) {
         {excerpt && (
           <div className="text-lg text-gray-700 mb-8 p-4 bg-gray-50 rounded-lg">
             {excerpt}
+          </div>
+        )}
+
+        {/* Imagem em destaque */}
+        {fullImageUrl && (
+          <div className="mb-8">
+            <Image
+              src={fullImageUrl}
+              alt={title}
+              width={1200}
+              height={675}
+              style={{ width: '100%', height: 'auto' }}
+              className="rounded-lg shadow-lg"
+              priority
+            />
           </div>
         )}
 

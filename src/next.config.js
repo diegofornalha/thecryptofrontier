@@ -11,7 +11,20 @@ const nextConfig = {
     trailingSlash: true,
     reactStrictMode: true,
     images: {
-        domains: [''],
+        domains: ['ale-blog.agentesintegrados.com', 'localhost'],
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: 'ale-blog.agentesintegrados.com',
+                pathname: '/uploads/**',
+            },
+            {
+                protocol: 'http',
+                hostname: 'localhost',
+                port: '1339',
+                pathname: '/uploads/**',
+            }
+        ],
     },
 
 

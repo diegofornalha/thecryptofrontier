@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { urlForImage } from "@/lib/imageHelper"
 
 interface CryptoNewsCardProps {
   title: string;
   slug: string;
   excerpt?: string;
   coverImage?: any;
+  featuredImageUrl?: string;
   authorName?: string;
   publishedAt?: string;
   category?: {
@@ -25,6 +25,7 @@ export default function CryptoNewsCard({
   slug,
   excerpt,
   coverImage,
+  featuredImageUrl,
   authorName,
   publishedAt,
   category,
@@ -32,7 +33,24 @@ export default function CryptoNewsCard({
   featured = false,
   horizontal = false,
 }: CryptoNewsCardProps) {
-  const imageUrl = coverImage ? urlForImage(coverImage)?.url() : '/placeholder-news.jpg';
+  // Prioriza featuredImageUrl do Strapi, senão usa coverImage do Sanity
+  let imageUrl = '/placeholder-news.jpg';
+  
+  if (featuredImageUrl) {
+    // Se a URL não for completa, adiciona o domínio do Strapi
+    imageUrl = featuredImageUrl.startsWith('http') 
+      ? featuredImageUrl 
+      : `${process.env.NEXT_PUBLIC_STRAPI_URL || 'https://ale-blog.agentesintegrados.com'}${featuredImageUrl}`;
+  } else if (coverImage && typeof window !== 'undefined') {
+    // Fallback para Sanity se ainda existir
+    try {
+      const { urlForImage } = require("@/lib/imageHelper");
+      imageUrl = urlForImage(coverImage)?.url() || '/placeholder-news.jpg';
+    } catch (error) {
+      // Se não conseguir usar o helper do Sanity, usa placeholder
+    }
+  }
+  
   const displayAuthorName = authorName || 'Redação';
   const formattedDate = publishedAt ? new Date(publishedAt).toLocaleDateString('pt-BR', {
     day: '2-digit',
