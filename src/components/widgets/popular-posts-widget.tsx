@@ -1,44 +1,40 @@
-'use client';
-
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import PopularPostItem from './popular-post-item';
 import strapiClient from "@/lib/strapiClient";
 
 interface Post {
-  _id: string;
+  id: string | number;
   title: string;
   slug: string;
   publishedAt?: string;
-  estimatedReadingTime?: number;
+  createdAt?: string;
+  content?: string;
 }
 
-export default function PopularPostsWidget() {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await strapiClient.getPopularPosts(5);
-        if (response.data) {
-          const formattedPosts = response.data.map((post: any) => ({
-            _id: post.id,
-            title: post.attributes?.title || post.title,
-            slug: post.attributes?.slug || post.slug,
-            publishedAt: post.attributes?.publishedAt || post.publishedAt,
-            estimatedReadingTime: Math.ceil((post.attributes?.content || '').split(' ').length / 200)
-          }));
-          setPosts(formattedPosts);
-        }
-      } catch (error) {
-        console.error('Erro ao buscar posts populares:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPosts();
-  }, []);
+// Server Component
+export default async function PopularPostsWidget() {
+  let posts: Post[] = [];
+  
+  try {
+    const response = await strapiClient.getPosts({
+      pageSize: 5,
+      sort: 'publishedAt:desc',
+      status: 'published'
+    });
+    
+    if (response.data) {
+      posts = response.data.map((post: any) => ({
+        id: post.id || post._id,
+        title: post.attributes?.title || post.title || '',
+        slug: post.attributes?.slug || post.slug || '',
+        publishedAt: post.attributes?.publishedAt || post.publishedAt,
+        createdAt: post.attributes?.createdAt || post.createdAt,
+        content: post.attributes?.content || post.content || ''
+      }));
+    }
+  } catch (error) {
+    console.error('Erro ao buscar posts populares:', error);
+  }
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-6">
@@ -46,20 +42,14 @@ export default function PopularPostsWidget() {
         Posts Populares
       </h3>
       <div className="space-y-4">
-        {loading ? (
-          <>
-            <div className="h-16 bg-gray-100 animate-pulse rounded mb-4" />
-            <div className="h-16 bg-gray-100 animate-pulse rounded mb-4" />
-            <div className="h-16 bg-gray-100 animate-pulse rounded" />
-          </>
-        ) : posts.length > 0 ? (
+        {posts.length > 0 ? (
           posts.map((post) => (
             <PopularPostItem
-              key={post._id}
+              key={`popular-${post.id}`}
               title={post.title}
               slug={post.slug}
               publishedAt={post.publishedAt}
-              readTime={post.estimatedReadingTime}
+              readTime={Math.ceil((post.content || '').split(' ').length / 200)}
             />
           ))
         ) : (

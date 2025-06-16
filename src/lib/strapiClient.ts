@@ -262,6 +262,17 @@ class StrapiClient {
   }
 
   /**
+   * Buscar posts populares
+   */
+  async getPopularPosts(limit: number = 5): Promise<StrapiResponse<StrapiPost[]>> {
+    return this.getPosts({
+      pageSize: limit,
+      sort: 'publishedAt:desc',
+      status: 'published'
+    });
+  }
+
+  /**
    * Upload de imagem
    */
   async uploadImage(file: File): Promise<any> {

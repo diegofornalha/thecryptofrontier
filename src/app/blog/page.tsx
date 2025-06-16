@@ -84,9 +84,31 @@ async function getPosts(page: number = 1): Promise<{ posts: Post[], total: numbe
   try {
     const start = (page - 1) * POSTS_PER_PAGE;
     const end = start + POSTS_PER_PAGE;
-    const result = await strapiClient.getPosts({ start, limit: POSTS_PER_PAGE });
+    const result = await strapiClient.getPosts({ 
+      page: page,
+      pageSize: POSTS_PER_PAGE,
+      sort: 'publishedAt:desc',
+      status: 'published'
+    });
+    
+    // Mapear os dados do Strapi para o formato esperado
+    const posts = (result.data || []).map((post: any) => ({
+      _id: String(post.id),
+      title: post.attributes?.title || post.title || '',
+      slug: post.attributes?.slug || post.slug || '',
+      publishedAt: post.attributes?.publishedAt || post.publishedAt || new Date().toISOString(),
+      excerpt: post.attributes?.excerpt || post.excerpt,
+      author: post.attributes?.author?.data ? {
+        name: post.attributes.author.data.attributes.name,
+        role: post.attributes.author.data.attributes.role
+      } : post.author ? { name: post.author } : undefined,
+      categories: post.attributes?.categories || post.categories,
+      tags: post.attributes?.tags || post.tags,
+      estimatedReadingTime: post.attributes?.readingTime || post.readingTime || 5
+    }));
+    
     return {
-      posts: result.data || [],
+      posts,
       total: result.meta?.pagination?.total || 0
     };
   } catch (error) {
@@ -151,22 +173,25 @@ export default async function BlogPage({ searchParams }: PageProps) {
           <div className="lg:col-span-8">
             {posts.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {posts.map((post) => (
-                  <CryptoNewsCard
-                    key={post._id}
-                    title={post.title}
-                    slug={post.slug}
-                    excerpt={post.excerpt}
-                    coverImage={post.mainImage}
-                    authorName={post.author?.name}
-                    publishedAt={post.publishedAt}
-                    category={post.categories?.[0] ? {
-                      title: post.categories[0].title,
-                      slug: post.categories[0].slug
-                    } : undefined}
-                    readTime={post.estimatedReadingTime}
-                  />
-                ))}
+                {posts.map((post, index) => {
+                  const key = post._id || `post-${index}`;
+                  return (
+                    <CryptoNewsCard
+                      key={key}
+                      title={post.title}
+                      slug={post.slug}
+                      excerpt={post.excerpt}
+                      coverImage={post.mainImage}
+                      authorName={post.author?.name}
+                      publishedAt={post.publishedAt}
+                      category={post.categories?.[0] ? {
+                        title: post.categories[0].title,
+                        slug: post.categories[0].slug
+                      } : undefined}
+                      readTime={post.estimatedReadingTime}
+                    />
+                  );
+                })}
               </div>
             ) : (
               <div className="text-center py-12">
