@@ -1,0 +1,28 @@
+{
+  "common": {
+    "search": "Buscar",
+    "menu": "Menú",
+    "home": "Inicio",
+    "blog": "Blog",
+    "homePage": "Página principal",
+    "latestNews": "Últimas noticias",
+    "searchArticles": "Buscar artículos",
+    "manageContent": "Gestionar contenido",
+    "readMore": "Leer Más",
+    "publishedAt": "Publicado el",
+    "by": "por",
+    "loading": "Cargando...",
+    "error": "Error al cargar",
+    "noPostsFound": "No se encontraron publicaciones"
+  },
+  "sections": {
+    "popularPosts": "Publicaciones Populares",
+    "recentPosts": "Publicaciones Recientes",
+    "relatedPosts": "Publicaciones Relacionadas"
+  },
+  "languages": {
+    "pt": "Português",
+    "en": "English",
+    "es": "Español"
+  }
+}

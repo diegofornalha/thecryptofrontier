@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
 
 export default function NewsHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -52,8 +53,9 @@ export default function NewsHeader() {
                 </Link>
               </div>
 
-              {/* Área direita - Menu Grid */}
-              <div className="w-1/4 flex justify-end">
+              {/* Área direita - Menu Grid e Language Switcher */}
+              <div className="w-1/4 flex justify-end items-center space-x-2">
+                <LanguageSwitcher />
                 <button 
                   className="text-gray-700 hover:text-blue-500 p-2 transition-colors"
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

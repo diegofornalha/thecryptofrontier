@@ -10,6 +10,14 @@ const nextConfig = {
     },
     trailingSlash: true,
     reactStrictMode: true,
+    
+    // Configuração de internacionalização
+    i18n: {
+        locales: ['pt', 'en', 'es'],
+        defaultLocale: 'pt',
+        localeDetection: true,
+    },
+    
     images: {
         domains: ['ale-blog.agentesintegrados.com', 'localhost'],
         remotePatterns: [
