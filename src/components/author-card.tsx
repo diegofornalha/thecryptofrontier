@@ -3,18 +3,15 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { urlForImage } from "@/lib/imageHelper"
-import { PortableText } from '@portabletext/react';
-import { client } from '@/strapi/lib/client';
 
 interface AuthorCardProps {
   author: {
-    _id: string;
+    id: string;
     name?: string;
-    image?: any;
+    avatar?: string;
     role?: string;
-    slug?: { current: string };
-    bio?: any[];
+    bio?: string;
+    slug?: string;
     social?: {
       twitter?: string;
       linkedin?: string;
@@ -24,42 +21,11 @@ interface AuthorCardProps {
   showBio?: boolean;
 }
 
-interface AuthorPost {
-  _id: string;
-  title: string;
-  slug: { current: string };
-  mainImage?: any;
-  categories?: Array<{
-    title: string;
-  }>;
-}
-
 const AuthorCard: React.FC<AuthorCardProps> = ({ author, showBio = true }) => {
-  const [authorPosts, setAuthorPosts] = React.useState<AuthorPost[]>([]);
-  
-  React.useEffect(() => {
-    if (author?._id) {
-      // Buscar os últimos 3 posts do autor
-      const query = `*[_type in ["post", "agentPost"] && author._ref == $authorId] | order(publishedAt desc) [0...3] {
-        _id,
-        title,
-        slug,
-        mainImage,
-        "categories": categories[]->{
-          title
-        }
-      }`;
-      
-      client.fetch(query, { authorId: author._id })
-        .then(posts => setAuthorPosts(posts))
-        .catch(err => console.error('Erro ao buscar posts do autor:', err));
-    }
-  }, [author?._id]);
-
   if (!author) return null;
 
-  const authorImage = author.image ? urlForImage(author.image).width(150).height(150).url() : null;
   const authorName = author.name || 'Autor';
+  const authorAvatar = author.avatar || null;
 
   return (
     <div className="my-16 max-w-[1200px] mx-auto">
@@ -69,9 +35,9 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, showBio = true }) => {
         <div className="lg:w-[200px] flex-shrink-0 text-center lg:text-left">
           <h2 className="text-3xl font-bold mb-8 text-[#111]">Autor</h2>
           <div className="inline-block">
-            {authorImage ? (
+            {authorAvatar ? (
               <Image
-                src={authorImage}
+                src={authorAvatar}
                 alt={authorName}
                 width={150}
                 height={150}
@@ -137,7 +103,7 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, showBio = true }) => {
             <h3 className="text-[28px] lg:text-[32px] font-bold mb-4 text-[#4db2ec] text-center">
               {author.slug ? (
                 <Link 
-                  href={`/autor/${author.slug.current}`}
+                  href={`/autor/${author.slug}`}
                   className="hover:underline hover:text-[#3a9bd4] transition-colors"
                 >
                   {authorName}
@@ -149,86 +115,12 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, showBio = true }) => {
             
             {showBio && author.bio && (
               <div className="text-[16px] lg:text-[18px] text-[#111] leading-[1.6] font-normal text-left">
-                <PortableText 
-                  value={author.bio}
-                  components={{
-                    block: {
-                      normal: ({ children, index }) => {
-                        // Renderiza todos os blocos como um texto contínuo
-                        const isLastBlock = index === author.bio.length - 1;
-                        return (
-                          <span>
-                            {children}
-                            {!isLastBlock && ' '}
-                          </span>
-                        );
-                      },
-                    },
-                    marks: {
-                      link: ({ children, value }) => (
-                        <a 
-                          href={value.href} 
-                          className="text-[#4db2ec] hover:underline font-medium"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {children}
-                        </a>
-                      ),
-                    },
-                  }}
-                />
+                <p>{author.bio}</p>
               </div>
             )}
           </div>
         </div>
       </div>
-
-      {/* More from Author */}
-      {authorPosts.length > 0 && (
-        <div className="mt-16 pt-8 border-t border-gray-200">
-          <h3 className="text-3xl font-bold mb-10 text-[#111]">
-            Mais do Autor
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {authorPosts.map((post) => (
-              <article key={post._id} className="group">
-                <Link 
-                  href={`/post/${post.slug.current}`}
-                  className="block"
-                >
-                  <div className="relative overflow-hidden rounded-xl mb-4 shadow-md">
-                    {post.mainImage ? (
-                      <Image
-                        src={urlForImage(post.mainImage).width(400).height(250).url()}
-                        alt={post.title}
-                        width={400}
-                        height={250}
-                        className="w-full h-[220px] object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="w-full h-[220px] bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                        <span className="text-gray-500 font-medium">Sem imagem</span>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {post.categories && post.categories[0] && (
-                    <p className="text-sm font-semibold text-[#4db2ec] uppercase tracking-wide mb-2">
-                      {post.categories[0].title}
-                    </p>
-                  )}
-                  
-                  <h4 className="font-bold text-xl text-[#111] group-hover:text-[#4db2ec] transition-colors leading-tight line-clamp-3">
-                    {post.title}
-                  </h4>
-                </Link>
-              </article>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

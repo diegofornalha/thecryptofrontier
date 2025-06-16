@@ -1,127 +1,29 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { client } from '../../../strapi/lib/client';
-import { urlForImage } from "@/lib/imageHelper"
-import { PortableText } from '@portabletext/react';
+import strapiClient from '@/lib/strapiClient';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import CryptoBasicFooter from '@/components/sections/CryptoBasicFooter';
-import NewsHeader from '@/components/sections/NewsHeader';
-import BreakingNewsTicker from '@/components/sections/home/breaking-news-ticker';
-import PopularPostsWidget from '@/components/widgets/popular-posts-widget';
-import AuthorCard from '@/components/author-card';
-import SocialShare from '@/components/SocialShare';
-import PostTags from '@/components/post-tags';
-import RelatedPosts from '@/components/RelatedPosts';
-import { POST_QUERY } from '@/lib/queries';
-import './crypto-basic-layout.css';
-import '@/css/post-enhancements.css';
-import { ReadingProgress } from '@/components/PostEnhancements';
-import { TwitterEmbed } from '@/components/TwitterEmbed';
-
-
-// GROQ para pegar todos os slugs para geração estática
-const SLUGS_QUERY = `*[_type == "post" && defined(slug.current)][].slug.current`;
-
-// Interface que reflete nossa query atual
-interface PostData {
-  _id: string;
-  title: string;
-  slug: string;
-  mainImage?: {
-    asset: any;
-    alt?: string;
-    caption?: string;
-  };
-  content: any[];
-  publishedAt: string;
-  excerpt?: string;
-  author?: {
-    _id: string;
-    name: string;
-    image?: any;
-    role?: string;
-    slug: string;
-  };
-  seo?: {
-    metaTitle?: string;
-    metaDescription?: string;
-  };
-}
 
 interface PageProps {
   params: { slug: string };
 }
 
 // Função para buscar o post
-async function getPost(slug: string): Promise<PostData | null> {
+async function getPost(slug: string) {
   try {
-    const post = await client.fetch(POST_QUERY, { slug });
+    const post = await strapiClient.getPostBySlug(slug);
     console.log('=== POST DATA DEBUG ===');
     console.log('Slug:', slug);
     console.log('Post found:', !!post);
-    console.log('Post mainImage:', post?.mainImage);
-    console.log('Post mainImage asset:', post?.mainImage?.asset);
+    console.log('Post structure:', post);
     console.log('======================');
-    return post || null;
+    return post;
   } catch (error) {
     console.error('Erro ao buscar post:', error);
     return null;
   }
 }
-
-// Componentes do PortableText
-const portableTextComponents = {
-  types: {
-    image: ({ value }: any) => {
-      if (!value?.asset) return null;
-      
-      const imageBuilder = urlForImage(value);
-      if (!imageBuilder) return null;
-      
-      const imageUrl = imageBuilder.width(800).url();
-      
-      return (
-        <div className="my-6">
-          <Image
-            src={imageUrl}
-            alt={value.alt || 'Imagem do post'}
-            width={800}
-            height={450}
-            style={{ width: '100%', height: 'auto' }}
-            className="rounded-lg"
-          />
-          {value.caption && (
-            <p className="text-sm text-gray-600 text-center mt-2 italic">
-              {value.caption}
-            </p>
-          )}
-        </div>
-      );
-    },
-  },
-  block: {
-    normal: ({ children }: any) => <p className="mb-4">{children}</p>,
-    h1: ({ children }: any) => <h1 className="text-3xl font-bold mb-4 mt-6">{children}</h1>,
-    h2: ({ children }: any) => <h2 className="text-2xl font-bold mb-3 mt-5">{children}</h2>,
-    h3: ({ children }: any) => <h3 className="text-xl font-bold mb-2 mt-4">{children}</h3>,
-  },
-  marks: {
-    link: ({ children, value }: any) => (
-      <a 
-        href={value.href} 
-        className="text-blue-600 hover:underline" 
-        target="_blank" 
-        rel="noopener noreferrer"
-      >
-        {children}
-      </a>
-    ),
-    strong: ({ children }: any) => <strong className="font-bold">{children}</strong>,
-    em: ({ children }: any) => <em className="italic">{children}</em>,
-  },
-};
 
 // Metadata
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -134,34 +36,66 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  let ogImage: string | undefined;
-  if (post.mainImage?.asset) {
-    const imageBuilder = urlForImage(post.mainImage as any);
-    if (imageBuilder) {
-      ogImage = imageBuilder.width(1200).height(630).url();
-    }
-  }
+  // Verifica se os dados estão em post.attributes ou diretamente em post
+  const data = (post as any).attributes || post;
+  const { title, excerpt, seo } = data;
 
   return {
-    title: `${post.title} - The Crypto Frontier`,
-    description: post.excerpt || post.seo?.metaDescription || 'Artigo sobre criptomoedas',
+    title: `${title} - The Crypto Frontier`,
+    description: excerpt || seo?.metaDescription || 'Artigo sobre criptomoedas',
     openGraph: {
-      title: post.title,
-      description: post.excerpt || 'Artigo sobre criptomoedas',
-      images: ogImage ? [{ url: ogImage }] : [],
+      title: title,
+      description: excerpt || 'Artigo sobre criptomoedas',
     },
   };
 }
 
-// Static params
+// Static params - por enquanto vamos desabilitar para desenvolvimento
 export async function generateStaticParams() {
-  try {
-    const slugs = await client.fetch(SLUGS_QUERY);
-    return slugs.map((slug: string) => ({ slug }));
-  } catch (error) {
-    return [];
-  }
+  return [];
 }
+
+// Função para formatar data
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString('pt-BR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
+
+// Função para renderizar conteúdo
+const renderContent = (content: string) => {
+  // Converte markdown básico para HTML
+  let html = content;
+  
+  // Headers
+  html = html.replace(/^### (.*$)/gim, '<h3 class="text-xl font-bold mb-2 mt-4">$1</h3>');
+  html = html.replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold mb-3 mt-5">$1</h2>');
+  html = html.replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold mb-4 mt-6">$1</h1>');
+  
+  // Bold
+  html = html.replace(/\*\*(.+)\*\*/g, '<strong class="font-bold">$1</strong>');
+  
+  // Lists
+  html = html.replace(/^\d+\. (.+)$/gim, '<li class="ml-4">$1</li>');
+  html = html.replace(/^- (.+)$/gim, '<li class="ml-4">$1</li>');
+  
+  // Paragraphs
+  html = html.split('\n\n').map(para => {
+    if (para.trim() && !para.startsWith('<')) {
+      return `<p class="mb-4">${para}</p>`;
+    }
+    return para;
+  }).join('\n');
+  
+  return (
+    <div 
+      className="prose prose-lg max-w-none"
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+};
 
 // Componente principal
 export default async function PostPage({ params }: PageProps) {
@@ -172,27 +106,19 @@ export default async function PostPage({ params }: PageProps) {
     notFound();
   }
 
-     // URL da imagem principal
-   let mainImageUrl = '';
-   console.log('Post mainImage:', post.mainImage);
-   console.log('Has asset?', post.mainImage?.asset);
-   
-   if (post.mainImage?.asset) {
-     const imageBuilder = urlForImage(post.mainImage as any);
-     console.log('Image builder result:', imageBuilder);
-     if (imageBuilder) {
-       mainImageUrl = imageBuilder.width(1200).url();
-       console.log('Final image URL:', mainImageUrl);
-     }
-   }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
+  // Verifica se os dados estão em post.attributes ou diretamente em post
+  const data = (post as any).attributes || post;
+  const {
+    title,
+    content,
+    excerpt,
+    publishedAt,
+    createdAt,
+    author,
+    featured,
+    tags,
+    categories
+  } = data;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -202,80 +128,68 @@ export default async function PostPage({ params }: PageProps) {
         <span className="mx-2">›</span>
         <Link href="/blog" className="text-blue-600 hover:underline">Blog</Link>
         <span className="mx-2">›</span>
-        <span className="text-gray-600">{post.title}</span>
+        <span className="text-gray-600">{title}</span>
       </nav>
 
       <article>
         {/* Título */}
-        <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
+        <h1 className="text-4xl font-bold mb-4">{title}</h1>
         
         {/* Meta */}
         <div className="flex items-center gap-4 text-gray-600 mb-6">
-          {post.author?.name && <span>Por {post.author.name}</span>}
-          <span>{formatDate(post.publishedAt)}</span>
+          {author && <span>Por {typeof author === 'string' ? author : author.data?.attributes?.name || 'Autor'}</span>}
+          <span>{formatDate(publishedAt || createdAt)}</span>
         </div>
 
-        {/* Resumo */}
-        {post.excerpt && (
-          <div className="text-lg text-gray-700 mb-8 p-4 bg-gray-50 rounded-lg">
-            {post.excerpt}
+        {/* Tags e Categorias */}
+        {(categories || tags) && (
+          <div className="flex flex-wrap gap-2 mb-6">
+            {categories && Array.isArray(categories) && categories.map((cat: string, index: number) => (
+              <span key={index} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                {cat}
+              </span>
+            ))}
+            {tags && Array.isArray(tags) && tags.map((tag: string, index: number) => (
+              <span key={index} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
+                #{tag}
+              </span>
+            ))}
           </div>
         )}
 
-        {/* Imagem principal */}
-        {mainImageUrl && (
-          <div className="mb-8">
-            <Image
-              src={mainImageUrl}
-              alt={post.mainImage?.alt || post.title}
-              width={1200}
-              height={675}
-              style={{ width: '100%', height: 'auto' }}
-              className="rounded-lg"
-              priority
-            />
-            {post.mainImage?.caption && (
-              <p className="text-sm text-gray-600 text-center mt-2 italic">
-                {post.mainImage.caption}
-              </p>
-            )}
+        {/* Resumo */}
+        {excerpt && (
+          <div className="text-lg text-gray-700 mb-8 p-4 bg-gray-50 rounded-lg">
+            {excerpt}
+          </div>
+        )}
+
+        {/* Destaque se for featured */}
+        {featured && (
+          <div className="mb-6 p-2 bg-yellow-100 text-yellow-800 rounded text-center">
+            ⭐ Post em Destaque
           </div>
         )}
 
         {/* Conteúdo */}
-        <div className="prose prose-lg max-w-none">
-          <PortableText value={post.content} components={portableTextComponents} />
-        </div>
+        {content && renderContent(content)}
 
-                 {/* Autor */}
-         {post.author && (
-           <div className="mt-12 p-6 bg-gray-50 rounded-lg">
-             <h3 className="text-lg font-bold mb-4">Sobre o autor</h3>
-             <div className="flex items-start gap-4">
-               {post.author.image && (() => {
-                 const imageBuilder = urlForImage(post.author.image);
-                 if (imageBuilder) {
-                   return (
-                     <Image
-                       src={imageBuilder.width(80).height(80).url()}
-                       alt={post.author.name}
-                       width={80}
-                       height={80}
-                       className="rounded-full"
-                     />
-                   );
-                 }
-                 return null;
-               })()}
-               <div>
-                 <h4 className="font-bold">{post.author.name}</h4>
-                 {post.author.role && (
-                   <p className="text-gray-600">{post.author.role}</p>
-                 )}
-               </div>
-             </div>
-           </div>
-         )}
+        {/* Autor */}
+        {author && (
+          <div className="mt-12 p-6 bg-gray-50 rounded-lg">
+            <h3 className="text-lg font-bold mb-4">Sobre o autor</h3>
+            <div className="flex items-start gap-4">
+              <div className="w-[80px] h-[80px] bg-gradient-to-br from-gray-300 to-gray-400 rounded-full flex items-center justify-center">
+                <span className="text-2xl font-bold text-white">
+                  {(typeof author === 'string' ? author : author.data?.attributes?.name || 'A').charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <div>
+                <h4 className="font-bold">{typeof author === 'string' ? author : author.data?.attributes?.name || 'Autor'}</h4>
+              </div>
+            </div>
+          </div>
+        )}
       </article>
     </div>
   );
