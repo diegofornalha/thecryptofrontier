@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import PopularPostItem from './PopularPostItem';
+import PopularPostItem from './popular-post-item';
 import strapiClient from "@/lib/strapiClient";
 
 interface Post {

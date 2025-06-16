@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { client } from '../../strapi/lib/client';
+import strapiClient from '@/lib/strapiClient';
 import { urlForImage } from "@/lib/imageHelper"
 import CryptoBasicFooter from '@/components/sections/CryptoBasicFooter';
 import NewsHeader from '../../components/sections/NewsHeader';
@@ -84,13 +84,10 @@ async function getPosts(page: number = 1): Promise<{ posts: Post[], total: numbe
   try {
     const start = (page - 1) * POSTS_PER_PAGE;
     const end = start + POSTS_PER_PAGE;
-    const result = await client.fetch(POSTS_LIST_QUERY, { start, end }, {
-      // Cache por 5 minutos
-      next: { revalidate: 300 }
-    });
+    const result = await strapiClient.getPosts({ start, limit: POSTS_PER_PAGE });
     return {
-      posts: result.posts || [],
-      total: result.total || 0
+      posts: result.data || [],
+      total: result.meta?.pagination?.total || 0
     };
   } catch (error) {
     console.error('Erro ao buscar posts:', error);
