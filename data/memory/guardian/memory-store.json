@@ -1,0 +1,395 @@
+{
+  "memories": {
+    "test-user": [
+      {
+        "id": "a2fa40fa-e9df-451a-ab71-cdfc43ddbc63",
+        "user_id": "test-user",
+        "content": "Teste de memória",
+        "metadata": "{}",
+        "category": "test",
+        "tags": [
+          "test"
+        ],
+        "created_at": "2025-06-16T09:07:08.505Z",
+        "updated_at": "2025-06-16T09:07:08.505Z"
+      }
+    ],
+    "strapi-specialist": [
+      {
+        "id": "ff8486b8-7645-4a98-89ed-1b6caccb9a6e",
+        "user_id": "strapi-specialist",
+        "content": "Pergunta: Como configuro internacionalização no Strapi?\nResposta: # 🚀 APIs no Strapi\n\n## 📡 REST API\n\n### Endpoints Padrão\n```bash\n# find\nGET /api/:pluralName\n\n# findOne\nGET /api/:pluralName/:id\n\n# create\nPOST /api/:pluralName\n\n# update\nPUT /api/:pluralName/:id\n\n# delete\nDELETE /api/:pluralName/:id\n\n```\n\n### Exemplos de Uso\n```javascript\n// Buscar todos os items\nconst response = await fetch('http://localhost:1337/api/items');\nconst data = await response.json();\n\n// Buscar com filtros e população\nconst filtered = await fetch(\n  'http://localhost:1337/api/items...\nTipo: api",
+        "metadata": "{\"requestType\":\"api\",\"keywords\":[\"api-development\"],\"hasCode\":true,\"responseLength\":1823,\"agent\":\"strapi-specialist\",\"agentName\":\"Strapi Specialist\",\"timestamp\":\"2025-06-16T11:46:24.375Z\",\"learningNumber\":22}",
+        "category": "strapi-knowledge",
+        "tags": [
+          "api",
+          "strapi",
+          "conhecimento",
+          "strapi-specialist"
+        ],
+        "created_at": "2025-06-16T11:46:24.377Z",
+        "updated_at": "2025-06-16T11:46:24.377Z"
+      },
+      {
+        "id": "44024b7a-44f4-41bb-91a6-09707d9c4d94",
+        "user_id": "strapi-specialist",
+        "content": "Pergunta: APRENDA: Com Draft & Publish, publique cada idioma separadamente: strapi.documents('api::item.item').publish({documentId:'abc123',locale:'pt'}). Use locale:'*' para publicar todas as versões.\nResposta: # 🚀 APIs no Strapi\n\n## 📡 REST API\n\n### Endpoints Padrão\n```bash\n# find\nGET /api/:pluralName\n\n# findOne\nGET /api/:pluralName/:id\n\n# create\nPOST /api/:pluralName\n\n# update\nPUT /api/:pluralName/:id\n\n# delete\nDELETE /api/:pluralName/:id\n\n```\n\n### Exemplos de Uso\n```javascript\n// Buscar todos os items\nconst response = await fetch('http://localhost:1337/api/items');\nconst data = await response.json();\n\n// Buscar com filtros e população\nconst filtered = await fetch(\n  'http://localhost:1337/api/items...\nTipo: api",
+        "metadata": "{\"requestType\":\"api\",\"keywords\":[\"api-development\"],\"hasCode\":true,\"responseLength\":1823,\"agent\":\"strapi-specialist\",\"agentName\":\"Strapi Specialist\",\"timestamp\":\"2025-06-16T11:44:41.837Z\",\"learningNumber\":21}",
+        "category": "strapi-knowledge",
+        "tags": [
+          "api",
+          "strapi",
+          "conhecimento",
+          "strapi-specialist"
+        ],
+        "created_at": "2025-06-16T11:44:41.838Z",
+        "updated_at": "2025-06-16T11:44:41.838Z"
+      },
+      {
+        "id": "c93f2ea5-72b3-4a5b-8017-674e309f025e",
+        "user_id": "strapi-specialist",
+        "content": "Pergunta: APRENDA: API i18n - Criar conteúdo com locale: POST /api/items com {data:{name:'Nome',locale:'pt'}}. Buscar por locale: GET /api/items?locale=pt. Buscar todos: GET /api/items?locale=all\nResposta: # 🚀 APIs no Strapi\n\n## 📡 REST API\n\n### Endpoints Padrão\n```bash\n# find\nGET /api/:pluralName\n\n# findOne\nGET /api/:pluralName/:id\n\n# create\nPOST /api/:pluralName\n\n# update\nPUT /api/:pluralName/:id\n\n# delete\nDELETE /api/:pluralName/:id\n\n```\n\n### Exemplos de Uso\n```javascript\n// Buscar todos os items\nconst response = await fetch('http://localhost:1337/api/items');\nconst data = await response.json();\n\n// Buscar com filtros e população\nconst filtered = await fetch(\n  'http://localhost:1337/api/items...\nTipo: api",
+        "metadata": "{\"requestType\":\"api\",\"keywords\":[\"api-development\"],\"hasCode\":true,\"responseLength\":1823,\"agent\":\"strapi-specialist\",\"agentName\":\"Strapi Specialist\",\"timestamp\":\"2025-06-16T11:44:40.829Z\",\"learningNumber\":20}",
+        "category": "strapi-knowledge",
+        "tags": [
+          "api",
+          "strapi",
+          "conhecimento",
+          "strapi-specialist"
+        ],
+        "created_at": "2025-06-16T11:44:40.830Z",
+        "updated_at": "2025-06-16T11:44:40.830Z"
+      },
+      {
+        "id": "6bbf6402-f01b-4a91-9138-edf6f4dd5c6e",
+        "user_id": "strapi-specialist",
+        "content": "Pergunta: APRENDA: Para habilitar i18n em um Content-Type, vá no Content-Type Builder, selecione o tipo, clique em Advanced Settings e marque Enable localization for this Content-Type.\nResposta: # 📊 Content-Type no Strapi\n\n## 🏗️ Estrutura de Content-Type\n\n```javascript\n// src/api/[nome-do-tipo]/content-types/[nome-do-tipo]/schema.json\n{\n  \"kind\": \"collectionType\", // ou \"singleType\"\n  \"collectionName\": \"items\",\n  \"info\": {\n    \"singularName\": \"item\",\n    \"pluralName\": \"items\",\n    \"displayName\": \"Item\",\n    \"description\": \"Descrição do content-type\"\n  },\n  \"options\": {\n    \"draftAndPublish\": true\n  },\n  \"attributes\": {\n    \"title\": {\n      \"type\": \"string\",\n      \"required\": true,\n   ...\nTipo: content-type",
+        "metadata": "{\"requestType\":\"content-type\",\"keywords\":[\"content-type-design\"],\"hasCode\":true,\"responseLength\":1479,\"agent\":\"strapi-specialist\",\"agentName\":\"Strapi Specialist\",\"timestamp\":\"2025-06-16T11:44:39.816Z\",\"learningNumber\":19}",
+        "category": "strapi-knowledge",
+        "tags": [
+          "content-type",
+          "strapi",
+          "conhecimento",
+          "strapi-specialist"
+        ],
+        "created_at": "2025-06-16T11:44:39.818Z",
+        "updated_at": "2025-06-16T11:44:39.818Z"
+      },
+      {
+        "id": "a9ea0ca9-0aee-4021-87f9-b3f7ccb0f73e",
+        "user_id": "strapi-specialist",
+        "content": "Pergunta: APRENDA: Para habilitar i18n no Strapi, vá em Settings > Global Settings > Internationalization e adicione os locales desejados. Existem mais de 500 locales pré-definidos. Não é possível criar locales customizados.\nResposta: # 🚀 APIs no Strapi\n\n## 📡 REST API\n\n### Endpoints Padrão\n```bash\n# find\nGET /api/:pluralName\n\n# findOne\nGET /api/:pluralName/:id\n\n# create\nPOST /api/:pluralName\n\n# update\nPUT /api/:pluralName/:id\n\n# delete\nDELETE /api/:pluralName/:id\n\n```\n\n### Exemplos de Uso\n```javascript\n// Buscar todos os items\nconst response = await fetch('http://localhost:1337/api/items');\nconst data = await response.json();\n\n// Buscar com filtros e população\nconst filtered = await fetch(\n  'http://localhost:1337/api/items...\nTipo: api",
+        "metadata": "{\"requestType\":\"api\",\"keywords\":[\"api-development\"],\"hasCode\":true,\"responseLength\":1823,\"agent\":\"strapi-specialist\",\"agentName\":\"Strapi Specialist\",\"timestamp\":\"2025-06-16T11:44:38.802Z\",\"learningNumber\":18}",
+        "category": "strapi-knowledge",
+        "tags": [
+          "api",
+          "strapi",
+          "conhecimento",
+          "strapi-specialist"
+        ],
+        "created_at": "2025-06-16T11:44:38.806Z",
+        "updated_at": "2025-06-16T11:44:38.806Z"
+      },
+      {
+        "id": "2cf8f805-9fd2-4034-92cc-d000af341b78",
+        "user_id": "strapi-specialist",
+        "content": "Pergunta: teste simples\nResposta: # 📚 Guia Geral do Strapi\n\n## 🚀 O que é Strapi?\nStrapi é um Headless CMS open-source que permite criar e gerenciar APIs rapidamente.\n\n## 🔑 Conceitos Principais\n\n### Content-Types\n- **Collection Types**: Múltiplas entradas (artigos, produtos)\n- **Single Types**: Entrada única (homepage, configurações)\n\n### Componentes\n- Estruturas reutilizáveis de campos\n- Podem ser usados em múltiplos content-types\n\n### Dynamic Zones\n- Áreas flexíveis que aceitam diferentes componentes\n- Ideal para layouts din...\nTipo: general",
+        "metadata": "{\"requestType\":\"general\",\"keywords\":[],\"hasCode\":true,\"responseLength\":930,\"agent\":\"strapi-specialist\",\"agentName\":\"Strapi Specialist\",\"timestamp\":\"2025-06-16T11:44:06.370Z\",\"learningNumber\":17}",
+        "category": "strapi-knowledge",
+        "tags": [
+          "general",
+          "strapi",
+          "conhecimento",
+          "strapi-specialist"
+        ],
+        "created_at": "2025-06-16T11:44:06.372Z",
+        "updated_at": "2025-06-16T11:44:06.372Z"
+      },
+      {
+        "id": "c500b18d-df04-454c-bac0-48520059f583",
+        "user_id": "strapi-specialist",
+        "content": "Pergunta: MEMORIZE E APRENDA: INTERNACIONALIZAÇÃO (i18n) NO STRAPI - Para publicar conteúdos em múltiplos idiomas: 1) HABILITAR PLUGIN: Settings > Global Settings > Internationalization - adicione locales desejados (mais de 500 pré-definidos, não é possível criar customizados). 2) HABILITAR NO CONTENT-TYPE: No Content-type Builder, marque Internationalization nas configurações avançadas. 3) CRIAR CONTEÚDO VIA API: Locale padrão: POST /api/restaurants {data:{Name:Oplato}}. Locale específico: POST /api/restaurants {data:{Name:Restaurante Exemplo,locale:pt}}. Atualizar versão: PUT /api/restaurants/{documentId}?locale=fr {data:{Name:Nom en Français}}. 4) PUBLICAR POR IDIOMA: Com Draft & Publish, publique cada idioma separadamente: strapi.documents(api::restaurant.restaurant).publish({documentId:abc123,locale:pt}). Use locale:* para publicar todas versões. IMPORTANTE: Cada versão de idioma é um documento separado que precisa ser publicado individualmente.\nResposta: # 📊 Content-Type no Strapi\n\n## 🏗️ Estrutura de Content-Type\n\n```javascript\n// src/api/[nome-do-tipo]/content-types/[nome-do-tipo]/schema.json\n{\n  \"kind\": \"collectionType\", // ou \"singleType\"\n  \"collectionName\": \"items\",\n  \"info\": {\n    \"singularName\": \"item\",\n    \"pluralName\": \"items\",\n    \"displayName\": \"Item\",\n    \"description\": \"Descrição do content-type\"\n  },\n  \"options\": {\n    \"draftAndPublish\": true\n  },\n  \"attributes\": {\n    \"title\": {\n      \"type\": \"string\",\n      \"required\": true,\n   ...\nTipo: content-type",
+        "metadata": "{\"requestType\":\"content-type\",\"keywords\":[\"content-type-design\"],\"hasCode\":true,\"responseLength\":1479,\"agent\":\"strapi-specialist\",\"agentName\":\"Strapi Specialist\",\"timestamp\":\"2025-06-16T11:31:05.887Z\",\"learningNumber\":16}",
+        "category": "strapi-knowledge",
+        "tags": [
+          "content-type",
+          "strapi",
+          "conhecimento",
+          "strapi-specialist"
+        ],
+        "created_at": "2025-06-16T11:31:05.888Z",
+        "updated_at": "2025-06-16T11:31:05.888Z"
+      },
+      {
+        "id": "0944de73-bdf2-4c75-9f06-ae9832a46c2a",
+        "user_id": "strapi-specialist",
+        "content": "Pergunta: APRENDA SOBRE INTERNACIONALIZAÇÃO (i18n) NO STRAPI: Para publicar conteúdos em múltiplos idiomas: 1) HABILITAR PLUGIN: Settings > Global Settings > Internationalization - adicione locales desejados (mais de 500 pré-definidos, não é possível criar customizados). 2) HABILITAR NO CONTENT-TYPE: No Content-type Builder, marque Internationalization nas configurações avançadas. 3) CRIAR CONTEÚDO VIA API: Locale padrão: POST /api/restaurants {data:{Name:Oplato}}. Locale específico: POST /api/restaurants {data:{Name:Restaurante Exemplo,locale:pt}}. Atualizar versão: PUT /api/restaurants/{documentId}?locale=fr {data:{Name:Nom en Français}}. 4) PUBLICAR POR IDIOMA: Com Draft & Publish, publique cada idioma separadamente: strapi.documents(api::restaurant.restaurant).publish({documentId:abc123,locale:pt}). Use locale:* para publicar todas versões. IMPORTANTE: Cada versão de idioma é um documento separado que precisa ser publicado individualmente.\nResposta: # 📊 Content-Type no Strapi\n\n## 🏗️ Estrutura de Content-Type\n\n```javascript\n// src/api/[nome-do-tipo]/content-types/[nome-do-tipo]/schema.json\n{\n  \"kind\": \"collectionType\", // ou \"singleType\"\n  \"collectionName\": \"items\",\n  \"info\": {\n    \"singularName\": \"item\",\n    \"pluralName\": \"items\",\n    \"displayName\": \"Item\",\n    \"description\": \"Descrição do content-type\"\n  },\n  \"options\": {\n    \"draftAndPublish\": true\n  },\n  \"attributes\": {\n    \"title\": {\n      \"type\": \"string\",\n      \"required\": true,\n   ...\nTipo: content-type",
+        "metadata": "{\"requestType\":\"content-type\",\"keywords\":[\"content-type-design\"],\"hasCode\":true,\"responseLength\":1479,\"agent\":\"strapi-specialist\",\"agentName\":\"Strapi Specialist\",\"timestamp\":\"2025-06-16T11:29:58.659Z\",\"learningNumber\":15}",
+        "category": "strapi-knowledge",
+        "tags": [
+          "content-type",
+          "strapi",
+          "conhecimento",
+          "strapi-specialist"
+        ],
+        "created_at": "2025-06-16T11:29:58.662Z",
+        "updated_at": "2025-06-16T11:29:58.662Z"
+      },
+      {
+        "id": "2c291e86-82c4-4d81-b2ff-fb9085a87a14",
+        "user_id": "strapi-specialist",
+        "content": "Pergunta: Como funciona o webhook CrewAI para enviar posts automatizados para o Strapi?\nResposta: # 🚀 APIs no Strapi\n\n## 📡 REST API\n\n### Endpoints Padrão\n```bash\n# find\nGET /api/:pluralName\n\n# findOne\nGET /api/:pluralName/:id\n\n# create\nPOST /api/:pluralName\n\n# update\nPUT /api/:pluralName/:id\n\n# delete\nDELETE /api/:pluralName/:id\n\n```\n\n### Exemplos de Uso\n```javascript\n// Buscar todos os items\nconst response = await fetch('http://localhost:1337/api/items');\nconst data = await response.json();\n\n// Buscar com filtros e população\nconst filtered = await fetch(\n  'http://localhost:1337/api/items...\nTipo: api",
+        "metadata": "{\"requestType\":\"api\",\"keywords\":[\"api-development\"],\"hasCode\":true,\"responseLength\":1823,\"agent\":\"strapi-specialist\",\"agentName\":\"Strapi Specialist\",\"timestamp\":\"2025-06-16T10:26:18.462Z\",\"learningNumber\":1}",
+        "category": "strapi-knowledge",
+        "tags": [
+          "api",
+          "strapi",
+          "conhecimento",
+          "strapi-specialist"
+        ],
+        "created_at": "2025-06-16T10:26:18.464Z",
+        "updated_at": "2025-06-16T10:26:18.464Z"
+      },
+      {
+        "id": "c5cfafb8-64cb-490c-b7cb-1d44f04b1707",
+        "user_id": "strapi-specialist",
+        "content": "Pergunta: APRENDA SOBRE WEBHOOK CREWAI-STRAPI: O webhook https://webhook-crewai.agentesintegrados.com/webhook/strapi é usado para receber posts automatizados dos agentes CrewAI. FUNCIONAMENTO: 1) Agentes geram conteúdo usando IA. 2) Enviam POST para o webhook com formato: {title, content, author, tags, category}. 3) Webhook processa e envia para Strapi API. 4) Posts aparecem automaticamente no frontend. CONFIGURAÇÃO: O webhook já está configurado e rodando em produção. Aceita posts via HTTPS com autenticação Bearer token. INTEGRAÇÃO: framework_crewai/blog_crew/webhook_server.py recebe os posts e usa strapi_integration.py para salvar no Strapi.\nResposta: # 🚀 APIs no Strapi\n\n## 📡 REST API\n\n### Endpoints Padrão\n```bash\n# find\nGET /api/:pluralName\n\n# findOne\nGET /api/:pluralName/:id\n\n# create\nPOST /api/:pluralName\n\n# update\nPUT /api/:pluralName/:id\n\n# delete\nDELETE /api/:pluralName/:id\n\n```\n\n### Exemplos de Uso\n```javascript\n// Buscar todos os items\nconst response = await fetch('http://localhost:1337/api/items');\nconst data = await response.json();\n\n// Buscar com filtros e população\nconst filtered = await fetch(\n  'http://localhost:1337/api/items...\nTipo: api",
+        "metadata": "{\"requestType\":\"api\",\"keywords\":[\"api-development\"],\"hasCode\":true,\"responseLength\":1823,\"agent\":\"strapi-specialist\",\"agentName\":\"Strapi Specialist\",\"timestamp\":\"2025-06-16T10:24:39.502Z\",\"learningNumber\":1}",
+        "category": "strapi-knowledge",
+        "tags": [
+          "api",
+          "strapi",
+          "conhecimento",
+          "strapi-specialist"
+        ],
+        "created_at": "2025-06-16T10:24:39.506Z",
+        "updated_at": "2025-06-16T10:24:39.506Z"
+      },
+      {
+        "id": "17b1cf64-1a14-454c-83f5-59586450fbdd",
+        "user_id": "strapi-specialist",
+        "content": "Pergunta: Como otimizar a criação de posts em lote no Strapi v5?\nResposta: # 🚀 APIs no Strapi\n\n## 📡 REST API\n\n### Endpoints Padrão\n```bash\n# find\nGET /api/:pluralName\n\n# findOne\nGET /api/:pluralName/:id\n\n# create\nPOST /api/:pluralName\n\n# update\nPUT /api/:pluralName/:id\n\n# delete\nDELETE /api/:pluralName/:id\n\n```\n\n### Exemplos de Uso\n```javascript\n// Buscar todos os items\nconst response = await fetch('http://localhost:1337/api/items');\nconst data = await response.json();\n\n// Buscar com filtros e população\nconst filtered = await fetch(\n  'http://localhost:1337/api/items...\nTipo: api",
+        "metadata": "{\"requestType\":\"api\",\"keywords\":[\"api-development\"],\"hasCode\":true,\"responseLength\":1823,\"agent\":\"strapi-specialist\",\"agentName\":\"Strapi Specialist\",\"timestamp\":\"2025-06-16T09:36:50.692Z\",\"learningNumber\":14}",
+        "category": "strapi-knowledge",
+        "tags": [
+          "api",
+          "strapi",
+          "conhecimento",
+          "strapi-specialist"
+        ],
+        "created_at": "2025-06-16T09:36:50.693Z",
+        "updated_at": "2025-06-16T09:36:50.693Z"
+      },
+      {
+        "id": "b1f22b2a-acec-4a9a-89a7-2140a43586b9",
+        "user_id": "strapi-specialist",
+        "content": "Pergunta: Como otimizar a criação de posts em lote no Strapi v5?\nResposta: # 🚀 APIs no Strapi\n\n## 📡 REST API\n\n### Endpoints Padrão\n```bash\n# find\nGET /api/:pluralName\n\n# findOne\nGET /api/:pluralName/:id\n\n# create\nPOST /api/:pluralName\n\n# update\nPUT /api/:pluralName/:id\n\n# delete\nDELETE /api/:pluralName/:id\n\n```\n\n### Exemplos de Uso\n```javascript\n// Buscar todos os items\nconst response = await fetch('http://localhost:1337/api/items');\nconst data = await response.json();\n\n// Buscar com filtros e população\nconst filtered = await fetch(\n  'http://localhost:1337/api/items...\nTipo: api",
+        "metadata": "{\"requestType\":\"api\",\"keywords\":[\"api-development\"],\"hasCode\":true,\"responseLength\":1823,\"agent\":\"strapi-specialist\",\"agentName\":\"Strapi Specialist\",\"timestamp\":\"2025-06-16T09:36:22.105Z\",\"learningNumber\":13}",
+        "category": "strapi-knowledge",
+        "tags": [
+          "api",
+          "strapi",
+          "conhecimento",
+          "strapi-specialist"
+        ],
+        "created_at": "2025-06-16T09:36:22.106Z",
+        "updated_at": "2025-06-16T09:36:22.106Z"
+      },
+      {
+        "id": "5006b76f-c99a-4ec6-93be-51589c252729",
+        "user_id": "strapi-specialist",
+        "content": "Pergunta: SOLUÇÃO CONTENT-TYPES STRAPI V5: Para fazer os content-types aparecerem no admin e funcionarem, é necessário criar 4 arquivos: 1) routes com createCoreRouter, 2) controllers com createCoreController, 3) services com createCoreService, 4) index.ts exportando todos. Depois fazer build e restart. O comando ts:generate-types confirma se foram detectados.\nResposta: # 📊 Content-Type no Strapi\n\n## 🏗️ Estrutura de Content-Type\n\n```javascript\n// src/api/[nome-do-tipo]/content-types/[nome-do-tipo]/schema.json\n{\n  \"kind\": \"collectionType\", // ou \"singleType\"\n  \"collectionName\": \"items\",\n  \"info\": {\n    \"singularName\": \"item\",\n    \"pluralName\": \"items\",\n    \"displayName\": \"Item\",\n    \"description\": \"Descrição do content-type\"\n  },\n  \"options\": {\n    \"draftAndPublish\": true\n  },\n  \"attributes\": {\n    \"title\": {\n      \"type\": \"string\",\n      \"required\": true,\n   ...\nTipo: content-type",
+        "metadata": "{\"requestType\":\"content-type\",\"keywords\":[\"content-type-design\"],\"hasCode\":true,\"responseLength\":1479,\"agent\":\"strapi-specialist\",\"agentName\":\"Strapi Specialist\",\"timestamp\":\"2025-06-16T09:32:17.759Z\",\"learningNumber\":12}",
+        "category": "strapi-knowledge",
+        "tags": [
+          "content-type",
+          "strapi",
+          "conhecimento",
+          "strapi-specialist"
+        ],
+        "created_at": "2025-06-16T09:32:17.760Z",
+        "updated_at": "2025-06-16T09:32:17.760Z"
+      },
+      {
+        "id": "c11e6aeb-a926-40a7-ab7b-fab34e60d84a",
+        "user_id": "strapi-specialist",
+        "content": "Pergunta: SUCESSO COMPLETO: Integração Strapi funcionando perfeitamente. Posts sendo criados com sucesso. Guardian pode supervisionar o processo.\nResposta: # 🚀 APIs no Strapi\n\n## 📡 REST API\n\n### Endpoints Padrão\n```bash\n# find\nGET /api/:pluralName\n\n# findOne\nGET /api/:pluralName/:id\n\n# create\nPOST /api/:pluralName\n\n# update\nPUT /api/:pluralName/:id\n\n# delete\nDELETE /api/:pluralName/:id\n\n```\n\n### Exemplos de Uso\n```javascript\n// Buscar todos os items\nconst response = await fetch('http://localhost:1337/api/items');\nconst data = await response.json();\n\n// Buscar com filtros e população\nconst filtered = await fetch(\n  'http://localhost:1337/api/items...\nTipo: api",
+        "metadata": "{\"requestType\":\"api\",\"keywords\":[\"api-development\"],\"hasCode\":true,\"responseLength\":1823,\"agent\":\"strapi-specialist\",\"agentName\":\"Strapi Specialist\",\"timestamp\":\"2025-06-16T09:30:16.610Z\",\"learningNumber\":11}",
+        "category": "strapi-knowledge",
+        "tags": [
+          "api",
+          "strapi",
+          "conhecimento",
+          "strapi-specialist"
+        ],
+        "created_at": "2025-06-16T09:30:16.611Z",
+        "updated_at": "2025-06-16T09:30:16.611Z"
+      },
+      {
+        "id": "92d4edb6-a829-4528-9f19-b419082da18d",
+        "user_id": "strapi-specialist",
+        "content": "Pergunta: VALIDAÇÃO STRAPI - GUIA COMPLETO: Use Zod ou Yup para validar ANTES de enviar. EXEMPLO TRATAMENTO DE ERRO: if(error.response?.data?.error) { const msg = error.response.data.error.message; if(msg.includes(\"required\")) return \"Campo obrigatório\"; if(msg.includes(\"must be a number\")) return \"Deve ser número\"; }. SEMPRE: 1) Validar tipos no frontend 2) Converter strings para números quando necessário 3) Verificar se relações (IDs) existem 4) Respeitar minLength/maxLength 5) Tratar arrays de errors.details. DICA: Crie um errorHandler.ts centralizado para mapear erros técnicos em mensagens amigáveis.\nResposta: # 🚀 APIs no Strapi\n\n## 📡 REST API\n\n### Endpoints Padrão\n```bash\n# find\nGET /api/:pluralName\n\n# findOne\nGET /api/:pluralName/:id\n\n# create\nPOST /api/:pluralName\n\n# update\nPUT /api/:pluralName/:id\n\n# delete\nDELETE /api/:pluralName/:id\n\n```\n\n### Exemplos de Uso\n```javascript\n// Buscar todos os items\nconst response = await fetch('http://localhost:1337/api/items');\nconst data = await response.json();\n\n// Buscar com filtros e população\nconst filtered = await fetch(\n  'http://localhost:1337/api/items...\nTipo: api",
+        "metadata": "{\"requestType\":\"api\",\"keywords\":[\"api-development\"],\"hasCode\":true,\"responseLength\":1823,\"agent\":\"strapi-specialist\",\"agentName\":\"Strapi Specialist\",\"timestamp\":\"2025-06-16T09:23:20.114Z\",\"learningNumber\":10}",
+        "category": "strapi-knowledge",
+        "tags": [
+          "api",
+          "strapi",
+          "conhecimento",
+          "strapi-specialist"
+        ],
+        "created_at": "2025-06-16T09:23:20.116Z",
+        "updated_at": "2025-06-16T09:23:20.116Z"
+      },
+      {
+        "id": "9902752f-070e-4704-a399-691bca144fa0",
+        "user_id": "strapi-specialist",
+        "content": "Pergunta: APRENDIZADO INTEGRAÇÃO STRAPI-FRONTEND-AGENTES: 1) Content-types Post e Article criados com estrutura correta no Strapi v5 2) Frontend Next.js usa strapiClient.ts para consumir a API 3) Agentes automatizados (CrewAI) enviam posts via strapi_integration.py 4) Guardian supervisiona todo o processo de criação de conteúdo 5) Formato de dados: sempre enviar dentro de {data: {...}} 6) Scripts disponíveis: strapi-post-manager.js para Node.js e strapi_integration.py para Python 7) Webhook server disponível para receber posts de agentes em tempo real\nResposta: # 📊 Content-Type no Strapi\n\n## 🏗️ Estrutura de Content-Type\n\n```javascript\n// src/api/[nome-do-tipo]/content-types/[nome-do-tipo]/schema.json\n{\n  \"kind\": \"collectionType\", // ou \"singleType\"\n  \"collectionName\": \"items\",\n  \"info\": {\n    \"singularName\": \"item\",\n    \"pluralName\": \"items\",\n    \"displayName\": \"Item\",\n    \"description\": \"Descrição do content-type\"\n  },\n  \"options\": {\n    \"draftAndPublish\": true\n  },\n  \"attributes\": {\n    \"title\": {\n      \"type\": \"string\",\n      \"required\": true,\n   ...\nTipo: content-type",
+        "metadata": "{\"requestType\":\"content-type\",\"keywords\":[\"content-type-design\"],\"hasCode\":true,\"responseLength\":1479,\"agent\":\"strapi-specialist\",\"agentName\":\"Strapi Specialist\",\"timestamp\":\"2025-06-16T09:23:16.076Z\",\"learningNumber\":9}",
+        "category": "strapi-knowledge",
+        "tags": [
+          "content-type",
+          "strapi",
+          "conhecimento",
+          "strapi-specialist"
+        ],
+        "created_at": "2025-06-16T09:23:16.077Z",
+        "updated_at": "2025-06-16T09:23:16.077Z"
+      },
+      {
+        "id": "057f7e88-8b8d-473a-8d89-5f9e44cde35c",
+        "user_id": "strapi-specialist",
+        "content": "Pergunta: APRENDIZADO: Configuração de permissões para content-types Post e Article no Strapi v5: 1) No Admin Panel, ir em Settings > Roles 2) Editar Public role para acesso sem autenticação ou Authenticated para usuários logados 3) Marcar as permissões: find, findOne para leitura; create, update, delete para escrita 4) Para API tokens, ir em Settings > API Tokens e definir permissões específicas por content-type 5) Salvar as configurações. Os endpoints ficarão disponíveis em /api/posts e /api/articles\nResposta: # 📊 Content-Type no Strapi\n\n## 🏗️ Estrutura de Content-Type\n\n```javascript\n// src/api/[nome-do-tipo]/content-types/[nome-do-tipo]/schema.json\n{\n  \"kind\": \"collectionType\", // ou \"singleType\"\n  \"collectionName\": \"items\",\n  \"info\": {\n    \"singularName\": \"item\",\n    \"pluralName\": \"items\",\n    \"displayName\": \"Item\",\n    \"description\": \"Descrição do content-type\"\n  },\n  \"options\": {\n    \"draftAndPublish\": true\n  },\n  \"attributes\": {\n    \"title\": {\n      \"type\": \"string\",\n      \"required\": true,\n   ...\nTipo: content-type",
+        "metadata": "{\"requestType\":\"content-type\",\"keywords\":[\"content-type-design\"],\"hasCode\":true,\"responseLength\":1479,\"agent\":\"strapi-specialist\",\"agentName\":\"Strapi Specialist\",\"timestamp\":\"2025-06-16T09:22:54.876Z\",\"learningNumber\":8}",
+        "category": "strapi-knowledge",
+        "tags": [
+          "content-type",
+          "strapi",
+          "conhecimento",
+          "strapi-specialist"
+        ],
+        "created_at": "2025-06-16T09:22:54.878Z",
+        "updated_at": "2025-06-16T09:22:54.878Z"
+      },
+      {
+        "id": "07371d63-fc76-4980-9641-a26ca42eda78",
+        "user_id": "strapi-specialist",
+        "content": "Pergunta: APRENDIZADO: Para criar um API token no Strapi v5: 1) Acessar http://localhost:1339/admin 2) Ir em Settings > API Tokens 3) Clicar em Create new API Token 4) Dar um nome ao token 5) Selecionar tipo Full-access para desenvolvimento 6) Definir duração (unlimited para dev) 7) Salvar e copiar o token gerado. O token deve ser usado no header Authorization: Bearer SEU_TOKEN\nResposta: # 🚀 APIs no Strapi\n\n## 📡 REST API\n\n### Endpoints Padrão\n```bash\n# find\nGET /api/:pluralName\n\n# findOne\nGET /api/:pluralName/:id\n\n# create\nPOST /api/:pluralName\n\n# update\nPUT /api/:pluralName/:id\n\n# delete\nDELETE /api/:pluralName/:id\n\n```\n\n### Exemplos de Uso\n```javascript\n// Buscar todos os items\nconst response = await fetch('http://localhost:1337/api/items');\nconst data = await response.json();\n\n// Buscar com filtros e população\nconst filtered = await fetch(\n  'http://localhost:1337/api/items...\nTipo: api",
+        "metadata": "{\"requestType\":\"api\",\"keywords\":[\"api-development\"],\"hasCode\":true,\"responseLength\":1823,\"agent\":\"strapi-specialist\",\"agentName\":\"Strapi Specialist\",\"timestamp\":\"2025-06-16T09:22:35.958Z\",\"learningNumber\":7}",
+        "category": "strapi-knowledge",
+        "tags": [
+          "api",
+          "strapi",
+          "conhecimento",
+          "strapi-specialist"
+        ],
+        "created_at": "2025-06-16T09:22:35.958Z",
+        "updated_at": "2025-06-16T09:22:35.958Z"
+      },
+      {
+        "id": "c4ad896d-7695-4052-865b-cfa65ce44306",
+        "user_id": "strapi-specialist",
+        "content": "Pergunta: Passo a passo para criar um API token no Strapi v5 Admin Panel. Preciso do token para autenticar requisições do frontend Next.js aos endpoints /api/posts e /api/articles.\nResposta: # 🚀 APIs no Strapi\n\n## 📡 REST API\n\n### Endpoints Padrão\n```bash\n# find\nGET /api/:pluralName\n\n# findOne\nGET /api/:pluralName/:id\n\n# create\nPOST /api/:pluralName\n\n# update\nPUT /api/:pluralName/:id\n\n# delete\nDELETE /api/:pluralName/:id\n\n```\n\n### Exemplos de Uso\n```javascript\n// Buscar todos os items\nconst response = await fetch('http://localhost:1337/api/items');\nconst data = await response.json();\n\n// Buscar com filtros e população\nconst filtered = await fetch(\n  'http://localhost:1337/api/items...\nTipo: api",
+        "metadata": "{\"requestType\":\"api\",\"keywords\":[\"api-development\"],\"hasCode\":true,\"responseLength\":1823,\"agent\":\"strapi-specialist\",\"agentName\":\"Strapi Specialist\",\"timestamp\":\"2025-06-16T09:22:19.276Z\",\"learningNumber\":6}",
+        "category": "strapi-knowledge",
+        "tags": [
+          "api",
+          "strapi",
+          "conhecimento",
+          "strapi-specialist"
+        ],
+        "created_at": "2025-06-16T09:22:19.278Z",
+        "updated_at": "2025-06-16T09:22:19.278Z"
+      },
+      {
+        "id": "7fa279c1-a653-4929-93e2-dc22089c721e",
+        "user_id": "strapi-specialist",
+        "content": "Pergunta: Como gerar um token de API no Strapi v5 para integrar com o frontend Next.js? Preciso configurar permissões para os content-types Post e Article.\nResposta: # 📊 Content-Type no Strapi\n\n## 🏗️ Estrutura de Content-Type\n\n```javascript\n// src/api/[nome-do-tipo]/content-types/[nome-do-tipo]/schema.json\n{\n  \"kind\": \"collectionType\", // ou \"singleType\"\n  \"collectionName\": \"items\",\n  \"info\": {\n    \"singularName\": \"item\",\n    \"pluralName\": \"items\",\n    \"displayName\": \"Item\",\n    \"description\": \"Descrição do content-type\"\n  },\n  \"options\": {\n    \"draftAndPublish\": true\n  },\n  \"attributes\": {\n    \"title\": {\n      \"type\": \"string\",\n      \"required\": true,\n   ...\nTipo: content-type",
+        "metadata": "{\"requestType\":\"content-type\",\"keywords\":[\"content-type-design\"],\"hasCode\":true,\"responseLength\":1479,\"agent\":\"strapi-specialist\",\"agentName\":\"Strapi Specialist\",\"timestamp\":\"2025-06-16T09:22:04.731Z\",\"learningNumber\":5}",
+        "category": "strapi-knowledge",
+        "tags": [
+          "content-type",
+          "strapi",
+          "conhecimento",
+          "strapi-specialist"
+        ],
+        "created_at": "2025-06-16T09:22:04.732Z",
+        "updated_at": "2025-06-16T09:22:04.732Z"
+      },
+      {
+        "id": "1d132478-534b-4a4d-9648-1d961746fee3",
+        "user_id": "strapi-specialist",
+        "content": "Pergunta: APRENDA SOBRE VALIDAÇÃO DE DADOS NO STRAPI: O Strapi valida TODOS os dados enviados via POST/PUT contra o schema.json do Content-Type. ERROS COMUNS: 1) Campo required ausente = 400 Bad Request. 2) Tipo incorreto (string onde espera number) = 400. 3) Validações não atendidas (minLength, max) = 400. 4) Relação com ID inexistente = 400. 5) Campos extras são IGNORADOS por padrão. RESPOSTA DE ERRO PADRÃO: {\"error\": {\"status\": 400, \"name\": \"ValidationError\", \"message\": \"campo é obrigatório\", \"details\": {\"errors\": [...]}}}. COMO EVITAR: Sempre validar dados no frontend antes de enviar, usar TypeScript para tipos seguros, implementar tratamento de erros para mostrar mensagens amigáveis ao usuário.\nResposta: # 📊 Content-Type no Strapi\n\n## 🏗️ Estrutura de Content-Type\n\n```javascript\n// src/api/[nome-do-tipo]/content-types/[nome-do-tipo]/schema.json\n{\n  \"kind\": \"collectionType\", // ou \"singleType\"\n  \"collectionName\": \"items\",\n  \"info\": {\n    \"singularName\": \"item\",\n    \"pluralName\": \"items\",\n    \"displayName\": \"Item\",\n    \"description\": \"Descrição do content-type\"\n  },\n  \"options\": {\n    \"draftAndPublish\": true\n  },\n  \"attributes\": {\n    \"title\": {\n      \"type\": \"string\",\n      \"required\": true,\n   ...\nTipo: content-type",
+        "metadata": "{\"requestType\":\"content-type\",\"keywords\":[\"content-type-design\"],\"hasCode\":true,\"responseLength\":1479,\"agent\":\"strapi-specialist\",\"agentName\":\"Strapi Specialist\",\"timestamp\":\"2025-06-16T09:21:35.295Z\",\"learningNumber\":4}",
+        "category": "strapi-knowledge",
+        "tags": [
+          "content-type",
+          "strapi",
+          "conhecimento",
+          "strapi-specialist"
+        ],
+        "created_at": "2025-06-16T09:21:35.295Z",
+        "updated_at": "2025-06-16T09:21:35.295Z"
+      },
+      {
+        "id": "ee2f386c-00cf-4164-b8b2-9bf02dd96e55",
+        "user_id": "strapi-specialist",
+        "content": "Pergunta: Aprenda sobre is-owner policy no Strapi v5: Implementamos usando middlewares em vez de policies. O middleware verifica se user.id === entry.author.id antes de permitir update/delete. Código fica em src/api/[api-name]/middlewares/isOwner.js. Nas rotas, configuramos middlewares: [\"api::post.is-owner\"] para update e delete. GET e POST continuam públicos.\nResposta: # 🚀 APIs no Strapi\n\n## 📡 REST API\n\n### Endpoints Padrão\n```bash\n# find\nGET /api/:pluralName\n\n# findOne\nGET /api/:pluralName/:id\n\n# create\nPOST /api/:pluralName\n\n# update\nPUT /api/:pluralName/:id\n\n# delete\nDELETE /api/:pluralName/:id\n\n```\n\n### Exemplos de Uso\n```javascript\n// Buscar todos os items\nconst response = await fetch('http://localhost:1337/api/items');\nconst data = await response.json();\n\n// Buscar com filtros e população\nconst filtered = await fetch(\n  'http://localhost:1337/api/items...\nTipo: api",
+        "metadata": "{\"requestType\":\"api\",\"keywords\":[\"api-development\"],\"hasCode\":true,\"responseLength\":1823,\"agent\":\"strapi-specialist\",\"agentName\":\"Strapi Specialist\",\"timestamp\":\"2025-06-16T09:20:21.102Z\",\"learningNumber\":3}",
+        "category": "strapi-knowledge",
+        "tags": [
+          "api",
+          "strapi",
+          "conhecimento",
+          "strapi-specialist"
+        ],
+        "created_at": "2025-06-16T09:20:21.103Z",
+        "updated_at": "2025-06-16T09:20:21.103Z"
+      },
+      {
+        "id": "0b27a3ec-0171-49dd-8082-c48ca03e24e4",
+        "user_id": "strapi-specialist",
+        "content": "Pergunta: Aprenda sobre a integração Strapi v5 com Next.js que estamos fazendo: 1) Usamos Content-Types para estruturar dados. 2) O Content-Type Post precisa campos: title, slug, content, excerpt, publishedAt, author, featuredImage. 3) Implementamos cliente TypeScript nativo em strapiClient.ts. 4) Token API configurado: 87e5f7e4c6917d39415f669f077cafa528e26c3aff065206805c82daa7e6ede2941bb783992ab6a8fc0f31f45b239dce9915b8a161d41ff312529464da6f9501218cb15b375253cfad94df96fb61286ca4e96558dfc37d36bbdb58214fd7bf76dcec1c61a3c7c1d9d00d541dc14c7d158463432f252708b9b421a02f65e0defb. 5) URL do Strapi: https://ale-blog.agentesintegrados.com. 6) Erro 405 ocorre quando Content-Type não existe.\nResposta: # 📊 Content-Type no Strapi\n\n## 🏗️ Estrutura de Content-Type\n\n```javascript\n// src/api/[nome-do-tipo]/content-types/[nome-do-tipo]/schema.json\n{\n  \"kind\": \"collectionType\", // ou \"singleType\"\n  \"collectionName\": \"items\",\n  \"info\": {\n    \"singularName\": \"item\",\n    \"pluralName\": \"items\",\n    \"displayName\": \"Item\",\n    \"description\": \"Descrição do content-type\"\n  },\n  \"options\": {\n    \"draftAndPublish\": true\n  },\n  \"attributes\": {\n    \"title\": {\n      \"type\": \"string\",\n      \"required\": true,\n   ...\nTipo: content-type",
+        "metadata": "{\"requestType\":\"content-type\",\"keywords\":[\"content-type-design\"],\"hasCode\":true,\"responseLength\":1479,\"agent\":\"strapi-specialist\",\"agentName\":\"Strapi Specialist\",\"timestamp\":\"2025-06-16T09:19:57.129Z\",\"learningNumber\":2}",
+        "category": "strapi-knowledge",
+        "tags": [
+          "content-type",
+          "strapi",
+          "conhecimento",
+          "strapi-specialist"
+        ],
+        "created_at": "2025-06-16T09:19:57.130Z",
+        "updated_at": "2025-06-16T09:19:57.130Z"
+      },
+      {
+        "id": "2c951efb-e167-4613-8e73-516f82780533",
+        "user_id": "strapi-specialist",
+        "content": "Pergunta: Como implementar webhooks no Strapi?\nResposta: # 🚀 APIs no Strapi\n\n## 📡 REST API\n\n### Endpoints Padrão\n```bash\n# find\nGET /api/:pluralName\n\n# findOne\nGET /api/:pluralName/:id\n\n# create\nPOST /api/:pluralName\n\n# update\nPUT /api/:pluralName/:id\n\n# delete\nDELETE /api/:pluralName/:id\n\n```\n\n### Exemplos de Uso\n```javascript\n// Buscar todos os items\nconst response = await fetch('http://localhost:1337/api/items');\nconst data = await response.json();\n\n// Buscar com filtros e população\nconst filtered = await fetch(\n  'http://localhost:1337/api/items...\nTipo: api",
+        "metadata": "{\"requestType\":\"api\",\"keywords\":[\"api-development\"],\"hasCode\":true,\"responseLength\":1823,\"agent\":\"strapi-specialist\",\"agentName\":\"Strapi Specialist\",\"timestamp\":\"2025-06-16T09:17:44.672Z\",\"learningNumber\":1}",
+        "category": "strapi-knowledge",
+        "tags": [
+          "api",
+          "strapi",
+          "conhecimento",
+          "strapi-specialist"
+        ],
+        "created_at": "2025-06-16T09:17:44.673Z",
+        "updated_at": "2025-06-16T09:17:44.673Z"
+      },
+      {
+        "id": "5f1c5fba-fbb4-4bc2-a785-758dc95737b7",
+        "user_id": "strapi-specialist",
+        "content": "Test memory from Node.js",
+        "metadata": "{\"test\":true}",
+        "category": "strapi-knowledge",
+        "tags": [
+          "test",
+          "nodejs"
+        ],
+        "created_at": "2025-06-16T09:08:55.709Z",
+        "updated_at": "2025-06-16T09:08:55.709Z"
+      }
+    ]
+  },
+  "totalCount": 26,
+  "lastUpdated": "2025-06-16T12:45:11.988Z"
+}

@@ -1,0 +1,89 @@
+{
+  "memories": {
+    "test-user": [
+      {
+        "id": "ddd24285-90f8-4a39-8165-e2f4d6a9e311",
+        "user_id": "test-user",
+        "content": "Teste de memória via API",
+        "metadata": {
+          "type": "test",
+          "timestamp": "2025-06-14T16:25:58Z"
+        },
+        "category": "testing",
+        "tags": [
+          "test",
+          "api"
+        ],
+        "created_at": "2025-06-14T16:25:58.376Z",
+        "updated_at": "2025-06-14T16:25:58.376Z"
+      },
+      {
+        "id": "8c283eef-610b-47b6-9b79-765c68015754",
+        "user_id": "test-user",
+        "content": "Teste de gravação de memória após correção de permissões",
+        "metadata": {
+          "test": true
+        },
+        "created_at": "2025-06-15T01:03:12.378Z",
+        "updated_at": "2025-06-15T01:03:12.378Z"
+      }
+    ],
+    "guardian-agent-001": [
+      {
+        "id": "838ba9d6-c85c-43b0-bc16-7ece2c12e790",
+        "user_id": "guardian-agent-001",
+        "content": "Análise de organização do código realizada em 2025-06-15. Detectei que o diretório /scripts estava desorganizado com 15 arquivos soltos na raiz. Reorganizei em subdiretórios: /scripts/docker para scripts Docker (6 arquivos), /scripts/patches para patches (3 arquivos), e /scripts/utilities para utilitários gerais (6 arquivos). Esta organização segue as diretrizes do CLAUDE.md e melhora a manutenibilidade do projeto.",
+        "metadata": {
+          "agent": "guardian",
+          "action": "code_organization_analysis",
+          "timestamp": "2025-06-15T10:30:00Z",
+          "files_reorganized": 15,
+          "directories_created": [
+            "scripts/docker",
+            "scripts/patches",
+            "scripts/utilities"
+          ],
+          "compliance_score": 95,
+          "issues_found": [
+            "scripts soltos na raiz",
+            "falta de categorização"
+          ],
+          "improvements": [
+            "estrutura hierárquica clara",
+            "facilita manutenção",
+            "segue padrões CLAUDE.md"
+          ]
+        },
+        "created_at": "2025-06-15T01:24:30.455Z",
+        "updated_at": "2025-06-15T01:24:30.455Z"
+      },
+      {
+        "id": "3f22a2b1-8300-47fc-ab96-ce3d00595e80",
+        "user_id": "guardian-agent-001",
+        "content": "Análise de segurança realizada em componentes React. Identificados 3 componentes usando dangerouslySetInnerHTML sem sanitização adequada em: /src/components/BlogPost.tsx, /src/components/Comment.tsx e /src/components/UserProfile.tsx. Implementei sanitização usando DOMPurify em todos os casos. Também detectei 2 vulnerabilidades XSS potenciais em formulários sem validação adequada. Todas as correções foram aplicadas seguindo as melhores práticas de segurança OWASP.",
+        "metadata": {
+          "agent": "guardian",
+          "action": "security_analysis",
+          "timestamp": "2025-06-15T11:45:00Z",
+          "vulnerabilities_found": 5,
+          "severity": "high",
+          "components_fixed": [
+            "BlogPost.tsx",
+            "Comment.tsx",
+            "UserProfile.tsx"
+          ],
+          "security_measures": [
+            "DOMPurify implementation",
+            "input validation",
+            "XSS prevention"
+          ],
+          "owasp_compliance": true
+        },
+        "created_at": "2025-06-15T01:24:44.516Z",
+        "updated_at": "2025-06-15T01:24:44.516Z"
+      }
+    ]
+  },
+  "totalCount": 4,
+  "lastUpdated": "2025-06-15T04:24:07.034Z"
+}

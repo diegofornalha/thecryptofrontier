@@ -11,6 +11,11 @@
     "draftAndPublish": true,
     "populateCreatorFields": true
   },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
   "attributes": {
     "title": {
       "type": "string",
