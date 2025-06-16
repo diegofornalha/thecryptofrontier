@@ -79,7 +79,7 @@ export default function CryptoNewsCard({
         {/* Content */}
         <div className="flex-1 min-w-0">
           {/* Category */}
-          {category && (
+          {category && category.title && (
             <Link 
               href={`/categoria/${category.slug}`}
               className="inline-block text-xs font-bold text-[#4db2ec] uppercase tracking-wide mb-2 hover:underline"
@@ -127,7 +127,7 @@ export default function CryptoNewsCard({
           />
           
           {/* Category Badge */}
-          {category && (
+          {category && category.title && (
             <div className="absolute top-3 left-3">
               <span className="bg-[#4db2ec] text-white text-xs font-bold px-3 py-1 rounded uppercase">
                 {category.title}
