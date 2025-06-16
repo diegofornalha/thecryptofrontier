@@ -9,8 +9,8 @@ if [ -z "$STRAPI_URL" ] || [ -z "$STRAPI_API_TOKEN" ]; then
     exit 1
 fi
 
-if [ -z "$OPENAI_API_KEY" ] && [ -z "$GEMINI_API_KEY" ]; then
-    echo "❌ Erro: Pelo menos uma API key (OPENAI_API_KEY ou GEMINI_API_KEY) é necessária!"
+if [ -z "$OPENAI_API_KEY" ] && [ -z "$GOOGLE_API_KEY" ]; then
+    echo "❌ Erro: Pelo menos uma API key (OPENAI_API_KEY ou GOOGLE_API_KEY) é necessária!"
     exit 1
 fi
 

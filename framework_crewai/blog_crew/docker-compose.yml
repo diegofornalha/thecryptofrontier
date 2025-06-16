@@ -12,7 +12,7 @@ services:
       
       # APIs
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       
       # Configurações do Pipeline
       - ARTICLE_LIMIT=${ARTICLE_LIMIT:-10}
