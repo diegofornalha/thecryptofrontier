@@ -3,27 +3,25 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { ChevronDown } from 'lucide-react';
 const languages = [
+    { code: 'pt', name: 'Português', flag: '🇧🇷' },
     { code: 'en', name: 'English', flag: '🇺🇸' },
-    { code: 'br', name: 'Português', flag: '🇧🇷' },
     { code: 'es', name: 'Español', flag: '🇪🇸' }
 ];
 export default function LanguageSwitcher() {
     const router = useRouter();
     const pathname = usePathname();
     const [isOpen, setIsOpen] = useState(false);
-    const [currentLang, setCurrentLang] = useState('en');
+    const [currentLang, setCurrentLang] = useState('pt');
     const dropdownRef = useRef(null);
     // Detectar idioma atual da URL
     useEffect(() => {
         const pathSegments = pathname.split('/');
         const langCode = pathSegments[1];
-        // Check if it's a locale path
-        if (['br', 'es'].includes(langCode)) {
+        if (languages.some(lang => lang.code === langCode)) {
             setCurrentLang(langCode);
         }
         else {
-            // Default to English for paths without locale prefix
-            setCurrentLang('en');
+            setCurrentLang('pt'); // Padrão para português
         }
     }, [pathname]);
     // Fechar dropdown ao clicar fora
@@ -43,27 +41,16 @@ export default function LanguageSwitcher() {
         }
         // Construir nova URL com o idioma selecionado
         const pathSegments = pathname.split('/');
-        const currentLocale = ['br', 'es'].includes(pathSegments[1]) ? pathSegments[1] : 'en';
+        const hasLangInPath = languages.some(lang => lang.code === pathSegments[1]);
         let newPath = '';
-        if (langCode === 'en') {
-            // Remove locale prefix for English
-            if (currentLocale !== 'en') {
-                pathSegments.splice(1, 1);
-                newPath = pathSegments.join('/') || '/';
-            }
-            else {
-                newPath = pathname;
-            }
+        if (hasLangInPath) {
+            // Substituir idioma existente
+            pathSegments[1] = langCode;
+            newPath = pathSegments.join('/');
         }
         else {
-            // Add or replace locale prefix for other languages
-            if (currentLocale !== 'en') {
-                pathSegments[1] = langCode;
-                newPath = pathSegments.join('/');
-            }
-            else {
-                newPath = `/${langCode}${pathname}`;
-            }
+            // Adicionar idioma à URL
+            newPath = `/${langCode}${pathname}`;
         }
         // Salvar preferência no localStorage
         localStorage.setItem('preferredLanguage', langCode);

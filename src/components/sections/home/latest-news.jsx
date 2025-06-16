@@ -1,17 +1,12 @@
 import React from "react";
 import strapiClient from "@/lib/strapiClient";
-import { toStrapiLocale } from '@/lib/locale-utils';
 import LatestNewsClient from "./latest-news-client";
 // Server Component
-export default async function LatestNews({ locale = 'en' }) {
+export default async function LatestNews() {
     let newsItems = [];
     let error = null;
     try {
-        const strapiLocale = toStrapiLocale(locale);
-        const response = await strapiClient.getPosts({
-            limit: 15,
-            locale: strapiLocale
-        });
+        const response = await strapiClient.getPosts({ limit: 15 });
         if (response.data) {
             newsItems = response.data.map((post) => {
                 var _a, _b, _c, _d, _e, _f, _g;

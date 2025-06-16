@@ -38,12 +38,11 @@ class StrapiClient {
      * Buscar posts com paginação e filtros
      */
     async getPosts(params = {}) {
-        const { page = 1, pageSize = 10, sort = 'publishedAt:desc', filters = {}, populate = '*', status, locale = 'en' } = params;
+        const { page = 1, pageSize = 10, sort = 'publishedAt:desc', filters = {}, populate = '*', status } = params;
         const queryParams = new URLSearchParams({
             'pagination[page]': page.toString(),
             'pagination[pageSize]': pageSize.toString(),
             sort,
-            locale,
         });
         // Adiciona populate
         if (Array.isArray(populate)) {
@@ -68,25 +67,25 @@ class StrapiClient {
     /**
      * Buscar post por ID
      */
-    async getPost(id, locale = 'en') {
-        return this.fetch(`/api/posts/${id}?populate=*&locale=${locale}`);
+    async getPost(id) {
+        return this.fetch(`/api/posts/${id}?populate=*`);
     }
     /**
      * Buscar post por slug
      */
-    async getPostBySlug(slug, locale = 'en') {
-        const response = await this.fetch(`/api/posts?filters[slug][$eq]=${slug}&populate=*&locale=${locale}`);
+    async getPostBySlug(slug) {
+        const response = await this.fetch(`/api/posts?filters[slug][$eq]=${slug}&populate=*`);
         return response.data && response.data.length > 0 ? response.data[0] : null;
     }
     /**
      * Criar novo post
      */
-    async createPost(data, locale = 'en') {
+    async createPost(data) {
         // Gera slug se não fornecido
         if (!data.slug) {
             data.slug = this.generateSlug(data.title);
         }
-        return this.fetch(`/api/posts?locale=${locale}`, {
+        return this.fetch('/api/posts', {
             method: 'POST',
             body: JSON.stringify({ data }),
         });
@@ -94,8 +93,8 @@ class StrapiClient {
     /**
      * Atualizar post
      */
-    async updatePost(id, data, locale = 'en') {
-        return this.fetch(`/api/posts/${id}?locale=${locale}`, {
+    async updatePost(id, data) {
+        return this.fetch(`/api/posts/${id}`, {
             method: 'PUT',
             body: JSON.stringify({ data }),
         });
@@ -112,7 +111,7 @@ class StrapiClient {
      * Buscar posts por texto
      */
     async searchPosts(query, params = {}) {
-        const { page = 1, pageSize = 10, locale = 'en' } = params;
+        const { page = 1, pageSize = 10 } = params;
         const queryParams = new URLSearchParams({
             'pagination[page]': page.toString(),
             'pagination[pageSize]': pageSize.toString(),
@@ -121,19 +120,17 @@ class StrapiClient {
             'filters[$or][2][excerpt][$containsi]': query,
             'populate': '*',
             'sort': 'publishedAt:desc',
-            'locale': locale,
         });
         return this.fetch(`/api/posts?${queryParams}`);
     }
     /**
      * Buscar posts populares
      */
-    async getPopularPosts(limit = 5, locale = 'en') {
+    async getPopularPosts(limit = 5) {
         return this.getPosts({
             pageSize: limit,
             sort: 'publishedAt:desc',
-            status: 'published',
-            locale
+            status: 'published'
         });
     }
     /**
