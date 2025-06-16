@@ -1,0 +1,20 @@
+npm info using npm@10.8.2
+npm info using node@v20.19.1
+
+> thecryptofrontier-strapi@0.1.0 develop
+> strapi develop
+
+- Loading Strapi
+- Building build context
+
+[INFO] Including the following ENV variables as part of the JS bundle:
+    - ADMIN_PATH
+    - STRAPI_ADMIN_BACKEND_URL
+    - STRAPI_TELEMETRY_DISABLED
+✔ Building build context (31ms)
+- Creating admin
+✔ Creating admin (660ms)
+[ERROR]  There seems to be an unexpected error, try again with --debug for more information 
+
+┌──────────────────────────────────────────────────────────────────────────────┐│                                                                              ││   Error: Error loading the plugin users-permissions because                  ││   users-permissions is not installed. Please either install the plugin or    ││   remove it's configuration.                                                 ││   at loadPlugins (/home/strapi/thecryptofrontier/node_modules/@strapi/core   ││   /dist/loaders/plugins/index.js:111:13)                                     ││   at async Promise.all (index 3)                                             ││   at async Module.loadApplicationContext (/home/strapi/thecryptofrontier/n   ││   ode_modules/@strapi/core/dist/loaders/index.js:12:3)                       ││   at async Object.register (/home/strapi/thecryptofrontier/node_modules/@s   ││   trapi/core/dist/providers/registries.js:26:5)                              ││   at async Strapi.register (/home/strapi/thecryptofrontier/node_modules/@s   ││   trapi/core/dist/Strapi.js:322:7)                                           ││   at async Strapi.load (/home/strapi/thecryptofrontier/node_modules/@strap   ││   i/core/dist/Strapi.js:314:5)                                               ││   at async Module.develop (/home/strapi/thecryptofrontier/node_modules/@st   ││   rapi/strapi/dist/node/develop.js:177:28)                                   ││   at async action (/home/strapi/thecryptofrontier/node_modules/@strapi/str   ││   api/dist/cli/commands/develop.js:18:5)                                     ││   at async Command.parseAsync (/home/strapi/thecryptofrontier/node_modules   ││   /commander/lib/command.js:923:5)                                           ││   at async runCLI (/home/strapi/thecryptofrontier/node_modules/@strapi/str   ││   api/dist/cli/index.js:75:3)                                                ││                                                                              │└──────────────────────────────────────────────────────────────────────────────┘
+npm info ok
