@@ -143,11 +143,7 @@ framework_crewai/fresh_env/lib64/
 *storybook.log
 /new_env/
 /env/
-**/.claude/settings.local.json
-framework_crewai/blog_crew/venv/bin/pyrsa-keygen
-framework_crewai/blog_crew/venv/bin/activate.fish
-framework_crewai/blog_crew/venv/bin/activate.csh
-framework_crewai/blog_crew/venv/bin/httpx
+framework_crewai/blog_crew/venv
 
 # Arquivos com credenciais e dados sensíveis (IMPORTANTE!)
 *credentials*
