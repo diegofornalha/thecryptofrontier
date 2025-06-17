@@ -9,7 +9,7 @@ services:
       - "6333:6333"
       - "6334:6334"
     volumes:
-      - ./data/qdrant:/qdrant/storage
+      - /var/lib/docker/volumes/thecryptofrontier-data/_data/qdrant:/qdrant/storage
     environment:
       - QDRANT__SERVICE__HTTP_PORT=6333
       - QDRANT__SERVICE__GRPC_PORT=6334
@@ -24,7 +24,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - ./data/redis:/data
+      - /var/lib/docker/volumes/thecryptofrontier-data/_data/redis:/data
     command: redis-server --appendonly yes
     networks:
       - mem0-network
@@ -41,7 +41,7 @@ services:
       POSTGRES_PASSWORD: mem0password
       POSTGRES_DB: mem0db
     volumes:
-      - ./data/postgres:/var/lib/postgresql/data
+      - /var/lib/docker/volumes/thecryptofrontier-data/_data/postgres:/var/lib/postgresql/data
     networks:
       - mem0-network
     restart: unless-stopped

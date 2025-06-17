@@ -243,6 +243,41 @@ services:
       - "com.thecryptofrontier.agent=specialist"
       - "com.thecryptofrontier.specialty=claude-code"
 
+  # Mem0 Specialist
+  mem0-specialist:
+    build:
+      context: ../../claude-flow-diego-cli/claude-diego-flow
+      dockerfile: docker/Dockerfile.mem0-specialist
+    container_name: mem0-specialist
+    ports:
+      - "3006:3006"
+    environment:
+      - NODE_ENV=production
+      - SPECIALIST_TYPE=mem0
+      - MEM0_BRIDGE_URL=http://mem0-bridge:3002
+      - CHROMA_URL=http://mem0-chroma:8000
+      - LOG_DIR=/app/logs
+      - BACKUP_DIR=/app/backups
+      - PORT=3006
+    volumes:
+      - ../../claude-flow-diego-cli/claude-diego-flow/logs:/app/logs
+      - ../../claude-flow-diego-cli/claude-diego-flow/backups:/app/backups
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+    networks:
+      - crypto-network
+    depends_on:
+      - mem0-bridge
+      - mem0-chroma
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3006/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "com.thecryptofrontier.agent=specialist"
+      - "com.thecryptofrontier.specialty=mem0"
+
   # ===========================================
   # GUARDIAN BRIDGE - Interface HTTP
   # ===========================================
