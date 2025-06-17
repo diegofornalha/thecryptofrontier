@@ -11,9 +11,9 @@ Este erro ocorria mesmo quando as imagens eram válidas (PNG/JPEG).
 
 ## Causa Raiz
 
-O problema estava no método de upload. Estávamos enviando as imagens como `multipart/form-data` em vez de enviar os bytes diretamente no corpo da requisição.
+O problema estava no método de upload. Estávamos enviando as imagens como `multipart/form-/var/lib/docker/volumes/thecryptofrontier-data` em vez de enviar os bytes diretamente no corpo da requisição.
 
-### Método Incorreto (multipart/form-data):
+### Método Incorreto (multipart/form-/var/lib/docker/volumes/thecryptofrontier-data):
 ```python
 files = {
     'file': (filename, f, 'image/png')
@@ -28,7 +28,7 @@ headers = {
     "Content-Type": "image/png"  # Especificar o tipo MIME correto
 }
 with open(image_path, 'rb') as f:
-    response = requests.post(upload_url, headers=headers, data=f)
+    response = requests.post(upload_url, headers=headers, /var/lib/docker/volumes/thecryptofrontier-data=f)
 ```
 
 ## Solução Implementada
@@ -51,7 +51,7 @@ def upload_image_to_strapi_binary(image_path, alt_text):
     
     # Upload binário direto
     with open(image_path, 'rb') as f:
-        response = requests.post(upload_url, headers=headers, data=f)
+        response = requests.post(upload_url, headers=headers, /var/lib/docker/volumes/thecryptofrontier-data=f)
 ```
 
 ### 2. Ferramenta para CrewAI: `image_generation_tools_fixed.py`

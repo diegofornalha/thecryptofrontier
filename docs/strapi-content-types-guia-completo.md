@@ -39,7 +39,7 @@ Quando você cria um Content-Type "Post", o Strapi automaticamente cria:
 ### 2. **Estrutura de Resposta Padronizada**
 ```json
 {
-  "data": {
+  "/var/lib/docker/volumes/thecryptofrontier-data": {
     "id": 1,
     "attributes": {
       "title": "Meu Post",
@@ -133,7 +133,7 @@ Quando você cria um Content-Type "Post", o Strapi automaticamente cria:
 }
 ```
 
-#### 7. **Data de Publicação** (DateTime)
+#### 7. **/var/lib/docker/volumes/thecryptofrontier-data de Publicação** (DateTime)
 ```json
 "publishedAt": {
   "type": "datetime"
@@ -231,7 +231,7 @@ curl -X POST https://ale-blog.agentesintegrados.com/api/posts \
   -H "Authorization: Bearer SEU_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "data": {
+    "/var/lib/docker/volumes/thecryptofrontier-data": {
       "title": "Primeiro Post",
       "slug": "primeiro-post",
       "content": "Conteúdo do post...",
@@ -277,9 +277,9 @@ Para adicionar lógica customizada:
 module.exports = {
   async beforeCreate(event) {
     // Auto-preencher autor
-    const { data } = event.params;
-    if (!data.author && event.state.user) {
-      data.author = event.state.user.id;
+    const { /var/lib/docker/volumes/thecryptofrontier-data } = event.params;
+    if (!/var/lib/docker/volumes/thecryptofrontier-data.author && event.state.user) {
+      /var/lib/docker/volumes/thecryptofrontier-data.author = event.state.user.id;
     }
   },
 

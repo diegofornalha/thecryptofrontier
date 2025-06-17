@@ -6,7 +6,7 @@ Todos os dados enviados para o Strapi devem seguir esta estrutura:
 
 ```json
 {
-  "data": {
+  "/var/lib/docker/volumes/thecryptofrontier-data": {
     // seus campos aqui
   }
 }
@@ -34,7 +34,7 @@ Todos os dados enviados para o Strapi devem seguir esta estrutura:
 
 ```json
 {
-  "data": {
+  "/var/lib/docker/volumes/thecryptofrontier-data": {
     "title": "Como o Bitcoin está revolucionando as finanças",
     "content": "## Introdução\n\nO Bitcoin tem transformado...",
     "excerpt": "Uma análise profunda sobre Bitcoin",
@@ -76,7 +76,7 @@ Todos os dados enviados para o Strapi devem seguir esta estrutura:
 
 ```json
 {
-  "data": {
+  "/var/lib/docker/volumes/thecryptofrontier-data": {
     "title": "Ethereum 2.0: O Futuro dos Smart Contracts",
     "content": "## O que é Ethereum 2.0?\n\nEthereum 2.0...",
     "summary": "Uma visão completa sobre Ethereum 2.0",
@@ -107,7 +107,7 @@ Todos os dados enviados para o Strapi devem seguir esta estrutura:
 ✅ **Correto:**
 ```json
 {
-  "data": {
+  "/var/lib/docker/volumes/thecryptofrontier-data": {
     "title": "Meu Post",
     "content": "Conteúdo"
   }
@@ -118,7 +118,7 @@ Todos os dados enviados para o Strapi devem seguir esta estrutura:
 ❌ **Errado:**
 ```json
 {
-  "data": {
+  "/var/lib/docker/volumes/thecryptofrontier-data": {
     "title": "Post",
     "content": "Conteúdo",
     "readingTime": "5 minutos", // deve ser número
@@ -130,7 +130,7 @@ Todos os dados enviados para o Strapi devem seguir esta estrutura:
 ✅ **Correto:**
 ```json
 {
-  "data": {
+  "/var/lib/docker/volumes/thecryptofrontier-data": {
     "title": "Post",
     "content": "Conteúdo",
     "readingTime": 5,
@@ -143,7 +143,7 @@ Todos os dados enviados para o Strapi devem seguir esta estrutura:
 ❌ **Errado:**
 ```json
 {
-  "data": {
+  "/var/lib/docker/volumes/thecryptofrontier-data": {
     "excerpt": "Apenas um resumo"
     // falta title e content
   }
@@ -154,7 +154,7 @@ Todos os dados enviados para o Strapi devem seguir esta estrutura:
 ❌ **Errado:**
 ```json
 {
-  "data": {
+  "/var/lib/docker/volumes/thecryptofrontier-data": {
     "title": "T".repeat(300), // excede max 255
     "content": "OK",
     "readingTime": 0, // menor que min 1

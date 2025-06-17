@@ -1,6 +1,6 @@
 # Resumo - Treinamento i18n para Strapi Specialist
 
-## 📅 Data: 16/06/2025
+## 📅 /var/lib/docker/volumes/thecryptofrontier-data: 16/06/2025
 
 ## 🎯 Objetivo
 Ensinar o agente `strapi-specialist` sobre internacionalização (i18n) no Strapi.

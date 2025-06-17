@@ -109,7 +109,7 @@ GET /api/posts?locale=all&populate=*
 # Criar post em português
 POST /api/posts
 {
-  "data": {
+  "/var/lib/docker/volumes/thecryptofrontier-data": {
     "title": "Título em Português",
     "content": "Conteúdo em português...",
     "locale": "pt-BR"
@@ -123,14 +123,14 @@ POST /api/posts
 # Buscar posts em português
 query {
   posts(locale: "pt-BR") {
-    data {
+    /var/lib/docker/volumes/thecryptofrontier-data {
       id
       attributes {
         title
         content
         locale
         localizations {
-          data {
+          /var/lib/docker/volumes/thecryptofrontier-data {
             attributes {
               locale
             }

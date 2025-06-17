@@ -116,7 +116,7 @@ result = publisher.create_post(article, locale='pt')
 
 # Criar versão em inglês
 if result:
-    doc_id = result['data']['documentId']
+    doc_id = result['/var/lib/docker/volumes/thecryptofrontier-data']['documentId']
     publisher.update_locale_version(doc_id, article_en, 'en')
 ```
 

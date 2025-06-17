@@ -1,5 +1,5 @@
 # 🧹 Relatório de Limpeza - Guardian Orchestrator MCP
-**Data**: 15/06/2025
+**/var/lib/docker/volumes/thecryptofrontier-data**: 15/06/2025
 **Executado por**: Guardian Orchestrator MCP
 
 ## 📊 Resumo Executivo
@@ -51,8 +51,8 @@ O Cleanup Specialist identificou:
 
 **Diretórios removidos** (fora de node_modules):
 - `/claude-flow-diego/claude-diego-flow/config` - Configurações vazias
-- `/claude-flow-diego/claude-diego-flow/data/logs` - Logs vazios
-- `/claude-flow-diego/claude-diego-flow/data/memory` - Memórias vazias
+- `/claude-flow-diego/claude-diego-flow//var/lib/docker/volumes/thecryptofrontier-data/logs` - Logs vazios
+- `/claude-flow-diego/claude-diego-flow//var/lib/docker/volumes/thecryptofrontier-data/memory` - Memórias vazias
 - `/claude-flow-diego/claude-diego-flow/src/agents/backup-old-logs` - Backup vazio
 - `/claude-flow-diego/claude-diego-flow/src/organization` - Organização vazia
 - `/claude-flow-diego/claude-diego-flow/tests` - Testes vazios

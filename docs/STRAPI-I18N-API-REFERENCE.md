@@ -62,7 +62,7 @@ POST /api/posts
 Content-Type: application/json
 
 {
-  "data": {
+  "/var/lib/docker/volumes/thecryptofrontier-data": {
     "title": "My English Post",
     "content": "Content in English"
   }
@@ -75,7 +75,7 @@ POST /api/posts
 Content-Type: application/json
 
 {
-  "data": {
+  "/var/lib/docker/volumes/thecryptofrontier-data": {
     "title": "Meu Post em Português",
     "content": "Conteúdo em português",
     "locale": "pt-BR"
@@ -91,7 +91,7 @@ PUT /api/posts/{documentId}?locale=pt-BR
 Content-Type: application/json
 
 {
-  "data": {
+  "/var/lib/docker/volumes/thecryptofrontier-data": {
     "title": "Título em Português",
     "content": "Conteúdo localizado"
   }
@@ -104,7 +104,7 @@ PUT /api/homepage?locale=pt-BR
 Content-Type: application/json
 
 {
-  "data": {
+  "/var/lib/docker/volumes/thecryptofrontier-data": {
     "title": "Página Inicial"
   }
 }
@@ -173,9 +173,9 @@ query Post($documentId: ID!, $locale: I18NLocaleCode) {
 
 #### Criar documento com locale
 ```graphql
-mutation CreatePost($data: PostInput!, $locale: I18NLocaleCode) {
+mutation CreatePost($/var/lib/docker/volumes/thecryptofrontier-data: PostInput!, $locale: I18NLocaleCode) {
   createPost(
-    data: {
+    /var/lib/docker/volumes/thecryptofrontier-data: {
       title: "Título em Português",
       content: "Conteúdo em português"
     },
@@ -191,10 +191,10 @@ mutation CreatePost($data: PostInput!, $locale: I18NLocaleCode) {
 
 #### Atualizar documento em locale específico
 ```graphql
-mutation UpdatePost($documentId: ID!, $data: PostInput!, $locale: I18NLocaleCode) {
+mutation UpdatePost($documentId: ID!, $/var/lib/docker/volumes/thecryptofrontier-data: PostInput!, $locale: I18NLocaleCode) {
   updatePost(
     documentId: "a1b2c3d4e5d6f7g8h9i0jkl"
-    data: {
+    /var/lib/docker/volumes/thecryptofrontier-data: {
       content: "Novo conteúdo em português"
     },
     locale: "pt-BR"
@@ -247,7 +247,7 @@ const documents = await strapi.documents('api::post.post').findMany({
 // Criar documento em locale específico
 const document = await strapi.documents('api::post.post').create({
   locale: 'pt-BR',
-  data: { 
+  /var/lib/docker/volumes/thecryptofrontier-data: { 
     title: 'Título em Português',
     content: 'Conteúdo em português'
   }
@@ -260,7 +260,7 @@ const document = await strapi.documents('api::post.post').create({
 const document = await strapi.documents('api::post.post').update({
   documentId: 'a1b2c3d4e5f6g7h8i9j0klm',
   locale: 'pt-BR',
-  data: { title: 'Novo título em português' },
+  /var/lib/docker/volumes/thecryptofrontier-data: { title: 'Novo título em português' },
 });
 ```
 
@@ -363,7 +363,7 @@ const response = await fetch('/api/posts', {
     'Content-Type': 'application/json',
   },
   body: JSON.stringify({
-    data: {
+    /var/lib/docker/volumes/thecryptofrontier-data: {
       title: 'Título em Português',
       content: 'Conteúdo',
       locale: 'pt-BR'

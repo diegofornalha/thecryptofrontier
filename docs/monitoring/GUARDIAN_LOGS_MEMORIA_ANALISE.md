@@ -1,6 +1,6 @@
 # 📊 Análise Detalhada: Sistema de Logs e Memórias do Guardian
 
-## 📅 Data da Análise: 2025-06-15
+## 📅 /var/lib/docker/volumes/thecryptofrontier-data da Análise: 2025-06-15
 
 ## 🎯 Resumo Executivo
 

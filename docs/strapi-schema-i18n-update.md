@@ -245,7 +245,7 @@ Se você também tem um Collection Type `post`, aqui está o schema atualizado:
   - `featuredImage`: Mesma imagem para todos os idiomas
   - `author`: Mesmo autor
   - `category/tags`: Compartilhados entre idiomas
-  - `publishedAt`: Mesma data de publicação
+  - `publishedAt`: Mesma /var/lib/docker/volumes/thecryptofrontier-data de publicação
 
 ### Após habilitar i18n
 

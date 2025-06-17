@@ -145,7 +145,7 @@ O 403 indicou que as rotas foram reconhecidas, faltando apenas configurar permis
 curl -H "Authorization: Bearer 87e5f7e4c6917d39415f669f077cafa528e26c3aff065206805c82daa7e6ede2941bb783992ab6a8fc0f31f45b239dce9915b8a161d41ff312529464da6f9501218cb15b375253cfad94df96fb61286ca4e96558dfc37d36bbdb58214fd7bf76dcec1c61a3c7c1d9d00d541dc14c7d158463432f252708b9b421a02f65e0defb" \
   https://ale-blog.agentesintegrados.com/api/posts
 
-# Retornou: {"data":[...],"meta":{...}} ✅
+# Retornou: {"/var/lib/docker/volumes/thecryptofrontier-data":[...],"meta":{...}} ✅
 ```
 
 ## 📝 Resumo dos Pontos Críticos

@@ -82,7 +82,7 @@ module.exports = {
     const { params } = event;
     
     // Adicionar timestamp de modificação
-    params.data.lastModified = new Date();
+    params./var/lib/docker/volumes/thecryptofrontier-data.lastModified = new Date();
   },
 
   async afterDelete(event) {
@@ -117,10 +117,10 @@ def handle_strapi_webhook():
         return jsonify({'error': 'Unauthorized'}), 401
     
     # Processar dados do webhook
-    data = request.json
-    event = data.get('event')
-    model = data.get('model')
-    entry = data.get('entry')
+    /var/lib/docker/volumes/thecryptofrontier-data = request.json
+    event = /var/lib/docker/volumes/thecryptofrontier-data.get('event')
+    model = /var/lib/docker/volumes/thecryptofrontier-data.get('model')
+    entry = /var/lib/docker/volumes/thecryptofrontier-data.get('entry')
     
     # Ações baseadas no evento
     if event == 'entry.create' and model == 'post':

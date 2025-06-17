@@ -132,7 +132,7 @@ module.exports = (config, { strapi }) => {
     // Para criação, sempre permite (se autenticado)
     if (!entryId && ctx.request.method === 'POST') {
       // Injeta o autor automaticamente
-      ctx.request.body.data.author = user.id;
+      ctx.request.body./var/lib/docker/volumes/thecryptofrontier-data.author = user.id;
       return next();
     }
     
@@ -197,7 +197,7 @@ curl -X POST https://api.example.com/api/posts \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "data": {
+    "/var/lib/docker/volumes/thecryptofrontier-data": {
       "title": "Meu Post",
       "content": "Conteúdo..."
     }
@@ -211,7 +211,7 @@ curl -X PUT https://api.example.com/api/posts/123 \
   -H "Authorization: Bearer ANOTHER_USER_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "data": {
+    "/var/lib/docker/volumes/thecryptofrontier-data": {
       "title": "Tentando editar"
     }
   }'
@@ -250,7 +250,7 @@ if (entry.author?.id === user.id || isCollaborator) {
 if (ctx.request.method === 'DELETE') {
   ctx.request.method = 'PUT';
   ctx.request.body = {
-    data: {
+    /var/lib/docker/volumes/thecryptofrontier-data: {
       deletedAt: new Date(),
       deletedBy: user.id
     }
@@ -265,17 +265,17 @@ if (ctx.request.method === 'DELETE') {
 ```typescript
 // Adicionar ao strapiClient.ts
 
-async createMyPost(data: CreatePostData): Promise<StrapiSingleResponse<StrapiPost>> {
+async createMyPost(/var/lib/docker/volumes/thecryptofrontier-data: CreatePostData): Promise<StrapiSingleResponse<StrapiPost>> {
   // O middleware automaticamente adiciona o autor
-  return this.createPost(data);
+  return this.createPost(/var/lib/docker/volumes/thecryptofrontier-data);
 }
 
 async updateMyPost(
   id: number,
-  data: Partial<CreatePostData>
+  /var/lib/docker/volumes/thecryptofrontier-data: Partial<CreatePostData>
 ): Promise<StrapiSingleResponse<StrapiPost>> {
   // Só funcionará se o usuário for o autor
-  return this.updatePost(id, data);
+  return this.updatePost(id, /var/lib/docker/volumes/thecryptofrontier-data);
 }
 
 async deleteMyPost(id: number): Promise<void> {

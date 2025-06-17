@@ -2,7 +2,7 @@
 
 ## Status Atual: ✅ Ativo e Aprendendo
 
-**Data:** 2025-06-16  
+**/var/lib/docker/volumes/thecryptofrontier-data:** 2025-06-16  
 **Total de Memórias:** 14  
 **Status do Container:** Rodando na porta 3007  
 
@@ -39,8 +39,8 @@
 ### 5. Tratamento de Erros
 ```typescript
 // Exemplo aprendido pelo agente
-if(error.response?.data?.error) {
-  const msg = error.response.data.error.message;
+if(error.response?./var/lib/docker/volumes/thecryptofrontier-data?.error) {
+  const msg = error.response./var/lib/docker/volumes/thecryptofrontier-data.error.message;
   if(msg.includes("required")) return "Campo obrigatório";
   if(msg.includes("must be a number")) return "Deve ser número";
 }

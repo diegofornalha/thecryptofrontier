@@ -79,7 +79,7 @@ post_data = {
 O `strapi_integration.py` formata para o Strapi:
 ```python
 formatted = {
-    'data': {
+    '/var/lib/docker/volumes/thecryptofrontier-data': {
         'title': post_data['title'],
         'content': post_data['content'],
         'slug': 'bitcoin-atinge-nova-maxima',
@@ -97,7 +97,7 @@ Authorization: Bearer TOKEN
 Content-Type: application/json
 
 {
-  "data": {
+  "/var/lib/docker/volumes/thecryptofrontier-data": {
     "title": "Bitcoin atinge nova máxima",
     "content": "## Análise do mercado...",
     // ...
@@ -151,7 +151,7 @@ results = adapter.process_crew_output(crew_output)
 HOST=0.0.0.0
 PORT=1337
 DATABASE_CLIENT=sqlite
-DATABASE_FILENAME=.tmp/data.db
+DATABASE_FILENAME=.tmp//var/lib/docker/volumes/thecryptofrontier-data.db
 ```
 
 ### `.env.local` (Frontend)

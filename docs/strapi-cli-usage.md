@@ -152,7 +152,7 @@ npm run strapi list --json > posts.json
 const manager = require('./scripts/strapi-content-manager').default;
 
 async function updateAllPosts() {
-  const { data: posts } = await manager.getPosts({ limit: 100 });
+  const { /var/lib/docker/volumes/thecryptofrontier-data: posts } = await manager.getPosts({ limit: 100 });
   
   for (const post of posts) {
     await manager.updatePost(post.id, {

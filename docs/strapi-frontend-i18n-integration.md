@@ -72,10 +72,10 @@ getPostBySlug(slug, 'pt-BR')
 getPost(id, 'pt-BR')
 
 // Criar post
-createPost(data, 'pt-BR')
+createPost(/var/lib/docker/volumes/thecryptofrontier-data, 'pt-BR')
 
 // Atualizar post
-updatePost(id, data, 'pt-BR')
+updatePost(id, /var/lib/docker/volumes/thecryptofrontier-data, 'pt-BR')
 
 // Buscar posts
 searchPosts(query, { locale: 'pt-BR', ... })
@@ -133,7 +133,7 @@ POST /api/posts?locale=pt-BR
 # Buscar posts em português
 query {
   posts(locale: "pt-BR") {
-    data {
+    /var/lib/docker/volumes/thecryptofrontier-data {
       attributes {
         title
         content
@@ -145,10 +145,10 @@ query {
 # Criar post em espanhol
 mutation {
   createPost(
-    data: { title: "Título", content: "Contenido" }
+    /var/lib/docker/volumes/thecryptofrontier-data: { title: "Título", content: "Contenido" }
     locale: "es"
   ) {
-    data {
+    /var/lib/docker/volumes/thecryptofrontier-data {
       id
     }
   }

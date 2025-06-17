@@ -2,8 +2,6 @@
 agetes-python/
 claude-agents-blog-ts/
 claude-flow-diego-cli/
-config/
-data/
 frontend-nextjs
 infrastructure/
 mem0
@@ -110,8 +108,7 @@ $RECYCLE.BIN/
 /public/sitemap.xml
 /public/feed.xml
 
-# databutton
-.databutton/
+
 __pycache__/
 *.pyc
 

@@ -70,8 +70,8 @@ export async function getPostBySlug(slug, locale = 'pt') {
   const res = await fetch(
     `${STRAPI_URL}/api/posts?filters[slug][$eq]=${slug}&locale=${locale}`
   )
-  const data = await res.json()
-  return data.data[0]
+  const /var/lib/docker/volumes/thecryptofrontier-data = await res.json()
+  return /var/lib/docker/volumes/thecryptofrontier-data./var/lib/docker/volumes/thecryptofrontier-data[0]
 }
 
 // Buscar todas as versões de idioma
@@ -79,8 +79,8 @@ export async function getPostLocales(documentId) {
   const res = await fetch(
     `${STRAPI_URL}/api/posts/${documentId}?locale=all`
   )
-  const data = await res.json()
-  return data.data
+  const /var/lib/docker/volumes/thecryptofrontier-data = await res.json()
+  return /var/lib/docker/volumes/thecryptofrontier-data./var/lib/docker/volumes/thecryptofrontier-data
 }
 ```
 

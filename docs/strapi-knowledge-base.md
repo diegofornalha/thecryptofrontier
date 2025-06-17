@@ -101,7 +101,7 @@ docker exec -it strapi-v5 sh -c "cd /opt/app && npm run strapi generate"
 
 ```json
 {
-  "data": {
+  "/var/lib/docker/volumes/thecryptofrontier-data": {
     "id": 1,
     "attributes": {
       "title": "Post Title",
@@ -134,6 +134,6 @@ docker exec -it strapi-v5 sh -c "cd /opt/app && npm run strapi generate"
 
 1. **Content-Types são fundamentais** - Sem eles, não há API
 2. **Strapi v5 usa middlewares** para políticas (não mais policies)
-3. **Formato de resposta é padronizado** com data/meta
+3. **Formato de resposta é padronizado** com /var/lib/docker/volumes/thecryptofrontier-data/meta
 4. **Docker em produção** requer modo desenvolvimento para Content-Type Builder
 5. **Tokens de API** precisam permissões específicas por content-type

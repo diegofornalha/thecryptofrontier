@@ -104,6 +104,6 @@ docker compose -f docker-compose.cleanup.yml --profile cleanup-scheduled up -d c
 
 ---
 
-**Data**: 15/06/2025  
+**/var/lib/docker/volumes/thecryptofrontier-data**: 15/06/2025  
 **Responsável**: Claude Assistant + Usuário  
 **Status**: ✅ Concluído com sucesso

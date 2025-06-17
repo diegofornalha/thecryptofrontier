@@ -91,7 +91,7 @@ headers['Authorization'] = `Bearer ${this.apiToken}`;
 ### 4. Ordenação
 
 ```javascript
-// Ordem decrescente por data de publicação
+// Ordem decrescente por /var/lib/docker/volumes/thecryptofrontier-data de publicação
 ?sort=publishedAt:desc
 
 // Múltiplas ordenações
@@ -112,7 +112,7 @@ async function fetchPosts(page = 1, pageSize = 10) {
   });
   
   return {
-    posts: response.data,
+    posts: response./var/lib/docker/volumes/thecryptofrontier-data,
     total: response.meta.pagination.total
   };
 }
@@ -141,7 +141,7 @@ async function searchPosts(searchTerm) {
     limit: 20
   });
   
-  return response.data;
+  return response./var/lib/docker/volumes/thecryptofrontier-data;
 }
 ```
 
@@ -152,7 +152,7 @@ async function createPost(postData) {
   const response = await strapiClient.fetch('/api/posts', {
     method: 'POST',
     body: JSON.stringify({
-      data: {
+      /var/lib/docker/volumes/thecryptofrontier-data: {
         title: postData.title,
         content: postData.content,
         slug: postData.slug,
@@ -162,7 +162,7 @@ async function createPost(postData) {
     })
   });
   
-  return response.data;
+  return response./var/lib/docker/volumes/thecryptofrontier-data;
 }
 ```
 
@@ -172,7 +172,7 @@ async function createPost(postData) {
 
 ```json
 {
-  "data": [
+  "/var/lib/docker/volumes/thecryptofrontier-data": [
     {
       "id": 1,
       "attributes": {
@@ -198,7 +198,7 @@ async function createPost(postData) {
 
 ```json
 {
-  "data": null,
+  "/var/lib/docker/volumes/thecryptofrontier-data": null,
   "error": {
     "status": 404,
     "name": "NotFoundError",
@@ -216,7 +216,7 @@ Use as opções do Next.js para cache:
 
 ```javascript
 // Cache por 5 minutos
-const data = await fetch(url, {
+const /var/lib/docker/volumes/thecryptofrontier-data = await fetch(url, {
   next: { revalidate: 300 }
 });
 ```
@@ -227,11 +227,11 @@ Sempre trate erros nas requisições:
 
 ```javascript
 try {
-  const data = await strapiClient.getPosts();
-  return data;
+  const /var/lib/docker/volumes/thecryptofrontier-data = await strapiClient.getPosts();
+  return /var/lib/docker/volumes/thecryptofrontier-data;
 } catch (error) {
   console.error('Erro ao buscar posts:', error);
-  return { data: [], meta: { pagination: { total: 0 } } };
+  return { /var/lib/docker/volumes/thecryptofrontier-data: [], meta: { pagination: { total: 0 } } };
 }
 ```
 

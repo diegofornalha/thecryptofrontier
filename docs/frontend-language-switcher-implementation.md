@@ -59,19 +59,19 @@ export default function LanguageSwitcher() {
         `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/posts?filters[slug][$eq]=${currentSlug}&locale=${locale}`
       ).then(res => res.json())
       
-      if (currentPost.data?.[0]) {
-        const documentId = currentPost.data[0].documentId
+      if (currentPost./var/lib/docker/volumes/thecryptofrontier-data?.[0]) {
+        const documentId = currentPost./var/lib/docker/volumes/thecryptofrontier-data[0].documentId
         
         // Buscar a versão no idioma desejado
         const translatedPost = await fetch(
           `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/posts/${documentId}?locale=${targetLocale}`
         ).then(res => res.json())
         
-        if (translatedPost.data) {
+        if (translatedPost./var/lib/docker/volumes/thecryptofrontier-data) {
           // Redirecionar para o slug traduzido
           router.push(
-            `/posts/${translatedPost.data.slug}`,
-            `/posts/${translatedPost.data.slug}`,
+            `/posts/${translatedPost./var/lib/docker/volumes/thecryptofrontier-data.slug}`,
+            `/posts/${translatedPost./var/lib/docker/volumes/thecryptofrontier-data.slug}`,
             { locale: targetLocale }
           )
         } else {
@@ -324,11 +324,11 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const res = await fetch(
     `${process.env.STRAPI_URL}/api/posts?locale=${locale}&populate=*`
   )
-  const data = await res.json()
+  const /var/lib/docker/volumes/thecryptofrontier-data = await res.json()
   
   return {
     props: {
-      posts: data.data || [],
+      posts: /var/lib/docker/volumes/thecryptofrontier-data./var/lib/docker/volumes/thecryptofrontier-data || [],
     },
     revalidate: 60, // ISR - revalidar a cada minuto
   }

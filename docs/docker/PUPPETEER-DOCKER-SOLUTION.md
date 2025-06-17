@@ -1,6 +1,6 @@
 # 🎯 Solução Puppeteer com Docker - The Crypto Frontier
 
-## 📅 Data: 15/06/2025
+## 📅 /var/lib/docker/volumes/thecryptofrontier-data: 15/06/2025
 
 ## 🔴 Problema Inicial
 

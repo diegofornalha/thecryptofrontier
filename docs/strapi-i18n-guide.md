@@ -39,7 +39,7 @@ Para cada Content-Type que precisa suportar múltiplos idiomas:
 ```bash
 POST /api/restaurants
 {
-  "data": {
+  "/var/lib/docker/volumes/thecryptofrontier-data": {
     "name": "Oplato",
     "description": "Restaurante italiano"
   }
@@ -50,7 +50,7 @@ POST /api/restaurants
 ```bash
 POST /api/restaurants
 {
-  "data": {
+  "/var/lib/docker/volumes/thecryptofrontier-data": {
     "name": "Restaurante Exemplo",
     "description": "Descrição em português",
     "locale": "pt"
@@ -62,7 +62,7 @@ POST /api/restaurants
 ```bash
 PUT /api/restaurants/{documentId}?locale=fr
 {
-  "data": {
+  "/var/lib/docker/volumes/thecryptofrontier-data": {
     "name": "Nom en Français",
     "description": "Description en français"
   }
@@ -167,7 +167,7 @@ module.exports = [
 ```javascript
 // Criar post em português
 const postPT = await strapi.entityService.create('api::post.post', {
-  data: {
+  /var/lib/docker/volumes/thecryptofrontier-data: {
     title: 'Introdução ao Strapi',
     content: 'Conteúdo em português...',
     locale: 'pt'
@@ -176,7 +176,7 @@ const postPT = await strapi.entityService.create('api::post.post', {
 
 // Criar versão em inglês do mesmo post
 const postEN = await strapi.entityService.create('api::post.post', {
-  data: {
+  /var/lib/docker/volumes/thecryptofrontier-data: {
     title: 'Introduction to Strapi',
     content: 'English content...',
     locale: 'en',

@@ -35,18 +35,18 @@ interface PostData {
 }
 
 // Validar antes de enviar
-function validatePost(data: Partial<PostData>): PostData {
-  if (!data.title?.trim()) {
+function validatePost(/var/lib/docker/volumes/thecryptofrontier-data: Partial<PostData>): PostData {
+  if (!/var/lib/docker/volumes/thecryptofrontier-data.title?.trim()) {
     throw new Error('Título é obrigatório');
   }
-  if (!data.content?.trim()) {
+  if (!/var/lib/docker/volumes/thecryptofrontier-data.content?.trim()) {
     throw new Error('Conteúdo é obrigatório');
   }
   
   return {
-    title: data.title.trim(),
-    content: data.content.trim(),
-    excerpt: data.excerpt?.trim() || ''
+    title: /var/lib/docker/volumes/thecryptofrontier-data.title.trim(),
+    content: /var/lib/docker/volumes/thecryptofrontier-data.content.trim(),
+    excerpt: /var/lib/docker/volumes/thecryptofrontier-data.excerpt?.trim() || ''
   };
 }
 ```
@@ -120,7 +120,7 @@ function validateTitle(title: string): string {
 async function validateAuthor(authorId: number): Promise<boolean> {
   try {
     const response = await strapiClient.fetch(`/api/authors/${authorId}`);
-    return !!response.data;
+    return !!response./var/lib/docker/volumes/thecryptofrontier-data;
   } catch {
     return false;
   }
@@ -136,7 +136,7 @@ if (!(await validateAuthor(formData.authorId))) {
 
 ```typescript
 // Strapi ignora campos não definidos
-const data = {
+const /var/lib/docker/volumes/thecryptofrontier-data = {
   title: "Post",
   content: "Conteúdo",
   campoNaoExiste: "Será ignorado" // ✅ Não causa erro
@@ -157,17 +157,17 @@ export interface StrapiPostAttributes {
   publishedAt?: string | null;
   views?: number;
   author?: {
-    data: {
+    /var/lib/docker/volumes/thecryptofrontier-data: {
       id: number;
     };
   };
   category?: {
-    data: {
+    /var/lib/docker/volumes/thecryptofrontier-data: {
       id: number;
     };
   };
   featuredImage?: {
-    data: {
+    /var/lib/docker/volumes/thecryptofrontier-data: {
       id: number;
     };
   };
@@ -224,8 +224,8 @@ const PostSchema = z.object({
     .optional()
 });
 
-export function validatePost(data: unknown): CreatePostData {
-  return PostSchema.parse(data);
+export function validatePost(/var/lib/docker/volumes/thecryptofrontier-data: unknown): CreatePostData {
+  return PostSchema.parse(/var/lib/docker/volumes/thecryptofrontier-data);
 }
 ```
 
@@ -235,8 +235,8 @@ export function validatePost(data: unknown): CreatePostData {
 // utils/error-handler.ts
 export function handleStrapiError(error: any): string {
   // Erro de validação do Strapi
-  if (error.response?.data?.error) {
-    const strapiError = error.response.data.error;
+  if (error.response?./var/lib/docker/volumes/thecryptofrontier-data?.error) {
+    const strapiError = error.response./var/lib/docker/volumes/thecryptofrontier-data.error;
     
     // Mapear mensagens técnicas para amigáveis
     const errorMap: Record<string, string> = {
@@ -362,20 +362,20 @@ strapiClient.interceptors.request.use(request => {
   console.log('📤 Strapi Request:', {
     url: request.url,
     method: request.method,
-    data: request.data
+    /var/lib/docker/volumes/thecryptofrontier-data: request./var/lib/docker/volumes/thecryptofrontier-data
   });
   return request;
 });
 
 strapiClient.interceptors.response.use(
   response => {
-    console.log('✅ Strapi Response:', response.data);
+    console.log('✅ Strapi Response:', response./var/lib/docker/volumes/thecryptofrontier-data);
     return response;
   },
   error => {
     console.error('❌ Strapi Error:', {
       status: error.response?.status,
-      data: error.response?.data,
+      /var/lib/docker/volumes/thecryptofrontier-data: error.response?./var/lib/docker/volumes/thecryptofrontier-data,
       config: error.config
     });
     return Promise.reject(error);
@@ -389,19 +389,19 @@ strapiClient.interceptors.response.use(
 // scripts/validate-schema.ts
 import schema from '@/api/post/content-types/post/schema.json';
 
-function validateAgainstSchema(data: any) {
+function validateAgainstSchema(/var/lib/docker/volumes/thecryptofrontier-data: any) {
   const errors = [];
   
   // Verificar campos obrigatórios
   Object.entries(schema.attributes).forEach(([key, config]: [string, any]) => {
-    if (config.required && !data[key]) {
+    if (config.required && !/var/lib/docker/volumes/thecryptofrontier-data[key]) {
       errors.push(`${key} é obrigatório`);
     }
     
     // Verificar tipos
-    if (data[key] !== undefined) {
+    if (/var/lib/docker/volumes/thecryptofrontier-data[key] !== undefined) {
       const expectedType = config.type;
-      const actualType = typeof data[key];
+      const actualType = typeof /var/lib/docker/volumes/thecryptofrontier-data[key];
       
       if (expectedType === 'number' && actualType !== 'number') {
         errors.push(`${key} deve ser número`);

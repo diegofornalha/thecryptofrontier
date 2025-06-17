@@ -18,11 +18,11 @@ Content-Type Builder → [Seu Tipo] → Advanced Settings → ✓ Enable localiz
 ```bash
 # Idioma padrão
 POST /api/posts
-{ "data": { "title": "Meu Post" } }
+{ "/var/lib/docker/volumes/thecryptofrontier-data": { "title": "Meu Post" } }
 
 # Idioma específico
 POST /api/posts
-{ "data": { "title": "My Post", "locale": "en" } }
+{ "/var/lib/docker/volumes/thecryptofrontier-data": { "title": "My Post", "locale": "en" } }
 ```
 
 ### Buscar Conteúdo
@@ -40,7 +40,7 @@ GET /api/posts?locale=pt&populate=*
 ### Atualizar Tradução
 ```bash
 PUT /api/posts/{documentId}?locale=fr
-{ "data": { "title": "Mon Post" } }
+{ "/var/lib/docker/volumes/thecryptofrontier-data": { "title": "Mon Post" } }
 ```
 
 ## 📤 Publicar (com Draft & Publish)

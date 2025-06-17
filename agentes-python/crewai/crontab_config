@@ -1,3 +1,0 @@
-# Executa o pipeline de blog todos os dias às 21:00 (horário de São Paulo)
-# Mantenha a variável TZ para garantir que o script execute com o fuso horário correto
-0 21 * * * export TZ="America/Sao_Paulo" && /home/strapi/thecryptofrontier/framework_crewai/blog_crew/daily_pipeline.sh

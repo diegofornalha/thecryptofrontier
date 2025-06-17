@@ -16,7 +16,7 @@ Esta configuração permite executar o Mem0 localmente com Docker, incluindo:
 
 ```bash
 # Criar diretórios necessários
-mkdir -p data/{qdrant,redis,postgres} mem0/docs-cache
+mkdir -p /var/lib/docker/volumes/thecryptofrontier-data/{qdrant,redis,postgres} mem0/docs-cache
 
 # Iniciar todos os serviços
 docker-compose -f docker-compose.mem0.yml up -d

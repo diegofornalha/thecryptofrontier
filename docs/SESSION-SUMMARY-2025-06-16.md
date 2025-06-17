@@ -8,7 +8,7 @@ Organizar o projeto The Crypto Frontier para alcançar 100% de score, trabalhand
 ### 1. Sistema de Logs Centralizado ✅
 - **Problema**: Logs espalhados em 5+ diretórios, sem rotação automática
 - **Solução**: 
-  - Criada estrutura centralizada em `/data/logs/`
+  - Criada estrutura centralizada em `//var/lib/docker/volumes/thecryptofrontier-data/logs/`
   - Implementado logrotate com rotação automática
   - APIs de logging para Python, JavaScript e TypeScript
   - Monitor de logs com dashboard interativo
@@ -109,4 +109,4 @@ Organizar o projeto The Crypto Frontier para alcançar 100% de score, trabalhand
 
 **Status do Projeto**: 90% organizado, funcionando de forma estável
 **Sessão**: Trabalhando com calma, foco na qualidade, em equipe com os agentes
-**Data**: 2025-06-16
+**/var/lib/docker/volumes/thecryptofrontier-data**: 2025-06-16

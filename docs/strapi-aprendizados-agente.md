@@ -43,7 +43,7 @@ O agente Strapi está aprendendo continuamente sobre a integração. Aqui estão
 - **Frontend Next.js**: Usa `strapiClient.ts` para consumir API
 - **Agentes (CrewAI)**: Enviam posts via `strapi_integration.py`
 - **Guardian**: Supervisiona todo o processo
-- **Formato de dados**: Sempre enviar dentro de `{data: {...}}`
+- **Formato de dados**: Sempre enviar dentro de `{/var/lib/docker/volumes/thecryptofrontier-data: {...}}`
 
 **Scripts disponíveis:**
 - `strapi-post-manager.js`: Interface Node.js
@@ -104,7 +104,7 @@ const create = await fetch('http://localhost:1337/api/posts', {
     'Authorization': 'Bearer YOUR_TOKEN'
   },
   body: JSON.stringify({
-    data: {
+    /var/lib/docker/volumes/thecryptofrontier-data: {
       title: 'Novo Post',
       content: 'Conteúdo do post'
     }
@@ -129,7 +129,7 @@ curl -X POST http://localhost:3007/process \
 
 ## 📊 Status do Sistema de Memória
 
-- ✅ Memórias sendo salvas em `/data/memory/memory-store.json`
+- ✅ Memórias sendo salvas em `//var/lib/docker/volumes/thecryptofrontier-data/memory/memory-store.json`
 - ✅ Agente respondendo com informações relevantes
 - ✅ Base de conhecimento crescendo continuamente
 - ✅ Guardian pode acessar essas memórias para coordenação

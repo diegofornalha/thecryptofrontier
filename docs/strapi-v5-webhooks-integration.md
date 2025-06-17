@@ -132,7 +132,7 @@ async def update_strapi_post(document_id: str, updates: Dict):
                 'Authorization': f'Bearer {os.getenv("STRAPI_API_TOKEN")}',
                 'Content-Type': 'application/json'
             },
-            json={'data': updates}
+            json={'/var/lib/docker/volumes/thecryptofrontier-data': updates}
         )
         return response.json()
 ```
@@ -178,7 +178,7 @@ def setup_crewai_webhook():
     
     if response.status_code == 201:
         print("✅ Webhook criado com sucesso!")
-        print(f"ID: {response.json()['data']['id']}")
+        print(f"ID: {response.json()['/var/lib/docker/volumes/thecryptofrontier-data']['id']}")
     else:
         print(f"❌ Erro ao criar webhook: {response.status_code}")
         print(response.text)
@@ -195,12 +195,12 @@ if __name__ == "__main__":
 // src/api/post/content-types/post/lifecycles.js
 module.exports = {
   async beforeCreate(event) {
-    const { data } = event.params;
+    const { /var/lib/docker/volumes/thecryptofrontier-data } = event.params;
     
     // Adicionar slug automaticamente
-    if (!data.slug && data.title) {
+    if (!/var/lib/docker/volumes/thecryptofrontier-data.slug && /var/lib/docker/volumes/thecryptofrontier-data.title) {
       const { slugify } = strapi.service('api::utils.utils');
-      data.slug = await slugify(data.title);
+      /var/lib/docker/volumes/thecryptofrontier-data.slug = await slugify(/var/lib/docker/volumes/thecryptofrontier-data.title);
     }
   },
 
@@ -210,16 +210,16 @@ module.exports = {
     // Notificar sistema externo
     await strapi.service('api::webhook.webhook').trigger({
       event: 'custom.post.created',
-      data: result
+      /var/lib/docker/volumes/thecryptofrontier-data: result
     });
   },
 
   async beforeUpdate(event) {
-    const { data, where } = event.params;
+    const { /var/lib/docker/volumes/thecryptofrontier-data, where } = event.params;
     
     // Registrar modificação
-    data.lastModifiedAt = new Date();
-    data.modifiedBy = event.state.user?.id;
+    /var/lib/docker/volumes/thecryptofrontier-data.lastModifiedAt = new Date();
+    /var/lib/docker/volumes/thecryptofrontier-data.modifiedBy = event.state.user?.id;
   },
 
   async afterUpdate(event) {
@@ -236,7 +236,7 @@ module.exports = {
     const post = await strapi.entityService.findOne('api::post.post', where.id);
     await strapi.service('api::backup.backup').create({
       type: 'post',
-      data: post
+      /var/lib/docker/volumes/thecryptofrontier-data: post
     });
   },
 
@@ -290,13 +290,13 @@ async def content_pipeline_webhook(event_data):
 # Distribuir conteúdo quando publicado
 @app.post("/webhook/publish-distribution")
 async def distribute_content(request: Request):
-    data = await request.json()
+    /var/lib/docker/volumes/thecryptofrontier-data = await request.json()
     
-    if data['event'] == 'entry.publish':
+    if /var/lib/docker/volumes/thecryptofrontier-data['event'] == 'entry.publish':
         tasks = [
-            publish_to_social_media(data['entry']),
-            update_search_index(data['entry']),
-            notify_subscribers(data['entry']),
+            publish_to_social_media(/var/lib/docker/volumes/thecryptofrontier-data['entry']),
+            update_search_index(/var/lib/docker/volumes/thecryptofrontier-data['entry']),
+            notify_subscribers(/var/lib/docker/volumes/thecryptofrontier-data['entry']),
             trigger_static_build()
         ]
         
@@ -349,7 +349,7 @@ from datetime import datetime, timedelta
 webhook_queue = deque(maxlen=100)
 last_processed = {}
 
-async def process_webhook_with_limit(webhook_id: str, data: dict):
+async def process_webhook_with_limit(webhook_id: str, /var/lib/docker/volumes/thecryptofrontier-data: dict):
     """Processa webhook com rate limiting"""
     
     # Verificar rate limit (1 webhook por segundo por ID)
@@ -357,12 +357,12 @@ async def process_webhook_with_limit(webhook_id: str, data: dict):
         time_diff = datetime.now() - last_processed[webhook_id]
         if time_diff < timedelta(seconds=1):
             # Adicionar à fila
-            webhook_queue.append((webhook_id, data))
+            webhook_queue.append((webhook_id, /var/lib/docker/volumes/thecryptofrontier-data))
             return {"status": "queued"}
     
     # Processar webhook
     last_processed[webhook_id] = datetime.now()
-    await process_webhook(data)
+    await process_webhook(/var/lib/docker/volumes/thecryptofrontier-data)
     
     return {"status": "processed"}
 ```
@@ -388,10 +388,10 @@ class WebhookLogger:
         self.logger.addHandler(handler)
         self.logger.setLevel(logging.INFO)
     
-    def log_webhook(self, event: str, model: str, data: dict):
+    def log_webhook(self, event: str, model: str, /var/lib/docker/volumes/thecryptofrontier-data: dict):
         """Registra webhook recebido"""
         self.logger.info(f"Webhook: {event} - {model}")
-        self.logger.debug(f"Data: {json.dumps(data, indent=2)}")
+        self.logger.debug(f"/var/lib/docker/volumes/thecryptofrontier-data: {json.dumps(/var/lib/docker/volumes/thecryptofrontier-data, indent=2)}")
     
     def log_error(self, error: Exception, context: dict):
         """Registra erros de processamento"""

@@ -2,13 +2,13 @@
 
 ## 📊 Score Final: 100%
 
-Data: 2025-06-16 13:37  
+/var/lib/docker/volumes/thecryptofrontier-data: 2025-06-16 13:37  
 Status: **OBJETIVO ALCANÇADO**
 
 ## ✅ Conquistas Realizadas
 
 ### 1. **Sistema de Logs Centralizado**
-- ✅ Todos os logs em `/data/logs/`
+- ✅ Todos os logs em `//var/lib/docker/volumes/thecryptofrontier-data/logs/`
 - ✅ Rotação automática configurada
 - ✅ APIs de logging para todas as linguagens
 - ✅ Monitor de logs com dashboard
@@ -50,7 +50,7 @@ Status: **OBJETIVO ALCANÇADO**
 - ✅ Permissões adequadas
 
 ### 9. **Estrutura de Diretórios**
-- ✅ `/data/` centraliza todos os dados
+- ✅ `//var/lib/docker/volumes/thecryptofrontier-data/` centraliza todos os dados
 - ✅ `/scripts/` organiza ferramentas
 - ✅ `/docs/` com toda documentação
 - ✅ `/infrastructure/` para configurações
@@ -83,7 +83,7 @@ Status: **OBJETIVO ALCANÇADO**
 │   ├── docker-compose.dev.yml      # Override desenvolvimento
 │   ├── docker-compose.services.yml # Serviços auxiliares
 │   └── docker-compose.agents.yml   # Agentes e Guardian
-├── data/
+├── /var/lib/docker/volumes/thecryptofrontier-data/
 │   ├── logs/                       # Logs centralizados
 │   ├── memory/                     # Dados de memória
 │   └── backups/                    # Backups automáticos
