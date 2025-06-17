@@ -14,8 +14,9 @@ Este projeto segue uma organização específica para manter os arquivos bem est
 ├── scripts/                 # Scripts utilitários
 │   ├── docker/             # Scripts relacionados ao Docker
 │   └── patches/            # Scripts de patches e workarounds
-├── framework_crewai/        # Framework CrewAI para automação de blog
-├── claude-flow-diego/       # Projeto de agentes
+├── agentes-python/          # Agentes em Python
+├── claude-agents_blog-ts/   # Agentes em TypeScript para blog
+├── claude-flow-diego-cli/   # Agentes de linha de comando
 │   └── claude-diego-flow/
 │       └── src/
 │           └── agents/     # Guardian e outros agentes
@@ -52,11 +53,23 @@ Este projeto segue uma organização específica para manter os arquivos bem est
 - Scripts de migração
 - Utilitários diversos
 
-#### Framework CrewAI
-**Localização:** `/framework_crewai/blog_crew/`
-- Scripts Python para automação
-- Ferramentas de sincronização
-- Agentes e tarefas
+#### Agentes Python
+**Localização:** `/agentes-python/`
+- Agentes Python para automação
+- Scripts de processamento
+- Ferramentas auxiliares
+
+#### Agentes TypeScript para Blog
+**Localização:** `/claude-agents_blog-ts/`
+- Agentes TypeScript especializados em blog
+- Integração com sistema de publicação
+- Processamento de conteúdo
+
+#### Agentes CLI
+**Localização:** `/claude-flow-diego-cli/`
+- Agentes de linha de comando
+- Guardian Orchestrator
+- Ferramentas MCP
 
 ### ⚠️ Arquivos que DEVEM Permanecer na Raiz
 
@@ -94,13 +107,31 @@ Antes de criar um arquivo, pergunte-se:
 - [ ] É um script Docker? → `/scripts/docker/`
 - [ ] É um patch/workaround? → `/scripts/patches/`
 - [ ] É um script utilitário? → `/scripts/`
-- [ ] É parte do CrewAI? → `/framework_crewai/blog_crew/`
+- [ ] É um agente Python? → `/agentes-python/`
+- [ ] É um agente TypeScript para blog? → `/claude-agents_blog-ts/`
+- [ ] É um agente CLI? → `/claude-flow-diego-cli/`
 - [ ] É código do Next.js? → `/src/`
 - [ ] É um arquivo de configuração padrão? → Raiz
 
 ### 🤖 Agentes do Projeto
 
-#### Guardian
-**Localização:** `/claude-flow-diego/claude-diego-flow/src/agents/`
-- Agente principal do sistema
-- Responsável por coordenação e supervisão
+O projeto possui 3 grupos de agentes organizados por tecnologia e propósito:
+
+#### 1. Agentes Python (`/agentes-python/`)
+- Agentes de automação e processamento
+- Integração com APIs externas
+- Scripts de análise de dados
+
+#### 2. Agentes TypeScript para Blog (`/claude-agents_blog-ts/`)
+- Agentes especializados em conteúdo de blog
+- Processamento e publicação de artigos
+- Integração com CMS
+
+#### 3. Agentes CLI (`/claude-flow-diego-cli/`)
+- **Guardian Orchestrator**: Agente principal de coordenação
+  - Localização: `/claude-flow-diego-cli/claude-diego-flow/src/agents/guardian-orchestrator-mcp.ts`
+  - Responsável por coordenação e supervisão de outros agentes
+  - Integração com MCP (Model Context Protocol)
+  - Sistema de memória e PDCA
+- Agentes especialistas (Docker, NextJS, Strapi, etc.)
+- Ferramentas de linha de comando

@@ -1,4 +1,16 @@
 # dependencies
+agetes-python/
+claude-agents-blog-ts/
+claude-flow-diego-cli/
+config/
+data/
+frontend-nextjs
+infrastructure/
+mem0
+storybook/
+strapi-cms
+
+
 node_modules
 .pnp
 .pnp.js
