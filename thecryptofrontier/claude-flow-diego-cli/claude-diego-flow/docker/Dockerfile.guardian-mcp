@@ -1,0 +1,79 @@
+# Build stage
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Instalar ferramentas necessárias para build
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    git
+
+# Copiar arquivos de dependências
+COPY package*.json ./
+COPY tsconfig.json ./
+
+# Instalar todas as dependências
+RUN npm ci
+
+# Copiar código fonte
+COPY src/ ./src/
+
+# Compilar TypeScript
+RUN npm run build || npx tsc
+
+# Production stage
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Instalar ferramentas necessárias
+RUN apk add --no-cache \
+    git \
+    curl \
+    bash \
+    tini \
+    docker-cli
+
+# Copiar arquivos de dependências
+COPY package*.json ./
+
+# Instalar apenas dependências de produção
+RUN npm ci --only=production && \
+    npm cache clean --force
+
+# Copiar build do estágio anterior
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/src ./src
+
+# Criar diretórios necessários
+RUN mkdir -p /app/reports /app/logs /app/.cache /app/memory
+
+# Variáveis de ambiente
+ENV NODE_ENV=production \
+    PROJECT_ROOT=/workspace \
+    LOG_LEVEL=info \
+    MCP_BRIDGE_URL=http://mem0-bridge:3002 \
+    GUARDIAN_API_PORT=3004 \
+    GUARDIAN_MEMORY_USER=guardian-orchestrator
+
+# User não-root para segurança
+RUN addgroup -g 1001 -S guardian && \
+    adduser -u 1001 -S guardian -G guardian && \
+    chown -R guardian:guardian /app
+
+USER guardian
+
+# Expor portas
+EXPOSE 3004
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD curl -f http://localhost:3004/health || exit 1
+
+# Use tini para gerenciar processos
+ENTRYPOINT ["/sbin/tini", "--"]
+
+# Comando padrão
+CMD ["node", "dist/agents/guardian-orchestrator-mcp.js"]

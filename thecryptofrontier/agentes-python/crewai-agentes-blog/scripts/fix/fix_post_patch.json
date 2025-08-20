@@ -1,0 +1,41 @@
+{
+  "mutations": [
+    {
+      "patch": {
+        "query": "*[_type == 'post' && slug.current == 'xrp-alta-de-647x-no-market-cap-de-apenas-us-17-milhoes-o-que-sabemos'][0]",
+        "set": {
+          "content[1]": {
+            "_type": "block",
+            "_key": "fixed_para",
+            "style": "normal",
+            "markDefs": [
+              {
+                "_type": "link",
+                "_key": "linkbriga",
+                "href": "https://thecryptobasic.com/2025/06/06/xrp-price-falls-as-elon-musk-and-trump-enter-bitter-feud/"
+              }
+            ],
+            "children": [
+              {
+                "_type": "span",
+                "_key": "sp1",
+                "text": "Notavelmente, o XRP caiu para US$ 2,0647 na semana passada, marcando uma queda de 9,4% em relação aos US$ 2,281 negociados no início da semana. A queda coincidiu com "
+              },
+              {
+                "_type": "span",
+                "_key": "sp2",
+                "text": "a briga entre",
+                "marks": ["linkbriga"]
+              },
+              {
+                "_type": "span",
+                "_key": "sp3",
+                "text": " o bilionário Elon Musk e o presidente dos EUA, Donald Trump, que levou a uma queda massiva nas ações da Tesla. A controvérsia se espalhou para o espaço cripto devido à associação de ambos os indivíduos com criptomoedas."
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

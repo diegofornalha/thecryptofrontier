@@ -1,0 +1,45 @@
+FROM node:20-alpine
+
+# Instalar dependências do sistema
+RUN apk add --no-cache \
+    curl \
+    docker-cli \
+    bash
+
+# Criar diretório de trabalho
+WORKDIR /app
+
+# Copiar arquivos de dependências
+COPY package*.json ./
+COPY tsconfig.json ./
+
+# Instalar dependências
+RUN npm ci --only=production && \
+    npm install -D typescript tsx @types/node
+
+# Copiar código fonte
+COPY src/ ./src/
+
+# Criar diretórios necessários
+RUN mkdir -p /app/logs /app/backups /app/data
+
+# Criar script de entrada
+COPY docker/entrypoint-mem0-specialist.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Variáveis de ambiente padrão
+ENV NODE_ENV=production \
+    MEM0_BRIDGE_URL=http://mem0-bridge:3002 \
+    CHROMA_URL=http://mem0-chroma:8005 \
+    LOG_DIR=/app/logs \
+    BACKUP_DIR=/app/backups \
+    PORT=3006
+
+# Expor porta para API HTTP
+EXPOSE 3006
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:3006/health || exit 1
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

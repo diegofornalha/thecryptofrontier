@@ -1,0 +1,28 @@
+{
+  "common": {
+    "search": "Search",
+    "menu": "Menu",
+    "home": "Home",
+    "blog": "Blog",
+    "homePage": "Main page",
+    "latestNews": "Latest news",
+    "searchArticles": "Search articles",
+    "manageContent": "Manage content",
+    "readMore": "Read More",
+    "publishedAt": "Published on",
+    "by": "by",
+    "loading": "Loading...",
+    "error": "Error loading",
+    "noPostsFound": "No posts found"
+  },
+  "sections": {
+    "popularPosts": "Popular Posts",
+    "recentPosts": "Recent Posts",
+    "relatedPosts": "Related Posts"
+  },
+  "languages": {
+    "pt": "Português",
+    "en": "English",
+    "es": "Español"
+  }
+}

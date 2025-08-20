@@ -1,0 +1,32 @@
+# Configurações do Blog Automação com CrewAI
+
+# Configurações de diretórios
+directories:
+  posts_para_traduzir: "posts_para_traduzir"
+  posts_traduzidos: "posts_traduzidos"
+  posts_formatados: "posts_formatados"
+  posts_com_imagem: "posts_com_imagem"
+  posts_publicados: "posts_publicados"
+  posts_imagens: "posts_imagens"
+
+# Configurações LLM
+llm:
+  model: "gpt-4.1-nano"  # Alterado para GPT-4.1 Nano (gpt-4.1-nano)
+  temperature: 0.7
+
+# Configurações do processo
+process:
+  type: "sequential"  # sequential ou hierarchical
+  verbose: true
+
+# Configurações de geração de imagem
+image_generation:
+  enabled: true
+  model: "dall-e-3"
+  size: "1792x1024"  # 16:9 landscape
+  quality: "hd"
+  style:
+    background: "Pure black (#000000) with subtle blue tech grid"
+    lighting: "Blue rim lighting (#003366) with top-down key light"
+    effects: "Circular cyan energy waves radiating from center"
+    quality: "ultra high definition, sharp details, professional rendering"

@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # ===========================================
+  # STRAPI V5 - CMS Backend
+  # ===========================================
+  strapi-v5:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ale-blog-strapi-v5
+    ports:
+      - "1339:1337"  # Mapeando para porta 1339 conforme configuração do Caddy
+    environment:
+      - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=1337
+      # Usando PostgreSQL em vez de SQLite
+      - DATABASE_CLIENT=postgres
+      - DATABASE_HOST=postgres-strapi
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=strapi
+      - DATABASE_USERNAME=strapi
+      - DATABASE_PASSWORD=strapi123
+      - DATABASE_SSL=false
+      # Security Keys - use as mesmas do .env local por ora
+      - APP_KEYS=toBeModified1,toBeModified2
+      - ADMIN_JWT_SECRET=toBeModified3
+      - API_TOKEN_SALT=toBeModified4
+      - TRANSFER_TOKEN_SALT=toBeModified5
+      - ENCRYPTION_KEY=toBeModified6
+      - JWT_SECRET=toBeModified7
+      # Flags
+      - FLAG_NPS=true
+      - FLAG_PROMOTE_EE=true
+    volumes:
+      - strapi-uploads:/app/public/uploads
+    restart: unless-stopped
+    networks:
+      - strapi-network
+    depends_on:
+      - postgres-strapi
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:1337/admin"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    labels:
+      - "com.agentesintegrados.service=strapi-v5"
+      - "com.agentesintegrados.domain=ale-blog.agentesintegrados.com"
+
+  # ===========================================
+  # DATABASE - PostgreSQL
+  # ===========================================
+  postgres-strapi:
+    image: postgres:15-alpine
+    container_name: ale-blog-postgres
+    environment:
+      - POSTGRES_DB=strapi
+      - POSTGRES_USER=strapi
+      - POSTGRES_PASSWORD=strapi123
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - strapi-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U strapi"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  strapi-uploads:
+    driver: local
+  postgres-data:
+    driver: local
+
+networks:
+  strapi-network:
+    driver: bridge 

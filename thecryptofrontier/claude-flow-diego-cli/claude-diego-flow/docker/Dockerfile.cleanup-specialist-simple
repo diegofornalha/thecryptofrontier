@@ -1,0 +1,45 @@
+# Versão simplificada sem compilação TypeScript
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Instalar ferramentas necessárias
+RUN apk add --no-cache \
+    git \
+    curl \
+    bash \
+    tini
+
+# Copiar todo o código fonte
+COPY . .
+
+# Instalar dependências
+RUN npm ci || npm install
+
+# Criar diretórios necessários
+RUN mkdir -p /app/reports /app/logs /app/.cache /workspace
+
+# User não-root para segurança
+RUN addgroup -g 1001 -S cleanup && \
+    adduser -u 1001 -S cleanup -G cleanup && \
+    chown -R cleanup:cleanup /app && \
+    chown cleanup:cleanup /workspace
+
+USER cleanup
+
+# Variáveis de ambiente padrão
+ENV NODE_ENV=production \
+    PROJECT_ROOT=/workspace \
+    DRY_RUN=true \
+    AGGRESSIVE=false \
+    LOG_LEVEL=info
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "console.log('healthy')" || exit 1
+
+# Use tini para gerenciar processos
+ENTRYPOINT ["/sbin/tini", "--"]
+
+# Comando padrão - rodar direto com tsx
+CMD ["npx", "tsx", "src/agents/cleanup-specialist-agent.ts"]

@@ -1,0 +1,82 @@
+{
+  "coreConcepts": {
+    "contentTypes": {
+      "definition": "Estruturas de dados customizáveis que definem o modelo de conteúdo",
+      "types": [
+        "collection",
+        "single"
+      ],
+      "fields": [
+        "text",
+        "number",
+        "boolean",
+        "date",
+        "media",
+        "relation",
+        "component",
+        "dynamiczone"
+      ],
+      "bestPractices": [
+        "Use nomes descritivos e no singular para content-types",
+        "Aproveite componentes para estruturas reutilizáveis",
+        "Configure validações apropriadas nos campos",
+        "Use relações para conectar dados relacionados"
+      ]
+    },
+    "api": {
+      "types": [
+        "REST",
+        "GraphQL"
+      ],
+      "endpoints": {
+        "rest": {
+          "find": "GET /api/:pluralName",
+          "findOne": "GET /api/:pluralName/:id",
+          "create": "POST /api/:pluralName",
+          "update": "PUT /api/:pluralName/:id",
+          "delete": "DELETE /api/:pluralName/:id"
+        }
+      },
+      "features": [
+        "filtering",
+        "sorting",
+        "pagination",
+        "population"
+      ]
+    },
+    "plugins": {
+      "core": [
+        "i18n",
+        "users-permissions",
+        "email",
+        "upload"
+      ],
+      "community": [
+        "comments",
+        "seo",
+        "sitemap",
+        "import-export"
+      ],
+      "development": "Crie plugins customizados em src/plugins/"
+    },
+    "security": {
+      "rbac": "Role-Based Access Control para gerenciar permissões",
+      "policies": "Políticas customizadas para controle fino de acesso",
+      "middleware": "Middleware para processamento de requisições",
+      "bestPractices": [
+        "Configure CORS apropriadamente",
+        "Use variáveis de ambiente para dados sensíveis",
+        "Implemente rate limiting",
+        "Habilite autenticação JWT"
+      ]
+    }
+  },
+  "commonTasks": {
+    "contentType": "Criar e gerenciar modelos de dados",
+    "api": "Desenvolver endpoints REST/GraphQL",
+    "auth": "Configurar autenticação e autorização",
+    "deploy": "Deploy em produção",
+    "optimize": "Otimizar performance",
+    "migrate": "Migrar dados entre ambientes"
+  }
+}

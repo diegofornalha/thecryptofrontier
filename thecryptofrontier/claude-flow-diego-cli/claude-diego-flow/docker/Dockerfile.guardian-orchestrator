@@ -1,0 +1,68 @@
+# Dockerfile otimizado para Guardian Orchestrator
+FROM node:20-alpine AS base
+
+# Instalar dependências do sistema
+RUN apk add --no-cache \
+    git \
+    curl \
+    wget \
+    tini
+
+# Criar usuário não-root
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
+# ========================================
+# BUILD STAGE
+# ========================================
+FROM base AS builder
+
+WORKDIR /app
+
+# Copiar arquivos de dependências
+COPY package*.json tsconfig.json ./
+
+# Instalar dependências (incluindo dev para build)
+RUN npm ci
+
+# Copiar código fonte
+COPY src/ ./src/
+
+# Build do TypeScript
+RUN npm run build || npx tsc
+
+# ========================================
+# PRODUCTION STAGE
+# ========================================
+FROM base AS production
+
+WORKDIR /app
+
+# Copiar arquivos necessários do builder
+COPY --from=builder --chown=nodejs:nodejs /app/package*.json ./
+COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nodejs:nodejs /app/src ./src
+
+# Instalar apenas dependências de produção
+RUN npm ci --only=production && \
+    npm cache clean --force
+
+# Criar diretórios necessários
+RUN mkdir -p logs reports && \
+    chown -R nodejs:nodejs /app
+
+# Mudar para usuário não-root
+USER nodejs
+
+# Expor porta
+EXPOSE 3000
+
+# Health check endpoint
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:3000/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1))"
+
+# Usar tini para gerenciamento de processos
+ENTRYPOINT ["/sbin/tini", "--"]
+
+# Comando padrão (usa tsx para suportar TypeScript diretamente)
+CMD ["npx", "tsx", "src/agents/guardian-orchestrator-mcp.ts"]

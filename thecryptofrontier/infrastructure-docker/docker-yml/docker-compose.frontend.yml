@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ../../frontend-nextjs
+      dockerfile: Dockerfile.frontend.production
+    container_name: thecryptofrontier-frontend
+    ports:
+      - "3300:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    volumes:
+      - ../../frontend-nextjs/.env.production:/app/.env.production:ro
+    restart: unless-stopped
+    networks:
+      - crypto-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  crypto-network:
+    driver: bridge

@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline de Tarefas - Claude Code 10x</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #0a0a0a;
+            color: #e0e0e0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            color: #60a5fa;
+            font-size: 2.5rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(96, 165, 250, 0.1);
+            color: #60a5fa;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(96, 165, 250, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #60a5fa;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: #9ca3af;
+            font-size: 0.9rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            color: #9ca3af;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+
+        .filter-tab:hover,
+        .filter-tab.active {
+            background: rgba(96, 165, 250, 0.2);
+            border-color: #60a5fa;
+            color: #60a5fa;
+        }
+
+        .search-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.9rem;
+            min-width: 200px;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #60a5fa;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .search-box::placeholder {
+            color: #6b7280;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #10b981;
+            font-size: 0.85rem;
+        }
+
+        .pulse {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+        }
+
+        .timeline-section {
+            background: #1a1a2e;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: #fff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #60a5fa, rgba(96, 165, 250, 0.3));
+        }
+
+        .timeline-item {
+            position: relative;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            border-left: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .timeline-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateX(5px);
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -24px;
+            top: 25px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid #0a0a0a;
+        }
+
+        .timeline-item.running::before {
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        .timeline-item.completed::before {
+            background: #60a5fa;
+        }
+
+        .timeline-item.error::before {
+            background: #ef4444;
+        }
+
+        .timeline-item.pending::before {
+            background: #f59e0b;
+        }
+
+        .timeline-item.running {
+            border-left-color: #10b981;
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .timeline-item.completed {
+            border-left-color: #60a5fa;
+            background: rgba(96, 165, 250, 0.05);
+        }
+
+        .timeline-item.error {
+            border-left-color: #ef4444;
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .timeline-item.pending {
+            border-left-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.05);
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .task-title {
+            font-weight: bold;
+            color: #fff;
+            font-size: 1.1rem;
+        }
+
+        .task-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-running {
+            background: #10b981;
+            color: white;
+        }
+
+        .status-completed {
+            background: #60a5fa;
+            color: white;
+        }
+
+        .status-error {
+            background: #ef4444;
+            color: white;
+        }
+
+        .status-pending {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .task-details {
+            color: #9ca3af;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .task-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            font-size: 0.85rem;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .meta-label {
+            color: #6b7280;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .meta-value {
+            color: #e0e0e0;
+            font-weight: 500;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar-section {
+            background: #1a1a2e;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .active-agents {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .agent-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            border-left: 3px solid #10b981;
+        }
+
+        .agent-name {
+            font-weight: 500;
+            color: #fff;
+        }
+
+        .agent-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: #10b981;
+        }
+
+        .performance-chart {
+            height: 200px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .quick-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .quick-stat {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+        }
+
+        .quick-stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #60a5fa;
+            margin-bottom: 5px;
+        }
+
+        .quick-stat-label {
+            color: #9ca3af;
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                grid-template-rows: auto;
+                display: grid;
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .empty-state-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #9ca3af;
+        }
+
+        .empty-state-description {
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Timeline de Tarefas</h1>
+            <a href="/" class="back-button">
+                ← Voltar ao Dashboard
+            </a>
+        </div>
+
+        <div class="stats-overview">
+            <div class="stat-card">
+                <div class="stat-number" id="total-tasks">0</div>
+                <div class="stat-label">Total de Tarefas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="running-tasks">0</div>
+                <div class="stat-label">Em Execução</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="completed-today">0</div>
+                <div class="stat-label">Concluídas Hoje</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="success-rate">0%</div>
+                <div class="stat-label">Taxa de Sucesso</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="filter-group">
+                <div class="filter-tab active" data-filter="all">Todas</div>
+                <div class="filter-tab" data-filter="running">🟢 Em Execução</div>
+                <div class="filter-tab" data-filter="completed">🔵 Concluídas</div>
+                <div class="filter-tab" data-filter="error">🔴 Com Erro</div>
+                <div class="filter-tab" data-filter="pending">🟡 Pendentes</div>
+            </div>
+
+            <div class="search-controls">
+                <input type="text" class="search-box" id="task-search" placeholder="🔍 Buscar tarefas...">
+                <div class="live-indicator">
+                    <div class="pulse"></div>
+                    <span>Atualização em tempo real</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="timeline-section">
+                <div class="section-title">
+                    ⏱️ Timeline de Execução
+                </div>
+                <div class="timeline" id="tasks-timeline">
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <div class="section-title">
+                        🤖 Agentes Ativos
+                    </div>
+                    <div class="active-agents" id="active-agents">
+                        <!-- Content will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="section-title">
+                        📊 Performance
+                    </div>
+                    <div class="quick-stats">
+                        <div class="quick-stat">
+                            <div class="quick-stat-number" id="avg-duration">0s</div>
+                            <div class="quick-stat-label">Tempo Médio</div>
+                        </div>
+                        <div class="quick-stat">
+                            <div class="quick-stat-number" id="tasks-per-hour">0</div>
+                            <div class="quick-stat-label">Tarefas/Hora</div>
+                        </div>
+                    </div>
+                    <div class="performance-chart">
+                        Gráfico de performance em desenvolvimento
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração de tarefas por serviço
+        const TASK_DEFINITIONS = {
+            'Guardian Agent': [
+                { name: 'organization-analysis', description: 'Análise de organização do projeto', complexity: 'complex', avgDuration: 45000 },
+                { name: 'auto-fix', description: 'Aplicação de correções automáticas', complexity: 'medium', avgDuration: 15000 },
+                { name: 'score-calculation', description: 'Cálculo do score de organização', complexity: 'simple', avgDuration: 3000 }
+            ],
+            'Auto-Commit Agent': [
+                { name: 'smart-commit', description: 'Commit inteligente com conventional commits', complexity: 'simple', avgDuration: 8000 },
+                { name: 'git-status-check', description: 'Verificação de status do repositório', complexity: 'simple', avgDuration: 2000 },
+                { name: 'auto-push', description: 'Push automático para repositório remoto', complexity: 'medium', avgDuration: 12000 }
+            ],
+            'SPARC Architect': [
+                { name: 'system-design', description: 'Planejamento de arquitetura de sistema', complexity: 'complex', avgDuration: 120000 },
+                { name: 'component-analysis', description: 'Análise de componentes existentes', complexity: 'medium', avgDuration: 30000 }
+            ],
+            'Memory MCP': [
+                { name: 'memory-search', description: 'Busca semântica em memórias', complexity: 'simple', avgDuration: 5000 },
+                { name: 'knowledge-graph-update', description: 'Atualização do grafo de conhecimento', complexity: 'complex', avgDuration: 25000 }
+            ],
+            'Sequential Thinking': [
+                { name: 'problem-analysis', description: 'Análise estruturada de problemas complexos', complexity: 'complex', avgDuration: 60000 },
+                { name: 'decision-making', description: 'Processo de tomada de decisão', complexity: 'medium', avgDuration: 35000 }
+            ]
+        };
+
+        // Estado da aplicação
+        let currentFilter = 'all';
+        let searchTerm = '';
+        let tasks = [];
+        let isRealData = false;
+
+        // Buscar tarefas reais da API
+        async function fetchRealTasks() {
+            try {
+                const response = await fetch('/api/tasks');
+                const data = await response.json();
+                
+                // Converter timestamps e ajustar formato
+                tasks = data.tasks.map(task => ({
+                    ...task,
+                    startTime: new Date(task.startTime),
+                    duration: task.duration || null,
+                    progress: task.progress || 0,
+                    realData: task.realData || false
+                }));
+                
+                isRealData = data.source === 'real';
+                
+                // Atualizar indicador de dados reais
+                const liveIndicator = document.querySelector('.live-indicator span');
+                if (liveIndicator) {
+                    liveIndicator.textContent = isRealData ? 
+                        'Dados reais do Mem0' : 
+                        'Aguardando dados reais...';
+                }
+                
+                return data;
+            } catch (error) {
+                console.error('Erro ao buscar tarefas:', error);
+                return { tasks: [], total: 0, running: 0, completed_today: 0 };
+            }
+        }
+
+        // Calcular estatísticas
+        async function calculateTaskStats(data) {
+            // Se data foi fornecido, usar diretamente
+            if (data) {
+                document.getElementById('total-tasks').textContent = data.total || 0;
+                document.getElementById('running-tasks').textContent = data.running || 0;
+                document.getElementById('completed-today').textContent = data.completed_today || 0;
+            } else {
+                // Calcular localmente
+                const total = tasks.length;
+                const running = tasks.filter(t => t.status === 'running').length;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const completedToday = tasks.filter(t => 
+                    t.status === 'completed' && t.startTime >= today
+                ).length;
+                
+                document.getElementById('total-tasks').textContent = total;
+                document.getElementById('running-tasks').textContent = running;
+                document.getElementById('completed-today').textContent = completedToday;
+            }
+
+            const completed = tasks.filter(t => t.status === 'completed');
+            const total = tasks.length;
+            const successRate = total > 0 ? Math.round((completed.length / total) * 100) : 0;
+            document.getElementById('success-rate').textContent = successRate + '%';
+
+            // Calcular métricas de performance
+            const avgDurationMs = completed.length > 0 ? 
+                completed.reduce((sum, t) => sum + (t.duration || 0), 0) / completed.length : 0;
+            const avgDurationSecs = avgDurationMs / 1000;
+            
+            // Formatar duração média
+            let avgDurationText = '-';
+            if (avgDurationSecs > 0) {
+                if (avgDurationSecs < 60) {
+                    avgDurationText = Math.round(avgDurationSecs) + 's';
+                } else if (avgDurationSecs < 3600) {
+                    const mins = Math.floor(avgDurationSecs / 60);
+                    const secs = Math.round(avgDurationSecs % 60);
+                    avgDurationText = secs > 0 ? `${mins}m ${secs}s` : `${mins}m`;
+                } else {
+                    const hours = Math.floor(avgDurationSecs / 3600);
+                    const mins = Math.floor((avgDurationSecs % 3600) / 60);
+                    avgDurationText = mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+                }
+            }
+            
+            const tasksPerHour = Math.round(completed.length * (24 / ((Date.now() - (tasks[0]?.startTime || Date.now())) / (1000 * 60 * 60))));
+
+            document.getElementById('avg-duration').textContent = avgDurationText;
+            document.getElementById('tasks-per-hour').textContent = isNaN(tasksPerHour) ? 0 : tasksPerHour;
+        }
+
+        // Renderizar timeline de tarefas
+        function renderTasksTimeline() {
+            const filteredTasks = tasks.filter(task => {
+                const matchesFilter = currentFilter === 'all' || task.status === currentFilter;
+                const matchesSearch = searchTerm === '' || 
+                    task.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    task.service.toLowerCase().includes(searchTerm.toLowerCase());
+                return matchesFilter && matchesSearch;
+            });
+
+            const timeline = document.getElementById('tasks-timeline');
+
+            if (filteredTasks.length === 0) {
+                timeline.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <div class="empty-state-title">Nenhuma tarefa encontrada</div>
+                        <div class="empty-state-description">
+                            Tente ajustar os filtros ou aguarde novas tarefas serem executadas pelos agentes.
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = filteredTasks.map(task => {
+                const timeAgo = getTimeAgo(task.startTime);
+                const durationText = task.durationFormatted || 
+                                    (task.status === 'running' ? 'Em execução...' : '-');
+
+                return `
+                    <div class="timeline-item ${task.status}">
+                        <div class="task-header">
+                            <div class="task-title">${task.description}</div>
+                            <span class="task-status status-${task.status}">${task.status}</span>
+                        </div>
+                        <div class="task-details">
+                            Executada por <strong>${task.service}</strong>
+                            ${task.error ? `<br><span style="color: #ef4444;">Erro: ${task.error}</span>` : ''}
+                            ${task.status === 'running' ? `<br><span style="color: #10b981;">Progresso: ${task.progress}%</span>` : ''}
+                        </div>
+                        <div class="task-meta">
+                            <div class="meta-item">
+                                <div class="meta-label">Iniciada</div>
+                                <div class="meta-value">${timeAgo}</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">Duração</div>
+                                <div class="meta-value">${durationText}</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">Complexidade</div>
+                                <div class="meta-value">${task.complexity}</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">ID</div>
+                                <div class="meta-value">#${task.id}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            timeline.innerHTML = html;
+        }
+
+        // Renderizar agentes ativos
+        function renderActiveAgents() {
+            const services = [...new Set(tasks.map(t => t.service))];
+            const agentsContainer = document.getElementById('active-agents');
+
+            const html = services.map(service => {
+                const runningTasks = tasks.filter(t => t.service === service && t.status === 'running').length;
+                const totalTasks = tasks.filter(t => t.service === service).length;
+
+                return `
+                    <div class="agent-item">
+                        <div class="agent-name">${service}</div>
+                        <div class="agent-status">
+                            ${runningTasks > 0 ? '<div class="pulse"></div>' : ''}
+                            <span>${runningTasks}/${totalTasks}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            agentsContainer.innerHTML = html || '<div style="text-align: center; color: #6b7280;">Nenhum agente ativo</div>';
+        }
+
+        // Utility function para "tempo atrás"
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            
+            if (seconds < 60) return `${seconds}s atrás`;
+            if (seconds < 3600) return `${Math.floor(seconds / 60)}m atrás`;
+            if (seconds < 86400) return `${Math.floor(seconds / 3600)}h atrás`;
+            return `${Math.floor(seconds / 86400)}d atrás`;
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Buscar dados reais
+            const data = await fetchRealTasks();
+            
+            // Renderizar inicial
+            await calculateTaskStats(data);
+            renderTasksTimeline();
+            renderActiveAgents();
+
+            // Filtros
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFilter = this.dataset.filter;
+                    renderTasksTimeline();
+                });
+            });
+
+            // Busca
+            document.getElementById('task-search').addEventListener('input', function() {
+                searchTerm = this.value;
+                renderTasksTimeline();
+            });
+
+            // Atualizar dados em tempo real
+            setInterval(async () => {
+                const data = await fetchRealTasks();
+                await calculateTaskStats(data);
+                renderTasksTimeline();
+                renderActiveAgents();
+            }, 10000); // Atualizar a cada 10 segundos
+        });
+    </script>
+</body>
+</html>

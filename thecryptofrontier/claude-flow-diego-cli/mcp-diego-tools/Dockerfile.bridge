@@ -1,0 +1,22 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Instalar dependências
+COPY package*.json ./
+RUN npm ci
+
+# Copiar código
+COPY . .
+
+# Compilar TypeScript
+RUN npm run build
+
+# Expor portas
+EXPOSE 3003
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3   CMD node -e "require('http').get('http://localhost:3003/health', (r) => r.statusCode === 200 ? process.exit(0) : process.exit(1))"
+
+# Executar bridge
+CMD ["node", "build/mcp-http-bridge.js"]

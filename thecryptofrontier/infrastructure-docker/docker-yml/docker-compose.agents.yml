@@ -1,0 +1,315 @@
+# Docker Compose - Agentes e Especialistas
+# Todos os agentes do sistema consolidados
+# Criado: 2025-06-16
+
+version: '3.8'
+
+services:
+  # ===========================================
+  # GUARDIAN - Orquestrador Principal
+  # ===========================================
+  guardian-orchestrator:
+    build:
+      context: ../../claude-flow-diego-cli/claude-diego-flow
+      dockerfile: docker/Dockerfile.guardian-orchestrator
+    container_name: guardian-orchestrator
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - GUARDIAN_MODE=orchestrator
+      - MEM0_BRIDGE_URL=http://mem0-bridge:3002
+      - LOG_LEVEL=info
+    volumes:
+      - ../../claude-flow-diego-cli/claude-diego-flow/logs:/app/logs
+      - ../../claude-flow-diego-cli/claude-diego-flow/data:/app/data
+    restart: unless-stopped
+    networks:
+      - crypto-network
+    depends_on:
+      - mem0-bridge
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "com.thecryptofrontier.agent=guardian"
+      - "com.thecryptofrontier.role=orchestrator"
+
+  # ===========================================
+  # UNIFIED GUARDIAN - Sistema Unificado
+  # ===========================================
+  unified-guardian:
+    build:
+      context: ../../claude-flow-diego-cli/claude-diego-flow
+      dockerfile: Dockerfile.guardian-unified
+    container_name: unified-guardian
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=production
+      - LOG_ROTATION_ENABLED=true
+      - MEMORY_BACKUP_ENABLED=true
+      - CLEANUP_ENABLED=true
+    volumes:
+      - ../../claude-flow-diego-cli/claude-diego-flow/logs:/app/logs
+      - ../../claude-flow-diego-cli/claude-diego-flow/data:/app/data
+    restart: unless-stopped
+    networks:
+      - crypto-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "com.thecryptofrontier.agent=guardian"
+      - "com.thecryptofrontier.role=unified"
+
+  # ===========================================
+  # MEMORY SERVICE - Mem0 Bridge
+  # ===========================================
+  mem0-bridge:
+    build:
+      context: ../../claude-flow-diego-cli/claude-diego-flow
+      dockerfile: docker/Dockerfile.mem0-bridge
+    container_name: mem0-bridge
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=production
+      - CHROMA_URL=http://mem0-chroma:8000
+    volumes:
+      - ../../claude-flow-diego-cli/claude-diego-flow/data/memory:/app/data/memory
+    restart: unless-stopped
+    networks:
+      - crypto-network
+    depends_on:
+      - mem0-chroma
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "com.thecryptofrontier.service=memory"
+      - "com.thecryptofrontier.type=bridge"
+
+  # ===========================================
+  # VECTOR DATABASE - ChromaDB
+  # ===========================================
+  mem0-chroma:
+    image: chromadb/chroma:latest
+    container_name: mem0-chroma
+    ports:
+      - "8005:8000"
+    environment:
+      - IS_PERSISTENT=TRUE
+      - PERSIST_DIRECTORY=/chroma/chroma
+      - ANONYMIZED_TELEMETRY=FALSE
+    volumes:
+      - chroma-data:/chroma/chroma
+    restart: unless-stopped
+    networks:
+      - crypto-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "com.thecryptofrontier.service=chroma"
+      - "com.thecryptofrontier.type=database"
+
+  # ===========================================
+  # SPECIALIST AGENTS
+  # ===========================================
+  
+  # Strapi Specialist
+  strapi-specialist:
+    build:
+      context: ../../claude-flow-diego-cli/claude-diego-flow
+      dockerfile: docker/Dockerfile.strapi-specialist
+    container_name: strapi-specialist
+    environment:
+      - NODE_ENV=production
+      - SPECIALIST_TYPE=strapi
+      - MEM0_BRIDGE_URL=http://mem0-bridge:3002
+    volumes:
+      - ../../claude-flow-diego-cli/claude-diego-flow/logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - crypto-network
+    depends_on:
+      - mem0-bridge
+    profiles:
+      - specialists
+    labels:
+      - "com.thecryptofrontier.agent=specialist"
+      - "com.thecryptofrontier.specialty=strapi"
+
+  # Docker Specialist
+  docker-specialist:
+    build:
+      context: ../../claude-flow-diego-cli/claude-diego-flow
+      dockerfile: docker/Dockerfile.docker-specialist
+    container_name: docker-specialist
+    environment:
+      - NODE_ENV=production
+      - SPECIALIST_TYPE=docker
+      - MEM0_BRIDGE_URL=http://mem0-bridge:3002
+    volumes:
+      - ../../claude-flow-diego-cli/claude-diego-flow/logs:/app/logs
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+    networks:
+      - crypto-network
+    depends_on:
+      - mem0-bridge
+    profiles:
+      - specialists
+    labels:
+      - "com.thecryptofrontier.agent=specialist"
+      - "com.thecryptofrontier.specialty=docker"
+
+  # NextJS Specialist
+  nextjs-specialist:
+    build:
+      context: ../../claude-flow-diego-cli/claude-diego-flow
+      dockerfile: docker/Dockerfile.nextjs-specialist
+    container_name: nextjs-specialist
+    environment:
+      - NODE_ENV=production
+      - SPECIALIST_TYPE=nextjs
+      - MEM0_BRIDGE_URL=http://mem0-bridge:3002
+    volumes:
+      - ../../claude-flow-diego-cli/claude-diego-flow/logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - crypto-network
+    depends_on:
+      - mem0-bridge
+    profiles:
+      - specialists
+    labels:
+      - "com.thecryptofrontier.agent=specialist"
+      - "com.thecryptofrontier.specialty=nextjs"
+
+  # Cleanup Specialist
+  cleanup-specialist:
+    build:
+      context: ../../claude-flow-diego-cli/claude-diego-flow
+      dockerfile: docker/Dockerfile.cleanup-specialist
+    container_name: cleanup-specialist
+    environment:
+      - NODE_ENV=production
+      - SPECIALIST_TYPE=cleanup
+      - MEM0_BRIDGE_URL=http://mem0-bridge:3002
+    volumes:
+      - ../../claude-flow-diego-cli/claude-diego-flow/logs:/app/logs
+      - ../../:/workspace:ro
+    restart: unless-stopped
+    networks:
+      - crypto-network
+    depends_on:
+      - mem0-bridge
+    profiles:
+      - specialists
+    labels:
+      - "com.thecryptofrontier.agent=specialist"
+      - "com.thecryptofrontier.specialty=cleanup"
+
+  # Claude Code Specialist
+  claude-code-specialist:
+    build:
+      context: ../../claude-flow-diego-cli/claude-diego-flow
+      dockerfile: docker/Dockerfile.claude-code-specialist
+    container_name: claude-code-specialist
+    environment:
+      - NODE_ENV=production
+      - SPECIALIST_TYPE=claude-code
+      - MEM0_BRIDGE_URL=http://mem0-bridge:3002
+    volumes:
+      - ../../claude-flow-diego-cli/claude-diego-flow/logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - crypto-network
+    depends_on:
+      - mem0-bridge
+    profiles:
+      - specialists
+    labels:
+      - "com.thecryptofrontier.agent=specialist"
+      - "com.thecryptofrontier.specialty=claude-code"
+
+  # Mem0 Specialist
+  mem0-specialist:
+    build:
+      context: ../../claude-flow-diego-cli/claude-diego-flow
+      dockerfile: docker/Dockerfile.mem0-specialist
+    container_name: mem0-specialist
+    ports:
+      - "3006:3006"
+    environment:
+      - NODE_ENV=production
+      - SPECIALIST_TYPE=mem0
+      - MEM0_BRIDGE_URL=http://mem0-bridge:3002
+      - CHROMA_URL=http://mem0-chroma:8000
+      - LOG_DIR=/app/logs
+      - BACKUP_DIR=/app/backups
+      - PORT=3006
+    volumes:
+      - ../../claude-flow-diego-cli/claude-diego-flow/logs:/app/logs
+      - ../../claude-flow-diego-cli/claude-diego-flow/backups:/app/backups
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+    networks:
+      - crypto-network
+    depends_on:
+      - mem0-bridge
+      - mem0-chroma
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3006/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "com.thecryptofrontier.agent=specialist"
+      - "com.thecryptofrontier.specialty=mem0"
+
+  # ===========================================
+  # GUARDIAN BRIDGE - Interface HTTP
+  # ===========================================
+  guardian-bridge:
+    build:
+      context: ../../claude-flow-diego-cli/claude-diego-flow
+      dockerfile: docker/Dockerfile.guardian-bridge-agent
+    container_name: guardian-bridge-agent
+    ports:
+      - "3011:3011"
+    environment:
+      - NODE_ENV=production
+      - GUARDIAN_URL=http://unified-guardian:3003
+    restart: unless-stopped
+    networks:
+      - crypto-network
+    depends_on:
+      - unified-guardian
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3011/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "com.thecryptofrontier.service=bridge"
+      - "com.thecryptofrontier.type=api"
+
+volumes:
+  chroma-data:
+    name: thecryptofrontier_chroma_data
+
+networks:
+  crypto-network:
+    external: true
+    name: thecryptofrontier_network

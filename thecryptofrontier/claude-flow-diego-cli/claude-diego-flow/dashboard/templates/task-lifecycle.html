@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Lifecycle Memory - Claude Flow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50">
+    <nav class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-semibold">🧠 Task Lifecycle Memory</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="text-gray-600 hover:text-gray-900">Dashboard</a>
+                    <a href="/tasks" class="text-gray-600 hover:text-gray-900">Tasks</a>
+                    <a href="/memories" class="text-gray-600 hover:text-gray-900">Memories</a>
+                    <a href="/task-lifecycle" class="text-blue-600 font-medium">Lifecycle</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Status Summary -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+                        <i data-lucide="play-circle" class="w-6 h-6 text-blue-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Em Andamento</p>
+                        <p class="text-2xl font-bold text-gray-900" id="inProgressCount">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-yellow-100 rounded-lg p-3">
+                        <i data-lucide="pause-circle" class="w-6 h-6 text-yellow-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Interrompidas</p>
+                        <p class="text-2xl font-bold text-gray-900" id="interruptedCount">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-green-100 rounded-lg p-3">
+                        <i data-lucide="check-circle" class="w-6 h-6 text-green-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Concluídas (24h)</p>
+                        <p class="text-2xl font-bold text-gray-900" id="completedCount">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-purple-100 rounded-lg p-3">
+                        <i data-lucide="brain" class="w-6 h-6 text-purple-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Memórias Ativas</p>
+                        <p class="text-2xl font-bold text-gray-900" id="activeMemories">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-4">🚀 Ações Rápidas</h2>
+            <div class="flex flex-wrap gap-2">
+                <button onclick="askWhatWasIDoing()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    <i data-lucide="help-circle" class="w-4 h-4 inline mr-2"></i>
+                    O que eu estava fazendo?
+                </button>
+                <button onclick="continueLast()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                    <i data-lucide="play" class="w-4 h-4 inline mr-2"></i>
+                    Continuar última tarefa
+                </button>
+                <button onclick="showSuggestions()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+                    <i data-lucide="lightbulb" class="w-4 h-4 inline mr-2"></i>
+                    Sugestões
+                </button>
+                <button onclick="refreshData()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
+                    <i data-lucide="refresh-cw" class="w-4 h-4 inline mr-2"></i>
+                    Atualizar
+                </button>
+            </div>
+        </div>
+
+        <!-- Tasks in Progress -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-4">⏳ Tarefas em Andamento</h2>
+            <div id="inProgressTasks" class="space-y-3">
+                <p class="text-gray-500">Carregando...</p>
+            </div>
+        </div>
+
+        <!-- Interrupted Tasks -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-4">⚠️ Tarefas Interrompidas</h2>
+            <div id="interruptedTasks" class="space-y-3">
+                <p class="text-gray-500">Carregando...</p>
+            </div>
+        </div>
+
+        <!-- Recent Completed -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <h2 class="text-lg font-semibold mb-4">✅ Concluídas Recentemente</h2>
+            <div id="completedTasks" class="space-y-3">
+                <p class="text-gray-500">Carregando...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let taskData = null;
+
+        async function loadTaskLifecycle() {
+            try {
+                const response = await fetch('/api/task-lifecycle');
+                taskData = await response.json();
+                
+                // Update counters
+                document.getElementById('inProgressCount').textContent = taskData.in_progress.length;
+                document.getElementById('interruptedCount').textContent = taskData.interrupted.length;
+                document.getElementById('completedCount').textContent = taskData.recent_completed.length;
+                document.getElementById('activeMemories').textContent = taskData.total;
+                
+                // Render tasks
+                renderInProgressTasks(taskData.in_progress);
+                renderInterruptedTasks(taskData.interrupted);
+                renderCompletedTasks(taskData.recent_completed);
+                
+            } catch (error) {
+                console.error('Error loading task lifecycle:', error);
+            }
+        }
+
+        function renderInProgressTasks(tasks) {
+            const container = document.getElementById('inProgressTasks');
+            if (tasks.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">Nenhuma tarefa em andamento</p>';
+                return;
+            }
+            
+            container.innerHTML = tasks.map(task => `
+                <div class="border rounded-lg p-4 hover:bg-gray-50 transition">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <h3 class="font-medium text-gray-900">${task.task}</h3>
+                            <p class="text-sm text-gray-600 mt-1">
+                                <i data-lucide="user" class="w-3 h-3 inline"></i> ${task.agent}
+                                <span class="mx-2">•</span>
+                                <i data-lucide="clock" class="w-3 h-3 inline"></i> ${new Date(task.started_at).toLocaleString('pt-BR')}
+                            </p>
+                            ${task.context.progress ? `
+                                <div class="mt-2 w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-blue-600 h-2 rounded-full" style="width: ${task.context.progress}%"></div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">${task.context.currentStep || 'Em progresso...'}</p>
+                            ` : ''}
+                        </div>
+                        <button onclick="continueTask('${task.id}')" class="ml-4 text-blue-600 hover:text-blue-800">
+                            <i data-lucide="play-circle" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            lucide.createIcons();
+        }
+
+        function renderInterruptedTasks(tasks) {
+            const container = document.getElementById('interruptedTasks');
+            if (tasks.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">Nenhuma tarefa interrompida</p>';
+                return;
+            }
+            
+            container.innerHTML = tasks.map(task => `
+                <div class="border border-yellow-200 bg-yellow-50 rounded-lg p-4">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <h3 class="font-medium text-gray-900">${task.task}</h3>
+                            <p class="text-sm text-red-600 mt-1">
+                                <i data-lucide="alert-circle" class="w-3 h-3 inline"></i> ${task.error}
+                            </p>
+                            <p class="text-sm text-gray-600 mt-1">
+                                <i data-lucide="user" class="w-3 h-3 inline"></i> ${task.agent}
+                                <span class="mx-2">•</span>
+                                <i data-lucide="clock" class="w-3 h-3 inline"></i> ${new Date(task.stopped_at).toLocaleString('pt-BR')}
+                            </p>
+                        </div>
+                        <button onclick="retryTask('${task.id}')" class="ml-4 text-yellow-600 hover:text-yellow-800">
+                            <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            lucide.createIcons();
+        }
+
+        function renderCompletedTasks(tasks) {
+            const container = document.getElementById('completedTasks');
+            if (tasks.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">Nenhuma tarefa concluída nas últimas 24h</p>';
+                return;
+            }
+            
+            container.innerHTML = tasks.map(task => `
+                <div class="border border-green-200 bg-green-50 rounded-lg p-4">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <h3 class="font-medium text-gray-900">${task.task}</h3>
+                            <p class="text-sm text-gray-600 mt-1">
+                                <i data-lucide="user" class="w-3 h-3 inline"></i> ${task.agent}
+                                <span class="mx-2">•</span>
+                                <i data-lucide="check-circle" class="w-3 h-3 inline text-green-600"></i> ${new Date(task.completed_at).toLocaleString('pt-BR')}
+                                ${task.duration ? `<span class="mx-2">•</span> <i data-lucide="timer" class="w-3 h-3 inline"></i> ${formatDuration(task.duration)}` : ''}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            lucide.createIcons();
+        }
+
+        function formatDuration(ms) {
+            if (ms < 1000) return `${ms}ms`;
+            if (ms < 60000) return `${(ms/1000).toFixed(1)}s`;
+            if (ms < 3600000) return `${Math.floor(ms/60000)}m ${Math.floor((ms%60000)/1000)}s`;
+            return `${Math.floor(ms/3600000)}h ${Math.floor((ms%3600000)/60000)}m`;
+        }
+
+        async function askWhatWasIDoing() {
+            // Em produção, isso enviaria um comando para o Guardian
+            alert('Comando "O que eu estava fazendo?" será enviado ao Guardian');
+        }
+
+        async function continueLast() {
+            if (taskData && taskData.in_progress.length > 0) {
+                const lastTask = taskData.in_progress[0];
+                alert(`Retomando tarefa: ${lastTask.task}`);
+            } else {
+                alert('Nenhuma tarefa em andamento para continuar');
+            }
+        }
+
+        async function showSuggestions() {
+            // Em produção, isso buscaria sugestões do Guardian
+            alert('Buscando sugestões baseadas em padrões...');
+        }
+
+        async function continueTask(taskId) {
+            alert(`Continuando tarefa ${taskId}`);
+        }
+
+        async function retryTask(taskId) {
+            alert(`Tentando novamente tarefa ${taskId}`);
+        }
+
+        async function refreshData() {
+            loadTaskLifecycle();
+        }
+
+        // Load data on page load
+        loadTaskLifecycle();
+        lucide.createIcons();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(loadTaskLifecycle, 30000);
+    </script>
+</body>
+</html>

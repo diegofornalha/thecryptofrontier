@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  # ===========================================
+  # STRAPI V5 - MODO DESENVOLVIMENTO/PREVIEW
+  # ===========================================
+  strapi-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: strapi-v5-dev-preview
+    ports:
+      - "1340:1337"  # Porta diferente para não conflitar com produção
+    environment:
+      - NODE_ENV=development  # MODO DESENVOLVIMENTO
+      - HOST=0.0.0.0
+      - PORT=1337
+      # Usando PostgreSQL separado para dev
+      - DATABASE_CLIENT=postgres
+      - DATABASE_HOST=postgres-strapi-dev
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=strapi_dev
+      - DATABASE_USERNAME=strapi_dev
+      - DATABASE_PASSWORD=strapi_dev_123
+      - DATABASE_SSL=false
+      # Security Keys para desenvolvimento
+      - APP_KEYS=dev-key-1,dev-key-2
+      - ADMIN_JWT_SECRET=dev-admin-jwt-secret
+      - API_TOKEN_SALT=dev-api-token-salt
+      - TRANSFER_TOKEN_SALT=dev-transfer-token-salt
+      - ENCRYPTION_KEY=dev-encryption-key
+      - JWT_SECRET=dev-jwt-secret
+      # Configurações de Preview/Frontend
+      - CLIENT_URL=https://thecryptofrontier.agentesintegrados.com
+      - PREVIEW_SECRET=crypto-frontier-preview-secret-2025
+      - STRAPI_ADMIN_CLIENT_URL=https://thecryptofrontier.agentesintegrados.com
+      - STRAPI_ADMIN_CLIENT_PREVIEW_SECRET=crypto-frontier-preview-secret-2025
+      # Flags de desenvolvimento
+      - FLAG_NPS=false
+      - FLAG_PROMOTE_EE=false
+    volumes:
+      # Volumes para desenvolvimento - permite edição em tempo real
+      - ./src:/app/src
+      - ./config:/app/config
+      - ./database:/app/database
+      - ./public/uploads:/app/public/uploads
+      - strapi-dev-uploads:/app/public/uploads
+      - strapi-dev-db:/app/.tmp
+    depends_on:
+      - postgres-strapi-dev
+    restart: unless-stopped
+    command: ["npm", "run", "develop"]  # MODO DESENVOLVIMENTO
+    
+    # Health check específico para modo dev
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:1337/admin"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ===========================================
+  # POSTGRESQL - DESENVOLVIMENTO
+  # ===========================================
+  postgres-strapi-dev:
+    image: postgres:15-alpine
+    container_name: postgres-strapi-dev
+    environment:
+      - POSTGRES_DB=strapi_dev
+      - POSTGRES_USER=strapi_dev
+      - POSTGRES_PASSWORD=strapi_dev_123
+    volumes:
+      - postgres-strapi-dev-data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"  # Porta diferente para não conflitar
+    restart: unless-stopped
+    
+    # Health check para PostgreSQL
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U strapi_dev -d strapi_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-strapi-dev-data:
+    driver: local
+  strapi-dev-uploads:
+    driver: local
+  strapi-dev-db:
+    driver: local
+
+networks:
+  default:
+    name: strapi-dev-network 

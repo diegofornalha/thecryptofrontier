@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  dashboard:
+    build: .
+    container_name: claude-flow-dashboard
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    environment:
+      - FLASK_PORT=5001
+      - MEM0_BASE_URL=http://host.docker.internal:3002
+      - MEM0_API_KEY=local_key_not_needed
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    labels:
+      - "com.docker.compose.project=claude-flow"
+      - "com.docker.compose.service=dashboard"

@@ -1,0 +1,184 @@
+# Docker Compose - Serviços Auxiliares
+# CrewAI, Webhook, Puppeteer e outros serviços
+# Criado: 2025-06-16
+
+version: '3.8'
+
+services:
+  # ===========================================
+  # CREWAI - Pipeline de Conteúdo
+  # ===========================================
+  crewai-pipeline:
+    build:
+      context: ../../framework_crewai/blog_crew
+      dockerfile: Dockerfile
+    container_name: crewai-pipeline
+    environment:
+      - STRAPI_URL=http://strapi:1337
+      - STRAPI_API_TOKEN=${STRAPI_API_TOKEN}
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ALGOLIA_APP_ID=${ALGOLIA_APP_ID}
+      - ALGOLIA_API_KEY=${ALGOLIA_API_KEY}
+    volumes:
+      - ../../framework_crewai/blog_crew/logs:/app/logs
+      - ../../framework_crewai/blog_crew/outputs:/app/outputs
+      - ../../framework_crewai/blog_crew/staging_posts:/app/staging_posts
+    restart: unless-stopped
+    networks:
+      - crypto-network
+    depends_on:
+      - strapi
+    profiles:
+      - pipeline
+    labels:
+      - "com.thecryptofrontier.service=crewai"
+      - "com.thecryptofrontier.type=pipeline"
+
+  # ===========================================
+  # WEBHOOK SERVER - Integração Strapi
+  # ===========================================
+  webhook-server:
+    build:
+      context: ../../framework_crewai/blog_crew
+      dockerfile: Dockerfile.webhook
+    container_name: webhook-server
+    ports:
+      - "8000:8000"
+    environment:
+      - WEBHOOK_SECRET=${WEBHOOK_SECRET}
+      - STRAPI_URL=http://strapi:1337
+      - STRAPI_API_TOKEN=${STRAPI_API_TOKEN}
+    volumes:
+      - ../../framework_crewai/blog_crew/pending_posts:/app/pending_posts
+    restart: unless-stopped
+    networks:
+      - crypto-network
+    depends_on:
+      - strapi
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "com.thecryptofrontier.service=webhook"
+      - "com.thecryptofrontier.type=integration"
+
+  # ===========================================
+  # BROWSERLESS - Navegador Headless
+  # ===========================================
+  browserless:
+    image: ghcr.io/browserless/chromium:latest
+    container_name: browserless
+    ports:
+      - "3010:3000"
+    environment:
+      - CONNECTION_TIMEOUT=60000
+      - MAX_CONCURRENT_SESSIONS=10
+      - MAX_QUEUE_LENGTH=20
+      - WORKSPACE_DELETE_EXPIRED=true
+      - WORKSPACE_EXPIRE_DAYS=1
+      - TOKEN=${BROWSERLESS_TOKEN:-your-secure-token}
+      - ENABLE_CORS=true
+      - CORS_ORIGIN=*
+      - DEBUG=browserless*
+    restart: unless-stopped
+    networks:
+      - crypto-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/pressure"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "com.thecryptofrontier.service=browserless"
+      - "com.thecryptofrontier.type=browser"
+
+  # ===========================================
+  # PUPPETEER SERVICE - Web Scraping
+  # ===========================================
+  puppeteer-service:
+    build:
+      context: ../../claude-flow-diego/claude-diego-flow
+      dockerfile: docker/Dockerfile.puppeteer
+    container_name: puppeteer-service
+    ports:
+      - "3008:3008"
+    environment:
+      - NODE_ENV=production
+      - BROWSERLESS_URL=http://browserless:3000
+      - BROWSERLESS_TOKEN=${BROWSERLESS_TOKEN:-your-secure-token}
+    restart: unless-stopped
+    networks:
+      - crypto-network
+    depends_on:
+      - browserless
+    profiles:
+      - scraping
+    labels:
+      - "com.thecryptofrontier.service=puppeteer"
+      - "com.thecryptofrontier.type=scraper"
+
+  # ===========================================
+  # MONITORING - Dashboard
+  # ===========================================
+  monitoring-dashboard:
+    build:
+      context: ../../claude-flow-diego/claude-diego-flow/dashboard
+      dockerfile: Dockerfile
+    container_name: monitoring-dashboard
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - GUARDIAN_API_URL=http://unified-guardian:3003
+      - MEM0_API_URL=http://mem0-bridge:3002
+    restart: unless-stopped
+    networks:
+      - crypto-network
+    depends_on:
+      - unified-guardian
+      - mem0-bridge
+    profiles:
+      - monitoring
+    labels:
+      - "com.thecryptofrontier.service=dashboard"
+      - "com.thecryptofrontier.type=monitoring"
+
+  # ===========================================
+  # LOG AGGREGATOR - Sistema Unificado
+  # ===========================================
+  log-aggregator:
+    build:
+      context: ../../claude-flow-diego/claude-diego-flow
+      dockerfile: docker/Dockerfile.agent-log
+    container_name: log-aggregator
+    environment:
+      - NODE_ENV=production
+      - LOG_LEVEL=info
+    volumes:
+      - ../../claude-flow-diego/claude-diego-flow/logs:/app/logs
+      - log-data:/app/aggregated-logs
+    restart: unless-stopped
+    networks:
+      - crypto-network
+    profiles:
+      - monitoring
+    labels:
+      - "com.thecryptofrontier.service=logs"
+      - "com.thecryptofrontier.type=aggregator"
+
+volumes:
+  log-data:
+    name: thecryptofrontier_log_data
+
+networks:
+  crypto-network:
+    external: true
+    name: thecryptofrontier_network

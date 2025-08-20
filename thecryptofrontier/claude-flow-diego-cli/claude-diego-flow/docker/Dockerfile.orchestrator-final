@@ -1,0 +1,50 @@
+# Dockerfile final para claude-diego-flow-Diego Orchestrator
+FROM node:20-slim
+
+# Instalar dependências essenciais
+RUN apt-get update && apt-get install -y \
+    curl \
+    unzip \
+    git \
+    python3 \
+    make \
+    g++ \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instalar Deno
+ENV DENO_VERSION=v1.46.3
+RUN curl -fsSL https://deno.land/install.sh | sh
+ENV DENO_INSTALL="/root/.deno"
+ENV PATH="${DENO_INSTALL}/bin:${PATH}"
+
+# Verificar instalação
+RUN deno --version
+
+# Criar diretório de trabalho
+WORKDIR /workspace
+
+# Copiar o projeto local
+COPY . /app/
+
+# Instalar dependências
+WORKDIR /app
+RUN npm install && npm install -g tsx
+
+# Expor porta
+EXPOSE 3003
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3003/health || exit 1
+
+# Criar diretórios necessários
+RUN mkdir -p /workspace/memory /workspace/coordination
+
+# Adicionar script de entrada
+COPY docker/orchestrator-entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Comando com inicialização forçada e criação de diretórios
+WORKDIR /app
+ENTRYPOINT ["/entrypoint.sh"]

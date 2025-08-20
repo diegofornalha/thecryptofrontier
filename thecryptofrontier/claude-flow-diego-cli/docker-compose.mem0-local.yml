@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  mem0-local:
+    container_name: mem0-local
+    image: claude-flow/mem0-bridge:latest
+    restart: unless-stopped
+    environment:
+      - MEM0_MODE=local
+      - DATA_DIR=/data
+      - PORT=3002
+      # Sem API keys cloud!
+    volumes:
+      - mem0-data:/data
+    ports:
+      - "3002:3002"
+    networks:
+      - claude-flow-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  mem0-data:
+    driver: local
+
+networks:
+  claude-flow-network:
+    external: true

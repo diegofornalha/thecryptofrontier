@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  chrome-headless:
+    image: browserless/chrome:latest
+    container_name: chrome-headless
+    restart: unless-stopped
+    ports:
+      - "3030:3000"
+    environment:
+      - CONNECTION_TIMEOUT=60000
+      - MAX_CONCURRENT_SESSIONS=10
+      - PREBOOT_CHROME=true
+      - KEEP_ALIVE=true
+      - CHROME_REFRESH_TIME=300000
+      - DEFAULT_BLOCK_ADS=true
+      - DEFAULT_HEADLESS=true
+      - DEFAULT_STEALTH=true
+      - DEFAULT_IGNORE_HTTPS_ERRORS=true
+      - WORKSPACE_DELETE_EXPIRED=true
+      - WORKSPACE_EXPIRE_DAYS=1
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - crypto-network
+
+networks:
+  crypto-network:
+    external: true
+    name: crypto-network

@@ -1,0 +1,26 @@
+# Configuração das tarefas do Blog Crew
+# Este arquivo define as configurações para cada tarefa
+
+monitoring:
+  description: >
+    Monitore os feeds RSS definidos e encontre os 3 artigos mais relevantes
+    e interessantes para o público brasileiro.
+  expected_output: "Lista de arquivos JSON salvos na pasta 'posts_para_traduzir'"
+
+translation:
+  description: >
+    Usando os arquivos da tarefa anterior, traduza o título, resumo e
+    conteúdo para português brasileiro, adaptando para o público local.
+  expected_output: "Lista de arquivos JSON traduzidos salvos na pasta 'posts_traduzidos'"
+
+formatting:
+  description: >
+    Formatar os artigos traduzidos para o formato esperado pelo Strapi CMS,
+    criando slugs, separando em parágrafos e adicionando metadados.
+  expected_output: "Lista de arquivos JSON formatados salvos na pasta 'posts_formatados'"
+
+publishing:
+  description: >
+    Publicar os artigos formatados no Strapi CMS usando a ferramenta publish_to_strapi
+    e retornar um relatório dos artigos publicados com sucesso.
+  expected_output: "Relatório de publicação dos artigos no Strapi CMS"

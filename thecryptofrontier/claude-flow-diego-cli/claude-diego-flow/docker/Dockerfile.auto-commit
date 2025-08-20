@@ -1,0 +1,50 @@
+# Dockerfile otimizado para Auto-Commit Agent
+FROM node:20-alpine
+
+# Instalar Git e OpenSSH (necessários para commit e push)
+RUN apk add --no-cache \
+    git \
+    openssh-client \
+    bash
+
+# Criar usuário para segurança (lidando com UID/GID existentes)
+RUN (addgroup -g 1000 agent 2>/dev/null || true) && \
+    (adduser -D -u 1000 -G agent agent 2>/dev/null || true) && \
+    (id agent || adduser -D agent)
+
+# Diretório da aplicação
+WORKDIR /app
+
+# Copiar arquivos de dependências primeiro (cache do Docker)
+COPY package*.json ./
+
+# Instalar dependências
+RUN npm install && \
+    npm install tsx typescript @types/node
+
+# Copiar código fonte
+COPY . .
+
+# Criar diretório para workspace
+RUN mkdir -p /workspace && chown -R agent:agent /workspace
+
+# Configurar Git globalmente
+RUN git config --global --add safe.directory /workspace && \
+    git config --global user.name "Auto Commit Agent" && \
+    git config --global user.email "agent@auto-commit.local"
+
+# Script de entrada customizado
+COPY scripts/docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+# Mudar para usuário não-root
+USER agent
+
+# Expor diretório de trabalho
+VOLUME ["/workspace"]
+
+# Usar o script de entrada
+ENTRYPOINT ["/docker-entrypoint.sh"]
+
+# Comando padrão
+CMD ["npx", "tsx", "/app/src/utils/auto-commit-docker.ts"]

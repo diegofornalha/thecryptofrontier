@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git + Memory Timeline - Claude Flow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/d3@7"></script>
+    <style>
+        .timeline-line { stroke: #4f46e5; stroke-width: 2; }
+        .commit-dot { fill: #4f46e5; }
+        .memory-dot { fill: #f59e0b; }
+        .decision-dot { fill: #10b981; }
+        .tooltip { 
+            position: absolute; 
+            background: rgba(0,0,0,0.8); 
+            color: white; 
+            padding: 8px; 
+            border-radius: 4px; 
+            pointer-events: none; 
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-6">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">🔗 Git + Memory Timeline</h1>
+            <p class="text-gray-600">Histórico integrado de commits e decisões dos agentes</p>
+            
+            <div class="flex gap-4 mt-4">
+                <button onclick="loadTimeline(7)" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Últimos 7 dias
+                </button>
+                <button onclick="loadTimeline(30)" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Últimos 30 dias
+                </button>
+                <button onclick="exportTimeline()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    📥 Exportar
+                </button>
+                <button onclick="showStats()" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+                    📊 Estatísticas
+                </button>
+            </div>
+        </header>
+
+        <!-- Filtros -->
+        <div class="bg-white rounded-lg shadow p-4 mb-6">
+            <h3 class="text-lg font-semibold mb-4">🔍 Filtros</h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Agente</label>
+                    <select id="agentFilter" class="w-full border rounded px-3 py-2">
+                        <option value="">Todos os agentes</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Branch</label>
+                    <select id="branchFilter" class="w-full border rounded px-3 py-2">
+                        <option value="">Todas as branches</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Tipo</label>
+                    <select id="typeFilter" class="w-full border rounded px-3 py-2">
+                        <option value="">Todos os tipos</option>
+                        <option value="commit">Commits</option>
+                        <option value="decision">Decisões</option>
+                        <option value="memory">Memórias</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Buscar</label>
+                    <input type="text" id="searchFilter" placeholder="Buscar texto..." 
+                           class="w-full border rounded px-3 py-2">
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline Visual -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h3 class="text-lg font-semibold mb-4">📈 Timeline Visual</h3>
+            <div id="timelineChart" class="w-full h-96 overflow-x-auto"></div>
+        </div>
+
+        <!-- Lista de Eventos -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold mb-4">📋 Eventos Detalhados</h3>
+            <div id="timelineList" class="space-y-4">
+                <div class="text-center py-8 text-gray-500">
+                    Carregando timeline...
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Estatísticas -->
+        <div id="statsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+            <div class="flex items-center justify-center h-full">
+                <div class="bg-white rounded-lg p-6 max-w-4xl w-full m-4 max-h-96 overflow-y-auto">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold">📊 Estatísticas Git + Memory</h3>
+                        <button onclick="closeStats()" class="text-gray-500 hover:text-gray-700">✖</button>
+                    </div>
+                    <div id="statsContent">
+                        <!-- Conteúdo das estatísticas será inserido aqui -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tooltip" class="tooltip hidden"></div>
+
+    <script>
+        let timelineData = [];
+        let filteredData = [];
+
+        // Dados mock para demonstração
+        const mockData = [
+            {
+                timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+                type: 'commit',
+                hash: 'abc123f',
+                message: 'feat: adicionar sistema Git+Memory',
+                author: 'DiegoFornalha',
+                branch: 'main',
+                filesChanged: ['src/utils/git-memory-integration.ts'],
+                agentDecisions: [
+                    {
+                        agent: 'Universal Organization Guardian',
+                        reasoning: 'Integração necessária para rastreamento de decisões',
+                        impact: 'Melhora rastreabilidade e auditoria'
+                    }
+                ]
+            },
+            {
+                timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+                type: 'decision',
+                agent: 'Guardian',
+                reasoning: 'Detectada desorganização no projeto, aplicando correções automáticas',
+                impact: 'Score de organização deve subir de 75% para 95%',
+                commitHash: 'def456a'
+            },
+            {
+                timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+                type: 'memory',
+                content: 'Backup automático das memórias criado',
+                category: 'backup',
+                agent: 'Memory System'
+            }
+        ];
+
+        async function loadTimeline(days = 7) {
+            // Em produção, faria chamada para API
+            // const response = await fetch(`/api/git-memory-timeline?days=${days}`);
+            // timelineData = await response.json();
+            
+            // Usando dados mock para demonstração
+            timelineData = mockData.filter(item => {
+                const daysDiff = (Date.now() - item.timestamp.getTime()) / (1000 * 60 * 60 * 24);
+                return daysDiff <= days;
+            });
+
+            filteredData = [...timelineData];
+            populateFilters();
+            renderTimeline();
+            renderTimelineList();
+        }
+
+        function populateFilters() {
+            const agents = [...new Set(timelineData.map(item => item.agent || item.author).filter(Boolean))];
+            const branches = [...new Set(timelineData.map(item => item.branch).filter(Boolean))];
+
+            const agentSelect = document.getElementById('agentFilter');
+            agentSelect.innerHTML = '<option value="">Todos os agentes</option>';
+            agents.forEach(agent => {
+                agentSelect.innerHTML += `<option value="${agent}">${agent}</option>`;
+            });
+
+            const branchSelect = document.getElementById('branchFilter');
+            branchSelect.innerHTML = '<option value="">Todas as branches</option>';
+            branches.forEach(branch => {
+                branchSelect.innerHTML += `<option value="${branch}">${branch}</option>`;
+            });
+
+            // Adicionar event listeners para filtros
+            document.getElementById('agentFilter').addEventListener('change', applyFilters);
+            document.getElementById('branchFilter').addEventListener('change', applyFilters);
+            document.getElementById('typeFilter').addEventListener('change', applyFilters);
+            document.getElementById('searchFilter').addEventListener('input', applyFilters);
+        }
+
+        function applyFilters() {
+            const agentFilter = document.getElementById('agentFilter').value;
+            const branchFilter = document.getElementById('branchFilter').value;
+            const typeFilter = document.getElementById('typeFilter').value;
+            const searchFilter = document.getElementById('searchFilter').value.toLowerCase();
+
+            filteredData = timelineData.filter(item => {
+                if (agentFilter && (item.agent !== agentFilter && item.author !== agentFilter)) return false;
+                if (branchFilter && item.branch !== branchFilter) return false;
+                if (typeFilter && item.type !== typeFilter) return false;
+                if (searchFilter) {
+                    const searchFields = [
+                        item.message,
+                        item.reasoning,
+                        item.content,
+                        item.impact
+                    ].filter(Boolean).join(' ').toLowerCase();
+                    if (!searchFields.includes(searchFilter)) return false;
+                }
+                return true;
+            });
+
+            renderTimeline();
+            renderTimelineList();
+        }
+
+        function renderTimeline() {
+            const container = document.getElementById('timelineChart');
+            container.innerHTML = '';
+
+            if (filteredData.length === 0) {
+                container.innerHTML = '<div class="text-center py-8 text-gray-500">Nenhum evento encontrado</div>';
+                return;
+            }
+
+            const width = Math.max(800, filteredData.length * 60);
+            const height = 300;
+            const margin = { top: 20, right: 30, bottom: 40, left: 60 };
+
+            const svg = d3.select(container)
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+
+            const xScale = d3.scaleTime()
+                .domain(d3.extent(filteredData, d => d.timestamp))
+                .range([margin.left, width - margin.right]);
+
+            const yScale = d3.scaleOrdinal()
+                .domain(['commit', 'decision', 'memory'])
+                .range([height - 80, height - 140, height - 200]);
+
+            // Linha do tempo
+            svg.append('line')
+                .attr('class', 'timeline-line')
+                .attr('x1', margin.left)
+                .attr('x2', width - margin.right)
+                .attr('y1', height - 140)
+                .attr('y2', height - 140);
+
+            // Pontos dos eventos
+            const dots = svg.selectAll('.event-dot')
+                .data(filteredData)
+                .enter()
+                .append('circle')
+                .attr('class', d => `event-dot ${d.type}-dot`)
+                .attr('cx', d => xScale(d.timestamp))
+                .attr('cy', d => yScale(d.type))
+                .attr('r', 6)
+                .style('cursor', 'pointer')
+                .on('mouseover', showTooltip)
+                .on('mouseout', hideTooltip)
+                .on('click', showEventDetails);
+
+            // Eixo X (tempo)
+            const xAxis = d3.axisBottom(xScale)
+                .tickFormat(d3.timeFormat('%d/%m'));
+
+            svg.append('g')
+                .attr('transform', `translate(0,${height - 30})`)
+                .call(xAxis);
+
+            // Legendas
+            const legend = svg.append('g')
+                .attr('transform', `translate(${width - 150}, 20)`);
+
+            const legendData = [
+                { type: 'commit', label: 'Commits', color: '#4f46e5' },
+                { type: 'decision', label: 'Decisões', color: '#10b981' },
+                { type: 'memory', label: 'Memórias', color: '#f59e0b' }
+            ];
+
+            legendData.forEach((item, i) => {
+                const g = legend.append('g')
+                    .attr('transform', `translate(0, ${i * 20})`);
+
+                g.append('circle')
+                    .attr('cx', 0)
+                    .attr('cy', 0)
+                    .attr('r', 4)
+                    .style('fill', item.color);
+
+                g.append('text')
+                    .attr('x', 10)
+                    .attr('y', 0)
+                    .attr('dy', '0.32em')
+                    .style('font-size', '12px')
+                    .text(item.label);
+            });
+        }
+
+        function renderTimelineList() {
+            const container = document.getElementById('timelineList');
+            
+            if (filteredData.length === 0) {
+                container.innerHTML = '<div class="text-center py-8 text-gray-500">Nenhum evento encontrado</div>';
+                return;
+            }
+
+            const sortedData = [...filteredData].sort((a, b) => b.timestamp - a.timestamp);
+
+            container.innerHTML = sortedData.map(item => {
+                const typeIcons = {
+                    commit: '📝',
+                    decision: '🤖',
+                    memory: '🧠'
+                };
+
+                const typeColors = {
+                    commit: 'bg-blue-100 text-blue-800',
+                    decision: 'bg-green-100 text-green-800',
+                    memory: 'bg-yellow-100 text-yellow-800'
+                };
+
+                return `
+                    <div class="border-l-4 border-${item.type === 'commit' ? 'blue' : item.type === 'decision' ? 'green' : 'yellow'}-500 pl-4 pb-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-xl">${typeIcons[item.type]}</span>
+                            <span class="px-2 py-1 rounded text-xs font-medium ${typeColors[item.type]}">
+                                ${item.type.toUpperCase()}
+                            </span>
+                            <span class="text-sm text-gray-500">
+                                ${item.timestamp.toLocaleDateString('pt-BR')} ${item.timestamp.toLocaleTimeString('pt-BR')}
+                            </span>
+                            ${item.agent || item.author ? `<span class="text-sm font-medium text-gray-700">${item.agent || item.author}</span>` : ''}
+                        </div>
+                        
+                        ${renderEventContent(item)}
+                        
+                        ${item.agentDecisions?.length ? `
+                            <div class="mt-3 pl-4 border-l-2 border-gray-200">
+                                <h5 class="text-sm font-medium text-gray-700 mb-2">🤖 Decisões dos Agentes:</h5>
+                                ${item.agentDecisions.map(decision => `
+                                    <div class="bg-gray-50 rounded p-2 mb-2">
+                                        <div class="text-sm font-medium">${decision.agent}</div>
+                                        <div class="text-sm text-gray-600">${decision.reasoning}</div>
+                                        ${decision.impact ? `<div class="text-xs text-gray-500 mt-1">💡 ${decision.impact}</div>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderEventContent(item) {
+            switch (item.type) {
+                case 'commit':
+                    return `
+                        <div class="text-sm">
+                            <div class="font-medium">${item.message}</div>
+                            ${item.hash ? `<div class="text-gray-500 font-mono">${item.hash}</div>` : ''}
+                            ${item.filesChanged?.length ? `<div class="text-gray-600">📁 ${item.filesChanged.length} arquivo(s) modificado(s)</div>` : ''}
+                            ${item.branch ? `<div class="text-gray-600">🌿 ${item.branch}</div>` : ''}
+                        </div>
+                    `;
+                case 'decision':
+                    return `
+                        <div class="text-sm">
+                            <div class="font-medium">${item.reasoning}</div>
+                            ${item.impact ? `<div class="text-gray-600">💡 ${item.impact}</div>` : ''}
+                            ${item.commitHash ? `<div class="text-gray-500 font-mono">🔗 ${item.commitHash}</div>` : ''}
+                        </div>
+                    `;
+                case 'memory':
+                    return `
+                        <div class="text-sm">
+                            <div class="font-medium">${item.content}</div>
+                            ${item.category ? `<div class="text-gray-600">📂 ${item.category}</div>` : ''}
+                        </div>
+                    `;
+                default:
+                    return '';
+            }
+        }
+
+        function showTooltip(event, d) {
+            const tooltip = document.getElementById('tooltip');
+            const content = d.message || d.reasoning || d.content || 'Evento';
+            
+            tooltip.innerHTML = `
+                <div class="text-xs">
+                    <div class="font-medium">${content}</div>
+                    <div>${d.timestamp.toLocaleString('pt-BR')}</div>
+                </div>
+            `;
+            
+            tooltip.style.left = (event.pageX + 10) + 'px';
+            tooltip.style.top = (event.pageY - 10) + 'px';
+            tooltip.classList.remove('hidden');
+        }
+
+        function hideTooltip() {
+            document.getElementById('tooltip').classList.add('hidden');
+        }
+
+        function showEventDetails(event, d) {
+            alert(`Detalhes do evento:\n\n${JSON.stringify(d, null, 2)}`);
+        }
+
+        function exportTimeline() {
+            const dataStr = JSON.stringify(filteredData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `git-memory-timeline-${new Date().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+
+        function showStats() {
+            const stats = calculateStats();
+            const modal = document.getElementById('statsModal');
+            const content = document.getElementById('statsContent');
+            
+            content.innerHTML = `
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-blue-50 p-4 rounded">
+                        <div class="text-2xl font-bold text-blue-600">${stats.totalCommits}</div>
+                        <div class="text-sm text-blue-800">Commits</div>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded">
+                        <div class="text-2xl font-bold text-green-600">${stats.totalDecisions}</div>
+                        <div class="text-sm text-green-800">Decisões</div>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded">
+                        <div class="text-2xl font-bold text-yellow-600">${stats.totalMemories}</div>
+                        <div class="text-sm text-yellow-800">Memórias</div>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded">
+                        <div class="text-2xl font-bold text-purple-600">${stats.totalAgents}</div>
+                        <div class="text-sm text-purple-800">Agentes</div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-semibold mb-2">🤖 Agentes Mais Ativos</h4>
+                        <div class="space-y-1">
+                            ${stats.topAgents.map(agent => `
+                                <div class="flex justify-between text-sm">
+                                    <span>${agent.name}</span>
+                                    <span class="font-medium">${agent.count}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-semibold mb-2">📈 Atividade por Dia</h4>
+                        <div class="space-y-1">
+                            ${stats.activityByDay.map(day => `
+                                <div class="flex justify-between text-sm">
+                                    <span>${day.date}</span>
+                                    <span class="font-medium">${day.count}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+        }
+
+        function closeStats() {
+            document.getElementById('statsModal').classList.add('hidden');
+        }
+
+        function calculateStats() {
+            const stats = {
+                totalCommits: filteredData.filter(d => d.type === 'commit').length,
+                totalDecisions: filteredData.filter(d => d.type === 'decision').length,
+                totalMemories: filteredData.filter(d => d.type === 'memory').length,
+                totalAgents: 0,
+                topAgents: [],
+                activityByDay: []
+            };
+
+            // Agentes únicos
+            const agents = [...new Set(filteredData.map(d => d.agent || d.author).filter(Boolean))];
+            stats.totalAgents = agents.length;
+
+            // Top agentes
+            const agentCounts = {};
+            filteredData.forEach(d => {
+                const agent = d.agent || d.author;
+                if (agent) {
+                    agentCounts[agent] = (agentCounts[agent] || 0) + 1;
+                }
+            });
+
+            stats.topAgents = Object.entries(agentCounts)
+                .map(([name, count]) => ({ name, count }))
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 5);
+
+            // Atividade por dia
+            const dayActivity = {};
+            filteredData.forEach(d => {
+                const day = d.timestamp.toLocaleDateString('pt-BR');
+                dayActivity[day] = (dayActivity[day] || 0) + 1;
+            });
+
+            stats.activityByDay = Object.entries(dayActivity)
+                .map(([date, count]) => ({ date, count }))
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 7);
+
+            return stats;
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTimeline(7);
+        });
+
+        // Fechar modal ao clicar fora
+        document.getElementById('statsModal').addEventListener('click', (e) => {
+            if (e.target.id === 'statsModal') {
+                closeStats();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copiar arquivos de configuração
+COPY claude-diego-flow/package*.json ./
+
+# Instalar dependências
+RUN npm ci --only=production
+
+# Copiar código fonte
+COPY claude-diego-flow/ ./
+
+# Build do TypeScript
+RUN npm run build
+
+# Expor porta da API
+EXPOSE 3001
+
+# Variáveis de ambiente
+ENV NODE_ENV=production
+ENV UNIFIED_AGENT_LOG_API_PORT=3001
+
+# Comando para iniciar o sistema de log unificado
+CMD ["node", "dist/agents/agent-log-unified.js"]

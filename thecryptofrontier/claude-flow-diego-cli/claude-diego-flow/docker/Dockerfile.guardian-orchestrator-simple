@@ -1,0 +1,46 @@
+# Dockerfile simplificado para Guardian Orchestrator
+FROM node:20-alpine
+
+# Instalar dependências do sistema
+RUN apk add --no-cache \
+    git \
+    curl \
+    wget \
+    tini
+
+# Criar usuário não-root
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
+WORKDIR /app
+
+# Copiar arquivos necessários
+COPY --chown=nodejs:nodejs package*.json tsconfig.json ./
+COPY --chown=nodejs:nodejs src/ ./src/
+
+# Instalar todas as dependências (incluindo TypeScript)
+RUN npm install && \
+    npm cache clean --force
+
+# Criar diretórios necessários
+RUN mkdir -p logs reports reports/screenshots && \
+    chown -R nodejs:nodejs /app
+
+# Ajustar variável de ambiente para projectRoot
+ENV PROJECT_ROOT=/workspace
+
+# Mudar para usuário não-root
+USER nodejs
+
+# Expor porta
+EXPOSE 3000
+
+# Health check endpoint
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:3000/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1))"
+
+# Usar tini para gerenciamento de processos
+ENTRYPOINT ["/sbin/tini", "--"]
+
+# Comando padrão (usa tsx para suportar TypeScript diretamente)
+CMD ["npx", "tsx", "src/agents/guardian-api-server.ts"]

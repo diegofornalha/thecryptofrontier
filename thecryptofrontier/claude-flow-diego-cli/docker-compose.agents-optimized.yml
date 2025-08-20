@@ -1,0 +1,313 @@
+version: '3.8'
+
+# Docker Compose otimizado para agentes principais com mínimo overhead
+# Criado por Guardian + Docker Specialist
+
+services:
+  # ========================================
+  # CORE SERVICES
+  # ========================================
+  
+  # Guardian Orchestrator - Coordenador principal
+  guardian-orchestrator:
+    build:
+      context: ./claude-diego-flow
+      dockerfile: docker/Dockerfile.guardian-orchestrator-simple
+    image: claude-flow/guardian-orchestrator:latest
+    container_name: guardian-orchestrator
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PROJECT_PATH=/workspace
+      - LOG_SERVICE_URL=http://agent-log:3001
+      - MEM0_BRIDGE_URL=http://mem0-bridge:3002
+      - MCP_ENABLED=true
+    volumes:
+      - ./workspace:/workspace:ro
+      - orchestrator-logs:/app/logs
+    networks:
+      - agent-network
+    depends_on:
+      agent-log:
+        condition: service_healthy
+      mem0-bridge:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      - "com.claude-flow.service=orchestrator"
+      - "com.claude-flow.debug=true"
+
+  # Agent Log - Sistema centralizado de logs
+  agent-log:
+    build:
+      context: ./claude-diego-flow
+      dockerfile: docker/Dockerfile.agent-log
+    image: claude-flow/agent-log:latest
+    container_name: agent-log
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - ENABLE_CORS=true
+      - LOG_RETENTION_DAYS=30
+    volumes:
+      - agent-logs:/app/logs
+      - /var/lib/docker/volumes/thecryptofrontier-data/_data/logs:/app/data/logs
+    networks:
+      - agent-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3001/health"]
+      interval: 20s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Mem0 Bridge - Ponte para sistema de memória
+  mem0-bridge:
+    build:
+      context: ./claude-diego-flow
+      dockerfile: docker/Dockerfile.mem0-bridge
+    image: claude-flow/mem0-bridge:latest
+    container_name: mem0-bridge
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=production
+      - MEM0_API_KEY=${MEM0_API_KEY:-}
+      - CHROMA_HOST=mem0-chroma
+      - CHROMA_PORT=8000
+    volumes:
+      - /var/lib/docker/volumes/thecryptofrontier-data/_data/memory:/app/data
+    networks:
+      - agent-network
+    depends_on:
+      mem0-chroma:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3002/health"]
+      interval: 20s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 256M
+
+  # ========================================
+  # MEMORY SERVICES
+  # ========================================
+  
+  # ChromaDB para armazenamento vetorial
+  mem0-chroma:
+    image: chromadb/chroma:latest
+    container_name: mem0-chroma
+    ports:
+      - "8005:8000"
+    environment:
+      - CHROMA_SERVER_AUTH_PROVIDER=chromadb.auth.token.TokenAuthServerProvider
+      - CHROMA_SERVER_AUTH_CREDENTIALS=${CHROMA_AUTH_TOKEN:-test-token}
+      - CHROMA_SERVER_AUTH_TOKEN_TRANSPORT_HEADER=AUTHORIZATION
+      - PERSIST_DIRECTORY=/chroma/chroma
+    volumes:
+      - chroma-data:/chroma
+    networks:
+      - agent-network
+    healthcheck:
+      test: ["CMD-SHELL", "exit 0"]
+      interval: 20s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  # ========================================
+  # SPECIALIST AGENTS (sob demanda)
+  # ========================================
+  
+  # Docker Specialist
+  docker-specialist:
+    build:
+      context: ./claude-diego-flow
+      dockerfile: docker/Dockerfile.docker-specialist
+    image: claude-flow/docker-specialist:latest
+    container_name: docker-specialist
+    environment:
+      - NODE_ENV=production
+      - ORCHESTRATOR_URL=http://guardian-orchestrator:3000
+      - LOG_SERVICE_URL=http://agent-log:3001
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./workspace:/workspace:ro
+    networks:
+      - agent-network
+    restart: "no"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 256M
+    profiles:
+      - specialists
+
+  # NextJS Specialist
+  nextjs-specialist:
+    build:
+      context: ./claude-diego-flow
+      dockerfile: docker/Dockerfile.nextjs-specialist
+    image: claude-flow/nextjs-specialist:latest
+    container_name: nextjs-specialist
+    environment:
+      - NODE_ENV=production
+      - ORCHESTRATOR_URL=http://guardian-orchestrator:3000
+      - LOG_SERVICE_URL=http://agent-log:3001
+    volumes:
+      - ./workspace:/workspace:ro
+    networks:
+      - agent-network
+    restart: "no"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 256M
+    profiles:
+      - specialists
+
+  # Strapi Specialist
+  strapi-specialist:
+    build:
+      context: ./claude-diego-flow
+      dockerfile: docker/Dockerfile.strapi-specialist
+    image: claude-flow/strapi-specialist:latest
+    container_name: strapi-specialist
+    environment:
+      - NODE_ENV=production
+      - ORCHESTRATOR_URL=http://guardian-orchestrator:3000
+      - LOG_SERVICE_URL=http://agent-log:3001
+    volumes:
+      - ./workspace:/workspace:ro
+    networks:
+      - agent-network
+    restart: "no"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 256M
+    profiles:
+      - specialists
+
+  # Claude Code Specialist
+  claude-code-specialist:
+    build:
+      context: ./claude-diego-flow
+      dockerfile: docker/Dockerfile.claude-code-specialist
+    image: claude-flow/claude-code-specialist:latest
+    container_name: claude-code-specialist
+    environment:
+      - NODE_ENV=production
+      - ORCHESTRATOR_URL=http://guardian-orchestrator:3000
+      - LOG_SERVICE_URL=http://agent-log:3001
+      - MCP_BRIDGE_URL=http://mem0-bridge:3006
+    volumes:
+      - ./workspace:/workspace:ro
+      - ../CLAUDE.md:/app/CLAUDE.md:ro
+      - ./claude-diego-flow/logs:/app/logs
+    networks:
+      - agent-network
+    restart: "no"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 256M
+    profiles:
+      - specialists
+
+  # ========================================
+  # MONITORING (opcional)
+  # ========================================
+  
+  # Log viewer UI
+  log-viewer:
+    image: datalust/seq:latest
+    container_name: log-viewer
+    ports:
+      - "5341:80"
+    environment:
+      - ACCEPT_EULA=Y
+    volumes:
+      - seq-data:/data
+    networks:
+      - agent-network
+    restart: unless-stopped
+    profiles:
+      - monitoring
+
+networks:
+  agent-network:
+    external: true
+
+volumes:
+  orchestrator-logs:
+    name: claude-flow-orchestrator-logs
+  agent-logs:
+    name: claude-flow-agent-logs
+  chroma-data:
+    name: claude-flow-chroma-data
+  seq-data:
+    name: claude-flow-seq-data
+
+# ========================================
+# COMANDOS ÚTEIS
+# ========================================
+# 
+# Iniciar serviços core:
+# docker-compose -f docker-compose.agents-optimized.yml up -d
+#
+# Iniciar com especialistas:
+# docker-compose -f docker-compose.agents-optimized.yml --profile specialists up -d
+#
+# Iniciar com monitoramento:
+# docker-compose -f docker-compose.agents-optimized.yml --profile monitoring up -d
+#
+# Ver logs centralizados:
+# docker-compose -f docker-compose.agents-optimized.yml logs -f agent-log
+#
+# Executar especialista sob demanda:
+# docker-compose -f docker-compose.agents-optimized.yml run --rm docker-specialist

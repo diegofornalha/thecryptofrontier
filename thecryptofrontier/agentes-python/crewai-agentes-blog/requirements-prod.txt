@@ -1,0 +1,29 @@
+# Production requirements - Full stack with monitoring and optimization
+# Use this for production deployments
+
+# Include development requirements
+-r requirements-dev.txt
+
+# Logging and monitoring
+python-json-logger>=2.0.7      # Structured logging
+psutil>=5.9.0                   # System resource monitoring
+sentry-sdk>=1.40.0              # Error tracking
+
+# Data processing and validation
+bleach>=6.0.0                   # HTML sanitization
+validators>=0.22.0              # URL and data validation
+python-dateutil>=2.8.2          # Advanced date parsing
+pytz>=2023.3                    # Timezone handling
+
+# Performance and scalability
+aiohttp>=3.9.0                  # Async HTTP requests
+redis>=5.0.0                    # Caching and queuing
+tenacity>=8.2.0                 # Retry logic
+
+# Security
+cryptography>=41.0.0            # Encryption support
+python-jose>=3.3.0              # JWT tokens
+
+# Database and storage
+pymongo>=4.5.0                  # MongoDB support (if needed)
+boto3>=1.28.0                   # AWS S3 integration (if needed)

@@ -1,0 +1,57 @@
+{
+  "mcpServers": {
+    "DiegoToolsHTTP": {
+      "type": "http",
+      "url": "http://localhost:3003",
+      "description": "Diego Tools MCP via HTTP Bridge - Always Active",
+      "features": {
+        "autoReconnect": true,
+        "sessionPersistence": true,
+        "queueOfflineRequests": true
+      },
+      "tools": {
+        "mem0_add_memory": {
+          "description": "Add memory to Mem0",
+          "endpoint": "/tools/mem0_add_memory",
+          "method": "POST"
+        },
+        "mem0_search_memory": {
+          "description": "Search memories in Mem0",
+          "endpoint": "/tools/mem0_search_memory",
+          "method": "POST"
+        },
+        "mem0_list_memories": {
+          "description": "List all memories",
+          "endpoint": "/tools/mem0_list_memories",
+          "method": "POST"
+        },
+        "mem0_delete_memories": {
+          "description": "Delete memories",
+          "endpoint": "/tools/mem0_delete_memories",
+          "method": "POST"
+        },
+        "web_navigate": {
+          "description": "Navigate to URL",
+          "endpoint": "/tools/web_navigate",
+          "method": "POST"
+        },
+        "web_screenshot": {
+          "description": "Take screenshot",
+          "endpoint": "/tools/web_screenshot",
+          "method": "POST"
+        },
+        "github_create_issue": {
+          "description": "Create GitHub issue",
+          "endpoint": "/tools/github_create_issue",
+          "method": "POST"
+        },
+        "git_status": {
+          "description": "Get git status",
+          "endpoint": "/tools/git_status",
+          "method": "POST"
+        }
+      }
+    }
+  },
+  "defaultServer": "DiegoToolsHTTP"
+}

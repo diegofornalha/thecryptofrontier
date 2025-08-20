@@ -1,0 +1,98 @@
+# Docker Compose - Serviços Auxiliares
+# CrewAI, Webhook, Puppeteer e outros serviços
+# Criado: 2025-06-16
+
+version: '3.8'
+
+services:
+  # ===========================================
+  # BROWSERLESS - Navegador Headless
+  # ===========================================
+  browserless:
+    image: ghcr.io/browserless/chromium:latest
+    container_name: browserless
+    ports:
+      - "3010:3000"
+    environment:
+      - CONNECTION_TIMEOUT=60000
+      - MAX_CONCURRENT_SESSIONS=10
+      - MAX_QUEUE_LENGTH=20
+      - WORKSPACE_DELETE_EXPIRED=true
+      - WORKSPACE_EXPIRE_DAYS=1
+      - TOKEN=${BROWSERLESS_TOKEN:-your-secure-token}
+      - ENABLE_CORS=true
+      - CORS_ORIGIN=*
+      - DEBUG=browserless*
+    restart: unless-stopped
+    networks:
+      - crypto-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/pressure"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "com.thecryptofrontier.service=browserless"
+      - "com.thecryptofrontier.type=browser"
+
+  # ===========================================
+  # PUPPETEER SERVICE - Web Scraping
+  # ===========================================
+  puppeteer-service:
+    build:
+      context: ../../claude-flow-diego-cli/
+      dockerfile: claude-diego-flow/docker/Dockerfile.puppeteer
+    container_name: puppeteer-service
+    ports:
+      - "3008:3008"
+    environment:
+      - NODE_ENV=production
+      - BROWSERLESS_URL=http://browserless:3000
+      - BROWSERLESS_TOKEN=${BROWSERLESS_TOKEN:-your-secure-token}
+    restart: unless-stopped
+    networks:
+      - crypto-network
+    depends_on:
+      - browserless
+    profiles:
+      - scraping
+    labels:
+      - "com.thecryptofrontier.service=puppeteer"
+      - "com.thecryptofrontier.type=scraper"
+
+  # ===========================================
+  # LOG AGGREGATOR - Sistema Unificado
+  # ===========================================
+  log-aggregator:
+    build:
+      context: ../../claude-flow-diego-cli/
+      dockerfile: claude-diego-flow/docker/Dockerfile.agent-log
+    container_name: log-aggregator
+    environment:
+      - NODE_ENV=production
+      - LOG_LEVEL=info
+    volumes:
+      - ../../claude-flow-diego-cli/claude-diego-flow/logs:/app/logs
+      - log-data:/app/aggregated-logs
+    restart: unless-stopped
+    networks:
+      - crypto-network
+    profiles:
+      - monitoring
+    labels:
+      - "com.thecryptofrontier.service=logs"
+      - "com.thecryptofrontier.type=aggregator"
+
+volumes:
+  log-data:
+    name: thecryptofrontier_log_data
+
+networks:
+  crypto-network:
+    external: true
+    name: thecryptofrontier_network

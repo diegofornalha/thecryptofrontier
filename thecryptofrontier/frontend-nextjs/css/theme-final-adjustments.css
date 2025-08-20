@@ -1,0 +1,20 @@
+@layer base {
+  :root {
+    /* Ajustes finais de cores */
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    
+    /* Adicionar novas variáveis específicas do projeto */
+    --brand-gradient-1: linear-gradient(to right, hsl(var(--primary)), hsl(250 83.2% 53.3%));
+    --feature-bg: 230 100% 98%;
+  }
+  
+  .dark {
+    /* Ajustes finais para tema escuro */
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    
+    /* Variáveis específicas do tema escuro */
+    --feature-bg: 230 20% 15%;
+  }
+} 

@@ -1,0 +1,190 @@
+{
+  "memoryRouting": {
+    "enabled": true,
+    "description": "Sistema de roteamento automático de memórias para agentes especialistas",
+    "version": "1.0.0",
+    "lastUpdated": "2025-06-17",
+    
+    "routingRules": [
+      {
+        "id": "docker-routing",
+        "name": "Docker Specialist Routing",
+        "targetAgent": "docker-specialist",
+        "patterns": [
+          "docker",
+          "container",
+          "compose",
+          "dockerfile",
+          "imagem",
+          "build",
+          "volume",
+          "network",
+          "registry",
+          "swarm",
+          "kubernetes",
+          "k8s",
+          "docker-compose"
+        ],
+        "priority": 1,
+        "description": "Roteia memórias relacionadas a Docker e containerização"
+      },
+      
+      {
+        "id": "strapi-routing",
+        "name": "Strapi Specialist Routing",
+        "targetAgent": "strapi-specialist",
+        "patterns": [
+          "strapi",
+          "cms",
+          "content-type",
+          "collection",
+          "api",
+          "webhook",
+          "plugin",
+          "middleware",
+          "controller",
+          "service",
+          "model",
+          "admin",
+          "graphql",
+          "rest"
+        ],
+        "priority": 1,
+        "description": "Roteia memórias relacionadas ao Strapi CMS"
+      },
+      
+      {
+        "id": "nextjs-routing",
+        "name": "NextJS Specialist Routing",
+        "targetAgent": "nextjs-specialist",
+        "patterns": [
+          "next",
+          "nextjs",
+          "react",
+          "frontend",
+          "component",
+          "page",
+          "route",
+          "ssr",
+          "ssg",
+          "tailwind",
+          "css",
+          "jsx",
+          "tsx",
+          "vercel",
+          "app router",
+          "pages router"
+        ],
+        "priority": 1,
+        "description": "Roteia memórias relacionadas ao Frontend/Next.js"
+      },
+      
+      {
+        "id": "cleanup-routing",
+        "name": "Cleanup Specialist Routing",
+        "targetAgent": "cleanup-specialist",
+        "patterns": [
+          "cleanup",
+          "limpeza",
+          "clean",
+          "remove",
+          "delete",
+          "manutenção",
+          "maintenance",
+          "optimization",
+          "otimização",
+          "garbage",
+          "trash",
+          "cache",
+          "temp",
+          "temporary"
+        ],
+        "priority": 2,
+        "description": "Roteia memórias relacionadas a limpeza e manutenção"
+      },
+      
+      {
+        "id": "claude-code-routing",
+        "name": "Claude Code Specialist Routing",
+        "targetAgent": "claude-code-specialist",
+        "patterns": [
+          "claude",
+          "code",
+          "cli",
+          "mcp",
+          "ferramenta",
+          "tool",
+          "automation",
+          "automação",
+          "script",
+          "workflow"
+        ],
+        "priority": 2,
+        "description": "Roteia memórias relacionadas ao Claude Code e automações"
+      },
+      
+      {
+        "id": "mem0-routing",
+        "name": "Mem0 Specialist Routing",
+        "targetAgent": "mem0-specialist",
+        "patterns": [
+          "mem0",
+          "memory",
+          "memória",
+          "remember",
+          "lembrar",
+          "save",
+          "salvar",
+          "persist",
+          "storage",
+          "database",
+          "vector",
+          "embedding",
+          "qdrant",
+          "redis"
+        ],
+        "priority": 3,
+        "description": "Roteia memórias relacionadas ao sistema Mem0"
+      },
+      
+      {
+        "id": "general-routing",
+        "name": "General Coordination Routing",
+        "targetAgent": "mem0-specialist",
+        "patterns": [
+          "general",
+          "geral",
+          "coordination",
+          "coordenação",
+          "guardian",
+          "system",
+          "sistema"
+        ],
+        "priority": 5,
+        "description": "Roteia memórias gerais e de coordenação para o Mem0"
+      }
+    ],
+    
+    "defaultAgent": "mem0-specialist",
+    "defaultReason": "Quando nenhuma regra específica é correspondida, a memória é enviada ao Mem0 Specialist como padrão",
+    
+    "conflictResolution": {
+      "strategy": "highest-priority-wins",
+      "description": "Em caso de múltiplas correspondências, o agente com maior prioridade (número menor) recebe a memória"
+    },
+    
+    "routingLogic": {
+      "caseSensitive": false,
+      "matchType": "contains",
+      "minimumConfidence": 0.7,
+      "analyzeContent": true,
+      "analyzeMetadata": true
+    },
+    
+    "monitoring": {
+      "logRoutingDecisions": true,
+      "metricsEnabled": true,
+      "alertOnFailure": true
+    }
+  }
+}

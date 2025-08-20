@@ -1,0 +1,13 @@
+#!/bin/bash
+# Patch para ajustar caminhos do Guardian quando rodando em Docker
+
+# Criar diretórios necessários com permissões corretas
+mkdir -p /app/reports/screenshots
+mkdir -p /app/reports/logs
+chown -R nodejs:nodejs /app/reports
+
+# Atualizar Guardian para usar caminhos do container
+sed -i "s|/home/strapi/thecryptofrontier|/workspace|g" /app/src/agents/guardian-orchestrator-mcp.ts
+sed -i "s|claude-flow-diego/reports|/app/reports|g" /app/src/agents/guardian-orchestrator-mcp.ts
+
+echo "✅ Paths ajustados para ambiente Docker"

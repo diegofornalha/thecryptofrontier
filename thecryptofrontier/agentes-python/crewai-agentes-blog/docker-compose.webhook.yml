@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  webhook-server:
+    container_name: crewai-webhook-server
+    build:
+      context: .
+      dockerfile: Dockerfile.webhook
+    image: crewai-webhook:latest
+    restart: unless-stopped
+    ports:
+      - "8002:8000"
+    environment:
+      - WEBHOOK_SECRET=crew-ai-webhook-secret-2025
+      - STRAPI_URL=http://localhost:1338
+      - STRAPI_API_TOKEN=${STRAPI_API_TOKEN}
+    volumes:
+      - ./webhook_server.py:/app/webhook_server.py
+      - ./logs:/app/logs
+      - ./.env:/app/.env
+    networks:
+      - crewai-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  crewai-network:
+    driver: bridge

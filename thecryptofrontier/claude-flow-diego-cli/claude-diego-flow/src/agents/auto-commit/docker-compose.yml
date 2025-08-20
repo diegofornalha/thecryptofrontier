@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  auto-commit-agent:
+    build:
+      context: ../../..
+      dockerfile: src/agents/auto-commit/Dockerfile
+    container_name: auto-commit-agent
+    restart: unless-stopped
+    
+    environment:
+      - PROJECT_PATH=/workspace
+      - DASHBOARD_PORT=3030
+      - NODE_ENV=production
+      - ENABLE_DASHBOARD=true
+      - ENABLE_MCP=true
+      - ENABLE_MEM0=true
+      - STRAPI_URL=http://strapi:1337
+      - DEBOUNCE_TIME=3000
+      
+    volumes:
+      # Projeto a ser monitorado
+      - ${PROJECT_PATH:-./workspace}:/workspace
+      
+      # Persistência de dados
+      - auto-commit-data:/app/.diego-tools
+      
+      # SSH keys do host (opcional)
+      - ~/.ssh:/root/.ssh:ro
+      
+    ports:
+      - "3030:3030"
+      
+    networks:
+      - diego-network
+      
+    # Healthcheck
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3030/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Dashboard NextJS (será implementado na próxima fase)
+  # auto-commit-dashboard:
+  #   build:
+  #     context: ./dashboard
+  #     dockerfile: Dockerfile
+  #   container_name: auto-commit-dashboard
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - API_URL=http://auto-commit-agent:3030
+  #   networks:
+  #     - diego-network
+
+volumes:
+  auto-commit-data:
+    name: auto-commit-data
+
+networks:
+  diego-network:
+    external: true
+    name: diego-network
