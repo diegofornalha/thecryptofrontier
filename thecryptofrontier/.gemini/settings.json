@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "dockerMcp": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-v",
+        "/var/run/docker.sock:/var/run/docker.sock",
+        "-e",
+        "DOCKER_HOST=unix:///var/run/docker.sock",
+        "docker-mcp:latest"
+      ],
+      "cwd": "/home/strapi/thecryptofrontier/docker-mcp"
+    }
+  }
+}

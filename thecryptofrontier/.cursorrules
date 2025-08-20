@@ -1,0 +1,11 @@
+📊 Situação Atual:
+✅ Frontend Principal: https://thecryptofrontier.agentesintegrados.com/ (porta 3300)
+✅ Strapi Produção: https://ale-blog.agentesintegrados.com/ (porta 1339) - modo produção
+✅ Strapi Preview : https://ale-blog-preview.agentesintegrados.com/ (porta 1340) - modo desenvolvimento
+
+quando se tratar de strapi Para mover mudanças para produção:
+Quando quiser aplicar mudanças do desenvolvimento para produção, você precisará:
+Schemas: Copiar os arquivos de schema
+Configurações: Aplicar as mesmas configurações
+Dados: Usar strapi transfer se necessário
+Rebuild: Fazer rebuild do container de produção

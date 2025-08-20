@@ -1,0 +1,5 @@
+httpx==0.28.1
+httpx-sse==0.4.0
+mcp==1.9.2
+python-dotenv==1.1.0
+python-on-whales==0.77.0
